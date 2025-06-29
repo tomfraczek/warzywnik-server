@@ -11,7 +11,7 @@ import {
 import { v4 as uuid } from 'uuid';
 import { VegetableTranslation } from './vegetable-translation.entity';
 import { Soil } from '../../soil/entities/soil.entity';
-import { CompanionRule } from './companion-rule.entity';
+import { CompanionRule } from 'src/companion-rules/entities/companion-rule.entity';
 
 export enum SunExposure {
   FULL_SUN = 'full_sun',

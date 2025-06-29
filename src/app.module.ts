@@ -10,6 +10,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { VegetablesModule } from './vegetables/vegetables.module';
+import { VegetableTranslationModule } from './vegetables/translations/vegetable-translation.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { VegetablesModule } from './vegetables/vegetables.module';
     MikroOrmModule.forRoot(mikroOrmOptions),
     UserModule,
     VegetablesModule,
+    VegetableTranslationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
