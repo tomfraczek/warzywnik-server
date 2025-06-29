@@ -6,6 +6,7 @@ import {
   Body,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { SoilsService } from './soil.service';
 import { createSoilSchema } from './dto/create-soil.dto';
@@ -16,13 +17,13 @@ export class SoilsController {
   constructor(private readonly soilsService: SoilsService) {}
 
   @Get()
-  findAll() {
-    return this.soilsService.findAll();
+  findAll(@Query('lang') lang?: string) {
+    return this.soilsService.findAll(lang);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.soilsService.findOne(id);
+  findOne(@Param('id') id: string, @Query('lang') lang?: string) {
+    return this.soilsService.findOne(id, lang);
   }
 
   @Post()

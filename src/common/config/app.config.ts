@@ -6,11 +6,6 @@ dotenv.config();
 
 const defaultPort = 4000;
 
-console.log('🔧 DB CONFIG:', {
-  user: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-});
-
 export const getConfig = (): AppConfig =>
   appConfigSchema.parse({
     env: process.env.NODE_ENV,

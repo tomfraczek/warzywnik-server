@@ -4,9 +4,11 @@ import {
   Property,
   OneToMany,
   Collection,
+  Cascade,
 } from '@mikro-orm/core';
 import { v4 as uuid } from 'uuid';
 import { Vegetable } from '../../vegetables/entities/vegetable.entity';
+import { SoilTranslation } from '../translations/entities/soil-translation.entity';
 
 @Entity()
 export class Soil {
@@ -27,4 +29,9 @@ export class Soil {
 
   @OneToMany(() => Vegetable, (v) => v.soilType)
   suitableVegetables = new Collection<Vegetable>(this);
+
+  @OneToMany(() => SoilTranslation, (t) => t.soil, {
+    cascade: [Cascade.PERSIST],
+  })
+  translations = new Collection<SoilTranslation>(this);
 }
