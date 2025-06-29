@@ -1,20 +1,18 @@
 import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
-import { Vegetable } from './vegetable.entity';
 import { v4 as uuid } from 'uuid';
-
-export type CompanionType = 'good' | 'bad';
+import { Vegetable } from '../../vegetables/entities/vegetable.entity';
 
 @Entity()
 export class CompanionRule {
   @PrimaryKey()
   id: string = uuid();
 
-  @ManyToOne()
+  @ManyToOne(() => Vegetable)
   source!: Vegetable;
 
-  @ManyToOne()
+  @ManyToOne(() => Vegetable)
   target!: Vegetable;
 
   @Property()
-  type!: CompanionType;
+  isGood: boolean;
 }
