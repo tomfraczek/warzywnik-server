@@ -1,18 +1,29 @@
 // src/vegetables/translation/vegetable-translation.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
-import { VegetableTranslation } from '../entities/vegetable-translation.entity';
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { z } from 'zod';
-import { createVegetableTranslationSchema } from './dto/create-translation.dto';
+
+import { VegetableTranslation } from '../entities/vegetable-translation.entity';
 import { Vegetable } from '../entities/vegetable.entity';
+
+import { createVegetableTranslationSchema } from './dto/create-translation.dto';
 import { updateVegetableTranslationSchema } from './dto/update-translation.dto';
 
 @Injectable()
 export class VegetableTranslationService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    @InjectRepository(VegetableTranslation)
+    private readonly translationRepo: EntityRepository<VegetableTranslation>,
+
+    @InjectRepository(Vegetable)
+    private readonly vegetableRepo: EntityRepository<Vegetable>,
+
+    private readonly em: EntityManager,
+  ) {}
 
   async findOne(id: string): Promise<VegetableTranslation> {
-    const translation = await this.em.findOne(VegetableTranslation, { id });
+    const translation = await this.translationRepo.findOne({ id });
     if (!translation) throw new NotFoundException('Translation not found');
     return translation;
   }
@@ -20,12 +31,12 @@ export class VegetableTranslationService {
   async create(
     data: z.infer<typeof createVegetableTranslationSchema>,
   ): Promise<VegetableTranslation> {
-    const vegetable = await this.em.findOne(Vegetable, {
+    const vegetable = await this.vegetableRepo.findOne({
       id: data.vegetableId,
     });
     if (!vegetable) throw new NotFoundException('Vegetable not found');
 
-    const translation = this.em.create(VegetableTranslation, {
+    const translation = this.translationRepo.create({
       lang: data.lang,
       name: data.name,
       description: data.description,
@@ -41,7 +52,7 @@ export class VegetableTranslationService {
     data: z.infer<typeof updateVegetableTranslationSchema>,
   ): Promise<VegetableTranslation> {
     const translation = await this.findOne(id);
-    this.em.assign(translation, data);
+    this.translationRepo.assign(translation, data);
     await this.em.flush();
     return translation;
   }

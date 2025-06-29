@@ -7,6 +7,7 @@ import {
   Body,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { z } from 'zod';
 import { VegetablesService } from './vegetables.service';
@@ -18,13 +19,13 @@ export class VegetablesController {
   constructor(private readonly vegetablesService: VegetablesService) {}
 
   @Get()
-  findAll() {
-    return this.vegetablesService.findAll();
+  findAll(@Query('lang') lang?: string) {
+    return this.vegetablesService.findAll(lang);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.vegetablesService.findOne(id);
+  findOne(@Param('id') id: string, @Query('lang') lang?: string) {
+    return this.vegetablesService.findOne(id, lang);
   }
 
   @Post()

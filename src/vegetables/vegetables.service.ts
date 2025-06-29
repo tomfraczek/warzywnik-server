@@ -1,35 +1,49 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/core';
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Vegetable } from './entities/vegetable.entity';
-import { z } from 'zod';
 import { createVegetableSchema } from './dto/create-vegetable.dto';
 import { updateVegetableSchema } from './dto/update-vegetable.dto';
+import { z } from 'zod';
 import { Soil } from '../soil/entities/soil.entity';
 
 @Injectable()
 export class VegetablesService {
   constructor(
     @InjectRepository(Vegetable)
+    private readonly vegetableRepo: EntityRepository<Vegetable>,
+    @InjectRepository(Soil)
+    private readonly soilRepo: EntityRepository<Soil>,
     private readonly em: EntityManager,
   ) {}
 
-  async findAll(): Promise<Vegetable[]> {
-    return this.em.find(
-      Vegetable,
-      {},
-      {
-        populate: ['translations', 'companionRules'],
-      },
-    );
+  async findAll(lang?: string): Promise<Vegetable[]> {
+    const populate: any[] = [];
+
+    if (lang) {
+      populate.push({ field: 'translations', where: { lang } });
+    } else {
+      populate.push('translations');
+    }
+
+    populate.push('companionRules');
+
+    return this.vegetableRepo.find({}, { populate });
   }
 
-  async findOne(id: string): Promise<Vegetable> {
-    const vegetable = await this.em.findOne(
-      Vegetable,
-      { id },
-      { populate: ['translations', 'companionRules'] },
-    );
+  async findOne(id: string, lang?: string): Promise<Vegetable> {
+    const populate: any[] = [];
+
+    if (lang) {
+      populate.push({ field: 'translations', where: { lang } });
+    } else {
+      populate.push('translations');
+    }
+
+    populate.push('companionRules');
+
+    const vegetable = await this.vegetableRepo.findOne({ id }, { populate });
+
     if (!vegetable) throw new NotFoundException('Vegetable not found');
     return vegetable;
   }
@@ -38,17 +52,18 @@ export class VegetablesService {
     data: z.infer<typeof createVegetableSchema>,
   ): Promise<Vegetable> {
     let soil: Soil | null = null;
+
     if (data.soilType) {
-      soil = await this.em.findOne(Soil, { id: data.soilType });
+      soil = await this.soilRepo.findOne({ id: data.soilType });
       if (!soil) throw new NotFoundException('Soil not found');
     }
 
-    const vegetable = this.em.create(Vegetable, {
+    const vegetable = this.vegetableRepo.create({
       ...data,
       soilType: soil,
     });
 
-    await this.em.persistAndFlush(vegetable);
+    await this.em.persistAndFlush(vegetable); // 👈 tutaj EntityManager
     return vegetable;
   }
 
@@ -60,21 +75,21 @@ export class VegetablesService {
 
     let soil: Soil | null = null;
     if (data.soilType) {
-      soil = await this.em.findOne(Soil, { id: data.soilType });
+      soil = await this.soilRepo.findOne({ id: data.soilType });
       if (!soil) throw new NotFoundException('Soil not found');
     }
 
-    this.em.assign(vegetable, {
+    this.vegetableRepo.assign(vegetable, {
       ...data,
       soilType: soil ?? undefined,
     });
 
-    await this.em.flush();
+    await this.em.flush(); // 👈 tutaj również EntityManager
     return vegetable;
   }
 
   async delete(id: string): Promise<void> {
     const vegetable = await this.findOne(id);
-    await this.em.removeAndFlush(vegetable);
+    await this.em.removeAndFlush(vegetable); // 👈 EntityManager
   }
 }
