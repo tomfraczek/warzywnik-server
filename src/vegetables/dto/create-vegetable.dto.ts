@@ -1,39 +1,28 @@
-import { IsString, IsBoolean, IsNumber } from 'class-validator';
+import { z } from 'zod';
+import { SunExposure, WateringNeeds } from '../entities/vegetable.entity';
 
-export class CreateVegetableDto {
-  @IsString()
-  imageUrl: string;
+export const createVegetableSchema = z.object({
+  slug: z.string().min(1),
+  name: z.string().min(1),
+  latinName: z.string().optional(),
+  description: z.string().optional(),
+  image: z.string().url(),
 
-  @IsString()
-  sowingStartMonth: string;
+  sowingTimeStart: z.string(),
+  sowingTimeEnd: z.string(),
+  harvestTimeStart: z.string(),
+  harvestTimeEnd: z.string(),
 
-  @IsString()
-  sowingEndMonth: string;
+  germinationDays: z.number().int().min(1),
+  sowingDepthCm: z.number().min(0),
+  rowSpacingCm: z.number().min(0),
+  plantSpacingCm: z.number().min(0),
 
-  @IsString()
-  harvestStartMonth: string;
+  isDirectSow: z.boolean(),
+  isPerennial: z.boolean(),
 
-  @IsString()
-  harvestEndMonth: string;
+  sunExposure: z.nativeEnum(SunExposure),
+  wateringNeeds: z.nativeEnum(WateringNeeds),
 
-  @IsNumber()
-  sowingDepthCm: number;
-
-  @IsNumber()
-  spacingCm: number;
-
-  @IsNumber()
-  germinationDays: number;
-
-  @IsBoolean()
-  directSow: boolean;
-
-  @IsString()
-  name: string;
-
-  @IsString()
-  description: string;
-
-  @IsString()
-  lang: string;
-}
+  soilType: z.string().uuid().optional(), // id gleby
+});

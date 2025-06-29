@@ -9,12 +9,14 @@ import mikroOrmOptions from './common/config/mikro-orm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
+import { VegetablesModule } from './vegetables/vegetables.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MikroOrmModule.forRoot(mikroOrmOptions),
     UserModule,
+    VegetablesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -11,11 +11,17 @@ export class VegetableTranslation {
   vegetable!: Vegetable;
 
   @Property()
-  lang: string;
+  lang: string; // np. 'pl', 'en'
 
   @Property()
   name: string;
 
-  @Property()
+  @Property({ type: 'text' })
   description: string;
+
+  @Property({ type: 'text', nullable: true })
+  advantages?: string;
+
+  @Property({ type: 'text', nullable: true })
+  disadvantages?: string;
 }
