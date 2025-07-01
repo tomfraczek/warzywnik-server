@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/core';
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { SoilTranslation } from './entities/soil-translation.entity';
 import { CreateSoilTranslationDto } from './dto/create-soil-translation.dto';
 import { UpdateSoilTranslationDto } from './dto/update-soil-translation.dto';
@@ -9,8 +9,10 @@ import { Soil } from '../entities/soil.entity';
 @Injectable()
 export class SoilTranslationService {
   constructor(
-    @InjectRepository(SoilTranslation)
     private readonly em: EntityManager,
+
+    @InjectRepository(Soil)
+    private readonly soilRepo: EntityRepository<Soil>,
   ) {}
 
   async findAll(): Promise<SoilTranslation[]> {
@@ -28,7 +30,7 @@ export class SoilTranslationService {
   }
 
   async create(data: CreateSoilTranslationDto): Promise<SoilTranslation> {
-    const soil = await this.em.findOne(Soil, { id: data.soilId });
+    const soil = await this.soilRepo.findOne({ id: data.soilId });
     if (!soil) throw new NotFoundException('Soil not found');
 
     const translation = this.em.create(SoilTranslation, {

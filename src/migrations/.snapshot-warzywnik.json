@@ -8,6 +8,175 @@
       "columns": {
         "id": {
           "name": "id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "advantages": {
+          "name": "advantages",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "disadvantages": {
+          "name": "disadvantages",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        }
+      },
+      "name": "soil",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "soil_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "soil_id": {
+          "name": "soil_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "lang": {
+          "name": "lang",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "advantages": {
+          "name": "advantages",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "disadvantages": {
+          "name": "disadvantages",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        }
+      },
+      "name": "soil_translation",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "soil_translation_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "soil_translation_soil_id_foreign": {
+          "constraintName": "soil_translation_soil_id_foreign",
+          "columnNames": [
+            "soil_id"
+          ],
+          "localTableName": "public.soil_translation",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.soil",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
           "type": "serial",
           "unsigned": false,
           "autoincrement": true,
@@ -106,8 +275,8 @@
           "length": 255,
           "mappedType": "string"
         },
-        "image_url": {
-          "name": "image_url",
+        "slug": {
+          "name": "slug",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -116,8 +285,8 @@
           "length": 255,
           "mappedType": "string"
         },
-        "sowing_start_month": {
-          "name": "sowing_start_month",
+        "name": {
+          "name": "name",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -126,8 +295,27 @@
           "length": 255,
           "mappedType": "string"
         },
-        "sowing_end_month": {
-          "name": "sowing_end_month",
+        "latin_name": {
+          "name": "latin_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "image": {
+          "name": "image",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -136,8 +324,8 @@
           "length": 255,
           "mappedType": "string"
         },
-        "harvest_start_month": {
-          "name": "harvest_start_month",
+        "sowing_time_start": {
+          "name": "sowing_time_start",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -146,8 +334,8 @@
           "length": 255,
           "mappedType": "string"
         },
-        "harvest_end_month": {
-          "name": "harvest_end_month",
+        "sowing_time_end": {
+          "name": "sowing_time_end",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -156,23 +344,25 @@
           "length": 255,
           "mappedType": "string"
         },
-        "sowing_depth_cm": {
-          "name": "sowing_depth_cm",
-          "type": "int",
+        "harvest_time_start": {
+          "name": "harvest_time_start",
+          "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "integer"
+          "length": 255,
+          "mappedType": "string"
         },
-        "spacing_cm": {
-          "name": "spacing_cm",
-          "type": "int",
+        "harvest_time_end": {
+          "name": "harvest_time_end",
+          "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "integer"
+          "length": 255,
+          "mappedType": "string"
         },
         "germination_days": {
           "name": "germination_days",
@@ -183,14 +373,88 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "direct_sow": {
-          "name": "direct_sow",
+        "sowing_depth_cm": {
+          "name": "sowing_depth_cm",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "row_spacing_cm": {
+          "name": "row_spacing_cm",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "plant_spacing_cm": {
+          "name": "plant_spacing_cm",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "is_direct_sow": {
+          "name": "is_direct_sow",
           "type": "boolean",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "mappedType": "boolean"
+        },
+        "is_perennial": {
+          "name": "is_perennial",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "boolean"
+        },
+        "sun_exposure": {
+          "name": "sun_exposure",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "enumItems": [
+            "full_sun",
+            "partial_shade",
+            "shade"
+          ],
+          "mappedType": "enum"
+        },
+        "watering_needs": {
+          "name": "watering_needs",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "enumItems": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "mappedType": "enum"
+        },
+        "soil_type_id": {
+          "name": "soil_type_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
         }
       },
       "name": "vegetable",
@@ -208,7 +472,106 @@
         }
       ],
       "checks": [],
-      "foreignKeys": {},
+      "foreignKeys": {
+        "vegetable_soil_type_id_foreign": {
+          "constraintName": "vegetable_soil_type_id_foreign",
+          "columnNames": [
+            "soil_type_id"
+          ],
+          "localTableName": "public.vegetable",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.soil",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "target_id": {
+          "name": "target_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "is_good": {
+          "name": "is_good",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "boolean"
+        }
+      },
+      "name": "companion_rule",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "companion_rule_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "companion_rule_source_id_foreign": {
+          "constraintName": "companion_rule_source_id_foreign",
+          "columnNames": [
+            "source_id"
+          ],
+          "localTableName": "public.companion_rule",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.vegetable",
+          "updateRule": "cascade"
+        },
+        "companion_rule_target_id_foreign": {
+          "constraintName": "companion_rule_target_id_foreign",
+          "columnNames": [
+            "target_id"
+          ],
+          "localTableName": "public.companion_rule",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.vegetable",
+          "updateRule": "cascade"
+        }
+      },
       "nativeEnums": {}
     },
     {
@@ -255,13 +618,30 @@
         },
         "description": {
           "name": "description",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "text"
+        },
+        "advantages": {
+          "name": "advantages",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "disadvantages": {
+          "name": "disadvantages",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
         }
       },
       "name": "vegetable_translation",

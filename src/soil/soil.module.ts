@@ -3,11 +3,12 @@ import { SoilsService } from './soil.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { SoilsController } from './soil.controller';
 import { Soil } from './entities/soil.entity';
-import { SoilTranslationController } from './translations/entities/soil-translation.controller';
+
+import { SoilTranslation } from './translations/entities/soil-translation.entity';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Soil])],
+  imports: [MikroOrmModule.forFeature([Soil, SoilTranslation])],
   providers: [SoilsService],
-  controllers: [SoilsController, SoilTranslationController],
+  controllers: [SoilsController],
 })
 export class SoilModule {}

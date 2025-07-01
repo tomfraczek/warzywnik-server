@@ -7,9 +7,9 @@ import {
   Param,
   Body,
 } from '@nestjs/common';
-import { SoilTranslationService } from '../soil-translation.service';
-import { createSoilTranslationSchema } from '../dto/create-soil-translation.dto';
-import { updateSoilTranslationSchema } from '../dto/update-soil-translation.dto';
+import { SoilTranslationService } from './soil-translation.service';
+import { createSoilTranslationSchema } from './dto/create-soil-translation.dto';
+import { updateSoilTranslationSchema } from './dto/update-soil-translation.dto';
 
 @Controller('soil-translations')
 export class SoilTranslationController {

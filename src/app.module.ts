@@ -11,13 +11,17 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { VegetablesModule } from './vegetables/vegetables.module';
 import { VegetableTranslationModule } from './vegetables/translations/vegetable-translation.module';
+import { SoilModule } from './soil/soil.module';
+import { SoilTranslationModule } from './soil/translations/soil-translation.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MikroOrmModule.forRoot(mikroOrmOptions),
     UserModule,
+    SoilModule,
     VegetablesModule,
+    SoilTranslationModule,
     VegetableTranslationModule,
   ],
   controllers: [AppController],
