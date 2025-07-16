@@ -13,6 +13,7 @@ import { VegetablesModule } from './vegetables/vegetables.module';
 import { VegetableTranslationModule } from './vegetables/translations/vegetable-translation.module';
 import { SoilModule } from './soil/soil.module';
 import { SoilTranslationModule } from './soil/translations/soil-translation.module';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SoilTranslationModule } from './soil/translations/soil-translation.modu
     VegetablesModule,
     SoilTranslationModule,
     VegetableTranslationModule,
+    ImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

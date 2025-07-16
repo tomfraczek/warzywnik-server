@@ -24,5 +24,5 @@ export const createVegetableSchema = z.object({
   sunExposure: z.nativeEnum(SunExposure),
   wateringNeeds: z.nativeEnum(WateringNeeds),
 
-  soilType: z.string().uuid().optional(), // id gleby
+  soilType: z.string().uuid().optional(),
 });

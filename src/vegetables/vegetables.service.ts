@@ -92,4 +92,9 @@ export class VegetablesService {
     const vegetable = await this.findOne(id);
     await this.em.removeAndFlush(vegetable); // 👈 EntityManager
   }
+
+  async checkSlug(slug: string): Promise<{ available: boolean }> {
+    const count = await this.soilRepo.count({ slug });
+    return { available: count === 0 };
+  }
 }

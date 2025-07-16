@@ -15,17 +15,20 @@ export class Soil {
   @PrimaryKey()
   id: string = uuid();
 
+  @Property({ unique: true })
+  slug: string;
+
   @Property()
   name: string;
 
   @Property({ type: 'text', nullable: true })
   description?: string;
 
-  @Property({ type: 'text', nullable: true })
-  advantages?: string;
+  @Property({ type: 'json', nullable: true })
+  advantages?: string[];
 
-  @Property({ type: 'text', nullable: true })
-  disadvantages?: string;
+  @Property({ type: 'json', nullable: true })
+  disadvantages?: string[];
 
   @OneToMany(() => Vegetable, (v) => v.soilType)
   suitableVegetables = new Collection<Vegetable>(this);

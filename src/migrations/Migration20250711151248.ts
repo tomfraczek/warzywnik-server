@@ -1,9 +1,10 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20250701101946 extends Migration {
+export class Migration20250711151248 extends Migration {
 
   override async up(): Promise<void> {
-    this.addSql(`create table "soil" ("id" varchar(255) not null, "name" varchar(255) not null, "description" text null, "advantages" text null, "disadvantages" text null, constraint "soil_pkey" primary key ("id"));`);
+    this.addSql(`create table "soil" ("id" varchar(255) not null, "slug" varchar(255) not null, "name" varchar(255) not null, "description" text null, "advantages" jsonb null, "disadvantages" jsonb null, constraint "soil_pkey" primary key ("id"));`);
+    this.addSql(`alter table "soil" add constraint "soil_slug_unique" unique ("slug");`);
 
     this.addSql(`create table "soil_translation" ("id" varchar(255) not null, "soil_id" varchar(255) not null, "lang" varchar(255) not null, "name" varchar(255) not null, "description" text null, "advantages" text null, "disadvantages" text null, constraint "soil_translation_pkey" primary key ("id"));`);
 
@@ -24,30 +25,6 @@ export class Migration20250701101946 extends Migration {
     this.addSql(`alter table "companion_rule" add constraint "companion_rule_target_id_foreign" foreign key ("target_id") references "vegetable" ("id") on update cascade;`);
 
     this.addSql(`alter table "vegetable_translation" add constraint "vegetable_translation_vegetable_id_foreign" foreign key ("vegetable_id") references "vegetable" ("id") on update cascade;`);
-  }
-
-  override async down(): Promise<void> {
-    this.addSql(`alter table "soil_translation" drop constraint "soil_translation_soil_id_foreign";`);
-
-    this.addSql(`alter table "vegetable" drop constraint "vegetable_soil_type_id_foreign";`);
-
-    this.addSql(`alter table "companion_rule" drop constraint "companion_rule_source_id_foreign";`);
-
-    this.addSql(`alter table "companion_rule" drop constraint "companion_rule_target_id_foreign";`);
-
-    this.addSql(`alter table "vegetable_translation" drop constraint "vegetable_translation_vegetable_id_foreign";`);
-
-    this.addSql(`drop table if exists "soil" cascade;`);
-
-    this.addSql(`drop table if exists "soil_translation" cascade;`);
-
-    this.addSql(`drop table if exists "user" cascade;`);
-
-    this.addSql(`drop table if exists "vegetable" cascade;`);
-
-    this.addSql(`drop table if exists "companion_rule" cascade;`);
-
-    this.addSql(`drop table if exists "vegetable_translation" cascade;`);
   }
 
 }

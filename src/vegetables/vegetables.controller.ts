@@ -8,6 +8,7 @@ import {
   Put,
   Delete,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { z } from 'zod';
 import { VegetablesService } from './vegetables.service';
@@ -21,6 +22,14 @@ export class VegetablesController {
   @Get()
   findAll(@Query('lang') lang?: string) {
     return this.vegetablesService.findAll(lang);
+  }
+
+  @Get('check-slug')
+  checkSlug(@Query('slug') slug: string) {
+    if (!slug) {
+      throw new BadRequestException('Parameter "slug" is required');
+    }
+    return this.vegetablesService.checkSlug(slug);
   }
 
   @Get(':id')

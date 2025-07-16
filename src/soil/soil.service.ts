@@ -1,5 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { EntityManager, EntityRepository } from '@mikro-orm/core';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  EntityManager,
+  EntityRepository,
+  UniqueConstraintViolationException,
+} from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Soil } from './entities/soil.entity';
 import { z } from 'zod';
@@ -44,8 +52,16 @@ export class SoilsService {
 
   async create(data: z.infer<typeof createSoilSchema>): Promise<Soil> {
     const soil = this.soilRepo.create(data);
-    await this.em.persistAndFlush(soil);
-    return soil;
+
+    try {
+      await this.em.persistAndFlush(soil);
+      return soil;
+    } catch (error) {
+      if (error instanceof UniqueConstraintViolationException) {
+        throw new BadRequestException('Slug must be unique');
+      }
+      throw error;
+    }
   }
 
   async update(
@@ -59,7 +75,27 @@ export class SoilsService {
   }
 
   async delete(id: string): Promise<void> {
-    const soil = await this.findOne(id);
-    await this.em.removeAndFlush(soil);
+    const soil = await this.soilRepo.findOne(
+      { id },
+      { populate: ['translations'] },
+    );
+
+    if (!soil) {
+      throw new NotFoundException('Soil not found');
+    }
+
+    // Remove all related translations first
+    for (const translation of soil.translations) {
+      this.em.remove(translation);
+    }
+
+    // Then remove the soil itself
+    this.em.remove(soil);
+    await this.em.flush();
+  }
+
+  async checkSlug(slug: string): Promise<{ available: boolean }> {
+    const count = await this.soilRepo.count({ slug });
+    return { available: count === 0 };
   }
 }

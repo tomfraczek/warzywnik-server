@@ -16,6 +16,16 @@
           "length": 255,
           "mappedType": "string"
         },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -37,26 +47,36 @@
         },
         "advantages": {
           "name": "advantages",
-          "type": "text",
+          "type": "jsonb",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "mappedType": "text"
+          "mappedType": "json"
         },
         "disadvantages": {
           "name": "disadvantages",
-          "type": "text",
+          "type": "jsonb",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "mappedType": "text"
+          "mappedType": "json"
         }
       },
       "name": "soil",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": [
+            "slug"
+          ],
+          "composite": false,
+          "keyName": "soil_slug_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "soil_pkey",
           "columnNames": [
