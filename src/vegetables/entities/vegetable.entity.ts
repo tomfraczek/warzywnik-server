@@ -25,6 +25,12 @@ export enum WateringNeeds {
   HIGH = 'high',
 }
 
+export enum FeedingClass {
+  LIGHT = 'light',
+  MEDIUM = 'medium',
+  HEAVY = 'heavy',
+}
+
 @Entity()
 export class Vegetable {
   @PrimaryKey()
@@ -45,7 +51,7 @@ export class Vegetable {
   @Property()
   image: string;
 
-  // 🌿 Uprawa
+  // 🌿 Cultivation times
   @Property()
   sowingTimeStart: string;
 
@@ -86,13 +92,33 @@ export class Vegetable {
   @ManyToOne(() => Soil, { nullable: true })
   soilType?: Soil;
 
-  // 🌍 Tłumaczenia
+  // 🧩 NEW — structured cultivation fields (fertilization & care)
+  @Property({ nullable: true })
+  phMin?: number;
+
+  @Property({ nullable: true })
+  phMax?: number;
+
+  @Property({ nullable: true })
+  mulchingRecommended?: boolean;
+
+  @Enum({ items: () => FeedingClass, nullable: true })
+  feedingClass?: FeedingClass;
+
+  // 🌍 Translations (with descriptive sections)
   @OneToMany(() => VegetableTranslation, (t) => t.vegetable, {
     cascade: [Cascade.PERSIST],
   })
   translations = new Collection<VegetableTranslation>(this);
 
-  // 🔁 Relacje dobrego/złego sąsiedztwa
+  // 🔁 Companion planting rules
   @OneToMany(() => CompanionRule, (r) => r.source)
   companionRules = new Collection<CompanionRule>(this);
+
+  // 🕒 NEW — timestamps
+  @Property({ onCreate: () => new Date() })
+  createdAt: Date = new Date();
+
+  @Property({ onCreate: () => new Date(), onUpdate: () => new Date() })
+  updatedAt: Date = new Date();
 }

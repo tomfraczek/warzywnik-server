@@ -11,7 +11,7 @@ export class VegetableTranslation {
   vegetable!: Vegetable;
 
   @Property()
-  lang: string; // np. 'pl', 'en'
+  lang: string; // e.g. 'pl', 'en'
 
   @Property()
   name: string;
@@ -24,4 +24,29 @@ export class VegetableTranslation {
 
   @Property({ type: 'text', nullable: true })
   disadvantages?: string;
+
+  // 🌱 NEW — descriptive cultivation sections (fertilization & care)
+  @Property({ type: 'text', nullable: true })
+  prePlanting?: string; // Fertilization before sowing/planting
+
+  @Property({ type: 'text', nullable: true })
+  inSeasonFeeding?: string; // Fertilization during the season
+
+  @Property({ type: 'text', nullable: true })
+  warnings?: string; // Warnings, e.g. avoid fresh manure
+
+  @Property({ type: 'text', nullable: true })
+  watering?: string; // Watering recommendations
+
+  @Property({ type: 'text', nullable: true })
+  mulching?: string; // Mulching instructions
+
+  @Property({ type: 'text', nullable: true })
+  trainingSupport?: string; // Supports, pruning, training (e.g., tomatoes)
+
+  @Property({ type: 'text', nullable: true })
+  weeding?: string; // Weeding and soil loosening
+
+  @Property({ type: 'text', nullable: true })
+  pestPrevention?: string; // Pest/disease prevention
 }

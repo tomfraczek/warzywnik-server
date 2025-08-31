@@ -1,8 +1,6 @@
-// src/vegetables/translation/vegetable-translation.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { z } from 'zod';
 
 import { VegetableTranslation } from '../entities/vegetable-translation.entity';
 import { Vegetable } from '../entities/vegetable.entity';
@@ -15,10 +13,8 @@ export class VegetableTranslationService {
   constructor(
     @InjectRepository(VegetableTranslation)
     private readonly translationRepo: EntityRepository<VegetableTranslation>,
-
     @InjectRepository(Vegetable)
     private readonly vegetableRepo: EntityRepository<Vegetable>,
-
     private readonly em: EntityManager,
   ) {}
 
@@ -28,30 +24,26 @@ export class VegetableTranslationService {
     return translation;
   }
 
-  async create(
-    data: z.infer<typeof createVegetableTranslationSchema>,
-  ): Promise<VegetableTranslation> {
-    const vegetable = await this.vegetableRepo.findOne({
-      id: data.vegetableId,
-    });
+  async create(raw: unknown): Promise<VegetableTranslation> {
+    const data = createVegetableTranslationSchema.parse(raw);
+
+    const { vegetableId, ...rest } = data; // <- tu vegetableId faktycznie użyte
+    const vegetable = await this.vegetableRepo.findOne({ id: vegetableId });
     if (!vegetable) throw new NotFoundException('Vegetable not found');
 
     const translation = this.translationRepo.create({
-      lang: data.lang,
-      name: data.name,
-      description: data.description,
-      vegetable,
+      ...rest, // lang, name, description, sekcje opisowe
+      vegetable, // relacja
     });
 
     await this.em.persistAndFlush(translation);
     return translation;
   }
 
-  async update(
-    id: string,
-    data: z.infer<typeof updateVegetableTranslationSchema>,
-  ): Promise<VegetableTranslation> {
+  async update(id: string, raw: unknown): Promise<VegetableTranslation> {
+    const data = updateVegetableTranslationSchema.parse(raw);
     const translation = await this.findOne(id);
+
     this.translationRepo.assign(translation, data);
     await this.em.flush();
     return translation;

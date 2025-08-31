@@ -37,4 +37,10 @@ export class Soil {
     cascade: [Cascade.PERSIST],
   })
   translations = new Collection<SoilTranslation>(this);
+
+  @Property({ onCreate: () => new Date() })
+  createdAt: Date = new Date();
+
+  @Property({ onCreate: () => new Date(), onUpdate: () => new Date() })
+  updatedAt: Date = new Date();
 }
