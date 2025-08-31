@@ -30,7 +30,6 @@ export class Vegetable {
   @PrimaryKey()
   id: string = uuid();
 
-  // ✅ Podstawowe informacje
   @Property()
   slug: string;
 

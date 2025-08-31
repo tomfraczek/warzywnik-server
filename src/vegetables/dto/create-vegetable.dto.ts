@@ -6,7 +6,7 @@ export const createVegetableSchema = z.object({
   name: z.string().min(1),
   latinName: z.string().optional(),
   description: z.string().optional(),
-  image: z.string().url(),
+  image: z.string(),
 
   sowingTimeStart: z.string(),
   sowingTimeEnd: z.string(),

@@ -4,16 +4,22 @@ import {
   Get,
   Post,
   Param,
-  Body,
   Put,
   Delete,
   Query,
   BadRequestException,
+  UploadedFile,
+  UseInterceptors,
+  Body,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { z } from 'zod';
 import { VegetablesService } from './vegetables.service';
 import { createVegetableSchema } from './dto/create-vegetable.dto';
 import { updateVegetableSchema } from './dto/update-vegetable.dto';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { v4 as uuid } from 'uuid';
 
 @Controller('vegetables')
 export class VegetablesController {
@@ -38,8 +44,35 @@ export class VegetablesController {
   }
 
   @Post()
-  create(@Body() body: z.infer<typeof createVegetableSchema>) {
-    const data = createVegetableSchema.parse(body);
+  @UseInterceptors(FileInterceptor('image'))
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() rawBody: Record<string, string>,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Image file is required');
+    }
+
+    const filename = `${uuid()}-${file.originalname}`;
+    const uploadsDir = path.join(__dirname, '../../uploads');
+    await fs.mkdir(uploadsDir, { recursive: true });
+
+    const filePath = path.join(uploadsDir, filename);
+    await fs.writeFile(filePath, file.buffer);
+
+    const imageUrl = `/uploads/${filename}`;
+
+    const data = createVegetableSchema.parse({
+      ...rawBody,
+      image: imageUrl,
+      germinationDays: Number(rawBody.germinationDays),
+      sowingDepthCm: Number(rawBody.sowingDepthCm),
+      rowSpacingCm: Number(rawBody.rowSpacingCm),
+      plantSpacingCm: Number(rawBody.plantSpacingCm),
+      isDirectSow: rawBody.isDirectSow === 'true',
+      isPerennial: rawBody.isPerennial === 'true',
+    });
+
     return this.vegetablesService.create(data);
   }
 
