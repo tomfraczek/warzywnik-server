@@ -7,6 +7,7 @@ import {
   ManyToOne,
   Collection,
   Cascade,
+  OptionalProps, // 👈
 } from '@mikro-orm/core';
 import { v4 as uuid } from 'uuid';
 import { VegetableTranslation } from './vegetable-translation.entity';
@@ -33,6 +34,9 @@ export enum FeedingClass {
 
 @Entity()
 export class Vegetable {
+  // 👇 TS wie, że przy create te pola są opcjonalne
+  [OptionalProps]?: 'createdAt' | 'updatedAt';
+
   @PrimaryKey()
   id: string = uuid();
 
@@ -51,7 +55,7 @@ export class Vegetable {
   @Property()
   image: string;
 
-  // 🌿 Cultivation times
+  // 🌿 Uprawa
   @Property()
   sowingTimeStart: string;
 
@@ -92,30 +96,26 @@ export class Vegetable {
   @ManyToOne(() => Soil, { nullable: true })
   soilType?: Soil;
 
-  // 🧩 NEW — structured cultivation fields (fertilization & care)
-  @Property({ nullable: true })
-  phMin?: number;
-
-  @Property({ nullable: true })
-  phMax?: number;
+  // 🌍 Care & fertilization
+  @Enum({ items: () => FeedingClass, nullable: true })
+  feedingClass?: FeedingClass;
 
   @Property({ nullable: true })
   mulchingRecommended?: boolean;
 
-  @Enum({ items: () => FeedingClass, nullable: true })
-  feedingClass?: FeedingClass;
+  @Property({ type: 'text', nullable: true })
+  careTips?: string;
 
-  // 🌍 Translations (with descriptive sections)
+  // 🌍 Tłumaczenia
   @OneToMany(() => VegetableTranslation, (t) => t.vegetable, {
     cascade: [Cascade.PERSIST],
   })
   translations = new Collection<VegetableTranslation>(this);
 
-  // 🔁 Companion planting rules
+  // 🔁 Relacje dobrego/złego sąsiedztwa
   @OneToMany(() => CompanionRule, (r) => r.source)
   companionRules = new Collection<CompanionRule>(this);
 
-  // 🕒 NEW — timestamps
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();
 

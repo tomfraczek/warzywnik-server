@@ -27,6 +27,7 @@ export class VegetablesService {
     }
 
     populate.push('companionRules');
+    populate.push('soilType'); // 👈 dodane, żeby frontend widział nazwę gleby
 
     return this.vegetableRepo.find({}, { populate });
   }
@@ -41,6 +42,7 @@ export class VegetablesService {
     }
 
     populate.push('companionRules');
+    populate.push('soilType'); // 👈 dodane
 
     const vegetable = await this.vegetableRepo.findOne({ id }, { populate });
 
@@ -63,7 +65,7 @@ export class VegetablesService {
       soilType: soil,
     });
 
-    await this.em.persistAndFlush(vegetable); // 👈 tutaj EntityManager
+    await this.em.persistAndFlush(vegetable);
     return vegetable;
   }
 
@@ -84,17 +86,18 @@ export class VegetablesService {
       soilType: soil ?? undefined,
     });
 
-    await this.em.flush(); // 👈 tutaj również EntityManager
+    await this.em.flush();
     return vegetable;
   }
 
   async delete(id: string): Promise<void> {
     const vegetable = await this.findOne(id);
-    await this.em.removeAndFlush(vegetable); // 👈 EntityManager
+    await this.em.removeAndFlush(vegetable);
   }
 
   async checkSlug(slug: string): Promise<{ available: boolean }> {
-    const count = await this.soilRepo.count({ slug });
+    // 👇 poprawka — sprawdzamy w tabeli warzyw, nie gleb
+    const count = await this.vegetableRepo.count({ slug });
     return { available: count === 0 };
   }
 }

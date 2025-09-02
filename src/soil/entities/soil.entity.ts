@@ -5,6 +5,7 @@ import {
   OneToMany,
   Collection,
   Cascade,
+  OptionalProps, // 👈
 } from '@mikro-orm/core';
 import { v4 as uuid } from 'uuid';
 import { Vegetable } from '../../vegetables/entities/vegetable.entity';
@@ -12,6 +13,9 @@ import { SoilTranslation } from '../translations/entities/soil-translation.entit
 
 @Entity()
 export class Soil {
+  // 👇 TS wie, że przy create te pola są opcjonalne
+  [OptionalProps]?: 'createdAt' | 'updatedAt';
+
   @PrimaryKey()
   id: string = uuid();
 

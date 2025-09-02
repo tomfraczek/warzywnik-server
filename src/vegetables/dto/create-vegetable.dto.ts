@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { SunExposure, WateringNeeds } from '../entities/vegetable.entity';
+import {
+  FeedingClass,
+  SunExposure,
+  WateringNeeds,
+} from '../entities/vegetable.entity';
 
 export const createVegetableSchema = z.object({
   slug: z.string().min(1),
@@ -25,4 +29,11 @@ export const createVegetableSchema = z.object({
   wateringNeeds: z.nativeEnum(WateringNeeds),
 
   soilType: z.string().uuid().optional(),
+
+  feedingClass: z.nativeEnum(FeedingClass).optional(),
+  mulchingRecommended: z
+    .union([z.boolean(), z.enum(['true', 'false'])])
+    .optional()
+    .transform((v) => (typeof v === 'string' ? v === 'true' : v)),
+  careTips: z.string().optional(),
 });

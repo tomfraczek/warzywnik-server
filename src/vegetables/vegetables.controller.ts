@@ -11,6 +11,7 @@ import {
   UploadedFile,
   UseInterceptors,
   Body,
+  Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { z } from 'zod';
@@ -23,6 +24,8 @@ import { v4 as uuid } from 'uuid';
 
 @Controller('vegetables')
 export class VegetablesController {
+  private readonly logger = new Logger(VegetablesController.name);
+
   constructor(private readonly vegetablesService: VegetablesService) {}
 
   @Get()
@@ -65,12 +68,24 @@ export class VegetablesController {
     const data = createVegetableSchema.parse({
       ...rawBody,
       image: imageUrl,
+
+      // liczby (te musimy przerobić, bo przyszły jako stringi z FormData)
       germinationDays: Number(rawBody.germinationDays),
       sowingDepthCm: Number(rawBody.sowingDepthCm),
       rowSpacingCm: Number(rawBody.rowSpacingCm),
       plantSpacingCm: Number(rawBody.plantSpacingCm),
+
+      // te dwa booleany z create (nie są w schemacie koercjonowane):
       isDirectSow: rawBody.isDirectSow === 'true',
       isPerennial: rawBody.isPerennial === 'true',
+
+      // feedingClass, mulchingRecommended, careTips – zostaw jak są,
+      // Zod zrobi koercję/validację:
+      // feedingClass: rawBody.feedingClass,
+      // mulchingRecommended: rawBody.mulchingRecommended,
+      // careTips: rawBody.careTips,
+
+      soilType: rawBody.soilType || undefined,
     });
 
     return this.vegetablesService.create(data);
@@ -81,6 +96,7 @@ export class VegetablesController {
     @Param('id') id: string,
     @Body() body: z.infer<typeof updateVegetableSchema>,
   ) {
+    this.logger.log(`PUT /vegetables/${id} BODY=${JSON.stringify(body)}`);
     const data = updateVegetableSchema.parse(body);
     return this.vegetablesService.update(id, data);
   }
