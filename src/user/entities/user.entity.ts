@@ -1,23 +1,33 @@
-import { Entity, PrimaryKey, Property, Unique } from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  Unique,
+  OptionalProps,
+} from '@mikro-orm/core';
 
-@Entity()
+@Entity({ tableName: 'user' })
 export class User {
-  @PrimaryKey()
-  id!: number;
+  // Fields listed here are optional for RequiredEntityData<T>
+  [OptionalProps]?: 'isAdmin' | 'status' | 'createdAt' | 'updatedAt';
 
-  @Property()
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string;
+
+  @Property({ unique: true })
   @Unique()
   clerkUserId!: string;
 
-  @Property({ nullable: true })
-  name?: string;
-
+  // Internal flags/role — never accept from client DTO
   @Property({ default: false })
   isAdmin: boolean = false;
 
-  @Property({ onCreate: () => new Date() })
-  createdAt: Date = new Date();
+  @Property({ columnType: 'text', default: 'active' })
+  status: 'active' | 'blocked' = 'active';
 
-  @Property({ onUpdate: () => new Date() })
+  @Property({ defaultRaw: 'now()' })
+  createdAt!: Date;
+
+  @Property({ onUpdate: () => new Date(), defaultRaw: 'now()' })
   updatedAt: Date = new Date();
 }
