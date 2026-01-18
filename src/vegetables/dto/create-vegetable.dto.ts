@@ -1,39 +1,181 @@
-import { z } from 'zod';
 import {
-  FeedingClass,
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  IsBoolean,
+  IsArray,
+  IsUUID,
+  Min,
+  Max,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  PlantType,
+  GrowthForm,
+  LifeCycle,
+  FrostResistance,
   SunExposure,
-  WateringNeeds,
-} from '../entities/vegetable.entity';
+  WaterNeeds,
+  NutrientNeeds,
+  WindowType,
+  MediaType,
+  CompanionRelation,
+  DifficultyLevel,
+  HarvestFrequency,
+} from '../../common/enums/vegetable.enums';
 
-export const createVegetableSchema = z.object({
-  slug: z.string().min(1),
-  name: z.string().min(1),
-  latinName: z.string().optional(),
-  description: z.string().optional(),
-  image: z.string(),
+export class CreateVegetableDto {
+  @IsString()
+  slug: string;
 
-  sowingTimeStart: z.string(),
-  sowingTimeEnd: z.string(),
-  harvestTimeStart: z.string(),
-  harvestTimeEnd: z.string(),
+  @IsString()
+  name: string;
 
-  germinationDays: z.number().int().min(1),
-  sowingDepthCm: z.number().min(0),
-  rowSpacingCm: z.number().min(0),
-  plantSpacingCm: z.number().min(0),
+  @IsOptional()
+  @IsString()
+  latinName?: string;
 
-  isDirectSow: z.boolean(),
-  isPerennial: z.boolean(),
+  @IsOptional()
+  @IsString()
+  family?: string;
 
-  sunExposure: z.nativeEnum(SunExposure),
-  wateringNeeds: z.nativeEnum(WateringNeeds),
+  @IsOptional()
+  @IsEnum(PlantType)
+  plantType?: PlantType;
 
-  soilType: z.string().uuid().optional(),
+  @IsOptional()
+  @IsEnum(GrowthForm)
+  growthForm?: GrowthForm;
 
-  feedingClass: z.nativeEnum(FeedingClass).optional(),
-  mulchingRecommended: z
-    .union([z.boolean(), z.enum(['true', 'false'])])
-    .optional()
-    .transform((v) => (typeof v === 'string' ? v === 'true' : v)),
-  careTips: z.string().optional(),
-});
+  @IsOptional()
+  @IsEnum(LifeCycle)
+  lifeCycle?: LifeCycle;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  daysToHarvest?: number;
+
+  // environment
+  @IsOptional()
+  @IsNumber()
+  minTemp?: number;
+
+  @IsOptional()
+  @IsNumber()
+  optimalTemp?: number;
+
+  @IsOptional()
+  @IsEnum(FrostResistance)
+  frostResistance?: FrostResistance;
+
+  @IsOptional()
+  @IsEnum(SunExposure)
+  sunExposure?: SunExposure;
+
+  @IsOptional()
+  @IsEnum(WaterNeeds)
+  waterNeeds?: WaterNeeds;
+
+  @IsOptional()
+  @IsEnum(NutrientNeeds)
+  nutrientNeeds?: NutrientNeeds;
+
+  // sowing/planting
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  seedDepth?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  rowSpacing?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  plantSpacing?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  germinationTimeDays?: number;
+
+  @IsOptional()
+  @IsNumber()
+  germinationTempMin?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  directSow?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  thinningRequired?: boolean;
+
+  // simple lists
+  @IsOptional()
+  @IsArray()
+  commonPests?: string[];
+
+  @IsOptional()
+  @IsArray()
+  commonDiseases?: string[];
+
+  @IsOptional()
+  @IsArray()
+  organicTreatments?: string[];
+
+  @IsOptional()
+  @IsArray()
+  chemicalTreatments?: string[];
+
+  // nutrition
+  @IsOptional()
+  @IsNumber()
+  caloriesPer100g?: number;
+
+  @IsOptional()
+  macros?: { protein?: number; fat?: number; carbs?: number; fiber?: number };
+
+  @IsOptional()
+  @IsArray()
+  vitamins?: string[];
+
+  @IsOptional()
+  @IsArray()
+  minerals?: string[];
+
+  // education
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  howToGrow?: string;
+
+  @IsOptional()
+  @IsArray()
+  blogPosts?: string[];
+
+  // metadata
+  @IsOptional()
+  @IsEnum(DifficultyLevel)
+  difficultyLevel?: DifficultyLevel;
+
+  @IsOptional()
+  @IsNumber()
+  spaceEfficiency?: number;
+
+  @IsOptional()
+  @IsNumber()
+  ecoScore?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  beeFriendly?: boolean;
+}

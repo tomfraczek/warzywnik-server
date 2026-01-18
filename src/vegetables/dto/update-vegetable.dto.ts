@@ -1,6 +1,4 @@
-import { createVegetableSchema } from './create-vegetable.dto';
-import { z } from 'zod';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateVegetableDto } from './create-vegetable.dto';
 
-export const updateVegetableSchema = createVegetableSchema.partial();
-
-export type UpdateVegetableDto = z.infer<typeof updateVegetableSchema>;
+export class UpdateVegetableDto extends PartialType(CreateVegetableDto) {}

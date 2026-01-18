@@ -7,40 +7,33 @@ import {
   ManyToOne,
   Collection,
   Cascade,
-  OptionalProps, // 👈
+  OptionalProps,
 } from '@mikro-orm/core';
 import { v4 as uuid } from 'uuid';
 import { VegetableTranslation } from './vegetable-translation.entity';
 import { Soil } from '../../soil/entities/soil.entity';
 import { CompanionRule } from '../../companion-rules/entities/companion-rule.entity';
-
-export enum SunExposure {
-  FULL_SUN = 'full_sun',
-  PARTIAL_SHADE = 'partial_shade',
-  SHADE = 'shade',
-}
-
-export enum WateringNeeds {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-}
-
-export enum FeedingClass {
-  LIGHT = 'light',
-  MEDIUM = 'medium',
-  HEAVY = 'heavy',
-}
+import { VegetableWindow } from './vegetable-window.entity';
+import { VegetableMedia } from './vegetable-media.entity';
+import {
+  PlantType,
+  GrowthForm,
+  LifeCycle,
+  FrostResistance,
+  SunExposure,
+  WaterNeeds,
+  NutrientNeeds,
+  DifficultyLevel,
+} from '../../common/enums/vegetable.enums';
 
 @Entity()
 export class Vegetable {
-  // 👇 TS wie, że przy create te pola są opcjonalne
   [OptionalProps]?: 'createdAt' | 'updatedAt';
 
   @PrimaryKey()
   id: string = uuid();
 
-  @Property()
+  @Property({ unique: true })
   slug: string;
 
   @Property()
@@ -49,72 +42,185 @@ export class Vegetable {
   @Property({ nullable: true })
   latinName?: string;
 
-  @Property({ type: 'text', nullable: true })
-  description?: string;
+  @Property({ nullable: true })
+  family?: string;
 
-  @Property()
-  image: string;
+  @Enum({ items: () => PlantType, nullable: true })
+  plantType?: PlantType;
 
-  // 🌿 Uprawa
-  @Property()
-  sowingTimeStart: string;
+  @Enum({ items: () => GrowthForm, nullable: true })
+  growthForm?: GrowthForm;
 
-  @Property()
-  sowingTimeEnd: string;
+  @Enum({ items: () => LifeCycle, nullable: true })
+  lifeCycle?: LifeCycle;
 
-  @Property()
-  harvestTimeStart: string;
+  @Property({ nullable: true })
+  daysToHarvest?: number;
 
-  @Property()
-  harvestTimeEnd: string;
+  @Property({ nullable: true })
+  growingSeasonLength?: number;
 
-  @Property()
-  germinationDays: number;
+  // Environment
+  @Property({ nullable: true })
+  minTemp?: number;
 
-  @Property()
-  sowingDepthCm: number;
+  @Property({ nullable: true })
+  optimalTemp?: number;
 
-  @Property()
-  rowSpacingCm: number;
+  @Enum({ items: () => FrostResistance, nullable: true })
+  frostResistance?: FrostResistance;
 
-  @Property()
-  plantSpacingCm: number;
-
-  // 🪴 Typ uprawy i cechy
-  @Property()
-  isDirectSow: boolean;
-
-  @Property()
-  isPerennial: boolean;
-
-  @Enum({ items: () => SunExposure })
-  sunExposure: SunExposure;
-
-  @Enum({ items: () => WateringNeeds })
-  wateringNeeds: WateringNeeds;
+  @Enum({ items: () => SunExposure, nullable: true })
+  sunExposure?: SunExposure;
 
   @ManyToOne(() => Soil, { nullable: true })
   soilType?: Soil;
 
-  // 🌍 Care & fertilization
-  @Enum({ items: () => FeedingClass, nullable: true })
-  feedingClass?: FeedingClass;
+  @Property({ nullable: true })
+  soilPHMin?: number;
+
+  @Property({ nullable: true })
+  soilPHMax?: number;
+
+  @Enum({ items: () => WaterNeeds, nullable: true })
+  waterNeeds?: WaterNeeds;
+
+  @Enum({ items: () => NutrientNeeds, nullable: true })
+  nutrientNeeds?: NutrientNeeds;
+
+  // Sowing/planting
+  @Property({ nullable: true })
+  seedDepth?: number;
+
+  @Property({ nullable: true })
+  rowSpacing?: number;
+
+  @Property({ nullable: true })
+  plantSpacing?: number;
+
+  @Property({ nullable: true })
+  germinationTimeDays?: number;
+
+  @Property({ nullable: true })
+  germinationTempMin?: number;
+
+  @Property({ nullable: true })
+  directSow?: boolean;
+
+  @Property({ nullable: true })
+  thinningRequired?: boolean;
+
+  // Care
+  @Property({ nullable: true })
+  wateringFrequencyDays?: number;
+
+  @Property({ type: 'text', nullable: true })
+  fertilizingSchedule?: string;
 
   @Property({ nullable: true })
   mulchingRecommended?: boolean;
 
-  @Property({ type: 'text', nullable: true })
-  careTips?: string;
+  @Property({ nullable: true })
+  stakingRequired?: boolean;
 
-  // 🌍 Tłumaczenia
+  @Property({ nullable: true })
+  pruningRequired?: boolean;
+
+  // Pests / diseases (simple lists -> text[])
+  @Property({ type: 'text[]', nullable: true })
+  commonPests?: string[];
+
+  @Property({ type: 'text[]', nullable: true })
+  commonDiseases?: string[];
+
+  @Property({ type: 'text[]', nullable: true })
+  organicTreatments?: string[];
+
+  @Property({ type: 'text[]', nullable: true })
+  chemicalTreatments?: string[];
+
+  // Companions via CompanionRule pivot
+  @OneToMany(() => CompanionRule, (r) => r.source)
+  companionRules = new Collection<CompanionRule>(this);
+
+  // Rotation group identifier (family-based rules live in separate table)
+  @Property({ nullable: true })
+  rotationGroup?: string;
+
+  // Yield
+  @Property({ nullable: true })
+  yieldPerM2?: number;
+
+  @Enum({ items: () => Object, nullable: true })
+  harvestFrequency?: string;
+
+  @Property({ nullable: true })
+  storageLife?: number;
+
+  @Property({ type: 'text[]', nullable: true })
+  storageConditions?: string[];
+
+  // Nutrition
+  @Property({ nullable: true })
+  caloriesPer100g?: number;
+
+  @Property({ type: 'jsonb', nullable: true })
+  macros?: { protein?: number; fat?: number; carbs?: number; fiber?: number };
+
+  @Property({ type: 'text[]', nullable: true })
+  vitamins?: string[];
+
+  @Property({ type: 'text[]', nullable: true })
+  minerals?: string[];
+
+  // Education
+  @Property({ type: 'text', nullable: true })
+  description?: string;
+
+  @Property({ type: 'text', nullable: true })
+  howToGrow?: string;
+
+  @Property({ type: 'text', nullable: true })
+  commonMistakes?: string;
+
+  @Property({ type: 'text', nullable: true })
+  tips?: string;
+
+  @Property({ type: 'text', nullable: true })
+  faq?: string;
+
+  @Property({ type: 'text[]', nullable: true })
+  blogPosts?: string[];
+
+  // Metadata
+  @Enum({ items: () => DifficultyLevel, nullable: true })
+  difficultyLevel?: DifficultyLevel;
+
+  @Property({ nullable: true })
+  spaceEfficiency?: number;
+
+  @Property({ nullable: true })
+  ecoScore?: number;
+
+  @Property({ nullable: true })
+  beeFriendly?: boolean;
+
+  // Calendar windows and media
+  @OneToMany(() => VegetableWindow, (w) => w.vegetable, {
+    cascade: [Cascade.PERSIST],
+  })
+  calendarWindows = new Collection<VegetableWindow>(this);
+
+  @OneToMany(() => VegetableMedia, (m) => m.vegetable, {
+    cascade: [Cascade.PERSIST],
+  })
+  media = new Collection<VegetableMedia>(this);
+
+  // translations
   @OneToMany(() => VegetableTranslation, (t) => t.vegetable, {
     cascade: [Cascade.PERSIST],
   })
   translations = new Collection<VegetableTranslation>(this);
-
-  // 🔁 Relacje dobrego/złego sąsiedztwa
-  @OneToMany(() => CompanionRule, (r) => r.source)
-  companionRules = new Collection<CompanionRule>(this);
 
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();

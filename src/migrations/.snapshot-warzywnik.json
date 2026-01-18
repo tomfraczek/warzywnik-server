@@ -16,6 +16,66 @@
           "length": 255,
           "mappedType": "string"
         },
+        "from_family": {
+          "name": "from_family",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "to_family": {
+          "name": "to_family",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "relation": {
+          "name": "relation",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        }
+      },
+      "name": "rotation_family_rule",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "rotation_family_rule_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
         "slug": {
           "name": "slug",
           "type": "varchar(255)",
@@ -462,118 +522,109 @@
           "length": 255,
           "mappedType": "string"
         },
-        "description": {
-          "name": "description",
+        "family": {
+          "name": "family",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "plant_type": {
+          "name": "plant_type",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "mappedType": "text"
+          "enumItems": [
+            "annual",
+            "perennial",
+            "biennial"
+          ],
+          "mappedType": "enum"
         },
-        "image": {
-          "name": "image",
-          "type": "varchar(255)",
+        "growth_form": {
+          "name": "growth_form",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "nullable": true,
+          "enumItems": [
+            "bush",
+            "vine",
+            "tree",
+            "tuber"
+          ],
+          "mappedType": "enum"
         },
-        "sowing_time_start": {
-          "name": "sowing_time_start",
-          "type": "varchar(255)",
+        "life_cycle": {
+          "name": "life_cycle",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "nullable": true,
+          "enumItems": [
+            "annual",
+            "perennial",
+            "biennial"
+          ],
+          "mappedType": "enum"
         },
-        "sowing_time_end": {
-          "name": "sowing_time_end",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "harvest_time_start": {
-          "name": "harvest_time_start",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "harvest_time_end": {
-          "name": "harvest_time_end",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "germination_days": {
-          "name": "germination_days",
+        "days_to_harvest": {
+          "name": "days_to_harvest",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "integer"
         },
-        "sowing_depth_cm": {
-          "name": "sowing_depth_cm",
+        "growing_season_length": {
+          "name": "growing_season_length",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "integer"
         },
-        "row_spacing_cm": {
-          "name": "row_spacing_cm",
+        "min_temp": {
+          "name": "min_temp",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "integer"
         },
-        "plant_spacing_cm": {
-          "name": "plant_spacing_cm",
+        "optimal_temp": {
+          "name": "optimal_temp",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "integer"
         },
-        "is_direct_sow": {
-          "name": "is_direct_sow",
-          "type": "boolean",
+        "frost_resistance": {
+          "name": "frost_resistance",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
-          "mappedType": "boolean"
-        },
-        "is_perennial": {
-          "name": "is_perennial",
-          "type": "boolean",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "boolean"
+          "nullable": true,
+          "enumItems": [
+            "none",
+            "low",
+            "medium",
+            "high"
+          ],
+          "mappedType": "enum"
         },
         "sun_exposure": {
           "name": "sun_exposure",
@@ -581,25 +632,11 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "enumItems": [
             "full_sun",
             "partial_shade",
             "shade"
-          ],
-          "mappedType": "enum"
-        },
-        "watering_needs": {
-          "name": "watering_needs",
-          "type": "text",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "enumItems": [
-            "low",
-            "medium",
-            "high"
           ],
           "mappedType": "enum"
         },
@@ -613,19 +650,132 @@
           "length": 255,
           "mappedType": "string"
         },
-        "feeding_class": {
-          "name": "feeding_class",
+        "soil_phmin": {
+          "name": "soil_phmin",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "soil_phmax": {
+          "name": "soil_phmax",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "water_needs": {
+          "name": "water_needs",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
           "enumItems": [
-            "light",
+            "low",
             "medium",
-            "heavy"
+            "high"
           ],
           "mappedType": "enum"
+        },
+        "nutrient_needs": {
+          "name": "nutrient_needs",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "enumItems": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "mappedType": "enum"
+        },
+        "seed_depth": {
+          "name": "seed_depth",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "row_spacing": {
+          "name": "row_spacing",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "plant_spacing": {
+          "name": "plant_spacing",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "germination_time_days": {
+          "name": "germination_time_days",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "germination_temp_min": {
+          "name": "germination_temp_min",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "direct_sow": {
+          "name": "direct_sow",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "boolean"
+        },
+        "thinning_required": {
+          "name": "thinning_required",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "boolean"
+        },
+        "watering_frequency_days": {
+          "name": "watering_frequency_days",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "fertilizing_schedule": {
+          "name": "fertilizing_schedule",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
         },
         "mulching_recommended": {
           "name": "mulching_recommended",
@@ -636,14 +786,237 @@
           "nullable": true,
           "mappedType": "boolean"
         },
-        "care_tips": {
-          "name": "care_tips",
+        "staking_required": {
+          "name": "staking_required",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "boolean"
+        },
+        "pruning_required": {
+          "name": "pruning_required",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "boolean"
+        },
+        "common_pests": {
+          "name": "common_pests",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "array"
+        },
+        "common_diseases": {
+          "name": "common_diseases",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "array"
+        },
+        "organic_treatments": {
+          "name": "organic_treatments",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "array"
+        },
+        "chemical_treatments": {
+          "name": "chemical_treatments",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "array"
+        },
+        "rotation_group": {
+          "name": "rotation_group",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "yield_per_m2": {
+          "name": "yield_per_m2",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "harvest_frequency": {
+          "name": "harvest_frequency",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "enumItems": [],
+          "mappedType": "enum"
+        },
+        "storage_life": {
+          "name": "storage_life",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "storage_conditions": {
+          "name": "storage_conditions",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "array"
+        },
+        "calories_per100g": {
+          "name": "calories_per100g",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "macros": {
+          "name": "macros",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "json"
+        },
+        "vitamins": {
+          "name": "vitamins",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "array"
+        },
+        "minerals": {
+          "name": "minerals",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "array"
+        },
+        "description": {
+          "name": "description",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
           "mappedType": "text"
+        },
+        "how_to_grow": {
+          "name": "how_to_grow",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "common_mistakes": {
+          "name": "common_mistakes",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "tips": {
+          "name": "tips",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "faq": {
+          "name": "faq",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "blog_posts": {
+          "name": "blog_posts",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "array"
+        },
+        "difficulty_level": {
+          "name": "difficulty_level",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "enumItems": [
+            "easy",
+            "medium",
+            "hard"
+          ],
+          "mappedType": "enum"
+        },
+        "space_efficiency": {
+          "name": "space_efficiency",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "eco_score": {
+          "name": "eco_score",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "bee_friendly": {
+          "name": "bee_friendly",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "boolean"
         },
         "created_at": {
           "name": "created_at",
@@ -669,6 +1042,16 @@
       "name": "vegetable",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": [
+            "slug"
+          ],
+          "composite": false,
+          "keyName": "vegetable_slug_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "vegetable_pkey",
           "columnNames": [
@@ -730,14 +1113,28 @@
           "length": 255,
           "mappedType": "string"
         },
-        "is_good": {
-          "name": "is_good",
-          "type": "boolean",
+        "relation": {
+          "name": "relation",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "boolean"
+          "enumItems": [
+            "good",
+            "bad",
+            "allelopathic"
+          ],
+          "mappedType": "enum"
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
         }
       },
       "name": "companion_rule",
@@ -774,6 +1171,97 @@
             "target_id"
           ],
           "localTableName": "public.companion_rule",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.vegetable",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "vegetable_id": {
+          "name": "vegetable_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        }
+      },
+      "name": "vegetable_media",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "vegetable_media_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "vegetable_media_vegetable_id_foreign": {
+          "constraintName": "vegetable_media_vegetable_id_foreign",
+          "columnNames": [
+            "vegetable_id"
+          ],
+          "localTableName": "public.vegetable_media",
           "referencedColumnNames": [
             "id"
           ],
@@ -947,6 +1435,87 @@
             "vegetable_id"
           ],
           "localTableName": "public.vegetable_translation",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.vegetable",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "vegetable_id": {
+          "name": "vegetable_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "start_month": {
+          "name": "start_month",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "end_month": {
+          "name": "end_month",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "vegetable_window",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "vegetable_window_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "vegetable_window_vegetable_id_foreign": {
+          "constraintName": "vegetable_window_vegetable_id_foreign",
+          "columnNames": [
+            "vegetable_id"
+          ],
+          "localTableName": "public.vegetable_window",
           "referencedColumnNames": [
             "id"
           ],

@@ -20,7 +20,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migration:create": "mikro-orm migration:create",
     "migration:up": "mikro-orm migration:up",
-    "migration:down": "mikro-orm migration:down"
+    "migration:down": "mikro-orm migration:down",
+    "seed": "ts-node -r tsconfig-paths/register src/seeds/seed-vegetables.ts"
   },
   "dependencies": {
     "@clerk/backend": "^2.12.0",

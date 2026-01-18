@@ -1,6 +1,7 @@
-import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, Enum } from '@mikro-orm/core';
 import { v4 as uuid } from 'uuid';
 import { Vegetable } from '../../vegetables/entities/vegetable.entity';
+import { CompanionRelation } from '../../common/enums/vegetable.enums';
 
 @Entity()
 export class CompanionRule {
@@ -13,6 +14,9 @@ export class CompanionRule {
   @ManyToOne(() => Vegetable)
   target!: Vegetable;
 
-  @Property()
-  isGood: boolean;
+  @Enum({ items: () => CompanionRelation })
+  relation!: CompanionRelation;
+
+  @Property({ nullable: true, type: 'text' })
+  note?: string;
 }

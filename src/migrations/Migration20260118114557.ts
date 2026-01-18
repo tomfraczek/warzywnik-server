@@ -1,0 +1,31 @@
+import { Migration } from '@mikro-orm/migrations';
+
+export class Migration20260118114557 extends Migration {
+  override async up(): Promise<void> {
+    this.addSql(
+      `alter table "vegetable" drop column if exists "image", drop column if exists "sowing_time_start", drop column if exists "sowing_time_end", drop column if exists "harvest_time_start", drop column if exists "harvest_time_end", drop column if exists "germination_days", drop column if exists "sowing_depth_cm", drop column if exists "row_spacing_cm", drop column if exists "plant_spacing_cm", drop column if exists "is_direct_sow", drop column if exists "is_perennial", drop column if exists "watering_needs", drop column if exists "feeding_class";`,
+    );
+
+    this.addSql(
+      `alter table "vegetable" add column if not exists "family" varchar(255) null, add column if not exists "plant_type" text check ("plant_type" in ('annual', 'perennial', 'biennial')) null, add column if not exists "growth_form" text check ("growth_form" in ('bush', 'vine', 'tree', 'tuber')) null, add column if not exists "life_cycle" text check ("life_cycle" in ('annual', 'perennial', 'biennial')) null, add column if not exists "days_to_harvest" int null, add column if not exists "growing_season_length" int null, add column if not exists "min_temp" int null, add column if not exists "optimal_temp" int null, add column if not exists "frost_resistance" text check ("frost_resistance" in ('none', 'low', 'medium', 'high')) null, add column if not exists "soil_phmin" int null, add column if not exists "soil_phmax" int null, add column if not exists "water_needs" text check ("water_needs" in ('low', 'medium', 'high')) null, add column if not exists "nutrient_needs" text check ("nutrient_needs" in ('low', 'medium', 'high')) null, add column if not exists "seed_depth" int null, add column if not exists "row_spacing" int null, add column if not exists "plant_spacing" int null, add column if not exists "germination_time_days" int null, add column if not exists "germination_temp_min" int null, add column if not exists "direct_sow" boolean null, add column if not exists "thinning_required" boolean null, add column if not exists "watering_frequency_days" int null, add column if not exists "staking_required" boolean null, add column if not exists "pruning_required" boolean null, add column if not exists "common_pests" text[] null, add column if not exists "common_diseases" text[] null, add column if not exists "organic_treatments" text[] null, add column if not exists "chemical_treatments" text[] null, add column if not exists "rotation_group" varchar(255) null, add column if not exists "yield_per_m2" int null, add column if not exists "harvest_frequency" text check ("harvest_frequency" in ('')) null, add column if not exists "storage_life" int null, add column if not exists "storage_conditions" text[] null, add column if not exists "calories_per100g" int null, add column if not exists "macros" jsonb null, add column if not exists "vitamins" text[] null, add column if not exists "minerals" text[] null, add column if not exists "how_to_grow" text null, add column if not exists "common_mistakes" text null, add column if not exists "tips" text null, add column if not exists "faq" text null, add column if not exists "blog_posts" text[] null, add column if not exists "difficulty_level" text check ("difficulty_level" in ('easy', 'medium', 'hard')) null, add column if not exists "space_efficiency" int null, add column if not exists "eco_score" int null, add column if not exists "bee_friendly" boolean null;`,
+    );
+    this.addSql(
+      `alter table "vegetable" alter column "sun_exposure" type text using ("sun_exposure"::text);`,
+    );
+    this.addSql(
+      `alter table "vegetable" alter column "sun_exposure" drop not null;`,
+    );
+    this.addSql(
+      `do $$ begin if exists (select 1 from information_schema.columns where table_name = 'vegetable' and column_name = 'care_tips') then alter table "vegetable" rename column "care_tips" to "fertilizing_schedule"; end if; end $$;`,
+    );
+  }
+
+  override async down(): Promise<void> {
+    this.addSql(
+      `do $$ begin if exists (select 1 from information_schema.columns where table_name = 'vegetable' and column_name = 'fertilizing_schedule') then alter table "vegetable" rename column "fertilizing_schedule" to "care_tips"; end if; end $$;`,
+    );
+    this.addSql(
+      `alter table "vegetable" drop column if exists "family", drop column if exists "plant_type", drop column if exists "growth_form", drop column if exists "life_cycle", drop column if exists "days_to_harvest", drop column if exists "growing_season_length", drop column if exists "min_temp", drop column if exists "optimal_temp", drop column if exists "frost_resistance", drop column if exists "soil_phmin", drop column if exists "soil_phmax", drop column if exists "water_needs", drop column if exists "nutrient_needs", drop column if exists "seed_depth", drop column if exists "row_spacing", drop column if exists "plant_spacing", drop column if exists "germination_time_days", drop column if exists "germination_temp_min", drop column if exists "direct_sow", drop column if exists "thinning_required", drop column if exists "watering_frequency_days", drop column if exists "staking_required", drop column if exists "pruning_required", drop column if exists "common_pests", drop column if exists "common_diseases", drop column if exists "organic_treatments", drop column if exists "chemical_treatments", drop column if exists "rotation_group", drop column if exists "yield_per_m2", drop column if exists "harvest_frequency", drop column if exists "storage_life", drop column if exists "storage_conditions", drop column if exists "calories_per100g", drop column if exists "macros", drop column if exists "vitamins", drop column if exists "minerals", drop column if exists "how_to_grow", drop column if exists "common_mistakes", drop column if exists "tips", drop column if exists "faq", drop column if exists "blog_posts", drop column if exists "difficulty_level", drop column if exists "space_efficiency", drop column if exists "eco_score", drop column if exists "bee_friendly";`,
+    );
+  }
+}
