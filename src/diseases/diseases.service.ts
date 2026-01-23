@@ -11,9 +11,6 @@ import {
   UpdateDiseaseDto,
 } from './dto/disease.schemas';
 
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
 @Injectable()
 export class DiseasesService {
   constructor(private readonly em: EntityManager) {}
@@ -44,12 +41,8 @@ export class DiseasesService {
     };
   }
 
-  async getByIdOrSlug(idOrSlug: string) {
-    const isUuid = UUID_REGEX.test(idOrSlug);
-    const entity = await this.em.findOne(
-      Disease,
-      isUuid ? { id: idOrSlug } : { slug: idOrSlug },
-    );
+  async getById(id: string) {
+    const entity = await this.em.findOne(Disease, { id });
 
     if (!entity) {
       throw new NotFoundException('Disease not found');

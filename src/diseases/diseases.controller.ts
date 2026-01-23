@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -31,9 +32,9 @@ export class DiseasesController {
     return this.diseasesService.list(query);
   }
 
-  @Get(':idOrSlug')
-  get(@Param('idOrSlug') idOrSlug: string) {
-    return this.diseasesService.getByIdOrSlug(idOrSlug);
+  @Get(':id')
+  get(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.diseasesService.getById(id);
   }
 
   @Post()
@@ -44,13 +45,16 @@ export class DiseasesController {
 
   @Patch(':id')
   @UsePipes(new ZodValidationPipe(updateDiseaseSchema))
-  update(@Param('id') id: string, @Body() body: UpdateDiseaseDto) {
+  update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: UpdateDiseaseDto,
+  ) {
     return this.diseasesService.update(id, body);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
     await this.diseasesService.remove(id);
   }
 }

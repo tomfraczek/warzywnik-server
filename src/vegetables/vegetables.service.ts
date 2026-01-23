@@ -15,9 +15,6 @@ import {
   UpdateVegetableDto,
 } from './dto/vegetable.schemas';
 
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
 @Injectable()
 export class VegetablesService {
   constructor(private readonly em: EntityManager) {}
@@ -69,11 +66,10 @@ export class VegetablesService {
     };
   }
 
-  async getByIdOrSlug(idOrSlug: string) {
-    const isUuid = UUID_REGEX.test(idOrSlug);
+  async getById(id: string) {
     const entity = await this.em.findOne(
       Vegetable,
-      isUuid ? { id: idOrSlug } : { slug: idOrSlug },
+      { id },
       {
         populate: [
           'commonPests',
@@ -92,11 +88,6 @@ export class VegetablesService {
   }
 
   async create(dto: CreateVegetableDto) {
-    const existing = await this.em.findOne(Vegetable, { slug: dto.slug });
-    if (existing) {
-      throw new ConflictException('Vegetable slug already exists');
-    }
-
     const vegetable = new Vegetable();
     vegetable.slug = dto.slug;
     vegetable.name = dto.name;

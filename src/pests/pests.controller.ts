@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -31,9 +32,9 @@ export class PestsController {
     return this.pestsService.list(query);
   }
 
-  @Get(':idOrSlug')
-  get(@Param('idOrSlug') idOrSlug: string) {
-    return this.pestsService.getByIdOrSlug(idOrSlug);
+  @Get(':id')
+  get(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.pestsService.getById(id);
   }
 
   @Post()
@@ -44,13 +45,16 @@ export class PestsController {
 
   @Patch(':id')
   @UsePipes(new ZodValidationPipe(updatePestSchema))
-  update(@Param('id') id: string, @Body() body: UpdatePestDto) {
+  update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: UpdatePestDto,
+  ) {
     return this.pestsService.update(id, body);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
     await this.pestsService.remove(id);
   }
 }

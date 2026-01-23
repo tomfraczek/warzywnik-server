@@ -11,6 +11,7 @@ import { AppService } from './app.service';
 import { VegetablesModule } from './vegetables/vegetables.module';
 import { PestsModule } from './pests/pests.module';
 import { DiseasesModule } from './diseases/diseases.module';
+import { SoilsModule } from './soils/soils.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { DiseasesModule } from './diseases/diseases.module';
     VegetablesModule,
     PestsModule,
     DiseasesModule,
+    SoilsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
