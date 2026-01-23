@@ -1,0 +1,52 @@
+import { z } from 'zod';
+
+export type PestBaseDto = {
+  slug?: string;
+  name?: string;
+  description?: string;
+  symptoms?: string | null;
+  prevention?: string | null;
+  treatment?: string | null;
+};
+
+export type CreatePestDto = PestBaseDto & {
+  slug: string;
+  name: string;
+  description: string;
+};
+
+export type UpdatePestDto = PestBaseDto;
+
+export type ListPestsQueryDto = {
+  page: number;
+  limit: number;
+  q?: string;
+};
+
+const basePestSchema = z.object({
+  slug: z
+    .string()
+    .min(2)
+    .max(80)
+    .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers and hyphens')
+    .optional(),
+  name: z.string().min(2).max(120).optional(),
+  description: z.string().min(1).optional(),
+  symptoms: z.string().min(1).nullable().optional(),
+  prevention: z.string().min(1).nullable().optional(),
+  treatment: z.string().min(1).nullable().optional(),
+});
+
+export const createPestSchema = basePestSchema.extend({
+  slug: basePestSchema.shape.slug.unwrap(),
+  name: basePestSchema.shape.name.unwrap(),
+  description: basePestSchema.shape.description.unwrap(),
+});
+
+export const updatePestSchema = basePestSchema;
+
+export const listPestsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  q: z.string().min(1).optional(),
+});

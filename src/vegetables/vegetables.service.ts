@@ -1,0 +1,384 @@
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { EntityName, FilterQuery } from '@mikro-orm/core';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { Vegetable } from './vegetable.entity';
+import { Pest } from '../pests/pest.entity';
+import { Disease } from '../diseases/disease.entity';
+import {
+  CreateVegetableDto,
+  ListVegetablesQueryDto,
+  UpdateVegetableDto,
+} from './dto/vegetable.schemas';
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+@Injectable()
+export class VegetablesService {
+  constructor(private readonly em: EntityManager) {}
+
+  async list(query: ListVegetablesQueryDto) {
+    const { page, limit, q, sunExposure, waterDemand, nutrientDemand } = query;
+    const search = q?.trim();
+
+    const where: Record<string, unknown> = {};
+
+    if (sunExposure) {
+      where.sunExposure = sunExposure;
+    }
+
+    if (waterDemand) {
+      where.waterDemand = waterDemand;
+    }
+
+    if (nutrientDemand) {
+      where.nutrientDemand = nutrientDemand;
+    }
+
+    if (search) {
+      where.$or = [
+        { name: { $ilike: `%${search}%` } },
+        { latinName: { $ilike: `%${search}%` } },
+        { slug: { $ilike: `%${search}%` } },
+      ];
+    }
+
+    const [items, total] = await this.em.findAndCount(Vegetable, where, {
+      limit,
+      offset: (page - 1) * limit,
+      orderBy: { name: 'asc' },
+      fields: ['id', 'slug', 'name', 'latinName', 'imageUrl'],
+    });
+
+    return {
+      items: items.map((item) => ({
+        id: item.id,
+        slug: item.slug,
+        name: item.name,
+        latinName: item.latinName ?? null,
+        imageUrl: item.imageUrl ?? null,
+      })),
+      page,
+      limit,
+      total,
+    };
+  }
+
+  async getByIdOrSlug(idOrSlug: string) {
+    const isUuid = UUID_REGEX.test(idOrSlug);
+    const entity = await this.em.findOne(
+      Vegetable,
+      isUuid ? { id: idOrSlug } : { slug: idOrSlug },
+      {
+        populate: [
+          'commonPests',
+          'commonDiseases',
+          'goodCompanions',
+          'badCompanions',
+        ],
+      },
+    );
+
+    if (!entity) {
+      throw new NotFoundException('Vegetable not found');
+    }
+
+    return this.serializeVegetable(entity);
+  }
+
+  async create(dto: CreateVegetableDto) {
+    const existing = await this.em.findOne(Vegetable, { slug: dto.slug });
+    if (existing) {
+      throw new ConflictException('Vegetable slug already exists');
+    }
+
+    const vegetable = new Vegetable();
+    vegetable.slug = dto.slug;
+    vegetable.name = dto.name;
+    vegetable.description = dto.description;
+    vegetable.latinName = dto.latinName ?? null;
+    vegetable.imageUrl = dto.imageUrl ?? null;
+    vegetable.sunExposure = dto.sunExposure ?? null;
+    vegetable.waterDemand = dto.waterDemand ?? null;
+    vegetable.soilType = dto.soilType ?? null;
+    vegetable.soilPHMin = dto.soilPHMin ?? null;
+    vegetable.soilPHMax = dto.soilPHMax ?? null;
+    vegetable.nutrientDemand = dto.nutrientDemand ?? null;
+    vegetable.sowingMethods = dto.sowingMethods ?? null;
+    vegetable.timeToHarvestDaysMin = dto.timeToHarvestDaysMin ?? null;
+    vegetable.timeToHarvestDaysMax = dto.timeToHarvestDaysMax ?? null;
+    vegetable.successionSowing = dto.successionSowing ?? false;
+    vegetable.successionIntervalDays = dto.successionIntervalDays ?? null;
+    vegetable.harvestStartMonth = dto.harvestStartMonth ?? null;
+    vegetable.harvestEndMonth = dto.harvestEndMonth ?? null;
+    vegetable.harvestSigns = dto.harvestSigns ?? null;
+    vegetable.fertilizationStages = dto.fertilizationStages ?? null;
+
+    if (dto.commonPestIds) {
+      const pests = await this.loadEntitiesByIds(
+        Pest,
+        dto.commonPestIds,
+        'Pest',
+      );
+      vegetable.commonPests.set(pests);
+    }
+
+    if (dto.commonDiseaseIds) {
+      const diseases = await this.loadEntitiesByIds(
+        Disease,
+        dto.commonDiseaseIds,
+        'Disease',
+      );
+      vegetable.commonDiseases.set(diseases);
+    }
+
+    if (dto.goodCompanionIds) {
+      const companions = await this.loadEntitiesByIds(
+        Vegetable,
+        dto.goodCompanionIds,
+        'Vegetable',
+      );
+      vegetable.goodCompanions.set(companions);
+    }
+
+    if (dto.badCompanionIds) {
+      const companions = await this.loadEntitiesByIds(
+        Vegetable,
+        dto.badCompanionIds,
+        'Vegetable',
+      );
+      vegetable.badCompanions.set(companions);
+    }
+
+    await this.em.persistAndFlush(vegetable);
+
+    await this.em.populate(vegetable, [
+      'commonPests',
+      'commonDiseases',
+      'goodCompanions',
+      'badCompanions',
+    ]);
+
+    return this.serializeVegetable(vegetable);
+  }
+
+  async update(id: string, dto: UpdateVegetableDto) {
+    const vegetable = await this.em.findOne(
+      Vegetable,
+      { id },
+      {
+        populate: [
+          'commonPests',
+          'commonDiseases',
+          'goodCompanions',
+          'badCompanions',
+        ],
+      },
+    );
+
+    if (!vegetable) {
+      throw new NotFoundException('Vegetable not found');
+    }
+
+    if (dto.slug && dto.slug !== vegetable.slug) {
+      const existing = await this.em.findOne(Vegetable, { slug: dto.slug });
+      if (existing) {
+        throw new ConflictException('Vegetable slug already exists');
+      }
+      vegetable.slug = dto.slug;
+    }
+
+    if (dto.name !== undefined) {
+      vegetable.name = dto.name;
+    }
+
+    if (dto.description !== undefined) {
+      vegetable.description = dto.description;
+    }
+
+    if (dto.latinName !== undefined) {
+      vegetable.latinName = dto.latinName;
+    }
+
+    if (dto.imageUrl !== undefined) {
+      vegetable.imageUrl = dto.imageUrl;
+    }
+
+    if (dto.sunExposure !== undefined) {
+      vegetable.sunExposure = dto.sunExposure;
+    }
+
+    if (dto.waterDemand !== undefined) {
+      vegetable.waterDemand = dto.waterDemand;
+    }
+
+    if (dto.soilType !== undefined) {
+      vegetable.soilType = dto.soilType;
+    }
+
+    if (dto.soilPHMin !== undefined) {
+      vegetable.soilPHMin = dto.soilPHMin;
+    }
+
+    if (dto.soilPHMax !== undefined) {
+      vegetable.soilPHMax = dto.soilPHMax;
+    }
+
+    if (dto.nutrientDemand !== undefined) {
+      vegetable.nutrientDemand = dto.nutrientDemand;
+    }
+
+    if (dto.sowingMethods !== undefined) {
+      vegetable.sowingMethods = dto.sowingMethods;
+    }
+
+    if (dto.timeToHarvestDaysMin !== undefined) {
+      vegetable.timeToHarvestDaysMin = dto.timeToHarvestDaysMin;
+    }
+
+    if (dto.timeToHarvestDaysMax !== undefined) {
+      vegetable.timeToHarvestDaysMax = dto.timeToHarvestDaysMax;
+    }
+
+    if (dto.successionSowing !== undefined) {
+      vegetable.successionSowing = dto.successionSowing;
+    }
+
+    if (dto.successionIntervalDays !== undefined) {
+      vegetable.successionIntervalDays = dto.successionIntervalDays;
+    }
+
+    if (dto.harvestStartMonth !== undefined) {
+      vegetable.harvestStartMonth = dto.harvestStartMonth;
+    }
+
+    if (dto.harvestEndMonth !== undefined) {
+      vegetable.harvestEndMonth = dto.harvestEndMonth;
+    }
+
+    if (dto.harvestSigns !== undefined) {
+      vegetable.harvestSigns = dto.harvestSigns;
+    }
+
+    if (dto.fertilizationStages !== undefined) {
+      vegetable.fertilizationStages = dto.fertilizationStages;
+    }
+
+    if (dto.commonPestIds !== undefined) {
+      const pests = await this.loadEntitiesByIds(
+        Pest,
+        dto.commonPestIds,
+        'Pest',
+      );
+      vegetable.commonPests.set(pests);
+    }
+
+    if (dto.commonDiseaseIds !== undefined) {
+      const diseases = await this.loadEntitiesByIds(
+        Disease,
+        dto.commonDiseaseIds,
+        'Disease',
+      );
+      vegetable.commonDiseases.set(diseases);
+    }
+
+    if (dto.goodCompanionIds !== undefined) {
+      const companions = await this.loadEntitiesByIds(
+        Vegetable,
+        dto.goodCompanionIds,
+        'Vegetable',
+      );
+      vegetable.goodCompanions.set(companions);
+    }
+
+    if (dto.badCompanionIds !== undefined) {
+      const companions = await this.loadEntitiesByIds(
+        Vegetable,
+        dto.badCompanionIds,
+        'Vegetable',
+      );
+      vegetable.badCompanions.set(companions);
+    }
+
+    await this.em.flush();
+
+    return this.serializeVegetable(vegetable);
+  }
+
+  async remove(id: string) {
+    const vegetable = await this.em.findOne(Vegetable, { id });
+    if (!vegetable) {
+      throw new NotFoundException('Vegetable not found');
+    }
+
+    await this.em.removeAndFlush(vegetable);
+  }
+
+  private async loadEntitiesByIds<T extends { id: string }>(
+    entity: EntityName<T>,
+    ids: string[],
+    label: string,
+  ): Promise<T[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const query = { id: { $in: ids } } as unknown as FilterQuery<T>;
+    const items = await this.em.find(entity, query);
+    const foundIds = new Set(items.map((item) => item.id));
+    const missing = ids.filter((id) => !foundIds.has(id));
+
+    if (missing.length) {
+      throw new BadRequestException(
+        `Missing ${label} IDs: ${missing.join(', ')}`,
+      );
+    }
+
+    return items;
+  }
+
+  private serializeVegetable(entity: Vegetable) {
+    return {
+      id: entity.id,
+      slug: entity.slug,
+      name: entity.name,
+      latinName: entity.latinName ?? null,
+      imageUrl: entity.imageUrl ?? null,
+      description: entity.description,
+      sunExposure: entity.sunExposure ?? null,
+      waterDemand: entity.waterDemand ?? null,
+      soilType: entity.soilType ?? null,
+      soilPHMin: entity.soilPHMin ?? null,
+      soilPHMax: entity.soilPHMax ?? null,
+      nutrientDemand: entity.nutrientDemand ?? null,
+      sowingMethods: entity.sowingMethods ?? null,
+      timeToHarvestDaysMin: entity.timeToHarvestDaysMin ?? null,
+      timeToHarvestDaysMax: entity.timeToHarvestDaysMax ?? null,
+      successionSowing: entity.successionSowing,
+      successionIntervalDays: entity.successionIntervalDays ?? null,
+      harvestStartMonth: entity.harvestStartMonth ?? null,
+      harvestEndMonth: entity.harvestEndMonth ?? null,
+      harvestSigns: entity.harvestSigns ?? null,
+      fertilizationStages: entity.fertilizationStages ?? null,
+      commonPests: entity.commonPests
+        .getItems()
+        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
+      commonDiseases: entity.commonDiseases
+        .getItems()
+        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
+      goodCompanions: entity.goodCompanions
+        .getItems()
+        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
+      badCompanions: entity.badCompanions
+        .getItems()
+        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    };
+  }
+}
