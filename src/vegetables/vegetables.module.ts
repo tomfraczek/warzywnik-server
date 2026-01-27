@@ -10,5 +10,6 @@ import { Disease } from '../diseases/disease.entity';
   imports: [MikroOrmModule.forFeature([Vegetable, Pest, Disease])],
   controllers: [VegetablesController],
   providers: [VegetablesService],
+  exports: [VegetablesService],
 })
 export class VegetablesModule {}

@@ -12,6 +12,7 @@ import { VegetablesModule } from './vegetables/vegetables.module';
 import { PestsModule } from './pests/pests.module';
 import { DiseasesModule } from './diseases/diseases.module';
 import { SoilsModule } from './soils/soils.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SoilsModule } from './soils/soils.module';
     PestsModule,
     DiseasesModule,
     SoilsModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

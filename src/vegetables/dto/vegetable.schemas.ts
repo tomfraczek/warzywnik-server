@@ -2,7 +2,6 @@ import { z } from 'zod';
 import {
   DemandLevel,
   Month,
-  SoilType,
   SunExposure,
   SowingMethodType,
 } from '../../common/enums/vegetable.enums';
@@ -19,9 +18,10 @@ export type VegetableBaseDto = {
   description?: string;
   sunExposure?: SunExposure | null;
   waterDemand?: DemandLevel | null;
-  soilType?: SoilType | null;
-  soilPHMin?: number | null;
-  soilPHMax?: number | null;
+
+  // ✅ dynamiczna gleba (słownik) zamiast enuma soilType
+  soilId?: string | null;
+
   nutrientDemand?: DemandLevel | null;
   sowingMethods?: SowingMethod[];
   timeToHarvestDaysMin?: number | null;
@@ -58,7 +58,6 @@ export type ListVegetablesQueryDto = {
 const monthSchema = z.nativeEnum(Month);
 const demandLevelSchema = z.nativeEnum(DemandLevel);
 const sunExposureSchema = z.nativeEnum(SunExposure);
-const soilTypeSchema = z.nativeEnum(SoilType);
 const sowingMethodTypeSchema = z.nativeEnum(SowingMethodType);
 
 const nonNegativeNumber = z.number().min(0, 'Must be >= 0');
@@ -118,32 +117,35 @@ const fertilizationStageSchema = z.object({
   description: z.string().min(1),
 });
 
-const baseVegetableSchema = z.object({
-  slug: slugSchema.optional(),
-  name: nameSchema.optional(),
-  latinName: z.string().max(160).nullable().optional(),
-  imageUrl: z.string().max(255).nullable().optional(),
-  description: descriptionSchema.optional(),
-  sunExposure: sunExposureSchema.nullable().optional(),
-  waterDemand: demandLevelSchema.nullable().optional(),
-  soilType: soilTypeSchema.nullable().optional(),
-  soilPHMin: z.number().min(0).max(14).nullable().optional(),
-  soilPHMax: z.number().min(0).max(14).nullable().optional(),
-  nutrientDemand: demandLevelSchema.nullable().optional(),
-  sowingMethods: z.array(sowingMethodSchema).optional(),
-  timeToHarvestDaysMin: nonNegativeNumber.nullable().optional(),
-  timeToHarvestDaysMax: nonNegativeNumber.nullable().optional(),
-  successionSowing: z.boolean().optional(),
-  successionIntervalDays: nonNegativeNumber.nullable().optional(),
-  harvestStartMonth: monthSchema.nullable().optional(),
-  harvestEndMonth: monthSchema.nullable().optional(),
-  harvestSigns: z.string().min(1).nullable().optional(),
-  fertilizationStages: z.array(fertilizationStageSchema).optional(),
-  commonPestIds: z.array(z.string().uuid()).optional(),
-  commonDiseaseIds: z.array(z.string().uuid()).optional(),
-  goodCompanionIds: z.array(z.string().uuid()).optional(),
-  badCompanionIds: z.array(z.string().uuid()).optional(),
-});
+const baseVegetableSchema = z
+  .object({
+    slug: slugSchema.optional(),
+    name: nameSchema.optional(),
+    latinName: z.string().max(160).nullable().optional(),
+    imageUrl: z.string().max(255).nullable().optional(),
+    description: descriptionSchema.optional(),
+    sunExposure: sunExposureSchema.nullable().optional(),
+    waterDemand: demandLevelSchema.nullable().optional(),
+
+    // ✅ NEW
+    soilId: z.string().uuid().nullable().optional(),
+
+    nutrientDemand: demandLevelSchema.nullable().optional(),
+    sowingMethods: z.array(sowingMethodSchema).optional(),
+    timeToHarvestDaysMin: nonNegativeNumber.nullable().optional(),
+    timeToHarvestDaysMax: nonNegativeNumber.nullable().optional(),
+    successionSowing: z.boolean().optional(),
+    successionIntervalDays: nonNegativeNumber.nullable().optional(),
+    harvestStartMonth: monthSchema.nullable().optional(),
+    harvestEndMonth: monthSchema.nullable().optional(),
+    harvestSigns: z.string().min(1).nullable().optional(),
+    fertilizationStages: z.array(fertilizationStageSchema).optional(),
+    commonPestIds: z.array(z.string().uuid()).optional(),
+    commonDiseaseIds: z.array(z.string().uuid()).optional(),
+    goodCompanionIds: z.array(z.string().uuid()).optional(),
+    badCompanionIds: z.array(z.string().uuid()).optional(),
+  })
+  .strict();
 
 export const createVegetableSchema = baseVegetableSchema
   .extend({
@@ -152,22 +154,6 @@ export const createVegetableSchema = baseVegetableSchema
     description: descriptionSchema,
   })
   .superRefine((value, ctx) => {
-    if (value.soilPHMin == null && value.soilPHMax == null) {
-      // ok
-    } else if (value.soilPHMin == null || value.soilPHMax == null) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'soilPHMin and soilPHMax must be provided together',
-        path: ['soilPHMin'],
-      });
-    } else if (value.soilPHMin > value.soilPHMax) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'soilPHMin must be <= soilPHMax',
-        path: ['soilPHMin'],
-      });
-    }
-
     if (
       value.timeToHarvestDaysMin == null &&
       value.timeToHarvestDaysMax == null
@@ -203,22 +189,6 @@ export const createVegetableSchema = baseVegetableSchema
 
 export const updateVegetableSchema = baseVegetableSchema.superRefine(
   (value, ctx) => {
-    if (value.soilPHMin == null && value.soilPHMax == null) {
-      // ok
-    } else if (value.soilPHMin == null || value.soilPHMax == null) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'soilPHMin and soilPHMax must be provided together',
-        path: ['soilPHMin'],
-      });
-    } else if (value.soilPHMin > value.soilPHMax) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'soilPHMin must be <= soilPHMax',
-        path: ['soilPHMin'],
-      });
-    }
-
     if (
       value.timeToHarvestDaysMin == null &&
       value.timeToHarvestDaysMax == null

@@ -9,6 +9,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Vegetable } from './vegetable.entity';
 import { Pest } from '../pests/pest.entity';
 import { Disease } from '../diseases/disease.entity';
+import { Soil } from '../soils/soil.entity';
 import {
   CreateVegetableDto,
   ListVegetablesQueryDto,
@@ -25,17 +26,9 @@ export class VegetablesService {
 
     const where: Record<string, unknown> = {};
 
-    if (sunExposure) {
-      where.sunExposure = sunExposure;
-    }
-
-    if (waterDemand) {
-      where.waterDemand = waterDemand;
-    }
-
-    if (nutrientDemand) {
-      where.nutrientDemand = nutrientDemand;
-    }
+    if (sunExposure) where.sunExposure = sunExposure;
+    if (waterDemand) where.waterDemand = waterDemand;
+    if (nutrientDemand) where.nutrientDemand = nutrientDemand;
 
     if (search) {
       where.$or = [
@@ -49,6 +42,8 @@ export class VegetablesService {
       limit,
       offset: (page - 1) * limit,
       orderBy: { name: 'asc' },
+      // ✅ soil zwracamy tylko jako id w listingu
+      populate: ['soil'],
       fields: ['id', 'slug', 'name', 'latinName', 'imageUrl'],
     });
 
@@ -59,6 +54,7 @@ export class VegetablesService {
         name: item.name,
         latinName: item.latinName ?? null,
         imageUrl: item.imageUrl ?? null,
+        soilId: item.soil?.id ?? null,
       })),
       page,
       limit,
@@ -72,6 +68,7 @@ export class VegetablesService {
       { id },
       {
         populate: [
+          'soil',
           'commonPests',
           'commonDiseases',
           'goodCompanions',
@@ -96,9 +93,6 @@ export class VegetablesService {
     vegetable.imageUrl = dto.imageUrl ?? null;
     vegetable.sunExposure = dto.sunExposure ?? null;
     vegetable.waterDemand = dto.waterDemand ?? null;
-    vegetable.soilType = dto.soilType ?? null;
-    vegetable.soilPHMin = dto.soilPHMin ?? null;
-    vegetable.soilPHMax = dto.soilPHMax ?? null;
     vegetable.nutrientDemand = dto.nutrientDemand ?? null;
     vegetable.sowingMethods = dto.sowingMethods ?? null;
     vegetable.timeToHarvestDaysMin = dto.timeToHarvestDaysMin ?? null;
@@ -109,6 +103,11 @@ export class VegetablesService {
     vegetable.harvestEndMonth = dto.harvestEndMonth ?? null;
     vegetable.harvestSigns = dto.harvestSigns ?? null;
     vegetable.fertilizationStages = dto.fertilizationStages ?? null;
+
+    // ✅ NEW: soilId -> Soil relation
+    if (dto.soilId !== undefined) {
+      vegetable.soil = await this.resolveSoil(dto.soilId);
+    }
 
     if (dto.commonPestIds) {
       const pests = await this.loadEntitiesByIds(
@@ -149,6 +148,7 @@ export class VegetablesService {
     await this.em.persistAndFlush(vegetable);
 
     await this.em.populate(vegetable, [
+      'soil',
       'commonPests',
       'commonDiseases',
       'goodCompanions',
@@ -164,6 +164,7 @@ export class VegetablesService {
       { id },
       {
         populate: [
+          'soil',
           'commonPests',
           'commonDiseases',
           'goodCompanions',
@@ -184,80 +185,36 @@ export class VegetablesService {
       vegetable.slug = dto.slug;
     }
 
-    if (dto.name !== undefined) {
-      vegetable.name = dto.name;
-    }
-
-    if (dto.description !== undefined) {
-      vegetable.description = dto.description;
-    }
-
-    if (dto.latinName !== undefined) {
-      vegetable.latinName = dto.latinName;
-    }
-
-    if (dto.imageUrl !== undefined) {
-      vegetable.imageUrl = dto.imageUrl;
-    }
-
-    if (dto.sunExposure !== undefined) {
-      vegetable.sunExposure = dto.sunExposure;
-    }
-
-    if (dto.waterDemand !== undefined) {
-      vegetable.waterDemand = dto.waterDemand;
-    }
-
-    if (dto.soilType !== undefined) {
-      vegetable.soilType = dto.soilType;
-    }
-
-    if (dto.soilPHMin !== undefined) {
-      vegetable.soilPHMin = dto.soilPHMin;
-    }
-
-    if (dto.soilPHMax !== undefined) {
-      vegetable.soilPHMax = dto.soilPHMax;
-    }
-
-    if (dto.nutrientDemand !== undefined) {
+    if (dto.name !== undefined) vegetable.name = dto.name;
+    if (dto.description !== undefined) vegetable.description = dto.description;
+    if (dto.latinName !== undefined) vegetable.latinName = dto.latinName;
+    if (dto.imageUrl !== undefined) vegetable.imageUrl = dto.imageUrl;
+    if (dto.sunExposure !== undefined) vegetable.sunExposure = dto.sunExposure;
+    if (dto.waterDemand !== undefined) vegetable.waterDemand = dto.waterDemand;
+    if (dto.nutrientDemand !== undefined)
       vegetable.nutrientDemand = dto.nutrientDemand;
-    }
-
-    if (dto.sowingMethods !== undefined) {
+    if (dto.sowingMethods !== undefined)
       vegetable.sowingMethods = dto.sowingMethods;
-    }
-
-    if (dto.timeToHarvestDaysMin !== undefined) {
+    if (dto.timeToHarvestDaysMin !== undefined)
       vegetable.timeToHarvestDaysMin = dto.timeToHarvestDaysMin;
-    }
-
-    if (dto.timeToHarvestDaysMax !== undefined) {
+    if (dto.timeToHarvestDaysMax !== undefined)
       vegetable.timeToHarvestDaysMax = dto.timeToHarvestDaysMax;
-    }
-
-    if (dto.successionSowing !== undefined) {
+    if (dto.successionSowing !== undefined)
       vegetable.successionSowing = dto.successionSowing;
-    }
-
-    if (dto.successionIntervalDays !== undefined) {
+    if (dto.successionIntervalDays !== undefined)
       vegetable.successionIntervalDays = dto.successionIntervalDays;
-    }
-
-    if (dto.harvestStartMonth !== undefined) {
+    if (dto.harvestStartMonth !== undefined)
       vegetable.harvestStartMonth = dto.harvestStartMonth;
-    }
-
-    if (dto.harvestEndMonth !== undefined) {
+    if (dto.harvestEndMonth !== undefined)
       vegetable.harvestEndMonth = dto.harvestEndMonth;
-    }
-
-    if (dto.harvestSigns !== undefined) {
+    if (dto.harvestSigns !== undefined)
       vegetable.harvestSigns = dto.harvestSigns;
-    }
-
-    if (dto.fertilizationStages !== undefined) {
+    if (dto.fertilizationStages !== undefined)
       vegetable.fertilizationStages = dto.fertilizationStages;
+
+    // ✅ NEW
+    if (dto.soilId !== undefined) {
+      vegetable.soil = await this.resolveSoil(dto.soilId);
     }
 
     if (dto.commonPestIds !== undefined) {
@@ -310,6 +267,19 @@ export class VegetablesService {
     await this.em.removeAndFlush(vegetable);
   }
 
+  private async resolveSoil(soilId: string | null): Promise<Soil | null> {
+    if (soilId === null) {
+      return null;
+    }
+
+    const soil = await this.em.findOne(Soil, { id: soilId });
+    if (!soil) {
+      throw new BadRequestException(`Missing Soil ID: ${soilId}`);
+    }
+
+    return soil;
+  }
+
   private async loadEntitiesByIds<T extends { id: string }>(
     entity: EntityName<T>,
     ids: string[],
@@ -343,9 +313,10 @@ export class VegetablesService {
       description: entity.description,
       sunExposure: entity.sunExposure ?? null,
       waterDemand: entity.waterDemand ?? null,
-      soilType: entity.soilType ?? null,
-      soilPHMin: entity.soilPHMin ?? null,
-      soilPHMax: entity.soilPHMax ?? null,
+
+      // ✅ NEW
+      soilId: entity.soil?.id ?? null,
+
       nutrientDemand: entity.nutrientDemand ?? null,
       sowingMethods: entity.sowingMethods ?? null,
       timeToHarvestDaysMin: entity.timeToHarvestDaysMin ?? null,

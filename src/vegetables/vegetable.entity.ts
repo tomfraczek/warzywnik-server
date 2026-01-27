@@ -4,6 +4,7 @@ import {
   Enum,
   JsonType,
   ManyToMany,
+  ManyToOne,
   PrimaryKey,
   Property,
   TextType,
@@ -12,7 +13,6 @@ import {
 import {
   DemandLevel,
   Month,
-  SoilType,
   SunExposure,
 } from '../common/enums/vegetable.enums';
 import {
@@ -21,6 +21,7 @@ import {
 } from '../common/types/vegetable.types';
 import { Pest } from '../pests/pest.entity';
 import { Disease } from '../diseases/disease.entity';
+import { Soil } from '../soils/soil.entity';
 
 @Entity({ tableName: 'vegetables' })
 export class Vegetable {
@@ -49,14 +50,9 @@ export class Vegetable {
   @Enum({ items: () => DemandLevel, nullable: true })
   waterDemand?: DemandLevel | null;
 
-  @Enum({ items: () => SoilType, nullable: true })
-  soilType?: SoilType | null;
-
-  @Property({ type: 'double', nullable: true })
-  soilPHMin?: number | null;
-
-  @Property({ type: 'double', nullable: true })
-  soilPHMax?: number | null;
+  // ✅ NEW: dynamiczna gleba jako relacja (soil_id w DB)
+  @ManyToOne(() => Soil, { nullable: true })
+  soil?: Soil | null;
 
   @Enum({ items: () => DemandLevel, nullable: true })
   nutrientDemand?: DemandLevel | null;
