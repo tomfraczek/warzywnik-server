@@ -14,6 +14,9 @@ import {
   DemandLevel,
   Month,
   SunExposure,
+  VegetableFamily,
+  NutrientNeeds,
+  RotationGroup,
 } from '../common/enums/vegetable.enums';
 import {
   FertilizationStage,
@@ -22,6 +25,30 @@ import {
 import { Pest } from '../pests/pest.entity';
 import { Disease } from '../diseases/disease.entity';
 import { Soil } from '../soils/soil.entity';
+
+const VEGETABLE_FAMILY_ITEMS: string[] = [
+  'BRASSICACEAE',
+  'SOLANACEAE',
+  'APIACEAE',
+  'FABACEAE',
+  'AMARANTHACEAE',
+  'CUCURBITACEAE',
+  'ASTERACEAE',
+  'ALLIACEAE',
+  'OTHER',
+];
+
+const NUTRIENT_NEEDS_ITEMS: string[] = ['LOW', 'MEDIUM', 'HIGH'];
+
+const ROTATION_GROUP_ITEMS: string[] = [
+  'HEAVY_FEEDER',
+  'LIGHT_FEEDER',
+  'LEGUME',
+  'ROOT',
+  'LEAF',
+  'FRUITING',
+  'OTHER',
+];
 
 @Entity({ tableName: 'vegetables' })
 export class Vegetable {
@@ -56,6 +83,15 @@ export class Vegetable {
 
   @Enum({ items: () => DemandLevel, nullable: true })
   nutrientDemand?: DemandLevel | null;
+
+  @Enum({ items: VEGETABLE_FAMILY_ITEMS, default: 'OTHER' })
+  family!: VegetableFamily;
+
+  @Enum({ items: NUTRIENT_NEEDS_ITEMS, default: 'MEDIUM' })
+  nutrientNeeds!: NutrientNeeds;
+
+  @Enum({ items: ROTATION_GROUP_ITEMS, default: 'OTHER' })
+  rotationGroup!: RotationGroup;
 
   @Property({ type: JsonType, nullable: true })
   sowingMethods?: SowingMethod[] | null;

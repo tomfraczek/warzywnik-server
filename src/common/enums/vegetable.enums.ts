@@ -35,3 +35,31 @@ export enum SowingMethodType {
   DIRECT_SOW = 'direct_sow',
   SEEDLINGS = 'seedlings',
 }
+
+export enum VegetableFamily {
+  BRASSICACEAE = 'BRASSICACEAE',
+  SOLANACEAE = 'SOLANACEAE',
+  APIACEAE = 'APIACEAE',
+  FABACEAE = 'FABACEAE',
+  AMARANTHACEAE = 'AMARANTHACEAE',
+  CUCURBITACEAE = 'CUCURBITACEAE',
+  ASTERACEAE = 'ASTERACEAE',
+  ALLIACEAE = 'ALLIACEAE',
+  OTHER = 'OTHER',
+}
+
+export enum NutrientNeeds {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+}
+
+export enum RotationGroup {
+  HEAVY_FEEDER = 'HEAVY_FEEDER',
+  LIGHT_FEEDER = 'LIGHT_FEEDER',
+  LEGUME = 'LEGUME',
+  ROOT = 'ROOT',
+  LEAF = 'LEAF',
+  FRUITING = 'FRUITING',
+  OTHER = 'OTHER',
+}

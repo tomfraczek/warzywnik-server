@@ -4,6 +4,9 @@ import {
   Month,
   SunExposure,
   SowingMethodType,
+  VegetableFamily,
+  NutrientNeeds,
+  RotationGroup,
 } from '../../common/enums/vegetable.enums';
 import type {
   FertilizationStage,
@@ -23,6 +26,9 @@ export type VegetableBaseDto = {
   soilId?: string | null;
 
   nutrientDemand?: DemandLevel | null;
+  family?: VegetableFamily;
+  nutrientNeeds?: NutrientNeeds;
+  rotationGroup?: RotationGroup;
   sowingMethods?: SowingMethod[];
   timeToHarvestDaysMin?: number | null;
   timeToHarvestDaysMax?: number | null;
@@ -59,6 +65,19 @@ const monthSchema = z.nativeEnum(Month);
 const demandLevelSchema = z.nativeEnum(DemandLevel);
 const sunExposureSchema = z.nativeEnum(SunExposure);
 const sowingMethodTypeSchema = z.nativeEnum(SowingMethodType);
+
+// ✅ no manual arrays + no "as VegetableFamily" casts
+const vegetableFamilySchema = z
+  .nativeEnum(VegetableFamily)
+  .default(VegetableFamily.OTHER);
+
+const nutrientNeedsSchema = z
+  .nativeEnum(NutrientNeeds)
+  .default(NutrientNeeds.MEDIUM);
+
+const rotationGroupSchema = z
+  .nativeEnum(RotationGroup)
+  .default(RotationGroup.OTHER);
 
 const nonNegativeNumber = z.number().min(0, 'Must be >= 0');
 const slugSchema = z
@@ -131,6 +150,12 @@ const baseVegetableSchema = z
     soilId: z.string().uuid().nullable().optional(),
 
     nutrientDemand: demandLevelSchema.nullable().optional(),
+
+    // defaults are defined on schema level -> no casts needed
+    family: vegetableFamilySchema.optional(),
+    nutrientNeeds: nutrientNeedsSchema.optional(),
+    rotationGroup: rotationGroupSchema.optional(),
+
     sowingMethods: z.array(sowingMethodSchema).optional(),
     timeToHarvestDaysMin: nonNegativeNumber.nullable().optional(),
     timeToHarvestDaysMax: nonNegativeNumber.nullable().optional(),
@@ -233,4 +258,7 @@ export const listVegetablesQuerySchema = z.object({
   sunExposure: sunExposureSchema.optional(),
   waterDemand: demandLevelSchema.optional(),
   nutrientDemand: demandLevelSchema.optional(),
+  family: vegetableFamilySchema.optional(),
+  nutrientNeeds: nutrientNeedsSchema.optional(),
+  rotationGroup: rotationGroupSchema.optional(),
 });

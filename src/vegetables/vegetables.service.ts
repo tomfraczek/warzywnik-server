@@ -7,6 +7,11 @@ import {
 import { EntityName, FilterQuery } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Vegetable } from './vegetable.entity';
+import {
+  VegetableFamily,
+  NutrientNeeds,
+  RotationGroup,
+} from '../common/enums/vegetable.enums';
 import { Pest } from '../pests/pest.entity';
 import { Disease } from '../diseases/disease.entity';
 import { Soil } from '../soils/soil.entity';
@@ -44,7 +49,17 @@ export class VegetablesService {
       orderBy: { name: 'asc' },
       // ✅ soil zwracamy tylko jako id w listingu
       populate: ['soil'],
-      fields: ['id', 'slug', 'name', 'latinName', 'imageUrl'],
+      fields: [
+        'id',
+        'slug',
+        'name',
+        'latinName',
+        'imageUrl',
+        'soil',
+        'family',
+        'nutrientNeeds',
+        'rotationGroup',
+      ],
     });
 
     return {
@@ -55,6 +70,9 @@ export class VegetablesService {
         latinName: item.latinName ?? null,
         imageUrl: item.imageUrl ?? null,
         soilId: item.soil?.id ?? null,
+        family: item.family,
+        nutrientNeeds: item.nutrientNeeds,
+        rotationGroup: item.rotationGroup,
       })),
       page,
       limit,
@@ -103,6 +121,9 @@ export class VegetablesService {
     vegetable.harvestEndMonth = dto.harvestEndMonth ?? null;
     vegetable.harvestSigns = dto.harvestSigns ?? null;
     vegetable.fertilizationStages = dto.fertilizationStages ?? null;
+    vegetable.family = dto.family ?? VegetableFamily.OTHER;
+    vegetable.nutrientNeeds = dto.nutrientNeeds ?? NutrientNeeds.MEDIUM;
+    vegetable.rotationGroup = dto.rotationGroup ?? RotationGroup.OTHER;
 
     // ✅ NEW: soilId -> Soil relation
     if (dto.soilId !== undefined) {
@@ -211,6 +232,11 @@ export class VegetablesService {
       vegetable.harvestSigns = dto.harvestSigns;
     if (dto.fertilizationStages !== undefined)
       vegetable.fertilizationStages = dto.fertilizationStages;
+    if (dto.family !== undefined) vegetable.family = dto.family;
+    if (dto.nutrientNeeds !== undefined)
+      vegetable.nutrientNeeds = dto.nutrientNeeds;
+    if (dto.rotationGroup !== undefined)
+      vegetable.rotationGroup = dto.rotationGroup;
 
     // ✅ NEW
     if (dto.soilId !== undefined) {
@@ -318,6 +344,9 @@ export class VegetablesService {
       soilId: entity.soil?.id ?? null,
 
       nutrientDemand: entity.nutrientDemand ?? null,
+      family: entity.family,
+      nutrientNeeds: entity.nutrientNeeds,
+      rotationGroup: entity.rotationGroup,
       sowingMethods: entity.sowingMethods ?? null,
       timeToHarvestDaysMin: entity.timeToHarvestDaysMin ?? null,
       timeToHarvestDaysMax: entity.timeToHarvestDaysMax ?? null,
