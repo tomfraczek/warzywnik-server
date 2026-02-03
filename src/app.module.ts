@@ -17,6 +17,7 @@ import { UploadsModule } from './uploads/uploads.module';
 import { AuthModule } from './auth/auth.module';
 import { ClerkAuthGuard } from './auth/clerk-auth.guard';
 import { UsersModule } from './users/users.module';
+import { FertilizersModule } from './fertilizers/fertilizers.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UsersModule } from './users/users.module';
     UploadsModule,
     AuthModule,
     UsersModule,
+    FertilizersModule,
   ],
   controllers: [AppController],
   providers: [
