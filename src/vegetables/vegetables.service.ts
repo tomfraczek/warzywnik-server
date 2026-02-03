@@ -47,18 +47,19 @@ export class VegetablesService {
       limit,
       offset: (page - 1) * limit,
       orderBy: { name: 'asc' },
-      // ✅ soil zwracamy tylko jako id w listingu
-      populate: ['soil'],
+      populate: ['recommendedSoils'],
       fields: [
         'id',
         'slug',
         'name',
         'latinName',
         'imageUrl',
-        'soil',
+        'recommendedSoils',
         'family',
         'nutrientNeeds',
         'rotationGroup',
+        'minSoilDepthCm',
+        'dominantNutrientDemand',
       ],
     });
 
@@ -69,10 +70,14 @@ export class VegetablesService {
         name: item.name,
         latinName: item.latinName ?? null,
         imageUrl: item.imageUrl ?? null,
-        soilId: item.soil?.id ?? null,
+        recommendedSoilIds: item.recommendedSoils
+          .getItems()
+          .map((soil) => soil.id),
         family: item.family,
         nutrientNeeds: item.nutrientNeeds,
         rotationGroup: item.rotationGroup,
+        minSoilDepthCm: item.minSoilDepthCm ?? null,
+        dominantNutrientDemand: item.dominantNutrientDemand ?? null,
       })),
       page,
       limit,
@@ -86,7 +91,7 @@ export class VegetablesService {
       { id },
       {
         populate: [
-          'soil',
+          'recommendedSoils',
           'commonPests',
           'commonDiseases',
           'goodCompanions',
@@ -124,10 +129,16 @@ export class VegetablesService {
     vegetable.family = dto.family ?? VegetableFamily.OTHER;
     vegetable.nutrientNeeds = dto.nutrientNeeds ?? NutrientNeeds.MEDIUM;
     vegetable.rotationGroup = dto.rotationGroup ?? RotationGroup.OTHER;
+    vegetable.minSoilDepthCm = dto.minSoilDepthCm ?? null;
+    vegetable.dominantNutrientDemand = dto.dominantNutrientDemand ?? null;
 
-    // ✅ NEW: soilId -> Soil relation
-    if (dto.soilId !== undefined) {
-      vegetable.soil = await this.resolveSoil(dto.soilId);
+    if (dto.recommendedSoilIds !== undefined) {
+      const soils = await this.loadEntitiesByIds(
+        Soil,
+        dto.recommendedSoilIds,
+        'Soil',
+      );
+      vegetable.recommendedSoils.set(soils);
     }
 
     if (dto.commonPestIds) {
@@ -169,7 +180,7 @@ export class VegetablesService {
     await this.em.persistAndFlush(vegetable);
 
     await this.em.populate(vegetable, [
-      'soil',
+      'recommendedSoils',
       'commonPests',
       'commonDiseases',
       'goodCompanions',
@@ -185,7 +196,7 @@ export class VegetablesService {
       { id },
       {
         populate: [
-          'soil',
+          'recommendedSoils',
           'commonPests',
           'commonDiseases',
           'goodCompanions',
@@ -237,10 +248,17 @@ export class VegetablesService {
       vegetable.nutrientNeeds = dto.nutrientNeeds;
     if (dto.rotationGroup !== undefined)
       vegetable.rotationGroup = dto.rotationGroup;
-
-    // ✅ NEW
-    if (dto.soilId !== undefined) {
-      vegetable.soil = await this.resolveSoil(dto.soilId);
+    if (dto.minSoilDepthCm !== undefined)
+      vegetable.minSoilDepthCm = dto.minSoilDepthCm;
+    if (dto.dominantNutrientDemand !== undefined)
+      vegetable.dominantNutrientDemand = dto.dominantNutrientDemand;
+    if (dto.recommendedSoilIds !== undefined) {
+      const soils = await this.loadEntitiesByIds(
+        Soil,
+        dto.recommendedSoilIds,
+        'Soil',
+      );
+      vegetable.recommendedSoils.set(soils);
     }
 
     if (dto.commonPestIds !== undefined) {
@@ -293,19 +311,6 @@ export class VegetablesService {
     await this.em.removeAndFlush(vegetable);
   }
 
-  private async resolveSoil(soilId: string | null): Promise<Soil | null> {
-    if (soilId === null) {
-      return null;
-    }
-
-    const soil = await this.em.findOne(Soil, { id: soilId });
-    if (!soil) {
-      throw new BadRequestException(`Missing Soil ID: ${soilId}`);
-    }
-
-    return soil;
-  }
-
   private async loadEntitiesByIds<T extends { id: string }>(
     entity: EntityName<T>,
     ids: string[],
@@ -339,14 +344,15 @@ export class VegetablesService {
       description: entity.description,
       sunExposure: entity.sunExposure ?? null,
       waterDemand: entity.waterDemand ?? null,
-
-      // ✅ NEW
-      soilId: entity.soil?.id ?? null,
-
+      recommendedSoilIds: entity.recommendedSoils
+        .getItems()
+        .map((soil) => soil.id),
       nutrientDemand: entity.nutrientDemand ?? null,
       family: entity.family,
       nutrientNeeds: entity.nutrientNeeds,
       rotationGroup: entity.rotationGroup,
+      minSoilDepthCm: entity.minSoilDepthCm ?? null,
+      dominantNutrientDemand: entity.dominantNutrientDemand ?? null,
       sowingMethods: entity.sowingMethods ?? null,
       timeToHarvestDaysMin: entity.timeToHarvestDaysMin ?? null,
       timeToHarvestDaysMax: entity.timeToHarvestDaysMax ?? null,

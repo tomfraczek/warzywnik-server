@@ -7,6 +7,7 @@ import {
   VegetableFamily,
   NutrientNeeds,
   RotationGroup,
+  DominantNutrientDemand,
 } from '../../common/enums/vegetable.enums';
 import type {
   FertilizationStage,
@@ -22,13 +23,14 @@ export type VegetableBaseDto = {
   sunExposure?: SunExposure | null;
   waterDemand?: DemandLevel | null;
 
-  // ✅ dynamiczna gleba (słownik) zamiast enuma soilType
-  soilId?: string | null;
+  recommendedSoilIds?: string[];
 
   nutrientDemand?: DemandLevel | null;
   family?: VegetableFamily;
   nutrientNeeds?: NutrientNeeds;
   rotationGroup?: RotationGroup;
+  minSoilDepthCm?: number | null;
+  dominantNutrientDemand?: DominantNutrientDemand | null;
   sowingMethods?: SowingMethod[];
   timeToHarvestDaysMin?: number | null;
   timeToHarvestDaysMax?: number | null;
@@ -78,6 +80,10 @@ const nutrientNeedsSchema = z
 const rotationGroupSchema = z
   .nativeEnum(RotationGroup)
   .default(RotationGroup.OTHER);
+
+const dominantNutrientDemandSchema = z
+  .nativeEnum(DominantNutrientDemand)
+  .nullable();
 
 const nonNegativeNumber = z.number().min(0, 'Must be >= 0');
 const slugSchema = z
@@ -146,8 +152,7 @@ const baseVegetableSchema = z
     sunExposure: sunExposureSchema.nullable().optional(),
     waterDemand: demandLevelSchema.nullable().optional(),
 
-    // ✅ NEW
-    soilId: z.string().uuid().nullable().optional(),
+    recommendedSoilIds: z.array(z.string().uuid()).optional(),
 
     nutrientDemand: demandLevelSchema.nullable().optional(),
 
@@ -155,6 +160,8 @@ const baseVegetableSchema = z
     family: vegetableFamilySchema.optional(),
     nutrientNeeds: nutrientNeedsSchema.optional(),
     rotationGroup: rotationGroupSchema.optional(),
+    minSoilDepthCm: nonNegativeNumber.nullable().optional(),
+    dominantNutrientDemand: dominantNutrientDemandSchema.optional(),
 
     sowingMethods: z.array(sowingMethodSchema).optional(),
     timeToHarvestDaysMin: nonNegativeNumber.nullable().optional(),

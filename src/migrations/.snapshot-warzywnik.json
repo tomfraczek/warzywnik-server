@@ -291,9 +291,14 @@
           "primary": false,
           "nullable": false,
           "enumItems": [
-            "light",
-            "medium",
-            "heavy"
+            "SANDY",
+            "LOAMY",
+            "CLAY",
+            "SILT",
+            "PEAT",
+            "CHALK",
+            "COMPOST_RICH",
+            "OTHER"
           ],
           "mappedType": "enum"
         },
@@ -538,15 +543,6 @@
           ],
           "mappedType": "enum"
         },
-        "soil_id": {
-          "name": "soil_id",
-          "type": "uuid",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "mappedType": "uuid"
-        },
         "nutrient_demand": {
           "name": "nutrient_demand",
           "type": "text",
@@ -558,6 +554,85 @@
             "low",
             "medium",
             "high"
+          ],
+          "mappedType": "enum"
+        },
+        "family": {
+          "name": "family",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'OTHER'",
+          "enumItems": [
+            "BRASSICACEAE",
+            "SOLANACEAE",
+            "APIACEAE",
+            "FABACEAE",
+            "AMARANTHACEAE",
+            "CUCURBITACEAE",
+            "ASTERACEAE",
+            "ALLIACEAE",
+            "OTHER"
+          ],
+          "mappedType": "enum"
+        },
+        "nutrient_needs": {
+          "name": "nutrient_needs",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'MEDIUM'",
+          "enumItems": [
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ],
+          "mappedType": "enum"
+        },
+        "rotation_group": {
+          "name": "rotation_group",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'OTHER'",
+          "enumItems": [
+            "HEAVY_FEEDER",
+            "LIGHT_FEEDER",
+            "LEGUME",
+            "ROOT",
+            "LEAF",
+            "FRUITING",
+            "OTHER"
+          ],
+          "mappedType": "enum"
+        },
+        "min_soil_depth_cm": {
+          "name": "min_soil_depth_cm",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "dominant_nutrient_demand": {
+          "name": "dominant_nutrient_demand",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "enumItems": [
+            "N",
+            "P",
+            "K",
+            "BALANCED"
           ],
           "mappedType": "enum"
         },
@@ -719,18 +794,71 @@
         }
       ],
       "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "vegetable_id": {
+          "name": "vegetable_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "soil_id": {
+          "name": "soil_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        }
+      },
+      "name": "vegetable_recommended_soils",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "vegetable_recommended_soils_pkey",
+          "columnNames": [
+            "vegetable_id",
+            "soil_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
       "foreignKeys": {
-        "vegetables_soil_id_foreign": {
-          "constraintName": "vegetables_soil_id_foreign",
+        "vegetable_recommended_soils_vegetable_id_foreign": {
+          "constraintName": "vegetable_recommended_soils_vegetable_id_foreign",
+          "columnNames": [
+            "vegetable_id"
+          ],
+          "localTableName": "public.vegetable_recommended_soils",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.vegetables",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "vegetable_recommended_soils_soil_id_foreign": {
+          "constraintName": "vegetable_recommended_soils_soil_id_foreign",
           "columnNames": [
             "soil_id"
           ],
-          "localTableName": "public.vegetables",
+          "localTableName": "public.vegetable_recommended_soils",
           "referencedColumnNames": [
             "id"
           ],
           "referencedTableName": "public.soils",
-          "deleteRule": "set null",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },

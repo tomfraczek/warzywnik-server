@@ -26,9 +26,14 @@ export enum SunExposure {
 }
 
 export enum SoilType {
-  LIGHT = 'light',
-  MEDIUM = 'medium',
-  HEAVY = 'heavy',
+  SANDY = 'SANDY',
+  LOAMY = 'LOAMY',
+  CLAY = 'CLAY',
+  SILT = 'SILT',
+  PEAT = 'PEAT',
+  CHALK = 'CHALK',
+  COMPOST_RICH = 'COMPOST_RICH',
+  OTHER = 'OTHER',
 }
 
 export enum SowingMethodType {
@@ -62,4 +67,11 @@ export enum RotationGroup {
   LEAF = 'LEAF',
   FRUITING = 'FRUITING',
   OTHER = 'OTHER',
+}
+
+export enum DominantNutrientDemand {
+  N = 'N',
+  P = 'P',
+  K = 'K',
+  BALANCED = 'BALANCED',
 }

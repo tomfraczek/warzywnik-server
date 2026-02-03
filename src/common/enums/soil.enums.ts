@@ -1,7 +1,12 @@
 export enum SoilType {
-  LIGHT = 'light',
-  MEDIUM = 'medium',
-  HEAVY = 'heavy',
+  SANDY = 'SANDY',
+  LOAMY = 'LOAMY',
+  CLAY = 'CLAY',
+  SILT = 'SILT',
+  PEAT = 'PEAT',
+  CHALK = 'CHALK',
+  COMPOST_RICH = 'COMPOST_RICH',
+  OTHER = 'OTHER',
 }
 
 export enum SoilStructure {

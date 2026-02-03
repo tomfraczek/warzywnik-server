@@ -4,7 +4,6 @@ import {
   Enum,
   JsonType,
   ManyToMany,
-  ManyToOne,
   PrimaryKey,
   Property,
   TextType,
@@ -17,6 +16,7 @@ import {
   VegetableFamily,
   NutrientNeeds,
   RotationGroup,
+  DominantNutrientDemand,
 } from '../common/enums/vegetable.enums';
 import {
   FertilizationStage,
@@ -77,12 +77,16 @@ export class Vegetable {
   @Enum({ items: () => DemandLevel, nullable: true })
   waterDemand?: DemandLevel | null;
 
-  // ✅ NEW: dynamiczna gleba jako relacja (soil_id w DB)
-  @ManyToOne(() => Soil, { nullable: true })
-  soil?: Soil | null;
-
   @Enum({ items: () => DemandLevel, nullable: true })
   nutrientDemand?: DemandLevel | null;
+
+  @ManyToMany(() => Soil, undefined, {
+    owner: true,
+    pivotTable: 'vegetable_recommended_soils',
+    joinColumn: 'vegetable_id',
+    inverseJoinColumn: 'soil_id',
+  })
+  recommendedSoils = new Collection<Soil>(this);
 
   @Enum({ items: VEGETABLE_FAMILY_ITEMS, default: 'OTHER' })
   family!: VegetableFamily;
@@ -92,6 +96,12 @@ export class Vegetable {
 
   @Enum({ items: ROTATION_GROUP_ITEMS, default: 'OTHER' })
   rotationGroup!: RotationGroup;
+
+  @Property({ type: 'int', nullable: true })
+  minSoilDepthCm?: number | null;
+
+  @Enum({ items: () => DominantNutrientDemand, nullable: true })
+  dominantNutrientDemand?: DominantNutrientDemand | null;
 
   @Property({ type: JsonType, nullable: true })
   sowingMethods?: SowingMethod[] | null;
