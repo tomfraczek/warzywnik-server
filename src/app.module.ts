@@ -16,6 +16,7 @@ import { SoilsModule } from './soils/soils.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { AuthModule } from './auth/auth.module';
 import { ClerkAuthGuard } from './auth/clerk-auth.guard';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ClerkAuthGuard } from './auth/clerk-auth.guard';
     SoilsModule,
     UploadsModule,
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [
