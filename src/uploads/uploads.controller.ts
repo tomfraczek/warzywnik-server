@@ -8,13 +8,11 @@ import {
   ParseUUIDPipe,
   Post,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { AdminTokenGuard } from '../auth/admin-token.guard';
 import { R2StorageService } from './r2-storage.service';
 import { Vegetable } from '../vegetables/vegetable.entity';
 import { VegetablesService } from '../vegetables/vegetables.service';
@@ -29,7 +27,6 @@ const mimeToExtension: Record<string, string> = {
 };
 
 @Controller('v1/uploads')
-@UseGuards(AdminTokenGuard)
 export class UploadsController {
   constructor(
     private readonly em: EntityManager,

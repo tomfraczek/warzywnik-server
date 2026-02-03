@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import mikroOrmOptions from './common/config/mikro-orm.config';
@@ -13,6 +14,8 @@ import { PestsModule } from './pests/pests.module';
 import { DiseasesModule } from './diseases/diseases.module';
 import { SoilsModule } from './soils/soils.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { AuthModule } from './auth/auth.module';
+import { ClerkAuthGuard } from './auth/clerk-auth.guard';
 
 @Module({
   imports: [
@@ -23,8 +26,15 @@ import { UploadsModule } from './uploads/uploads.module';
     DiseasesModule,
     SoilsModule,
     UploadsModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ClerkAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

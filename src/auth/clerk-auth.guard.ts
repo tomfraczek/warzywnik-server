@@ -6,38 +6,85 @@ import {
 } from '@nestjs/common';
 import { verifyToken } from '@clerk/backend';
 
-/**
- * Guard that verifies Clerk JWT from the Authorization: Bearer <token> header.
- * On success, attaches { auth: { userId: clerkUserId } } to the request.
- */
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
+  private parseCookies(cookieHeader?: string): Record<string, string> {
+    if (!cookieHeader) return {};
+    return cookieHeader
+      .split(';')
+      .reduce<Record<string, string>>((acc, part) => {
+        const [rawKey, ...rest] = part.trim().split('=');
+        if (!rawKey) return acc;
+        acc[rawKey] = decodeURIComponent(rest.join('=') || '');
+        return acc;
+      }, {});
+  }
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<{
       headers: Record<string, string | undefined>;
-      auth?: { userId: string };
+      auth?: { sub: string; sid?: string; azp?: string; iss?: string };
     }>();
 
     const authHeader = req.headers['authorization'];
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException(
-        'Missing or invalid Authorization header',
-      );
+    const bearerToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.slice('Bearer '.length).trim()
+      : undefined;
+
+    const cookies = this.parseCookies(req.headers['cookie']);
+    const token = bearerToken || cookies['__session'];
+
+    if (!token) {
+      throw new UnauthorizedException('Missing Clerk token');
     }
 
-    const token = authHeader.slice('Bearer '.length);
+    const secretKey = process.env.CLERK_SECRET_KEY;
+    if (!secretKey) {
+      // to jest błąd konfiguracji środowiska, a nie "invalid token"
+      throw new UnauthorizedException('Missing CLERK_SECRET_KEY in env');
+    }
+
+    const authorizedParties = process.env.CLERK_AUTHORIZED_PARTIES
+      ? process.env.CLERK_AUTHORIZED_PARTIES.split(',')
+          .map((value) => value.trim())
+          .filter(Boolean)
+      : undefined;
+
+    // Uwaga: PEM w .env często ma "\n" zamiast prawdziwych newline.
+    const jwtKey = process.env.CLERK_JWT_KEY
+      ? process.env.CLERK_JWT_KEY.replace(/\\n/g, '\n')
+      : undefined;
 
     try {
       const payload = await verifyToken(token, {
-        secretKey: process.env.CLERK_SECRET_KEY as string,
+        secretKey,
+        jwtKey,
+        authorizedParties,
       });
-      // Clerk places the user identifier in the `sub` claim
-      (req as { auth?: { userId?: string } }).auth = {
-        userId: payload.sub,
+
+      (
+        req as {
+          auth?: { sub?: string; sid?: string; azp?: string; iss?: string };
+        }
+      ).auth = {
+        sub: payload.sub,
+        sid: payload.sid,
+        azp: payload.azp,
+        iss: payload.iss,
       };
+
       return true;
-    } catch {
-      throw new UnauthorizedException('Invalid Clerk token');
+    } catch (error) {
+      // KLUCZOWE: zobaczmy prawdziwą przyczynę
+      // eslint-disable-next-line no-console
+      console.error('Clerk verifyToken error:', error);
+
+      // Wystaw bardziej informacyjny message w odpowiedzi na czas debug
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Invalid Clerk token';
+      throw new UnauthorizedException(message);
     }
   }
 }
