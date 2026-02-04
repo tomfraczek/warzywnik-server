@@ -59,6 +59,7 @@ export class VegetablesService {
         'nutrientNeeds',
         'rotationGroup',
         'minSoilDepthCm',
+        'requiredSoilDepthCm',
         'dominantNutrientDemand',
       ],
     });
@@ -77,6 +78,7 @@ export class VegetablesService {
         nutrientNeeds: item.nutrientNeeds,
         rotationGroup: item.rotationGroup,
         minSoilDepthCm: item.minSoilDepthCm ?? null,
+        requiredSoilDepthCm: item.requiredSoilDepthCm ?? null,
         dominantNutrientDemand: item.dominantNutrientDemand ?? null,
       })),
       page,
@@ -130,6 +132,7 @@ export class VegetablesService {
     vegetable.nutrientNeeds = dto.nutrientNeeds ?? NutrientNeeds.MEDIUM;
     vegetable.rotationGroup = dto.rotationGroup ?? RotationGroup.OTHER;
     vegetable.minSoilDepthCm = dto.minSoilDepthCm ?? null;
+    vegetable.requiredSoilDepthCm = dto.requiredSoilDepthCm ?? null;
     vegetable.dominantNutrientDemand = dto.dominantNutrientDemand ?? null;
 
     if (dto.recommendedSoilIds !== undefined) {
@@ -250,6 +253,8 @@ export class VegetablesService {
       vegetable.rotationGroup = dto.rotationGroup;
     if (dto.minSoilDepthCm !== undefined)
       vegetable.minSoilDepthCm = dto.minSoilDepthCm;
+    if (dto.requiredSoilDepthCm !== undefined)
+      vegetable.requiredSoilDepthCm = dto.requiredSoilDepthCm;
     if (dto.dominantNutrientDemand !== undefined)
       vegetable.dominantNutrientDemand = dto.dominantNutrientDemand;
     if (dto.recommendedSoilIds !== undefined) {
@@ -352,6 +357,7 @@ export class VegetablesService {
       nutrientNeeds: entity.nutrientNeeds,
       rotationGroup: entity.rotationGroup,
       minSoilDepthCm: entity.minSoilDepthCm ?? null,
+      requiredSoilDepthCm: entity.requiredSoilDepthCm ?? null,
       dominantNutrientDemand: entity.dominantNutrientDemand ?? null,
       sowingMethods: entity.sowingMethods ?? null,
       timeToHarvestDaysMin: entity.timeToHarvestDaysMin ?? null,

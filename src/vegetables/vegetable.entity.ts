@@ -100,6 +100,9 @@ export class Vegetable {
   @Property({ type: 'int', nullable: true })
   minSoilDepthCm?: number | null;
 
+  @Property({ type: 'int', nullable: true })
+  requiredSoilDepthCm?: number | null;
+
   @Enum({ items: () => DominantNutrientDemand, nullable: true })
   dominantNutrientDemand?: DominantNutrientDemand | null;
 

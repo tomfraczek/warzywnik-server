@@ -1,0 +1,7 @@
+export enum PlantingStatus {
+  PLANNED = 'PLANNED',
+  ACTIVE = 'ACTIVE',
+  HARVESTING = 'HARVESTING',
+  FINISHED = 'FINISHED',
+  CANCELLED = 'CANCELLED',
+}
