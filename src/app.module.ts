@@ -18,6 +18,7 @@ import { AuthModule } from './auth/auth.module';
 import { ClerkAuthGuard } from './auth/clerk-auth.guard';
 import { UsersModule } from './users/users.module';
 import { FertilizersModule } from './fertilizers/fertilizers.module';
+import { WarningRulesModule } from './warning-rules/warning-rules.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { FertilizersModule } from './fertilizers/fertilizers.module';
     AuthModule,
     UsersModule,
     FertilizersModule,
+    WarningRulesModule,
   ],
   controllers: [AppController],
   providers: [
