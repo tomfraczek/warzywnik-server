@@ -133,6 +133,16 @@ export class ArticlesService {
     return this.serializeDetail(entity);
   }
 
+  async getById(id: string) {
+    const entity = await this.em.findOne(Article, { id });
+
+    if (!entity) {
+      throw new NotFoundException('Article not found');
+    }
+
+    return this.serializeDetail(entity);
+  }
+
   async create(dto: CreateArticleDto) {
     const existing = await this.em.findOne(Article, { slug: dto.slug });
     if (existing) {

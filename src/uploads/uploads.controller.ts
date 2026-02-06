@@ -16,6 +16,8 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { R2StorageService } from './r2-storage.service';
 import { Vegetable } from '../vegetables/vegetable.entity';
 import { VegetablesService } from '../vegetables/vegetables.service';
+import { Article } from '../articles/article.entity';
+import { ArticlesService } from '../articles/articles.service';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
@@ -32,6 +34,7 @@ export class UploadsController {
     private readonly em: EntityManager,
     private readonly r2Storage: R2StorageService,
     private readonly vegetablesService: VegetablesService,
+    private readonly articlesService: ArticlesService,
   ) {}
 
   @Post('vegetables/:id/image')
@@ -89,21 +92,105 @@ export class UploadsController {
 
     const imageUrl = vegetable.imageUrl;
     if (imageUrl) {
-      const baseUrl = this.r2Storage.getPublicBaseUrl();
-      if (imageUrl.startsWith(baseUrl)) {
-        try {
-          const parsed = new URL(imageUrl);
-          const key = parsed.pathname.replace(/^\/+/, '');
-          if (key) {
-            await this.r2Storage.deleteObject({ key });
-          }
-        } catch {
-          // ignore invalid URL
-        }
+      const key = this.extractKeyFromPublicUrl(imageUrl);
+      if (!key) {
+        throw new BadRequestException('Invalid image URL');
       }
+
+      if (!key.startsWith('vegetables/')) {
+        throw new BadRequestException('Invalid vegetable image key');
+      }
+
+      await this.r2Storage.deleteObject({ key });
     }
 
     vegetable.imageUrl = null;
     await this.em.flush();
+  }
+
+  @Post('articles/:id/cover')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: MAX_FILE_SIZE },
+      fileFilter: (_req, file, cb) => {
+        if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
+          return cb(new BadRequestException('Unsupported file type'), false);
+        }
+        return cb(null, true);
+      },
+    }),
+  )
+  async uploadArticleCover(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    const article = await this.em.findOne(Article, { id });
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    const ext = mimeToExtension[file.mimetype];
+    if (!ext) {
+      throw new BadRequestException('Unsupported file type');
+    }
+
+    const key = `articles/${id}.${ext}`;
+
+    await this.r2Storage.uploadObject({
+      key,
+      body: file.buffer,
+      contentType: file.mimetype,
+    });
+
+    article.coverImageUrl = this.r2Storage.getPublicUrl(key);
+    await this.em.flush();
+
+    return this.articlesService.getById(id);
+  }
+
+  @Delete('articles/:id/cover')
+  @HttpCode(204)
+  async deleteArticleCover(@Param('id', new ParseUUIDPipe()) id: string) {
+    const article = await this.em.findOne(Article, { id });
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    const imageUrl = article.coverImageUrl;
+    if (imageUrl) {
+      const key = this.extractKeyFromPublicUrl(imageUrl);
+      if (!key) {
+        throw new BadRequestException('Invalid cover image URL');
+      }
+
+      if (!key.startsWith('articles/')) {
+        throw new BadRequestException('Invalid article image key');
+      }
+
+      await this.r2Storage.deleteObject({ key });
+    }
+
+    article.coverImageUrl = null;
+    await this.em.flush();
+  }
+
+  private extractKeyFromPublicUrl(url: string): string | null {
+    const baseUrl = this.r2Storage.getPublicBaseUrl();
+    if (!url.startsWith(baseUrl)) {
+      return null;
+    }
+
+    try {
+      const parsed = new URL(url);
+      const key = parsed.pathname.replace(/^\/+/, '');
+      return key.length ? key : null;
+    } catch {
+      return null;
+    }
   }
 }
