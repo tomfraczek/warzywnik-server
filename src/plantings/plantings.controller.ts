@@ -10,7 +10,6 @@ import {
   Post,
   Query,
   Req,
-  UsePipes,
 } from '@nestjs/common';
 import { PlantingsService } from './plantings.service';
 import {
@@ -29,10 +28,10 @@ export class PlantingsController {
   constructor(private readonly plantingsService: PlantingsService) {}
 
   @Get()
-  @UsePipes(new ZodValidationPipe(listPlantingsQuerySchema))
   list(
     @Req() req: { userEntity?: User },
-    @Query() query: ListPlantingsQueryDto,
+    @Query(new ZodValidationPipe(listPlantingsQuerySchema))
+    query: ListPlantingsQueryDto,
   ) {
     return this.plantingsService.list(req.userEntity as User, query);
   }
@@ -43,17 +42,20 @@ export class PlantingsController {
   }
 
   @Post()
-  @UsePipes(new ZodValidationPipe(createPlantingSchema))
-  create(@Req() req: { userEntity?: User }, @Body() body: CreatePlantingDto) {
+  create(
+    @Req() req: { userEntity?: User },
+    @Body(new ZodValidationPipe(createPlantingSchema))
+    body: CreatePlantingDto,
+  ) {
     return this.plantingsService.create(req.userEntity as User, body);
   }
 
   @Patch(':id')
-  @UsePipes(new ZodValidationPipe(updatePlantingSchema))
   update(
     @Req() req: { userEntity?: User },
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() body: UpdatePlantingDto,
+    @Body(new ZodValidationPipe(updatePlantingSchema))
+    body: UpdatePlantingDto,
   ) {
     return this.plantingsService.update(req.userEntity as User, id, body);
   }

@@ -4,12 +4,28 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { verifyToken } from '@clerk/backend';
 import { UsersService } from '../users/users.service';
+import { IS_PUBLIC_KEY } from './public.decorator';
+
+const toErrorMessage = (err: unknown): string => {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string') return err;
+
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return 'Unknown error';
+  }
+};
 
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly reflector: Reflector,
+  ) {}
 
   private parseCookies(cookieHeader?: string): Record<string, string> {
     if (!cookieHeader) return {};
@@ -24,6 +40,15 @@ export class ClerkAuthGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      return true;
+    }
+
     const req = context.switchToHttp().getRequest<{
       headers: Record<string, string | undefined>;
       auth?: { sub: string; sid?: string; azp?: string; iss?: string };
@@ -66,11 +91,7 @@ export class ClerkAuthGuard implements CanActivate {
         authorizedParties,
       });
 
-      (
-        req as {
-          auth?: { sub?: string; sid?: string; azp?: string; iss?: string };
-        }
-      ).auth = {
+      req.auth = {
         sub: payload.sub,
         sid: payload.sid,
         azp: payload.azp,
@@ -79,25 +100,19 @@ export class ClerkAuthGuard implements CanActivate {
 
       const email = (payload as { email?: string }).email;
       const displayName = (payload as { name?: string }).name;
+
       const user = await this.usersService.getOrCreateFromClerkSub({
         clerkUserId: payload.sub,
         email: email ?? null,
         displayName: displayName ?? null,
       });
 
-      (req as { userEntity?: unknown }).userEntity = user;
+      req.userEntity = user;
 
       return true;
-    } catch (error) {
-      // KLUCZOWE: zobaczmy prawdziwą przyczynę
-      console.error('Clerk verifyToken error:', error);
-
-      // Wystaw bardziej informacyjny message w odpowiedzi na czas debug
-      const message =
-        error instanceof Error && error.message
-          ? error.message
-          : 'Invalid Clerk token';
-      throw new UnauthorizedException(message);
+    } catch (err: unknown) {
+      console.error('Clerk verifyToken error:', toErrorMessage(err));
+      throw new UnauthorizedException(toErrorMessage(err));
     }
   }
 }

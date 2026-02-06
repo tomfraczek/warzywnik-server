@@ -21,6 +21,7 @@ import { FertilizersModule } from './fertilizers/fertilizers.module';
 import { WarningRulesModule } from './warning-rules/warning-rules.module';
 import { BedsModule } from './beds/beds.module';
 import { PlantingsModule } from './plantings/plantings.module';
+import { ArticlesModule } from './articles/articles.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { PlantingsModule } from './plantings/plantings.module';
     WarningRulesModule,
     BedsModule,
     PlantingsModule,
+    ArticlesModule,
   ],
   controllers: [AppController],
   providers: [
