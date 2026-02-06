@@ -89,7 +89,8 @@ export class R2StorageService {
       }),
     );
 
-    const items: Array<{ key: string; size?: number; lastModified?: Date }> = [];
+    const items: Array<{ key: string; size?: number; lastModified?: Date }> =
+      [];
 
     for (const item of response.Contents ?? []) {
       if (!item.Key) {
@@ -106,7 +107,7 @@ export class R2StorageService {
     return {
       items,
       nextCursor: response.IsTruncated
-        ? response.NextContinuationToken ?? undefined
+        ? (response.NextContinuationToken ?? undefined)
         : undefined,
     };
   }
