@@ -37,7 +37,8 @@ const mikroOrmOptions: MikroOrmModuleSyncOptions = {
 
   extensions: [Migrator],
 
-  driverOptions: { connection: { ssl: false } },
+  driverOptions: { connection: { ssl: { rejectUnauthorized: false } } },
+
   debug: true,
 };
 
