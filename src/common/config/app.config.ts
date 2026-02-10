@@ -16,6 +16,7 @@ export const getConfig = (): AppConfig =>
       name: process.env.DB_NAME,
       port: parseInt(process.env.DB_PORT ?? `5432`, 10),
       host: process.env.DB_HOST,
+      ssl: process.env.DB_SSL === 'true',
     },
     // auth0: {
     //   domain: process.env.AUTH0_DOMAIN,

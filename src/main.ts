@@ -4,6 +4,7 @@ import { join } from 'path';
 import * as express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { MikroORM } from '@mikro-orm/core';
 
 type RequestWithRawBody = Request & { rawBody?: string };
 
@@ -58,10 +59,10 @@ async function bootstrap() {
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
   /**
-   * CORS – frontend (Next) na 3000
+   * CORS – docelowo z env, lokalnie localhost
    */
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
@@ -78,6 +79,12 @@ async function bootstrap() {
 
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, swaggerDocument);
+
+  /**
+   * ✅ MIGRACJE (PRZED LISTEN)
+   */
+  const orm = app.get(MikroORM);
+  await orm.getMigrator().up();
 
   /**
    * 🚀 START

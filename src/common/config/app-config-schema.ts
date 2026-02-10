@@ -10,6 +10,7 @@ export const appConfigSchema = z.object({
     name: z.string().trim().min(1),
     port: z.number().int().positive(),
     host: z.string().trim().min(1),
+    ssl: z.boolean().default(false),
   }),
   // clerk: z.object({
   //   domain: z.string().min(1),
