@@ -35,8 +35,9 @@ function getCaCertificateFromEnv(): string | undefined {
   return pem + '\n';
 }
 
-const isProduction = process.env.NODE_ENV === 'production';
-const isStaging = process.env.NODE_ENV === 'staging';
+const appEnv = process.env.APP_ENV ?? process.env.NODE_ENV;
+const isProduction = appEnv === 'production';
+const isStaging = appEnv === 'staging';
 const useSsl = isProduction || isStaging || Boolean(db.ssl);
 
 const caCertificate = useSsl ? getCaCertificateFromEnv() : undefined;

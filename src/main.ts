@@ -43,6 +43,7 @@ async function bootstrap() {
           console.log('Raw body (first 300 chars):');
           console.log((r.rawBody ?? '').slice(0, 300));
           console.log('Error:', err);
+          console.log('ENV:', process.env.NODE_ENV);
           console.log('==================================================');
         }
 
@@ -92,7 +93,9 @@ async function bootstrap() {
   const port = Number(process.env.PORT ?? 4000);
   await app.listen(port, '0.0.0.0');
 
-  console.log(`[BOOT] pid=${process.pid} port=${port}`);
+  console.log(
+    `[BOOT] pid=${process.pid} port=${port} env=${process.env.APP_ENV}`,
+  );
 }
 
 void bootstrap();
