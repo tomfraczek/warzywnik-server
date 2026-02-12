@@ -22,6 +22,7 @@ import { WarningRulesModule } from './warning-rules/warning-rules.module';
 import { BedsModule } from './beds/beds.module';
 import { PlantingsModule } from './plantings/plantings.module';
 import { ArticlesModule } from './articles/articles.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ArticlesModule } from './articles/articles.module';
     BedsModule,
     PlantingsModule,
     ArticlesModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [
