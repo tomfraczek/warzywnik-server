@@ -6,7 +6,16 @@ import {
   Property,
   Unique,
 } from '@mikro-orm/core';
-import { Units, UserSubscription } from '../common/enums/user.enums';
+import {
+  AreaUnit,
+  Language,
+  LocationMode,
+  PrecipitationUnit,
+  TemperatureUnit,
+  ThemeMode,
+  Units,
+  UserSubscription,
+} from '../common/enums/user.enums';
 
 @Entity({ tableName: 'users' })
 @Index({ properties: ['isAdmin'] })
@@ -25,6 +34,39 @@ export class User {
 
   @Property({ length: 255, nullable: true })
   displayName?: string | null;
+
+  @Property({ length: 32, nullable: true })
+  avatarId?: string | null;
+
+  @Enum({ items: () => ThemeMode, default: ThemeMode.SYSTEM })
+  themeMode: ThemeMode = ThemeMode.SYSTEM;
+
+  @Enum({ items: () => Language, default: Language.SYSTEM })
+  language: Language = Language.SYSTEM;
+
+  @Enum({ items: () => TemperatureUnit, default: TemperatureUnit.C })
+  temperatureUnit: TemperatureUnit = TemperatureUnit.C;
+
+  @Enum({ items: () => PrecipitationUnit, default: PrecipitationUnit.MM })
+  precipitationUnit: PrecipitationUnit = PrecipitationUnit.MM;
+
+  @Enum({ items: () => AreaUnit, default: AreaUnit.M2 })
+  areaUnit: AreaUnit = AreaUnit.M2;
+
+  @Enum({ items: () => LocationMode, default: LocationMode.NONE })
+  locationMode: LocationMode = LocationMode.NONE;
+
+  @Property({ length: 200, nullable: true })
+  locationLabel?: string | null;
+
+  @Property({ type: 'double', nullable: true })
+  locationLat?: number | null;
+
+  @Property({ type: 'double', nullable: true })
+  locationLon?: number | null;
+
+  @Property({ type: Date, nullable: true })
+  locationUpdatedAt?: Date | null;
 
   @Property({ type: 'boolean', default: false })
   isAdmin: boolean = false;
