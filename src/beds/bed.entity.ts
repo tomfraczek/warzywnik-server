@@ -61,7 +61,6 @@ export class Bed {
   @Property({ type: 'boolean', default: true })
   isActive: boolean = true;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
   @OneToMany(() => Planting, (planting: Planting) => planting.bed)
   plantings = new Collection<Planting>(this);
 

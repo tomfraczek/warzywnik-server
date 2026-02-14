@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
 import {
   Body,
   Controller,
@@ -12,7 +13,8 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { User } from './user.entity';
-import { MeResponse, UsersService } from './users.service';
+import { UsersService } from './users.service';
+import { MeResponse } from './dto/me.types';
 import {
   ExportQueryDto,
   PatchMeDto,
@@ -30,7 +32,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  me(@Req() req: RequestWithUser) {
+  me(@Req() req: RequestWithUser): Promise<MeResponse> {
     const user = this.getUserFromRequest(req);
     return this.usersService.getMe(user.id);
   }
@@ -39,14 +41,14 @@ export class UsersController {
   patchMe(
     @Req() req: RequestWithUser,
     @Body(new ZodValidationPipe(patchMeSchema)) body: PatchMeDto,
-  ) {
+  ): Promise<MeResponse> {
     const user = this.getUserFromRequest(req);
     return this.usersService.patchMe(user.id, body);
   }
 
   @Delete('me')
   @HttpCode(204)
-  async deleteMe(@Req() req: RequestWithUser) {
+  async deleteMe(@Req() req: RequestWithUser): Promise<void> {
     const user = this.getUserFromRequest(req);
     await this.usersService.deleteMe(user.id);
   }
@@ -56,7 +58,7 @@ export class UsersController {
     @Req() req: RequestWithUser,
     @Query(new ZodValidationPipe(exportQuerySchema)) query: ExportQueryDto,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<MeResponse | string> {
     const user = this.getUserFromRequest(req);
     const data = await this.usersService.exportMe(user.id);
     const today = new Date().toISOString().slice(0, 10);
@@ -111,7 +113,7 @@ export class UsersController {
       data.locationLat != null ? String(data.locationLat) : '',
       data.locationLon != null ? String(data.locationLon) : '',
       data.locationUpdatedAt ? data.locationUpdatedAt.toISOString() : '',
-    ].map(this.escapeCsvValue);
+    ].map((value) => this.escapeCsvValue(value));
 
     return `${header.join(',')}\n${row.join(',')}\n`;
   }

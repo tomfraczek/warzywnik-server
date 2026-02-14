@@ -6,33 +6,10 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from './user.entity';
 import { PatchMeDto } from './dto/me.schemas';
-import {
-  AreaUnit,
-  Language,
-  LocationMode,
-  PrecipitationUnit,
-  TemperatureUnit,
-  ThemeMode,
-} from '../common/enums/user.enums';
+import { LocationMode } from '../common/enums/user.enums';
+import { MeResponse } from './dto/me.types';
 import { Bed } from '../beds/bed.entity';
 import { Planting } from '../plantings/planting.entity';
-
-export type MeResponse = {
-  id: string;
-  email: string | null;
-  displayName: string | null;
-  avatarId: string | null;
-  themeMode: ThemeMode;
-  language: Language;
-  temperatureUnit: TemperatureUnit;
-  precipitationUnit: PrecipitationUnit;
-  areaUnit: AreaUnit;
-  locationMode: LocationMode;
-  locationLabel: string | null;
-  locationLat: number | null;
-  locationLon: number | null;
-  locationUpdatedAt: Date | null;
-};
 
 @Injectable()
 export class UsersService {
