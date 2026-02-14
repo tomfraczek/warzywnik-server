@@ -9,7 +9,6 @@ import {
   Patch,
   Post,
   Query,
-  UsePipes,
 } from '@nestjs/common';
 import { PestsService } from './pests.service';
 import {
@@ -27,8 +26,10 @@ export class PestsController {
   constructor(private readonly pestsService: PestsService) {}
 
   @Get()
-  @UsePipes(new ZodValidationPipe(listPestsQuerySchema))
-  list(@Query() query: ListPestsQueryDto) {
+  list(
+    @Query(new ZodValidationPipe(listPestsQuerySchema))
+    query: ListPestsQueryDto,
+  ) {
     return this.pestsService.list(query);
   }
 
@@ -38,16 +39,14 @@ export class PestsController {
   }
 
   @Post()
-  @UsePipes(new ZodValidationPipe(createPestSchema))
-  create(@Body() body: CreatePestDto) {
+  create(@Body(new ZodValidationPipe(createPestSchema)) body: CreatePestDto) {
     return this.pestsService.create(body);
   }
 
   @Patch(':id')
-  @UsePipes(new ZodValidationPipe(updatePestSchema))
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() body: UpdatePestDto,
+    @Body(new ZodValidationPipe(updatePestSchema)) body: UpdatePestDto,
   ) {
     return this.pestsService.update(id, body);
   }

@@ -9,7 +9,6 @@ import {
   Patch,
   Post,
   Query,
-  UsePipes,
 } from '@nestjs/common';
 import { DiseasesService } from './diseases.service';
 import {
@@ -27,8 +26,10 @@ export class DiseasesController {
   constructor(private readonly diseasesService: DiseasesService) {}
 
   @Get()
-  @UsePipes(new ZodValidationPipe(listDiseasesQuerySchema))
-  list(@Query() query: ListDiseasesQueryDto) {
+  list(
+    @Query(new ZodValidationPipe(listDiseasesQuerySchema))
+    query: ListDiseasesQueryDto,
+  ) {
     return this.diseasesService.list(query);
   }
 
@@ -38,16 +39,16 @@ export class DiseasesController {
   }
 
   @Post()
-  @UsePipes(new ZodValidationPipe(createDiseaseSchema))
-  create(@Body() body: CreateDiseaseDto) {
+  create(
+    @Body(new ZodValidationPipe(createDiseaseSchema)) body: CreateDiseaseDto,
+  ) {
     return this.diseasesService.create(body);
   }
 
   @Patch(':id')
-  @UsePipes(new ZodValidationPipe(updateDiseaseSchema))
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() body: UpdateDiseaseDto,
+    @Body(new ZodValidationPipe(updateDiseaseSchema)) body: UpdateDiseaseDto,
   ) {
     return this.diseasesService.update(id, body);
   }

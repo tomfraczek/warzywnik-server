@@ -9,7 +9,6 @@ import {
   Patch,
   Post,
   Query,
-  UsePipes,
 } from '@nestjs/common';
 import { WarningRulesService } from './warning-rules.service';
 import {
@@ -27,8 +26,10 @@ export class WarningRulesController {
   constructor(private readonly warningRulesService: WarningRulesService) {}
 
   @Get()
-  @UsePipes(new ZodValidationPipe(listWarningRulesQuerySchema))
-  list(@Query() query: ListWarningRulesQueryDto) {
+  list(
+    @Query(new ZodValidationPipe(listWarningRulesQuerySchema))
+    query: ListWarningRulesQueryDto,
+  ) {
     return this.warningRulesService.list(query);
   }
 
@@ -38,16 +39,18 @@ export class WarningRulesController {
   }
 
   @Post()
-  @UsePipes(new ZodValidationPipe(createWarningRuleSchema))
-  create(@Body() body: CreateWarningRuleDto) {
+  create(
+    @Body(new ZodValidationPipe(createWarningRuleSchema))
+    body: CreateWarningRuleDto,
+  ) {
     return this.warningRulesService.create(body);
   }
 
   @Patch(':id')
-  @UsePipes(new ZodValidationPipe(updateWarningRuleSchema))
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() body: UpdateWarningRuleDto,
+    @Body(new ZodValidationPipe(updateWarningRuleSchema))
+    body: UpdateWarningRuleDto,
   ) {
     return this.warningRulesService.update(id, body);
   }

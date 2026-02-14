@@ -10,7 +10,6 @@ import {
   Post,
   Query,
   Req,
-  UsePipes,
 } from '@nestjs/common';
 import { BedsService } from './beds.service';
 import {
@@ -29,8 +28,11 @@ export class BedsController {
   constructor(private readonly bedsService: BedsService) {}
 
   @Get()
-  @UsePipes(new ZodValidationPipe(listBedsQuerySchema))
-  list(@Req() req: { userEntity?: User }, @Query() query: ListBedsQueryDto) {
+  list(
+    @Req() req: { userEntity?: User },
+    @Query(new ZodValidationPipe(listBedsQuerySchema))
+    query: ListBedsQueryDto,
+  ) {
     return this.bedsService.list(req.userEntity as User, query);
   }
 
@@ -40,17 +42,18 @@ export class BedsController {
   }
 
   @Post()
-  @UsePipes(new ZodValidationPipe(createBedSchema))
-  create(@Req() req: { userEntity?: User }, @Body() body: CreateBedDto) {
+  create(
+    @Req() req: { userEntity?: User },
+    @Body(new ZodValidationPipe(createBedSchema)) body: CreateBedDto,
+  ) {
     return this.bedsService.create(req.userEntity as User, body);
   }
 
   @Patch(':id')
-  @UsePipes(new ZodValidationPipe(updateBedSchema))
   update(
     @Req() req: { userEntity?: User },
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() body: UpdateBedDto,
+    @Body(new ZodValidationPipe(updateBedSchema)) body: UpdateBedDto,
   ) {
     return this.bedsService.update(req.userEntity as User, id, body);
   }
