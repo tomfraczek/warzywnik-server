@@ -136,6 +136,8 @@ export class BedsService {
     }
 
     await this.em.flush();
+    // NOTE: Bed changes (soil, depth, measurements) affect planting warnings.
+    // Clients should refetch plantings for this bed after updates.
     return this.serializeBed(bed);
   }
 

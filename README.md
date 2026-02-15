@@ -57,6 +57,30 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
+## Warnings
+
+Warnings are computed exclusively on the backend and rendered from `warning_rules` templates.
+Rules are applied only when they exist and are both `enabled` and `isActive`.
+
+**Endpoints**
+
+- `POST /v1/plantings` and `PATCH /v1/plantings/:id` always return computed warnings and harvest window.
+- `GET /v1/plantings` and `GET /v1/plantings/:id` accept `includeWarnings=true` to compute warnings (harvest window is always returned).
+
+**Placeholders by code**
+
+- `DEPTH_TOO_SMALL`: `vegetableName`, `bedName`, `bedDepthCm`, `requiredDepthCm`
+- `SOIL_NOT_RECOMMENDED`: `vegetableName`, `bedName`
+- `PH_OUT_OF_RANGE`: `vegetableName`, `bedName`, `measuredPh`, `recommendedPhMin`, `recommendedPhMax`, `direction`, `directionText`, `phThreshold`, `phDelta`
+- `NPK_TOO_LOW`: `vegetableName`, `bedName`, `nutrient`, `needLevel`, `measuredLevel`, `deficit`
+- `FAMILY_REPETITION`: `vegetableName`, `bedName`, `familyName`
+- `ROTATION_RISK`: `vegetableName`, `bedName`, `rotationGroup`
+- `WATER_RETENTION_MISMATCH`: `vegetableName`, `bedName`, `soilWaterRetention`, `vegetableWaterDemand`
+- `DRAINAGE_MISMATCH`: **not emitted yet** (TODO: requires vegetable drainage preference)
+- `HARVEST_WINDOW_MISSED`: `vegetableName`, `bedName`, `harvestEndDate` (ISO)
+- `SUBOPTIMAL_SOWING_TIME`: `vegetableName`, `bedName`, `plannedStartDate` (ISO), `sowingStartMonth`, `sowingEndMonth`
+- `EXPERIMENTAL_SETUP`: `vegetableName`, `bedName`
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

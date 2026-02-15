@@ -14,9 +14,11 @@ import {
 import { PlantingsService } from './plantings.service';
 import {
   createPlantingSchema,
+  getPlantingQuerySchema,
   listPlantingsQuerySchema,
   updatePlantingSchema,
   CreatePlantingDto,
+  GetPlantingQueryDto,
   ListPlantingsQueryDto,
   UpdatePlantingDto,
 } from './dto/planting.schemas';
@@ -37,8 +39,17 @@ export class PlantingsController {
   }
 
   @Get(':id')
-  get(@Req() req: { userEntity?: User }, @Param('id') id: string) {
-    return this.plantingsService.getById(req.userEntity as User, id);
+  get(
+    @Req() req: { userEntity?: User },
+    @Param('id') id: string,
+    @Query(new ZodValidationPipe(getPlantingQuerySchema))
+    query: GetPlantingQueryDto,
+  ) {
+    return this.plantingsService.getById(
+      req.userEntity as User,
+      id,
+      query.includeWarnings,
+    );
   }
 
   @Post()

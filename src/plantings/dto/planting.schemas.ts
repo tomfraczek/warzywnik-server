@@ -25,6 +25,11 @@ export type ListPlantingsQueryDto = {
   status?: PlantingStatus;
   fromDate?: string;
   toDate?: string;
+  includeWarnings?: boolean;
+};
+
+export type GetPlantingQueryDto = {
+  includeWarnings?: boolean;
 };
 
 const isoDateSchema = z.string().datetime();
@@ -53,4 +58,9 @@ export const listPlantingsQuerySchema = z.object({
   status: z.nativeEnum(PlantingStatus).optional(),
   fromDate: isoDateSchema.optional(),
   toDate: isoDateSchema.optional(),
+  includeWarnings: z.coerce.boolean().optional().default(false),
+});
+
+export const getPlantingQuerySchema = z.object({
+  includeWarnings: z.coerce.boolean().optional().default(false),
 });

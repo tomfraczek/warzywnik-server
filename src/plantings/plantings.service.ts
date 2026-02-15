@@ -14,22 +14,23 @@ import {
 } from './dto/planting.schemas';
 import { User } from '../users/user.entity';
 import { PlantingStatus } from '../common/enums/planting.enums';
-import { WarningCode, WarningSeverity } from '../common/enums/warning.enums';
-import { WarningsService } from '../warning-rules/warnings.service';
+import { WarningCode } from '../common/enums/warning.enums';
 import {
+  WarningsService,
+  WarningCandidate,
+  WarningOutput,
+  WarningRulesMap,
+} from '../warning-rules/warnings.service';
+import {
+  DemandLevel as VegetableDemandLevel,
   DominantNutrientDemand,
   Month,
   NutrientNeeds,
+  RotationGroup,
 } from '../common/enums/vegetable.enums';
+import { DemandLevel as SoilDemandLevel } from '../common/enums/soil.enums';
 
-type WarningResult = {
-  code: WarningCode;
-  severity: WarningSeverity;
-  title: string;
-  message: string;
-  hint?: string | null;
-  details?: Record<string, unknown> | null;
-};
+type WarningResult = WarningOutput;
 
 @Injectable()
 export class PlantingsService {
@@ -39,7 +40,8 @@ export class PlantingsService {
   ) {}
 
   async list(user: User, query: ListPlantingsQueryDto) {
-    const { page, limit, bedId, status, fromDate, toDate } = query;
+    const { page, limit, bedId, status, fromDate, toDate, includeWarnings } =
+      query;
 
     const where: Record<string, unknown> = {
       user: user.id,
@@ -64,28 +66,72 @@ export class PlantingsService {
       where.plannedStartDate = range;
     }
 
+    const populate = includeWarnings
+      ? ([
+          'bed',
+          'bed.soil',
+          'vegetable',
+          'vegetable.recommendedSoils',
+        ] as const)
+      : (['bed', 'vegetable'] as const);
+
     const [items, total] = await this.em.findAndCount(Planting, where, {
       limit,
       offset: (page - 1) * limit,
       orderBy: { plannedStartDate: 'desc' },
+      populate,
     });
 
+    const rulesMap = includeWarnings
+      ? await this.warningsService.getRulesMap(Object.values(WarningCode))
+      : undefined;
+
     return {
-      items: items.map((item) => this.serializePlanting(item)),
+      items: await Promise.all(
+        items.map((item) =>
+          this.serializeWithComputed(item, item.bed, item.vegetable, {
+            includeWarnings: Boolean(includeWarnings),
+            rulesMap,
+          }),
+        ),
+      ),
       page,
       limit,
       total,
     };
   }
 
-  async getById(user: User, id: string) {
-    const planting = await this.em.findOne(Planting, { id, user: user.id });
+  async getById(user: User, id: string, includeWarnings = false) {
+    const populate = includeWarnings
+      ? ([
+          'bed',
+          'bed.soil',
+          'vegetable',
+          'vegetable.recommendedSoils',
+        ] as const)
+      : (['bed', 'vegetable'] as const);
+
+    const planting = await this.em.findOne(
+      Planting,
+      { id, user: user.id },
+      { populate },
+    );
 
     if (!planting) {
       throw new NotFoundException('Planting not found');
     }
 
-    return this.serializePlanting(planting);
+    return this.serializeWithComputed(
+      planting,
+      planting.bed,
+      planting.vegetable,
+      {
+        includeWarnings,
+        rulesMap: includeWarnings
+          ? await this.warningsService.getRulesMap(Object.values(WarningCode))
+          : undefined,
+      },
+    );
   }
 
   async create(user: User, dto: CreatePlantingDto) {
@@ -125,7 +171,9 @@ export class PlantingsService {
 
     await this.em.persistAndFlush(planting);
 
-    return await this.serializeWithComputed(planting, bed, vegetable);
+    return await this.serializeWithComputed(planting, bed, vegetable, {
+      includeWarnings: true,
+    });
   }
 
   async update(user: User, id: string, dto: UpdatePlantingDto) {
@@ -197,7 +245,9 @@ export class PlantingsService {
 
     await this.em.flush();
 
-    return await this.serializeWithComputed(planting, bed, vegetable);
+    return await this.serializeWithComputed(planting, bed, vegetable, {
+      includeWarnings: true,
+    });
   }
 
   async remove(user: User, id: string) {
@@ -228,20 +278,33 @@ export class PlantingsService {
     planting: Planting,
     bed: Bed,
     vegetable: Vegetable,
+    options: {
+      includeWarnings: boolean;
+      rulesMap?: WarningRulesMap;
+    },
   ) {
     const base = this.serializePlanting(planting);
     const harvestWindow = this.computeHarvestWindow(
       vegetable,
       planting.plannedStartDate,
     );
-    const warnings = await this.computeWarnings(planting, bed, vegetable);
-
-    return {
+    const result: Record<string, unknown> = {
       ...base,
       harvestStartDate: harvestWindow?.start ?? null,
       harvestEndDate: harvestWindow?.end ?? null,
-      warnings,
     };
+
+    if (options.includeWarnings) {
+      const warnings = await this.computeWarnings(
+        planting,
+        bed,
+        vegetable,
+        options.rulesMap,
+      );
+      result.warnings = warnings;
+    }
+
+    return result;
   }
 
   private computeHarvestWindow(vegetable: Vegetable, plannedStart: Date) {
@@ -262,8 +325,9 @@ export class PlantingsService {
     planting: Planting,
     bed: Bed,
     vegetable: Vegetable,
+    rulesMap?: WarningRulesMap,
   ): Promise<WarningResult[]> {
-    const warnings: WarningResult[] = [];
+    const candidates: WarningCandidate[] = [];
     const valuesBase = {
       vegetableName: vegetable.name,
       bedName: bed.name,
@@ -280,16 +344,14 @@ export class PlantingsService {
     ) {
       hasDepthTooSmall = true;
       const requiredDepthCm = vegetable.requiredSoilDepthCm;
-      const warning = await this.warningsService.buildWarning(
-        WarningCode.DEPTH_TOO_SMALL,
-        {
+      candidates.push({
+        code: WarningCode.DEPTH_TOO_SMALL,
+        values: {
           ...valuesBase,
           bedDepthCm: bed.depthCm,
           requiredDepthCm,
         },
-      );
-
-      if (warning) warnings.push(warning);
+      });
     }
 
     const recommendedSoils = vegetable.recommendedSoils.getItems();
@@ -298,11 +360,10 @@ export class PlantingsService {
       const matches = recommendedSoils.some((soil) => soil.id === bed.soil?.id);
       if (!matches) {
         hasSoilNotRecommended = true;
-        const warning = await this.warningsService.buildWarning(
-          WarningCode.SOIL_NOT_RECOMMENDED,
-          valuesBase,
-        );
-        if (warning) warnings.push(warning);
+        candidates.push({
+          code: WarningCode.SOIL_NOT_RECOMMENDED,
+          values: valuesBase,
+        });
       }
     }
 
@@ -332,9 +393,9 @@ export class PlantingsService {
             direction === 'LOW' ? recommendedPhMin : recommendedPhMax;
           const phDelta = Math.abs(bed.measuredPh - phThreshold);
           hasPhOutOfRange = true;
-          const warning = await this.warningsService.buildWarning(
-            WarningCode.PH_OUT_OF_RANGE,
-            {
+          candidates.push({
+            code: WarningCode.PH_OUT_OF_RANGE,
+            values: {
               ...valuesBase,
               measuredPh: bed.measuredPh,
               recommendedPhMin,
@@ -344,8 +405,7 @@ export class PlantingsService {
               phThreshold,
               phDelta,
             },
-          );
-          if (warning) warnings.push(warning);
+          });
         }
       }
     }
@@ -359,53 +419,69 @@ export class PlantingsService {
         const measuredLevel = this.getMeasuredNutrientLevel(bed, nutrientKey);
         if (measuredLevel != null && measuredLevel < nutrientNeed) {
           const deficit = Math.max(0, nutrientNeed - measuredLevel);
-          const warning = await this.warningsService.buildWarning(
-            WarningCode.NPK_TOO_LOW,
-            {
+          candidates.push({
+            code: WarningCode.NPK_TOO_LOW,
+            values: {
               ...valuesBase,
               nutrient: nutrientKey,
               needLevel: nutrientNeed,
               measuredLevel,
               deficit,
             },
-          );
-          if (warning) warnings.push(warning);
+          });
         }
       }
     }
 
-    const familyRepetitionWarning = await this.buildFamilyRepetitionWarning(
-      planting,
+    const waterRetentionCandidate = this.buildWaterRetentionMismatchCandidate(
       bed,
       vegetable,
       valuesBase,
     );
-    if (familyRepetitionWarning) warnings.push(familyRepetitionWarning);
+    if (waterRetentionCandidate) candidates.push(waterRetentionCandidate);
 
-    const harvestWindowMissedWarning =
-      await this.buildHarvestWindowMissedWarning(
-        planting,
-        vegetable,
-        valuesBase,
-      );
-    if (harvestWindowMissedWarning) warnings.push(harvestWindowMissedWarning);
+    // TODO: DRAINAGE_MISMATCH requires vegetable drainage preference, which is not modeled yet.
+    // Once Vegetable exposes drainage demand, compute mismatch here and emit warning.
 
-    const suboptimalSowingWarning = await this.buildSuboptimalSowingWarning(
+    const previousPlantings = await this.getPreviousPlantings(planting, bed);
+
+    const familyRepetitionCandidate = this.buildFamilyRepetitionCandidate(
+      vegetable,
+      valuesBase,
+      previousPlantings,
+    );
+    if (familyRepetitionCandidate) candidates.push(familyRepetitionCandidate);
+
+    const rotationRiskCandidate = this.buildRotationRiskCandidate(
+      vegetable,
+      valuesBase,
+      previousPlantings,
+    );
+    if (rotationRiskCandidate) candidates.push(rotationRiskCandidate);
+
+    const harvestWindowMissedCandidate = this.buildHarvestWindowMissedCandidate(
       planting,
       vegetable,
       valuesBase,
     );
-    if (suboptimalSowingWarning) warnings.push(suboptimalSowingWarning);
+    if (harvestWindowMissedCandidate)
+      candidates.push(harvestWindowMissedCandidate);
+
+    const suboptimalSowingCandidate = this.buildSuboptimalSowingCandidate(
+      planting,
+      vegetable,
+      valuesBase,
+    );
+    if (suboptimalSowingCandidate) candidates.push(suboptimalSowingCandidate);
 
     if (hasDepthTooSmall && hasSoilNotRecommended && hasPhOutOfRange) {
-      const warning = await this.warningsService.buildWarning(
-        WarningCode.EXPERIMENTAL_SETUP as WarningCode,
-        valuesBase,
-      );
-      if (warning) warnings.push(warning);
+      candidates.push({
+        code: WarningCode.EXPERIMENTAL_SETUP,
+        values: valuesBase,
+      });
     }
 
-    return warnings;
+    return this.warningsService.buildWarnings(candidates, rulesMap);
   }
 
   private mapNutrientNeedToLevel(level?: NutrientNeeds | null): number | null {
@@ -419,6 +495,25 @@ export class PlantingsService {
       default:
         return null;
     }
+  }
+
+  private mapDemandLevelToScore(
+    level?: VegetableDemandLevel | SoilDemandLevel | null,
+  ): number | null {
+    switch (level) {
+      case VegetableDemandLevel.LOW:
+        return 1;
+      case VegetableDemandLevel.MEDIUM:
+        return 2;
+      case VegetableDemandLevel.HIGH:
+        return 3;
+      default:
+        return null;
+    }
+  }
+
+  private isDemandMismatch(soilScore: number, vegetableScore: number) {
+    return Math.abs(soilScore - vegetableScore) >= 2;
   }
 
   private getDominantNutrientKey(
@@ -442,15 +537,9 @@ export class PlantingsService {
     return bed.measuredK ?? null;
   }
 
-  private async buildFamilyRepetitionWarning(
-    planting: Planting,
-    bed: Bed,
-    vegetable: Vegetable,
-    valuesBase: Record<string, string | number>,
-  ) {
-    if (!vegetable.family) return null;
+  private async getPreviousPlantings(planting: Planting, bed: Bed) {
     const cutoff = this.addDays(planting.plannedStartDate, -365);
-    const previousPlantings = await this.em.find(
+    return this.em.find(
       Planting,
       {
         bed: bed.id,
@@ -460,27 +549,80 @@ export class PlantingsService {
       },
       { populate: ['vegetable'] },
     );
+  }
 
+  private buildFamilyRepetitionCandidate(
+    vegetable: Vegetable,
+    valuesBase: Record<string, string | number>,
+    previousPlantings: Planting[],
+  ): WarningCandidate | null {
+    if (!vegetable.family) return null;
     const hasSameFamily = previousPlantings.some(
       (item) => item.vegetable.family === vegetable.family,
     );
-
     if (!hasSameFamily) return null;
 
-    return this.warningsService.buildWarning(
-      WarningCode.FAMILY_REPETITION as WarningCode,
-      {
+    return {
+      code: WarningCode.FAMILY_REPETITION,
+      values: {
         ...valuesBase,
         familyName: vegetable.family,
       },
-    );
+    };
   }
 
-  private async buildHarvestWindowMissedWarning(
+  private buildRotationRiskCandidate(
+    vegetable: Vegetable,
+    valuesBase: Record<string, string | number>,
+    previousPlantings: Planting[],
+  ): WarningCandidate | null {
+    if (!vegetable.rotationGroup) return null;
+    if (vegetable.rotationGroup === RotationGroup.OTHER) return null;
+
+    const hasSameGroup = previousPlantings.some(
+      (item) => item.vegetable.rotationGroup === vegetable.rotationGroup,
+    );
+
+    if (!hasSameGroup) return null;
+
+    return {
+      code: WarningCode.ROTATION_RISK,
+      values: {
+        ...valuesBase,
+        rotationGroup: vegetable.rotationGroup,
+      },
+    };
+  }
+
+  private buildWaterRetentionMismatchCandidate(
+    bed: Bed,
+    vegetable: Vegetable,
+    valuesBase: Record<string, string | number>,
+  ): WarningCandidate | null {
+    if (!bed.soil || bed.soil.waterRetention == null) return null;
+    if (vegetable.waterDemand == null) return null;
+
+    const soilScore = this.mapDemandLevelToScore(bed.soil.waterRetention);
+    const vegetableScore = this.mapDemandLevelToScore(vegetable.waterDemand);
+
+    if (soilScore == null || vegetableScore == null) return null;
+    if (!this.isDemandMismatch(soilScore, vegetableScore)) return null;
+
+    return {
+      code: WarningCode.WATER_RETENTION_MISMATCH,
+      values: {
+        ...valuesBase,
+        soilWaterRetention: bed.soil.waterRetention,
+        vegetableWaterDemand: vegetable.waterDemand,
+      },
+    };
+  }
+
+  private buildHarvestWindowMissedCandidate(
     planting: Planting,
     vegetable: Vegetable,
     valuesBase: Record<string, string | number>,
-  ) {
+  ): WarningCandidate | null {
     if (
       planting.status !== PlantingStatus.ACTIVE &&
       planting.status !== PlantingStatus.HARVESTING
@@ -497,20 +639,20 @@ export class PlantingsService {
 
     if (new Date() <= harvestEndDate) return null;
 
-    return this.warningsService.buildWarning(
-      WarningCode.HARVEST_WINDOW_MISSED as WarningCode,
-      {
+    return {
+      code: WarningCode.HARVEST_WINDOW_MISSED,
+      values: {
         ...valuesBase,
         harvestEndDate: harvestEndDate.toISOString(),
       },
-    );
+    };
   }
 
-  private async buildSuboptimalSowingWarning(
+  private buildSuboptimalSowingCandidate(
     planting: Planting,
     vegetable: Vegetable,
     valuesBase: Record<string, string | number>,
-  ) {
+  ): WarningCandidate | null {
     const sowingMethods = vegetable.sowingMethods ?? [];
     if (sowingMethods.length === 0) return null;
 
@@ -522,15 +664,15 @@ export class PlantingsService {
     if (inAnyWindow) return null;
 
     const reference = sowingMethods[0];
-    return this.warningsService.buildWarning(
-      WarningCode.SUBOPTIMAL_SOWING_TIME as WarningCode,
-      {
+    return {
+      code: WarningCode.SUBOPTIMAL_SOWING_TIME,
+      values: {
         ...valuesBase,
         plannedStartDate: planting.plannedStartDate.toISOString(),
         sowingStartMonth: reference.startMonth,
         sowingEndMonth: reference.endMonth,
       },
-    );
+    };
   }
 
   private getMonthEnumFromDate(date: Date): Month {
