@@ -9,10 +9,8 @@ import {
 } from '@mikro-orm/core';
 import { Planting } from '../plantings/planting.entity';
 import { Disease } from '../diseases/disease.entity';
-import {
-  PlantingDiseaseSeverity,
-  PlantingDiseaseStatus,
-} from '../common/enums/planting-disease.enums';
+import { PlantingDiseaseStatus } from '../common/enums/planting-disease.enums';
+import { DiseaseSeverity } from '../common/enums/disease.enums';
 
 @Entity({ tableName: 'planting_diseases' })
 @Index({ properties: ['planting'] })
@@ -31,8 +29,8 @@ export class PlantingDisease {
   @Enum({ items: () => PlantingDiseaseStatus })
   status!: PlantingDiseaseStatus;
 
-  @Enum({ items: () => PlantingDiseaseSeverity, nullable: true })
-  severity?: PlantingDiseaseSeverity | null;
+  @Enum({ items: () => DiseaseSeverity, nullable: true })
+  severity?: DiseaseSeverity | null;
 
   @Property({ type: Date, defaultRaw: 'now()' })
   observedAt: Date = new Date();
