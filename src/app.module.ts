@@ -4,6 +4,7 @@ dotenv.config();
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import mikroOrmOptions from './common/config/mikro-orm.config';
 
@@ -23,10 +24,14 @@ import { BedsModule } from './beds/beds.module';
 import { PlantingsModule } from './plantings/plantings.module';
 import { ArticlesModule } from './articles/articles.module';
 import { SearchModule } from './search/search.module';
+import { PlantingDiseasesModule } from './planting-diseases/planting-diseases.module';
+import { RemindersModule } from './reminders/reminders.module';
+import { DevicesModule } from './devices/devices.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     MikroOrmModule.forRoot(mikroOrmOptions),
     VegetablesModule,
     PestsModule,
@@ -41,6 +46,9 @@ import { SearchModule } from './search/search.module';
     PlantingsModule,
     ArticlesModule,
     SearchModule,
+    PlantingDiseasesModule,
+    RemindersModule,
+    DevicesModule,
   ],
   controllers: [AppController],
   providers: [
