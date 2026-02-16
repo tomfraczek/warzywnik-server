@@ -339,11 +339,11 @@ export class PlantingsService {
 
     if (
       bed.depthCm != null &&
-      vegetable.requiredSoilDepthCm != null &&
-      bed.depthCm < vegetable.requiredSoilDepthCm
+      vegetable.minSoilDepthCm != null &&
+      bed.depthCm < vegetable.minSoilDepthCm
     ) {
       hasDepthTooSmall = true;
-      const requiredDepthCm = vegetable.requiredSoilDepthCm;
+      const requiredDepthCm = vegetable.minSoilDepthCm;
       candidates.push({
         code: WarningCode.DEPTH_TOO_SMALL,
         values: {

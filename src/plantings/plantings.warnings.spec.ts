@@ -119,7 +119,7 @@ describe('PlantingsService warnings', () => {
     const { service } = createService();
 
     const bed = makeBed({ depthCm: 10 });
-    const vegetable = makeVegetable({ requiredSoilDepthCm: 20 });
+    const vegetable = makeVegetable({ minSoilDepthCm: 20 });
     const planting = makePlanting();
 
     const warnings = await computeWarnings(service, planting, bed, vegetable);
@@ -286,7 +286,7 @@ describe('PlantingsService warnings', () => {
       }),
     });
     const vegetable = makeVegetable({
-      requiredSoilDepthCm: 20,
+      minSoilDepthCm: 20,
       recommendedSoils: {
         getItems: () => [makeSoil({ id: 'soil-2', phMin: 6, phMax: 7 })],
       } as unknown as Collection<Soil>,
@@ -302,7 +302,7 @@ describe('PlantingsService warnings', () => {
   it('updates warnings after bed changes are refetched', async () => {
     const { service } = createService();
 
-    const vegetable = makeVegetable({ requiredSoilDepthCm: 20 });
+    const vegetable = makeVegetable({ minSoilDepthCm: 20 });
     const planting = makePlanting();
 
     const shallowBed = makeBed({ depthCm: 10 });

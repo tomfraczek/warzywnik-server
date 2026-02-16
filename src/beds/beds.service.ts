@@ -82,10 +82,12 @@ export class BedsService {
     bed.measuredPh = dto.measuredPh ?? null;
     bed.isActive = dto.isActive ?? true;
 
-    if (dto.soilId === null) {
+    const soilId = dto.soilId !== undefined ? dto.soilId : dto.soil;
+
+    if (soilId === null) {
       bed.soil = null;
-    } else if (dto.soilId) {
-      const soil = await this.em.findOne(Soil, { id: dto.soilId });
+    } else if (soilId) {
+      const soil = await this.em.findOne(Soil, { id: soilId });
       if (!soil) {
         throw new BadRequestException('Soil not found');
       }
@@ -125,10 +127,12 @@ export class BedsService {
     if (dto.measuredPh !== undefined) bed.measuredPh = dto.measuredPh;
     if (dto.isActive !== undefined) bed.isActive = dto.isActive;
 
-    if (dto.soilId === null) {
+    const soilId = dto.soilId !== undefined ? dto.soilId : dto.soil;
+
+    if (soilId === null) {
       bed.soil = null;
-    } else if (dto.soilId !== undefined) {
-      const soil = await this.em.findOne(Soil, { id: dto.soilId });
+    } else if (soilId !== undefined) {
+      const soil = await this.em.findOne(Soil, { id: soilId });
       if (!soil) {
         throw new BadRequestException('Soil not found');
       }

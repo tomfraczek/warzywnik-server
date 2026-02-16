@@ -30,7 +30,6 @@ export type VegetableBaseDto = {
   nutrientNeeds?: NutrientNeeds;
   rotationGroup?: RotationGroup;
   minSoilDepthCm?: number | null;
-  requiredSoilDepthCm?: number | null;
   dominantNutrientDemand?: DominantNutrientDemand | null;
   sowingMethods?: SowingMethod[];
   timeToHarvestDaysMin?: number | null;
@@ -87,7 +86,6 @@ const dominantNutrientDemandSchema = z
   .nullable();
 
 const nonNegativeNumber = z.number().min(0, 'Must be >= 0');
-const positiveInt = z.number().int().min(1, 'Must be >= 1');
 const slugSchema = z
   .string()
   .min(2)
@@ -163,7 +161,6 @@ const baseVegetableSchema = z
     nutrientNeeds: nutrientNeedsSchema.optional(),
     rotationGroup: rotationGroupSchema.optional(),
     minSoilDepthCm: nonNegativeNumber.nullable().optional(),
-    requiredSoilDepthCm: positiveInt.nullable().optional(),
     dominantNutrientDemand: dominantNutrientDemandSchema.optional(),
 
     sowingMethods: z.array(sowingMethodSchema).optional(),
