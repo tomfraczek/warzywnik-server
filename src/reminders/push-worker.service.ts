@@ -14,16 +14,13 @@ type ExpoPushMessage = {
     reminderId: string;
     plantingId: string;
     diseaseId: string;
+    plantingDiseaseId?: string | null;
   };
 };
 
 type ExpoPushTicket =
   | { status: 'ok'; id: string }
   | { status: 'error'; message: string; details?: Record<string, unknown> };
-
-type ExpoPushResponse = {
-  data: ExpoPushTicket[];
-};
 
 @Injectable()
 export class PushWorkerService {
@@ -33,7 +30,7 @@ export class PushWorkerService {
   constructor(private readonly em: EntityManager) {}
 
   @Cron('*/1 * * * *')
-  async handleCron() {
+  async handleCron(): Promise<void> {
     if (process.env.PUSH_WORKER_ENABLED !== 'true') {
       return;
     }
@@ -58,7 +55,7 @@ export class PushWorkerService {
     }
   }
 
-  private buildBody(reminder: Reminder) {
+  private buildBody(reminder: Reminder): string {
     if (reminder.type === ReminderType.DISEASE_TREATMENT) {
       return 'Zastosuj zalecane leczenie choroby.';
     }
@@ -66,7 +63,7 @@ export class PushWorkerService {
     return 'Sprawdź stan choroby w uprawie.';
   }
 
-  private async processReminder(reminder: Reminder) {
+  private async processReminder(reminder: Reminder): Promise<void> {
     const devices = await this.em.find(UserDevice, {
       user: reminder.user.id,
       isEnabled: true,
@@ -85,39 +82,59 @@ export class PushWorkerService {
         reminderId: reminder.id,
         plantingId: reminder.payload.plantingId,
         diseaseId: reminder.payload.diseaseId,
+        plantingDiseaseId: reminder.plantingDiseaseId ?? null,
       },
     }));
 
     try {
-      const response = await this.sendPush(messages);
+      const tickets = await this.sendPush(messages);
 
-      const hasError = response.data.some(
-        (ticket) => ticket.status === 'error',
-      );
-      if (hasError) {
-        const firstError = response.data.find(
-          (ticket) => ticket.status === 'error',
-        ) as ExpoPushTicket | undefined;
+      const firstError = tickets.find((t) => this.isErrorTicket(t));
 
-        const message =
-          firstError && firstError.status === 'error'
-            ? firstError.message
-            : 'Unknown Expo error';
-
-        await this.markFailure(reminder, message);
+      if (firstError) {
+        await this.markFailure(reminder, firstError.message);
         return;
       }
 
       await this.markSuccess(reminder);
-    } catch (err) {
+    } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       await this.markFailure(reminder, message);
     }
   }
 
+  private isErrorTicket(
+    ticket: ExpoPushTicket,
+  ): ticket is Extract<ExpoPushTicket, { status: 'error' }> {
+    return ticket.status === 'error';
+  }
+
+  private extractTickets(json: unknown): ExpoPushTicket[] {
+    if (!json || typeof json !== 'object') {
+      return [];
+    }
+
+    const obj = json as { data?: unknown };
+
+    // Shape 1: { data: [...] }
+    if (Array.isArray(obj.data)) {
+      return obj.data as ExpoPushTicket[];
+    }
+
+    // Shape 2: { data: { data: [...] } }
+    if (obj.data && typeof obj.data === 'object') {
+      const nested = obj.data as { data?: unknown };
+      if (Array.isArray(nested.data)) {
+        return nested.data as ExpoPushTicket[];
+      }
+    }
+
+    return [];
+  }
+
   private async sendPush(
     messages: ExpoPushMessage[],
-  ): Promise<ExpoPushResponse> {
+  ): Promise<ExpoPushTicket[]> {
     const response = await fetch(this.expoEndpoint, {
       method: 'POST',
       headers: {
@@ -126,15 +143,29 @@ export class PushWorkerService {
       body: JSON.stringify(messages),
     });
 
+    const text = await response.text();
+
     if (!response.ok) {
-      const text = await response.text();
       throw new Error(`Expo push failed (${response.status}): ${text}`);
     }
 
-    return (await response.json()) as ExpoPushResponse;
+    let json: unknown;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      throw new Error(`Expo push invalid JSON: ${text}`);
+    }
+
+    const tickets = this.extractTickets(json);
+
+    if (tickets.length === 0) {
+      throw new Error(`Expo push unexpected response: ${text}`);
+    }
+
+    return tickets;
   }
 
-  private async markSuccess(reminder: Reminder) {
+  private async markSuccess(reminder: Reminder): Promise<void> {
     reminder.status = ReminderStatus.SENT;
     reminder.sentAt = new Date();
     reminder.attempts += 1;
@@ -142,7 +173,10 @@ export class PushWorkerService {
     await this.em.flush();
   }
 
-  private async markFailure(reminder: Reminder, message: string) {
+  private async markFailure(
+    reminder: Reminder,
+    message: string,
+  ): Promise<void> {
     reminder.attempts += 1;
     reminder.lastError = message;
 

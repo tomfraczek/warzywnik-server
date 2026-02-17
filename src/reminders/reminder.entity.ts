@@ -24,6 +24,7 @@ export type ReminderPayload = {
 @Entity({ tableName: 'reminders' })
 @Index({ properties: ['status', 'scheduledAt'] })
 @Index({ properties: ['user'] })
+@Index({ properties: ['plantingDiseaseId'] })
 export class Reminder {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
@@ -42,6 +43,10 @@ export class Reminder {
 
   @Property({ type: 'jsonb' })
   payload!: ReminderPayload;
+
+  // ✅ nowa kolumna do szybkiego anulowania bez jsonb $contains
+  @Property({ type: 'uuid', nullable: true })
+  plantingDiseaseId?: string | null;
 
   @Property({ type: Date, nullable: true })
   sentAt?: Date | null;

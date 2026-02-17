@@ -90,6 +90,10 @@ export class RemindersService {
       reminder.payload = this.buildPayload(planting, disease, plantingDisease, {
         action: item.action,
       });
+
+      // ✅ nowa kolumna (łatwe anulowanie)
+      reminder.plantingDiseaseId = plantingDisease.id;
+
       return reminder;
     });
 
@@ -104,7 +108,7 @@ export class RemindersService {
   async cancelPendingForPlantingDisease(plantingDiseaseId: string) {
     const reminders = await this.em.find(Reminder, {
       status: ReminderStatus.PENDING,
-      payload: { $contains: { plantingDiseaseId } },
+      plantingDiseaseId,
     });
 
     if (reminders.length === 0) {
@@ -134,7 +138,6 @@ export class RemindersService {
 
   private getPlanForDisease(slug: string): ReminderPlanItem[] {
     const plans: Record<string, ReminderPlanItem[]> = {
-      // Example of disease-specific plan:
       // 'zaraza-ziemniaczana': [
       //   { type: ReminderType.DISEASE_CHECK, action: ReminderAction.CHECK, offsetDays: 1 },
       //   { type: ReminderType.DISEASE_TREATMENT, action: ReminderAction.TREAT, offsetDays: 3 },
@@ -164,6 +167,7 @@ export class RemindersService {
       status: reminder.status,
       type: reminder.type,
       payload: reminder.payload,
+      plantingDiseaseId: reminder.plantingDiseaseId ?? null,
       sentAt: reminder.sentAt ?? null,
       attempts: reminder.attempts,
       lastError: reminder.lastError ?? null,
