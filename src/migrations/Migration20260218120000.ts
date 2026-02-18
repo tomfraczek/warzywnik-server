@@ -11,6 +11,8 @@ export class Migration20260218120000 extends Migration {
   }
 
   down(): void {
-    this.addSql(`alter table "reminders" drop column if exists "locked_at";`);
+    this.addSql(
+      `alter table "reminders" drop column if exists "locked_at";`,
+    );
   }
 }
