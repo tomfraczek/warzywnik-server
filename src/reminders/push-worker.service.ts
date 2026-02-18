@@ -10,17 +10,24 @@ import {
 } from '../common/enums/reminder.enums';
 import { UserDevice } from '../devices/user-device.entity';
 import { User } from '../users/user.entity';
+import { RemindersService } from './reminders.service';
+
+type ExpoPushMessageData = {
+  reminderId: string;
+  target: 'disease' | 'pest';
+  plantingId?: string;
+  diseaseId?: string;
+  plantingDiseaseId?: string | null;
+  bedId?: string;
+  pestId?: string;
+  pestOccurrenceId?: string | null;
+};
 
 type ExpoPushMessage = {
   to: string;
   title: string;
   body: string;
-  data: {
-    reminderId: string;
-    plantingId: string;
-    diseaseId: string;
-    plantingDiseaseId?: string | null;
-  };
+  data: ExpoPushMessageData;
 };
 
 type ExpoPushTicket =
@@ -35,6 +42,7 @@ type ClaimedReminderRow = {
   type: ReminderType;
   payload: unknown;
   planting_disease_id: string | null;
+  pest_occurrence_id: string | null;
   sent_at: string | Date | null;
   attempts: number;
   last_error: string | null;
@@ -65,10 +73,18 @@ const isReminderPayload = (payload: unknown): payload is ReminderPayload => {
   if (!payload || typeof payload !== 'object') return false;
 
   const obj = payload as Record<string, unknown>;
-  return (
+  const isDiseasePayload =
     isNonEmptyString(obj.plantingId) &&
     isNonEmptyString(obj.diseaseId) &&
-    isNonEmptyString(obj.plantingDiseaseId) &&
+    isNonEmptyString(obj.plantingDiseaseId);
+
+  const isPestPayload =
+    isNonEmptyString(obj.bedId) &&
+    isNonEmptyString(obj.pestId) &&
+    isNonEmptyString(obj.pestOccurrenceId);
+
+  return (
+    (isDiseasePayload || isPestPayload) &&
     Object.values(ReminderAction).includes(obj.action as ReminderAction)
   );
 };
@@ -82,7 +98,10 @@ export class PushWorkerService {
   private readonly expoEndpoint = 'https://exp.host/--/api/v2/push/send';
   private readonly batchSize = 100;
 
-  constructor(private readonly em: EntityManager) {
+  constructor(
+    private readonly em: EntityManager,
+    private readonly remindersService: RemindersService,
+  ) {
     this.logger.log(
       `worker created | pid=${process.pid} | instance=${this.instanceId}`,
     );
@@ -170,6 +189,7 @@ export class PushWorkerService {
         r.type,
         r.payload,
         r.planting_disease_id,
+        r.pest_occurrence_id,
         r.sent_at,
         r.attempts,
         r.last_error,
@@ -193,6 +213,7 @@ export class PushWorkerService {
           type: row.type,
           payload: this.requirePayload(row.payload, row.id),
           plantingDiseaseId: row.planting_disease_id,
+          pestOccurrenceId: row.pest_occurrence_id,
           sentAt: toDate(row.sent_at),
           attempts: row.attempts,
           lastError: row.last_error,
@@ -220,7 +241,33 @@ export class PushWorkerService {
     if (reminder.type === ReminderType.DISEASE_TREATMENT) {
       return 'Zastosuj zalecane leczenie choroby.';
     }
+    if (reminder.type === ReminderType.PEST_CHECK) {
+      return 'Sprawdź stan szkodników na grządce.';
+    }
     return 'Sprawdź stan choroby w uprawie.';
+  }
+
+  private buildMessageData(reminder: Reminder): ExpoPushMessageData {
+    const payload = reminder.payload as ReminderPayload;
+
+    if ('pestOccurrenceId' in payload) {
+      return {
+        reminderId: reminder.id,
+        target: 'pest',
+        bedId: payload.bedId,
+        pestId: payload.pestId,
+        pestOccurrenceId: reminder.pestOccurrenceId ?? payload.pestOccurrenceId,
+      };
+    }
+
+    return {
+      reminderId: reminder.id,
+      target: 'disease',
+      plantingId: payload.plantingId,
+      diseaseId: payload.diseaseId,
+      plantingDiseaseId:
+        reminder.plantingDiseaseId ?? payload.plantingDiseaseId ?? null,
+    };
   }
 
   private async processReminder(reminder: Reminder): Promise<void> {
@@ -250,12 +297,7 @@ export class PushWorkerService {
       to: device.expoPushToken,
       title: 'Warzywnik',
       body: this.buildBody(reminder),
-      data: {
-        reminderId: reminder.id,
-        plantingId: reminder.payload.plantingId,
-        diseaseId: reminder.payload.diseaseId,
-        plantingDiseaseId: reminder.plantingDiseaseId ?? null,
-      },
+      data: this.buildMessageData(reminder),
     }));
 
     this.logger.log(
@@ -283,12 +325,35 @@ export class PushWorkerService {
       }
 
       await this.markSuccess(reminder.id);
+      await this.handleFollowUp(reminder);
     } catch (err: unknown) {
       const message = toErrorMessage(err);
       this.logger.error(
         `sendPush failed | reminder=${reminder.id} | error=${message}`,
       );
       await this.markFailure(reminder.id, reminder.attempts, message);
+    }
+  }
+
+  private async handleFollowUp(reminder: Reminder): Promise<void> {
+    try {
+      if (reminder.plantingDiseaseId) {
+        await this.remindersService.handlePlantingDiseaseReminderSent(
+          reminder.plantingDiseaseId,
+        );
+        return;
+      }
+
+      if (reminder.pestOccurrenceId) {
+        await this.remindersService.handlePestOccurrenceReminderSent(
+          reminder.pestOccurrenceId,
+        );
+      }
+    } catch (err: unknown) {
+      const message = toErrorMessage(err);
+      this.logger.error(
+        `follow-up failed | reminder=${reminder.id} | error=${message}`,
+      );
     }
   }
 

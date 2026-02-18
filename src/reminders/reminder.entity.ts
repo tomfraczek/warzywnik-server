@@ -14,17 +14,29 @@ import {
   ReminderType,
 } from '../common/enums/reminder.enums';
 
-export type ReminderPayload = {
+export type DiseaseReminderPayload = {
+  kind?: 'disease';
   plantingId: string;
   diseaseId: string;
   plantingDiseaseId: string;
   action: ReminderAction;
 };
 
+export type PestReminderPayload = {
+  kind: 'pest';
+  bedId: string;
+  pestId: string;
+  pestOccurrenceId: string;
+  action: ReminderAction;
+};
+
+export type ReminderPayload = DiseaseReminderPayload | PestReminderPayload;
+
 @Entity({ tableName: 'reminders' })
 @Index({ properties: ['status', 'scheduledAt'] })
 @Index({ properties: ['user'] })
 @Index({ properties: ['plantingDiseaseId'] })
+@Index({ properties: ['pestOccurrenceId'] })
 export class Reminder {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
@@ -46,6 +58,9 @@ export class Reminder {
 
   @Property({ type: 'uuid', nullable: true })
   plantingDiseaseId?: string | null;
+
+  @Property({ type: 'uuid', nullable: true })
+  pestOccurrenceId?: string | null;
 
   @Property({ type: Date, nullable: true })
   sentAt?: Date | null;

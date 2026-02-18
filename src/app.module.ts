@@ -27,6 +27,7 @@ import { SearchModule } from './search/search.module';
 import { PlantingDiseasesModule } from './planting-diseases/planting-diseases.module';
 import { RemindersModule } from './reminders/reminders.module';
 import { DevicesModule } from './devices/devices.module';
+import { PestOccurrencesModule } from './pest-occurrences/pest-occurrences.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { DevicesModule } from './devices/devices.module';
     PlantingDiseasesModule,
     RemindersModule,
     DevicesModule,
+    PestOccurrencesModule,
   ],
   controllers: [AppController],
   providers: [

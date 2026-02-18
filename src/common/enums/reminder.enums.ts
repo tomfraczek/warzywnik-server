@@ -10,6 +10,7 @@ export enum ReminderStatus {
 export enum ReminderType {
   DISEASE_CHECK = 'DISEASE_CHECK',
   DISEASE_TREATMENT = 'DISEASE_TREATMENT',
+  PEST_CHECK = 'PEST_CHECK',
 }
 
 export enum ReminderAction {

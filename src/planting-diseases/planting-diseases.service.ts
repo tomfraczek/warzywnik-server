@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -19,6 +20,8 @@ import { RemindersService } from '../reminders/reminders.service';
 
 @Injectable()
 export class PlantingDiseasesService {
+  private readonly logger = new Logger(PlantingDiseasesService.name);
+
   constructor(
     private readonly em: EntityManager,
     private readonly remindersService: RemindersService,
@@ -86,6 +89,10 @@ export class PlantingDiseasesService {
       plantingDisease: occurrence,
     });
 
+    this.logger.log(
+      `created planting disease occurrence=${occurrence.id} | planting=${planting.id} | disease=${disease.id} | status=${occurrence.status}`,
+    );
+
     await this.em.populate(occurrence, ['disease']);
     return this.serialize(occurrence);
   }
@@ -113,14 +120,16 @@ export class PlantingDiseasesService {
         await this.ensureNoActiveDuplicate(occurrence, dto.status);
       }
 
-      const wasResolved = occurrence.status === PlantingDiseaseStatus.RESOLVED;
+      const previousStatus = occurrence.status;
       occurrence.status = dto.status;
 
-      if (!wasResolved && dto.status === PlantingDiseaseStatus.RESOLVED) {
-        await this.remindersService.cancelPendingForPlantingDisease(
-          occurrence.id,
-        );
-      }
+      await this.remindersService.updateForPlantingDiseaseStatusChange({
+        user,
+        planting,
+        disease: occurrence.disease,
+        plantingDisease: occurrence,
+        previousStatus,
+      });
     }
 
     if (dto.severity !== undefined) {
@@ -136,6 +145,10 @@ export class PlantingDiseasesService {
     }
 
     await this.em.flush();
+
+    this.logger.log(
+      `updated planting disease occurrence=${occurrence.id} | status=${occurrence.status}`,
+    );
 
     return this.serialize(occurrence);
   }
@@ -196,6 +209,8 @@ export class PlantingDiseasesService {
       severity: entity.severity ?? null,
       observedAt: entity.observedAt,
       notes: entity.notes ?? null,
+      reminderCount: entity.reminderCount,
+      nextCheckAt: entity.nextCheckAt ?? null,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };

@@ -16,6 +16,7 @@ import { DiseaseSeverity } from '../common/enums/disease.enums';
 @Index({ properties: ['planting'] })
 @Index({ properties: ['disease'] })
 @Index({ properties: ['status'] })
+@Index({ properties: ['nextCheckAt'] })
 export class PlantingDisease {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
@@ -37,6 +38,12 @@ export class PlantingDisease {
 
   @Property({ type: TextType, nullable: true })
   notes?: string | null;
+
+  @Property({ type: 'int', default: 0 })
+  reminderCount: number = 0;
+
+  @Property({ type: Date, nullable: true })
+  nextCheckAt?: Date | null;
 
   @Property({ type: Date, defaultRaw: 'now()' })
   createdAt: Date = new Date();
