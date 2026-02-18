@@ -44,39 +44,36 @@ export class PushWorkerService {
 
   @Cron('*/1 * * * *')
   async handleCron(): Promise<void> {
-    if (process.env.PUSH_WORKER_ENABLED !== 'true') return;
+    this.logger.log(
+      `cron tick | PUSH_WORKER_ENABLED=${process.env.PUSH_WORKER_ENABLED} | NODE_ENV=${process.env.NODE_ENV ?? 'undefined'}`,
+    );
 
-    await this.resetStuckProcessing();
+    if (process.env.PUSH_WORKER_ENABLED !== 'true') {
+      this.logger.debug('worker disabled - returning');
+      return;
+    }
 
-    const reminders = await this.claimDueReminders(this.batchSize);
-    await this.em.populate(reminders, ['user']);
+    const now = new Date();
 
-    this.logger.log(`claimed reminders=${reminders.length}`);
+    const reminders = await this.em.find(
+      Reminder,
+      {
+        status: ReminderStatus.PENDING,
+        scheduledAt: { $lte: now },
+      },
+      {
+        orderBy: { scheduledAt: 'asc' },
+        limit: this.batchSize,
+        populate: ['user'],
+      },
+    );
+
+    this.logger.log(
+      `due reminders=${reminders.length} | now=${now.toISOString()}`,
+    );
 
     for (const reminder of reminders) {
-      try {
-        await this.processReminder(reminder);
-
-        await this.em.nativeUpdate(Reminder, { id: reminder.id }, {
-          status: ReminderStatus.SENT,
-          sentAt: new Date(),
-          lockedAt: null,
-          lastError: null,
-        });
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-
-        const status =
-          reminder.attempts + 1 >= 10
-            ? ReminderStatus.SKIPPED
-            : ReminderStatus.PENDING;
-
-        await this.em.nativeUpdate(Reminder, { id: reminder.id }, {
-          status,
-          lockedAt: null,
-          lastError: message,
-        });
-      }
+      await this.processReminder(reminder);
     }
   }
 
@@ -103,7 +100,8 @@ export class PushWorkerService {
     );
 
     if (devices.length === 0) {
-      throw new Error('No active devices');
+      await this.markFailure(reminder, 'No active devices');
+      return;
     }
 
     const messages: ExpoPushMessage[] = devices.map((device) => ({
@@ -135,54 +133,18 @@ export class PushWorkerService {
         this.logger.error(
           `expo ticket error | reminder=${reminder.id} | message=${firstError.message} | details=${firstError.details ? JSON.stringify(firstError.details) : 'null'}`,
         );
-        throw new Error(firstError.message);
+        await this.markFailure(reminder, firstError.message);
+        return;
       }
+
+      await this.markSuccess(reminder);
     } catch (err: unknown) {
       const message = toErrorMessage(err);
       this.logger.error(
         `sendPush failed | reminder=${reminder.id} | error=${message}`,
       );
-      throw new Error(message);
+      await this.markFailure(reminder, message);
     }
-  }
-
-  private async resetStuckProcessing(): Promise<void> {
-    await this.em.getConnection().execute(`
-      UPDATE reminders
-      SET status = 'pending',
-          locked_at = NULL
-      WHERE status = 'processing'
-        AND locked_at < now() - interval '15 minutes'
-    `);
-  }
-
-  private async claimDueReminders(limit: number): Promise<Reminder[]> {
-    const sql = `
-      WITH due AS (
-        SELECT id
-        FROM reminders
-        WHERE status = 'pending'
-          AND scheduled_at <= now()
-        ORDER BY scheduled_at ASC
-        LIMIT ?
-        FOR UPDATE SKIP LOCKED
-      )
-      UPDATE reminders r
-      SET status = 'processing',
-          locked_at = now(),
-          attempts = r.attempts + 1,
-          last_error = NULL
-      FROM due
-      WHERE r.id = due.id
-      RETURNING r.*;
-    `;
-
-    const rows = (await this.em.getConnection().execute(
-      sql,
-      [limit],
-    )) as Record<string, unknown>[];
-
-    return rows.map((row) => this.em.map(Reminder, row));
   }
 
   private isErrorTicket(
@@ -254,4 +216,31 @@ export class PushWorkerService {
     return tickets;
   }
 
+  private async markSuccess(reminder: Reminder): Promise<void> {
+    reminder.status = ReminderStatus.SENT;
+    reminder.sentAt = new Date();
+    reminder.attempts += 1;
+    reminder.lastError = null;
+    await this.em.flush();
+
+    this.logger.log(`marked success | reminder=${reminder.id}`);
+  }
+
+  private async markFailure(
+    reminder: Reminder,
+    message: string,
+  ): Promise<void> {
+    reminder.attempts += 1;
+    reminder.lastError = message;
+
+    if (reminder.attempts >= 10) {
+      reminder.status = ReminderStatus.SKIPPED;
+    }
+
+    await this.em.flush();
+
+    this.logger.warn(
+      `marked failure | reminder=${reminder.id} | attempts=${reminder.attempts} | status=${reminder.status} | error=${message}`,
+    );
+  }
 }

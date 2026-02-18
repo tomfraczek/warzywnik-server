@@ -51,9 +51,6 @@ export class Reminder {
   @Property({ type: Date, nullable: true })
   sentAt?: Date | null;
 
-  @Property({ fieldName: 'locked_at', nullable: true })
-  lockedAt?: Date | null;
-
   @Property({ type: 'int', default: 0 })
   attempts: number = 0;
 

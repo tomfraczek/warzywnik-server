@@ -1,6 +1,5 @@
 export enum ReminderStatus {
   PENDING = 'pending',
-  PROCESSING = 'processing',
   SENT = 'sent',
   DONE = 'done',
   SKIPPED = 'skipped',
