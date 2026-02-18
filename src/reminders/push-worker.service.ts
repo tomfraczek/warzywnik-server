@@ -57,12 +57,16 @@ export class PushWorkerService {
       try {
         await this.processReminder(reminder);
 
-        await this.em.nativeUpdate(Reminder, { id: reminder.id }, {
-          status: ReminderStatus.SENT,
-          sentAt: new Date(),
-          lockedAt: null,
-          lastError: null,
-        });
+        await this.em.nativeUpdate(
+          Reminder,
+          { id: reminder.id },
+          {
+            status: ReminderStatus.SENT,
+            sentAt: new Date(),
+            lockedAt: null,
+            lastError: null,
+          },
+        );
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
 
@@ -71,11 +75,15 @@ export class PushWorkerService {
             ? ReminderStatus.SKIPPED
             : ReminderStatus.PENDING;
 
-        await this.em.nativeUpdate(Reminder, { id: reminder.id }, {
-          status,
-          lockedAt: null,
-          lastError: message,
-        });
+        await this.em.nativeUpdate(
+          Reminder,
+          { id: reminder.id },
+          {
+            status,
+            lockedAt: null,
+            lastError: message,
+          },
+        );
       }
     }
   }
@@ -177,12 +185,11 @@ export class PushWorkerService {
       RETURNING r.*;
     `;
 
-    const rows = (await this.em.getConnection().execute(
-      sql,
-      [limit],
-    )) as Record<string, unknown>[];
+    const rows = await this.em.getConnection().execute(sql, [limit]);
 
-    return rows.map((row) => this.em.map(Reminder, row));
+    return (rows as Record<string, unknown>[]).map((row) =>
+      this.em.map(Reminder, row),
+    );
   }
 
   private isErrorTicket(
@@ -253,5 +260,4 @@ export class PushWorkerService {
 
     return tickets;
   }
-
 }
