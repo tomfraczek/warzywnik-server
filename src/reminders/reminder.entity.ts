@@ -44,7 +44,6 @@ export class Reminder {
   @Property({ type: 'jsonb' })
   payload!: ReminderPayload;
 
-  // ✅ nowa kolumna do szybkiego anulowania bez jsonb $contains
   @Property({ type: 'uuid', nullable: true })
   plantingDiseaseId?: string | null;
 
@@ -56,6 +55,9 @@ export class Reminder {
 
   @Property({ type: TextType, nullable: true })
   lastError?: string | null;
+
+  @Property({ type: Date, nullable: true, fieldName: 'locked_at' })
+  lockedAt?: Date | null;
 
   @Property({ type: Date, defaultRaw: 'now()' })
   createdAt: Date = new Date();
