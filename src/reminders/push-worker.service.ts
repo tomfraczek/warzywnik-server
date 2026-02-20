@@ -337,16 +337,16 @@ export class PushWorkerService {
   private async handleFollowUp(reminder: Reminder): Promise<void> {
     try {
       if (reminder.plantingDiseaseId) {
-        await this.remindersService.handlePlantingDiseaseReminderSent(
-          reminder.plantingDiseaseId,
-        );
+        await this.remindersService.handlePlantingDiseaseReminderSent({
+          reminderId: reminder.id,
+        });
         return;
       }
 
       if (reminder.pestOccurrenceId) {
-        await this.remindersService.handlePestOccurrenceReminderSent(
-          reminder.pestOccurrenceId,
-        );
+        await this.remindersService.handlePestOccurrenceReminderSent({
+          reminderId: reminder.id,
+        });
       }
     } catch (err: unknown) {
       const message = toErrorMessage(err);

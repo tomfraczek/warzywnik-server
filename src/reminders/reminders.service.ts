@@ -33,6 +33,11 @@ export class RemindersService {
   private readonly maxRemindersSuspected = 3;
   private readonly maxRemindersConfirmed = 2;
 
+  private readonly activeReminderStatuses = [
+    ReminderStatus.PENDING,
+    ReminderStatus.PROCESSING,
+  ];
+
   constructor(private readonly em: EntityManager) {}
 
   async list(user: User, query: ListRemindersQueryDto) {
@@ -87,27 +92,25 @@ export class RemindersService {
     if (plantingDisease.status === PlantingDiseaseStatus.RESOLVED) {
       plantingDisease.nextCheckAt = null;
       plantingDisease.reminderCount = 0;
+      await this.cancelPending('disease', plantingDisease.id);
       await this.em.flush();
       return [];
     }
 
-    const nextCheckAt = this.computeNextCheckAt(plantingDisease.status);
-
-    plantingDisease.nextCheckAt = nextCheckAt;
-    plantingDisease.reminderCount = 0;
-
-    await this.upsertPendingReminderForPlantingDisease({
+    await this.scheduleNextForOccurrence({
+      kind: 'disease',
+      occurrence: plantingDisease,
+      status: plantingDisease.status,
       user,
       planting,
       disease,
-      plantingDisease,
-      scheduledAt: nextCheckAt,
+      resetReminderCount: true,
     });
 
     await this.em.flush();
 
     this.logger.log(
-      `scheduled planting disease reminder | occurrence=${plantingDisease.id} | nextCheckAt=${nextCheckAt.toISOString()}`,
+      `scheduled planting disease reminder | occurrence=${plantingDisease.id} | nextCheckAt=${plantingDisease.nextCheckAt?.toISOString() ?? 'null'}`,
     );
 
     return [];
@@ -129,7 +132,7 @@ export class RemindersService {
     if (plantingDisease.status === PlantingDiseaseStatus.RESOLVED) {
       plantingDisease.nextCheckAt = null;
       plantingDisease.reminderCount = 0;
-      await this.cancelPendingForPlantingDisease(plantingDisease.id);
+      await this.cancelPending('disease', plantingDisease.id);
       await this.em.flush();
 
       this.logger.log(
@@ -139,45 +142,25 @@ export class RemindersService {
       return;
     }
 
-    const nextCheckAt = this.computeNextCheckAt(plantingDisease.status);
-    plantingDisease.nextCheckAt = nextCheckAt;
-    plantingDisease.reminderCount = 0;
-
-    await this.upsertPendingReminderForPlantingDisease({
+    await this.scheduleNextForOccurrence({
+      kind: 'disease',
+      occurrence: plantingDisease,
+      status: plantingDisease.status,
       user,
       planting,
       disease,
-      plantingDisease,
-      scheduledAt: nextCheckAt,
+      resetReminderCount: true,
     });
 
     await this.em.flush();
 
     this.logger.log(
-      `rescheduled planting disease reminder | occurrence=${plantingDisease.id} | nextCheckAt=${nextCheckAt.toISOString()}`,
+      `rescheduled planting disease reminder | occurrence=${plantingDisease.id} | nextCheckAt=${plantingDisease.nextCheckAt?.toISOString() ?? 'null'}`,
     );
   }
 
   async cancelPendingForPlantingDisease(plantingDiseaseId: string) {
-    const updated = await this.em.nativeUpdate(
-      Reminder,
-      {
-        plantingDiseaseId,
-        status: {
-          $in: [ReminderStatus.PENDING, ReminderStatus.PROCESSING],
-        },
-      },
-      {
-        status: ReminderStatus.CANCELED,
-        lockedAt: null,
-      },
-    );
-
-    if (updated > 0) {
-      this.logger.log(
-        `canceled planting disease reminders=${updated} | occurrence=${plantingDiseaseId}`,
-      );
-    }
+    await this.cancelPending('disease', plantingDiseaseId);
   }
 
   async initializeForPestOccurrence(params: {
@@ -191,27 +174,25 @@ export class RemindersService {
     if (pestOccurrence.status === PestOccurrenceStatus.RESOLVED) {
       pestOccurrence.nextCheckAt = null;
       pestOccurrence.reminderCount = 0;
+      await this.cancelPending('pest', pestOccurrence.id);
       await this.em.flush();
       return;
     }
 
-    const nextCheckAt = this.computeNextCheckAt(pestOccurrence.status);
-
-    pestOccurrence.nextCheckAt = nextCheckAt;
-    pestOccurrence.reminderCount = 0;
-
-    await this.upsertPendingReminderForPestOccurrence({
+    await this.scheduleNextForOccurrence({
+      kind: 'pest',
+      occurrence: pestOccurrence,
+      status: pestOccurrence.status,
       user,
       planting,
       pest,
-      pestOccurrence,
-      scheduledAt: nextCheckAt,
+      resetReminderCount: true,
     });
 
     await this.em.flush();
 
     this.logger.log(
-      `scheduled pest reminder | occurrence=${pestOccurrence.id} | nextCheckAt=${nextCheckAt.toISOString()}`,
+      `scheduled pest reminder | occurrence=${pestOccurrence.id} | nextCheckAt=${pestOccurrence.nextCheckAt?.toISOString() ?? 'null'}`,
     );
   }
 
@@ -231,7 +212,7 @@ export class RemindersService {
     if (pestOccurrence.status === PestOccurrenceStatus.RESOLVED) {
       pestOccurrence.nextCheckAt = null;
       pestOccurrence.reminderCount = 0;
-      await this.cancelPendingForPestOccurrence(pestOccurrence.id);
+      await this.cancelPending('pest', pestOccurrence.id);
       await this.em.flush();
 
       this.logger.log(
@@ -241,153 +222,171 @@ export class RemindersService {
       return;
     }
 
-    const nextCheckAt = this.computeNextCheckAt(pestOccurrence.status);
-    pestOccurrence.nextCheckAt = nextCheckAt;
-    pestOccurrence.reminderCount = 0;
-
-    await this.upsertPendingReminderForPestOccurrence({
+    await this.scheduleNextForOccurrence({
+      kind: 'pest',
+      occurrence: pestOccurrence,
+      status: pestOccurrence.status,
       user,
       planting,
       pest,
-      pestOccurrence,
-      scheduledAt: nextCheckAt,
+      resetReminderCount: true,
     });
 
     await this.em.flush();
 
     this.logger.log(
-      `rescheduled pest reminder | occurrence=${pestOccurrence.id} | nextCheckAt=${nextCheckAt.toISOString()}`,
+      `rescheduled pest reminder | occurrence=${pestOccurrence.id} | nextCheckAt=${pestOccurrence.nextCheckAt?.toISOString() ?? 'null'}`,
     );
   }
 
   async cancelPendingForPestOccurrence(pestOccurrenceId: string) {
-    const updated = await this.em.nativeUpdate(
-      Reminder,
-      {
-        pestOccurrenceId,
-        status: {
-          $in: [ReminderStatus.PENDING, ReminderStatus.PROCESSING],
-        },
-      },
-      {
-        status: ReminderStatus.CANCELED,
-        lockedAt: null,
-      },
-    );
-
-    if (updated > 0) {
-      this.logger.log(
-        `canceled pest reminders=${updated} | occurrence=${pestOccurrenceId}`,
-      );
-    }
+    await this.cancelPending('pest', pestOccurrenceId);
   }
 
-  async handlePlantingDiseaseReminderSent(plantingDiseaseId: string) {
-    const occurrence = await this.em.findOne(
-      PlantingDisease,
-      { id: plantingDiseaseId },
-      { populate: ['planting', 'disease'] },
-    );
+  async handlePlantingDiseaseReminderSent(params: { reminderId: string }) {
+    await this.em.transactional(async (em) => {
+      const reminder = await em.findOne(Reminder, { id: params.reminderId });
 
-    if (!occurrence) {
-      this.logger.warn(
-        `planting disease reminder sent but occurrence missing | id=${plantingDiseaseId}`,
+      if (!reminder) {
+        this.logger.warn(
+          `planting disease reminder sent but reminder missing | reminder=${params.reminderId}`,
+        );
+        return;
+      }
+
+      if (!reminder.plantingDiseaseId) {
+        this.logger.warn(
+          `planting disease reminder sent but plantingDiseaseId missing | reminder=${params.reminderId}`,
+        );
+        return;
+      }
+
+      const occurrence = await em.findOne(
+        PlantingDisease,
+        { id: reminder.plantingDiseaseId },
+        { populate: ['planting', 'disease'] },
       );
-      return;
-    }
 
-    if (occurrence.status === PlantingDiseaseStatus.RESOLVED) {
-      occurrence.nextCheckAt = null;
-      occurrence.reminderCount = 0;
-      await this.cancelPendingForPlantingDisease(occurrence.id);
-      await this.em.flush();
-      return;
-    }
+      if (!occurrence) {
+        this.logger.warn(
+          `planting disease reminder sent but occurrence missing | id=${reminder.plantingDiseaseId}`,
+        );
+        return;
+      }
 
-    occurrence.reminderCount += 1;
+      if (occurrence.status === PlantingDiseaseStatus.RESOLVED) {
+        occurrence.nextCheckAt = null;
+        occurrence.reminderCount = 0;
+        await this.cancelPending('disease', occurrence.id, em);
+        await em.flush();
+        return;
+      }
 
-    const maxReminders = this.getMaxReminders(occurrence.status);
+      occurrence.reminderCount += 1;
 
-    if (occurrence.reminderCount >= maxReminders) {
-      occurrence.nextCheckAt = null;
-      await this.cancelPendingForPlantingDisease(occurrence.id);
-      await this.em.flush();
+      const maxReminders = this.getMaxReminders(occurrence.status);
+
+      if (occurrence.reminderCount >= maxReminders) {
+        occurrence.nextCheckAt = null;
+        await this.cancelPending('disease', occurrence.id, em);
+        await em.flush();
+
+        this.logger.log(
+          `planting disease reminders finished | occurrence=${occurrence.id}`,
+        );
+        return;
+      }
+
+      await this.scheduleNextForOccurrence({
+        kind: 'disease',
+        em,
+        occurrence,
+        status: occurrence.status,
+        user: occurrence.planting.user,
+        planting: occurrence.planting,
+        disease: occurrence.disease,
+        scheduledBaseTime: reminder.scheduledAt,
+      });
+
+      await em.flush();
 
       this.logger.log(
-        `planting disease reminders finished | occurrence=${occurrence.id}`,
+        `next planting disease reminder | occurrence=${occurrence.id} | nextCheckAt=${occurrence.nextCheckAt?.toISOString() ?? 'null'}`,
       );
-      return;
-    }
-
-    const nextCheckAt = this.computeNextCheckAt(occurrence.status);
-    occurrence.nextCheckAt = nextCheckAt;
-
-    await this.upsertPendingReminderForPlantingDisease({
-      user: occurrence.planting.user,
-      planting: occurrence.planting,
-      disease: occurrence.disease,
-      plantingDisease: occurrence,
-      scheduledAt: nextCheckAt,
     });
-
-    await this.em.flush();
-
-    this.logger.log(
-      `next planting disease reminder | occurrence=${occurrence.id} | nextCheckAt=${nextCheckAt.toISOString()}`,
-    );
   }
 
-  async handlePestOccurrenceReminderSent(pestOccurrenceId: string) {
-    const occurrence = await this.em.findOne(
-      PestOccurrence,
-      { id: pestOccurrenceId },
-      { populate: ['planting', 'pest'] },
-    );
+  async handlePestOccurrenceReminderSent(params: { reminderId: string }) {
+    await this.em.transactional(async (em) => {
+      const reminder = await em.findOne(Reminder, { id: params.reminderId });
 
-    if (!occurrence) {
-      this.logger.warn(
-        `pest reminder sent but occurrence missing | id=${pestOccurrenceId}`,
+      if (!reminder) {
+        this.logger.warn(
+          `pest reminder sent but reminder missing | reminder=${params.reminderId}`,
+        );
+        return;
+      }
+
+      if (!reminder.pestOccurrenceId) {
+        this.logger.warn(
+          `pest reminder sent but pestOccurrenceId missing | reminder=${params.reminderId}`,
+        );
+        return;
+      }
+
+      const occurrence = await em.findOne(
+        PestOccurrence,
+        { id: reminder.pestOccurrenceId },
+        { populate: ['planting', 'pest'] },
       );
-      return;
-    }
 
-    if (occurrence.status === PestOccurrenceStatus.RESOLVED) {
-      occurrence.nextCheckAt = null;
-      occurrence.reminderCount = 0;
-      await this.cancelPendingForPestOccurrence(occurrence.id);
-      await this.em.flush();
-      return;
-    }
+      if (!occurrence) {
+        this.logger.warn(
+          `pest reminder sent but occurrence missing | id=${reminder.pestOccurrenceId}`,
+        );
+        return;
+      }
 
-    occurrence.reminderCount += 1;
+      if (occurrence.status === PestOccurrenceStatus.RESOLVED) {
+        occurrence.nextCheckAt = null;
+        occurrence.reminderCount = 0;
+        await this.cancelPending('pest', occurrence.id, em);
+        await em.flush();
+        return;
+      }
 
-    const maxReminders = this.getMaxReminders(occurrence.status);
+      occurrence.reminderCount += 1;
 
-    if (occurrence.reminderCount >= maxReminders) {
-      occurrence.nextCheckAt = null;
-      await this.cancelPendingForPestOccurrence(occurrence.id);
-      await this.em.flush();
+      const maxReminders = this.getMaxReminders(occurrence.status);
 
-      this.logger.log(`pest reminders finished | occurrence=${occurrence.id}`);
-      return;
-    }
+      if (occurrence.reminderCount >= maxReminders) {
+        occurrence.nextCheckAt = null;
+        await this.cancelPending('pest', occurrence.id, em);
+        await em.flush();
 
-    const nextCheckAt = this.computeNextCheckAt(occurrence.status);
-    occurrence.nextCheckAt = nextCheckAt;
+        this.logger.log(
+          `pest reminders finished | occurrence=${occurrence.id}`,
+        );
+        return;
+      }
 
-    await this.upsertPendingReminderForPestOccurrence({
-      user: occurrence.planting.user,
-      planting: occurrence.planting,
-      pest: occurrence.pest,
-      pestOccurrence: occurrence,
-      scheduledAt: nextCheckAt,
+      await this.scheduleNextForOccurrence({
+        kind: 'pest',
+        em,
+        occurrence,
+        status: occurrence.status,
+        user: occurrence.planting.user,
+        planting: occurrence.planting,
+        pest: occurrence.pest,
+        scheduledBaseTime: reminder.scheduledAt,
+      });
+
+      await em.flush();
+
+      this.logger.log(
+        `next pest reminder | occurrence=${occurrence.id} | nextCheckAt=${occurrence.nextCheckAt?.toISOString() ?? 'null'}`,
+      );
     });
-
-    await this.em.flush();
-
-    this.logger.log(
-      `next pest reminder | occurrence=${occurrence.id} | nextCheckAt=${nextCheckAt.toISOString()}`,
-    );
   }
 
   private buildDiseasePayload(
@@ -422,6 +421,7 @@ export class RemindersService {
 
   private computeNextCheckAt(
     status: PlantingDiseaseStatus | PestOccurrenceStatus,
+    baseTime: Date = new Date(),
   ) {
     const interval =
       status === PlantingDiseaseStatus.CONFIRMED ||
@@ -429,7 +429,7 @@ export class RemindersService {
         ? this.confirmedIntervalMs
         : this.suspectedIntervalMs;
 
-    return new Date(Date.now() + interval);
+    return new Date(baseTime.getTime() + interval);
   }
 
   private getMaxReminders(
@@ -445,82 +445,151 @@ export class RemindersService {
     return this.maxRemindersSuspected;
   }
 
-  private async upsertPendingReminderForPlantingDisease(params: {
-    user: User;
-    planting: Planting;
-    disease: Disease;
-    plantingDisease: PlantingDisease;
-    scheduledAt: Date;
-  }) {
-    const { user, planting, disease, plantingDisease, scheduledAt } = params;
+  private async scheduleNextForOccurrence(
+    params:
+      | {
+          kind: 'disease';
+          occurrence: PlantingDisease;
+          status: PlantingDiseaseStatus;
+          user: User;
+          planting: Planting;
+          disease: Disease;
+          em?: EntityManager;
+          scheduledBaseTime?: Date;
+          resetReminderCount?: boolean;
+        }
+      | {
+          kind: 'pest';
+          occurrence: PestOccurrence;
+          status: PestOccurrenceStatus;
+          user: User;
+          planting: Planting;
+          pest: Pest;
+          em?: EntityManager;
+          scheduledBaseTime?: Date;
+          resetReminderCount?: boolean;
+        },
+  ) {
+    const em = params.em ?? this.em;
 
-    const existing = await this.em.findOne(Reminder, {
-      status: ReminderStatus.PENDING,
-      plantingDiseaseId: plantingDisease.id,
-    });
+    if (
+      params.status === PlantingDiseaseStatus.RESOLVED ||
+      params.status === PestOccurrenceStatus.RESOLVED
+    ) {
+      params.occurrence.nextCheckAt = null;
+      params.occurrence.reminderCount = 0;
+      await this.cancelPending(params.kind, params.occurrence.id, em);
+      return;
+    }
 
-    if (existing) {
-      existing.scheduledAt = scheduledAt;
-      existing.type = ReminderType.DISEASE_CHECK;
-      existing.payload = this.buildDiseasePayload(
-        planting,
-        disease,
-        plantingDisease,
-        { action: ReminderAction.CHECK },
+    if (params.resetReminderCount) {
+      params.occurrence.reminderCount = 0;
+    }
+
+    const nextCheckAt = this.computeNextCheckAt(
+      params.status,
+      params.scheduledBaseTime,
+    );
+
+    params.occurrence.nextCheckAt = nextCheckAt;
+
+    await this.cancelPending(params.kind, params.occurrence.id, em);
+
+    if (params.kind === 'disease') {
+      await this.createPending(
+        params.kind,
+        {
+          user: params.user,
+          occurrenceId: params.occurrence.id,
+          type: ReminderType.DISEASE_CHECK,
+          payload: this.buildDiseasePayload(
+            params.planting,
+            params.disease,
+            params.occurrence,
+            { action: ReminderAction.CHECK },
+          ),
+        },
+        nextCheckAt,
+        em,
       );
       return;
     }
 
-    const reminder = new Reminder();
-    reminder.user = user;
-    reminder.type = ReminderType.DISEASE_CHECK;
-    reminder.status = ReminderStatus.PENDING;
-    reminder.scheduledAt = scheduledAt;
-    reminder.payload = this.buildDiseasePayload(
-      planting,
-      disease,
-      plantingDisease,
-      { action: ReminderAction.CHECK },
+    await this.createPending(
+      params.kind,
+      {
+        user: params.user,
+        occurrenceId: params.occurrence.id,
+        type: ReminderType.PEST_CHECK,
+        payload: this.buildPestPayload(
+          params.planting,
+          params.pest,
+          params.occurrence,
+          { action: ReminderAction.CHECK },
+        ),
+      },
+      nextCheckAt,
+      em,
     );
-    reminder.plantingDiseaseId = plantingDisease.id;
-
-    this.em.persist(reminder);
   }
 
-  private async upsertPendingReminderForPestOccurrence(params: {
-    user: User;
-    planting: Planting;
-    pest: Pest;
-    pestOccurrence: PestOccurrence;
-    scheduledAt: Date;
-  }) {
-    const { user, planting, pest, pestOccurrence, scheduledAt } = params;
+  private async cancelPending(
+    kind: 'disease' | 'pest',
+    occurrenceId: string,
+    em: EntityManager = this.em,
+  ) {
+    const where =
+      kind === 'disease'
+        ? {
+            plantingDiseaseId: occurrenceId,
+            status: { $in: this.activeReminderStatuses },
+          }
+        : {
+            pestOccurrenceId: occurrenceId,
+            status: { $in: this.activeReminderStatuses },
+          };
 
-    const existing = await this.em.findOne(Reminder, {
-      status: ReminderStatus.PENDING,
-      pestOccurrenceId: pestOccurrence.id,
+    const updated = await em.nativeUpdate(Reminder, where, {
+      status: ReminderStatus.CANCELED,
+      lockedAt: null,
+      lastError: null,
     });
 
-    if (existing) {
-      existing.scheduledAt = scheduledAt;
-      existing.type = ReminderType.PEST_CHECK;
-      existing.payload = this.buildPestPayload(planting, pest, pestOccurrence, {
-        action: ReminderAction.CHECK,
-      });
-      return;
+    if (updated > 0) {
+      this.logger.log(
+        `canceled ${kind} reminders=${updated} | occurrence=${occurrenceId}`,
+      );
     }
+  }
 
+  private async createPending(
+    kind: 'disease' | 'pest',
+    payload: {
+      user: User;
+      type: ReminderType;
+      occurrenceId: string;
+      payload: ReminderPayload;
+    },
+    scheduledAt: Date,
+    em: EntityManager = this.em,
+  ) {
     const reminder = new Reminder();
-    reminder.user = user;
-    reminder.type = ReminderType.PEST_CHECK;
+    reminder.user = payload.user;
+    reminder.type = payload.type;
     reminder.status = ReminderStatus.PENDING;
     reminder.scheduledAt = scheduledAt;
-    reminder.payload = this.buildPestPayload(planting, pest, pestOccurrence, {
-      action: ReminderAction.CHECK,
-    });
-    reminder.pestOccurrenceId = pestOccurrence.id;
+    reminder.payload = payload.payload;
+    reminder.attempts = 0;
+    reminder.lockedAt = null;
+    reminder.lastError = null;
 
-    this.em.persist(reminder);
+    if (kind === 'disease') {
+      reminder.plantingDiseaseId = payload.occurrenceId;
+    } else {
+      reminder.pestOccurrenceId = payload.occurrenceId;
+    }
+
+    em.persist(reminder);
   }
 
   private serialize(reminder: Reminder) {
