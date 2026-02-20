@@ -1,7 +1,7 @@
 import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20260202090000 extends Migration {
-  async up(): Promise<void> {
+  up(): void {
     this.addSql(
       `alter table "vegetables" add column "family" varchar(32) not null default 'OTHER';`,
     );
@@ -22,7 +22,7 @@ export class Migration20260202090000 extends Migration {
     );
   }
 
-  async down(): Promise<void> {
+  down(): void {
     this.addSql('drop index if exists "idx_vegetables_family";');
     this.addSql('drop index if exists "idx_vegetables_nutrient_needs";');
     this.addSql('drop index if exists "idx_vegetables_rotation_group";');

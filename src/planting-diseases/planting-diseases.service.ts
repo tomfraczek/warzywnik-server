@@ -103,17 +103,7 @@ export class PlantingDiseasesService {
     id: string,
     dto: UpdatePlantingDiseaseDto,
   ) {
-    const planting = await this.getPlantingOrThrow(user, plantingId);
-
-    const occurrence = await this.em.findOne(
-      PlantingDisease,
-      { id, planting: planting.id },
-      { populate: ['disease'] },
-    );
-
-    if (!occurrence) {
-      throw new NotFoundException('Planting disease not found');
-    }
+    const occurrence = await this.getOccurrenceOrThrow(user, id, plantingId);
 
     if (dto.status !== undefined) {
       if (dto.status !== PlantingDiseaseStatus.RESOLVED) {
@@ -125,7 +115,7 @@ export class PlantingDiseasesService {
 
       await this.remindersService.updateForPlantingDiseaseStatusChange({
         user,
-        planting,
+        planting: occurrence.planting,
         disease: occurrence.disease,
         plantingDisease: occurrence,
         previousStatus,
@@ -151,6 +141,57 @@ export class PlantingDiseasesService {
     );
 
     return this.serialize(occurrence);
+  }
+
+  async updateById(user: User, id: string, dto: UpdatePlantingDiseaseDto) {
+    const occurrence = await this.getOccurrenceOrThrow(user, id);
+
+    if (dto.status !== undefined) {
+      if (dto.status !== PlantingDiseaseStatus.RESOLVED) {
+        await this.ensureNoActiveDuplicate(occurrence, dto.status);
+      }
+
+      const previousStatus = occurrence.status;
+      occurrence.status = dto.status;
+
+      await this.remindersService.updateForPlantingDiseaseStatusChange({
+        user,
+        planting: occurrence.planting,
+        disease: occurrence.disease,
+        plantingDisease: occurrence,
+        previousStatus,
+      });
+    }
+
+    if (dto.severity !== undefined) {
+      occurrence.severity = dto.severity;
+    }
+
+    if (dto.observedAt !== undefined) {
+      occurrence.observedAt = this.parseDate(dto.observedAt, 'observedAt');
+    }
+
+    if (dto.notes !== undefined) {
+      occurrence.notes = dto.notes;
+    }
+
+    await this.em.flush();
+
+    this.logger.log(
+      `updated planting disease occurrence=${occurrence.id} | status=${occurrence.status}`,
+    );
+
+    return this.serialize(occurrence);
+  }
+
+  async remove(user: User, id: string) {
+    const occurrence = await this.getOccurrenceOrThrow(user, id);
+
+    await this.remindersService.cancelPendingForPlantingDisease(occurrence.id);
+
+    await this.em.removeAndFlush(occurrence);
+
+    this.logger.log(`deleted planting disease occurrence=${occurrence.id}`);
   }
 
   private async ensureNoActiveDuplicate(
@@ -184,6 +225,28 @@ export class PlantingDiseasesService {
     }
 
     return planting;
+  }
+
+  private async getOccurrenceOrThrow(
+    user: User,
+    id: string,
+    plantingId?: string,
+  ) {
+    const where: Record<string, unknown> = { id };
+
+    if (plantingId) {
+      where.planting = plantingId;
+    }
+
+    const occurrence = await this.em.findOne(PlantingDisease, where, {
+      populate: ['planting', 'disease'],
+    });
+
+    if (!occurrence || occurrence.planting.user.id !== user.id) {
+      throw new NotFoundException('Planting disease not found');
+    }
+
+    return occurrence;
   }
 
   private parseDate(value: string, field: string) {

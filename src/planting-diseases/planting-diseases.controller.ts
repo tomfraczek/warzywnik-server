@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -25,13 +27,13 @@ type RequestWithUser = {
   userEntity?: User;
 };
 
-@Controller('v1/plantings/:plantingId/diseases')
+@Controller()
 export class PlantingDiseasesController {
   constructor(
     private readonly plantingDiseasesService: PlantingDiseasesService,
   ) {}
 
-  @Get()
+  @Get('v1/plantings/:plantingId/disease-occurrences')
   list(
     @Req() req: RequestWithUser,
     @Param('plantingId', new ParseUUIDPipe()) plantingId: string,
@@ -45,7 +47,7 @@ export class PlantingDiseasesController {
     );
   }
 
-  @Post()
+  @Post('v1/plantings/:plantingId/disease-occurrences')
   create(
     @Req() req: RequestWithUser,
     @Param('plantingId', new ParseUUIDPipe()) plantingId: string,
@@ -59,19 +61,26 @@ export class PlantingDiseasesController {
     );
   }
 
-  @Patch(':id')
+  @Patch('v1/disease-occurrences/:id')
   update(
     @Req() req: RequestWithUser,
-    @Param('plantingId', new ParseUUIDPipe()) plantingId: string,
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body(new ZodValidationPipe(updatePlantingDiseaseSchema))
     body: UpdatePlantingDiseaseDto,
   ) {
-    return this.plantingDiseasesService.update(
+    return this.plantingDiseasesService.updateById(
       req.userEntity as User,
-      plantingId,
       id,
       body,
     );
+  }
+
+  @Delete('v1/disease-occurrences/:id')
+  @HttpCode(204)
+  async remove(
+    @Req() req: RequestWithUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    await this.plantingDiseasesService.remove(req.userEntity as User, id);
   }
 }

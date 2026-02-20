@@ -24,7 +24,7 @@ export type DiseaseReminderPayload = {
 
 export type PestReminderPayload = {
   kind: 'pest';
-  bedId: string;
+  plantingId: string;
   pestId: string;
   pestOccurrenceId: string;
   action: ReminderAction;

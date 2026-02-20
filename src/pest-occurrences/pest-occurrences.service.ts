@@ -8,40 +8,71 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PestOccurrence } from './pest-occurrence.entity';
 import {
   CreatePestOccurrenceDto,
+  ListPestOccurrencesQueryDto,
   UpdatePestOccurrenceDto,
 } from './dto/pest-occurrence.schemas';
-import { Bed } from '../beds/bed.entity';
+import { Planting } from '../plantings/planting.entity';
 import { Pest } from '../pests/pest.entity';
 import { User } from '../users/user.entity';
 import { PestOccurrenceStatus } from '../common/enums/pest-occurrence.enums';
 import { RemindersService } from '../reminders/reminders.service';
 
+type PestOccurrenceReminderApi = {
+  initializeForPestOccurrence(params: {
+    user: User;
+    planting: Planting;
+    pest: Pest;
+    pestOccurrence: PestOccurrence;
+  }): Promise<void>;
+  updateForPestOccurrenceStatusChange(params: {
+    user: User;
+    planting: Planting;
+    pest: Pest;
+    pestOccurrence: PestOccurrence;
+    previousStatus: PestOccurrenceStatus;
+  }): Promise<void>;
+  cancelPendingForPestOccurrence(pestOccurrenceId: string): Promise<void>;
+};
+
 @Injectable()
 export class PestOccurrencesService {
   private readonly logger = new Logger(PestOccurrencesService.name);
+  private readonly remindersApi: PestOccurrenceReminderApi;
 
   constructor(
     private readonly em: EntityManager,
     private readonly remindersService: RemindersService,
-  ) {}
+  ) {
+    this.remindersApi = remindersService;
+  }
 
-  async list(user: User, bedId: string) {
-    const bed = await this.getBedOrThrow(user, bedId);
+  async list(
+    user: User,
+    plantingId: string,
+    query: ListPestOccurrencesQueryDto,
+  ) {
+    const planting = await this.getPlantingOrThrow(user, plantingId);
 
-    const items = await this.em.find(
-      PestOccurrence,
-      { bed: bed.id },
-      {
-        populate: ['pest'],
-        orderBy: { createdAt: 'desc' },
-      },
-    );
+    const where: Record<string, unknown> = {
+      planting: planting.id,
+    };
+
+    if (query.status === 'active') {
+      where.status = { $ne: PestOccurrenceStatus.RESOLVED };
+    } else if (query.status === 'resolved') {
+      where.status = PestOccurrenceStatus.RESOLVED;
+    }
+
+    const items = await this.em.find(PestOccurrence, where, {
+      populate: ['pest'],
+      orderBy: { createdAt: 'desc' },
+    });
 
     return items.map((item) => this.serialize(item));
   }
 
-  async create(user: User, bedId: string, dto: CreatePestOccurrenceDto) {
-    const bed = await this.getBedOrThrow(user, bedId);
+  async create(user: User, plantingId: string, dto: CreatePestOccurrenceDto) {
+    const planting = await this.getPlantingOrThrow(user, plantingId);
 
     const pest = await this.em.findOne(Pest, { id: dto.pestId });
     if (!pest) {
@@ -49,7 +80,7 @@ export class PestOccurrencesService {
     }
 
     const existing = await this.em.findOne(PestOccurrence, {
-      bed: bed.id,
+      planting: planting.id,
       pest: pest.id,
       status: { $ne: PestOccurrenceStatus.RESOLVED },
     });
@@ -59,17 +90,16 @@ export class PestOccurrencesService {
     }
 
     const occurrence = new PestOccurrence();
-    occurrence.bed = bed;
+    occurrence.planting = planting;
     occurrence.pest = pest;
     occurrence.status = dto.status ?? PestOccurrenceStatus.SUSPECTED;
     occurrence.notes = dto.notes ?? null;
 
     await this.em.persistAndFlush(occurrence);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    await this.remindersService.initializeForPestOccurrence({
+    await this.remindersApi.initializeForPestOccurrence({
       user,
-      bed,
+      planting,
       pest,
       pestOccurrence: occurrence,
     });
@@ -77,7 +107,7 @@ export class PestOccurrencesService {
     await this.em.populate(occurrence, ['pest']);
 
     this.logger.log(
-      `created pest occurrence=${occurrence.id} | bed=${bed.id} | pest=${pest.id} | status=${occurrence.status}`,
+      `created pest occurrence=${occurrence.id} | planting=${planting.id} | pest=${pest.id} | status=${occurrence.status}`,
     );
 
     return this.serialize(occurrence);
@@ -95,10 +125,9 @@ export class PestOccurrencesService {
 
       occurrence.status = dto.status;
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      await this.remindersService.updateForPestOccurrenceStatusChange({
+      await this.remindersApi.updateForPestOccurrenceStatusChange({
         user,
-        bed: occurrence.bed,
+        planting: occurrence.planting,
         pest: occurrence.pest,
         pestOccurrence: occurrence,
         previousStatus,
@@ -121,32 +150,34 @@ export class PestOccurrencesService {
   async remove(user: User, id: string) {
     const occurrence = await this.getOccurrenceOrThrow(user, id);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    await this.remindersService.cancelPendingForPestOccurrence(occurrence.id);
+    await this.remindersApi.cancelPendingForPestOccurrence(occurrence.id);
 
     await this.em.removeAndFlush(occurrence);
 
     this.logger.log(`deleted pest occurrence=${occurrence.id}`);
   }
 
-  private async getBedOrThrow(user: User, bedId: string) {
-    const bed = await this.em.findOne(Bed, { id: bedId, user: user.id });
+  private async getPlantingOrThrow(user: User, plantingId: string) {
+    const planting = await this.em.findOne(Planting, {
+      id: plantingId,
+      user: user.id,
+    });
 
-    if (!bed) {
-      throw new NotFoundException('Bed not found');
+    if (!planting) {
+      throw new NotFoundException('Planting not found');
     }
 
-    return bed;
+    return planting;
   }
 
   private async getOccurrenceOrThrow(user: User, id: string) {
     const occurrence = await this.em.findOne(
       PestOccurrence,
       { id },
-      { populate: ['bed', 'pest'] },
+      { populate: ['planting', 'pest'] },
     );
 
-    if (!occurrence || occurrence.bed.user.id !== user.id) {
+    if (!occurrence || occurrence.planting.user.id !== user.id) {
       throw new NotFoundException('Pest occurrence not found');
     }
 
@@ -163,7 +194,7 @@ export class PestOccurrencesService {
 
     const existing = await this.em.findOne(PestOccurrence, {
       id: { $ne: occurrence.id },
-      bed: occurrence.bed.id,
+      planting: occurrence.planting.id,
       pest: occurrence.pest.id,
       status: { $ne: PestOccurrenceStatus.RESOLVED },
     });
@@ -176,7 +207,7 @@ export class PestOccurrencesService {
   private serialize(entity: PestOccurrence) {
     return {
       id: entity.id,
-      bedId: entity.bed.id,
+      plantingId: entity.planting.id,
       pest: entity.pest
         ? {
             id: entity.pest.id,

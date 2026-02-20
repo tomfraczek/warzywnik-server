@@ -1,7 +1,7 @@
 import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20260202132339 extends Migration {
-  override async up(): Promise<void> {
+  override up(): void {
     this.addSql(
       `create table if not exists "vegetable_recommended_soils" ("vegetable_id" uuid not null, "soil_id" uuid not null, constraint "vegetable_recommended_soils_pkey" primary key ("vegetable_id", "soil_id"));`,
     );
@@ -67,7 +67,7 @@ export class Migration20260202132339 extends Migration {
     );
   }
 
-  override async down(): Promise<void> {
+  override down(): void {
     this.addSql(
       `alter table "soils" drop constraint if exists "soils_soil_type_check";`,
     );

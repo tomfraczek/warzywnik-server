@@ -21,7 +21,6 @@ import { Disease } from '../diseases/disease.entity';
 import { PlantingDisease } from '../planting-diseases/planting-disease.entity';
 import { PlantingDiseaseStatus } from '../common/enums/planting-disease.enums';
 import { Pest } from '../pests/pest.entity';
-import { Bed } from '../beds/bed.entity';
 import { PestOccurrence } from '../pest-occurrences/pest-occurrence.entity';
 import { PestOccurrenceStatus } from '../common/enums/pest-occurrence.enums';
 
@@ -183,11 +182,11 @@ export class RemindersService {
 
   async initializeForPestOccurrence(params: {
     user: User;
-    bed: Bed;
+    planting: Planting;
     pest: Pest;
     pestOccurrence: PestOccurrence;
   }) {
-    const { user, bed, pest, pestOccurrence } = params;
+    const { user, planting, pest, pestOccurrence } = params;
 
     if (pestOccurrence.status === PestOccurrenceStatus.RESOLVED) {
       pestOccurrence.nextCheckAt = null;
@@ -203,7 +202,7 @@ export class RemindersService {
 
     await this.upsertPendingReminderForPestOccurrence({
       user,
-      bed,
+      planting,
       pest,
       pestOccurrence,
       scheduledAt: nextCheckAt,
@@ -218,12 +217,12 @@ export class RemindersService {
 
   async updateForPestOccurrenceStatusChange(params: {
     user: User;
-    bed: Bed;
+    planting: Planting;
     pest: Pest;
     pestOccurrence: PestOccurrence;
     previousStatus: PestOccurrenceStatus;
   }) {
-    const { user, bed, pest, pestOccurrence, previousStatus } = params;
+    const { user, planting, pest, pestOccurrence, previousStatus } = params;
 
     if (pestOccurrence.status === previousStatus) {
       return;
@@ -248,7 +247,7 @@ export class RemindersService {
 
     await this.upsertPendingReminderForPestOccurrence({
       user,
-      bed,
+      planting,
       pest,
       pestOccurrence,
       scheduledAt: nextCheckAt,
@@ -342,7 +341,7 @@ export class RemindersService {
     const occurrence = await this.em.findOne(
       PestOccurrence,
       { id: pestOccurrenceId },
-      { populate: ['bed', 'pest'] },
+      { populate: ['planting', 'pest'] },
     );
 
     if (!occurrence) {
@@ -377,8 +376,8 @@ export class RemindersService {
     occurrence.nextCheckAt = nextCheckAt;
 
     await this.upsertPendingReminderForPestOccurrence({
-      user: occurrence.bed.user,
-      bed: occurrence.bed,
+      user: occurrence.planting.user,
+      planting: occurrence.planting,
       pest: occurrence.pest,
       pestOccurrence: occurrence,
       scheduledAt: nextCheckAt,
@@ -407,14 +406,14 @@ export class RemindersService {
   }
 
   private buildPestPayload(
-    bed: Bed,
+    planting: Planting,
     pest: Pest,
     pestOccurrence: PestOccurrence,
     params: { action: ReminderAction },
   ): ReminderPayload {
     return {
       kind: 'pest',
-      bedId: bed.id,
+      plantingId: planting.id,
       pestId: pest.id,
       pestOccurrenceId: pestOccurrence.id,
       action: params.action,
@@ -490,12 +489,12 @@ export class RemindersService {
 
   private async upsertPendingReminderForPestOccurrence(params: {
     user: User;
-    bed: Bed;
+    planting: Planting;
     pest: Pest;
     pestOccurrence: PestOccurrence;
     scheduledAt: Date;
   }) {
-    const { user, bed, pest, pestOccurrence, scheduledAt } = params;
+    const { user, planting, pest, pestOccurrence, scheduledAt } = params;
 
     const existing = await this.em.findOne(Reminder, {
       status: ReminderStatus.PENDING,
@@ -505,7 +504,7 @@ export class RemindersService {
     if (existing) {
       existing.scheduledAt = scheduledAt;
       existing.type = ReminderType.PEST_CHECK;
-      existing.payload = this.buildPestPayload(bed, pest, pestOccurrence, {
+      existing.payload = this.buildPestPayload(planting, pest, pestOccurrence, {
         action: ReminderAction.CHECK,
       });
       return;
@@ -516,7 +515,7 @@ export class RemindersService {
     reminder.type = ReminderType.PEST_CHECK;
     reminder.status = ReminderStatus.PENDING;
     reminder.scheduledAt = scheduledAt;
-    reminder.payload = this.buildPestPayload(bed, pest, pestOccurrence, {
+    reminder.payload = this.buildPestPayload(planting, pest, pestOccurrence, {
       action: ReminderAction.CHECK,
     });
     reminder.pestOccurrenceId = pestOccurrence.id;

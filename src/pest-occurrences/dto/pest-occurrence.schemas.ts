@@ -12,6 +12,10 @@ export type UpdatePestOccurrenceDto = {
   notes?: string | null;
 };
 
+export type ListPestOccurrencesQueryDto = {
+  status: 'active' | 'resolved' | 'all';
+};
+
 export const createPestOccurrenceSchema = z.object({
   pestId: z.string().uuid(),
   status: z.nativeEnum(PestOccurrenceStatus).optional(),
@@ -21,4 +25,8 @@ export const createPestOccurrenceSchema = z.object({
 export const updatePestOccurrenceSchema = z.object({
   status: z.nativeEnum(PestOccurrenceStatus).optional(),
   notes: z.string().min(1).nullable().optional(),
+});
+
+export const listPestOccurrencesQuerySchema = z.object({
+  status: z.enum(['active', 'resolved', 'all']).default('active'),
 });

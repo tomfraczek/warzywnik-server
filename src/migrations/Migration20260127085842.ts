@@ -1,7 +1,7 @@
 import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20260127085842 extends Migration {
-  override async up(): Promise<void> {
+  override up(): void {
     this.addSql(
       `alter table if exists "soil_translation" drop constraint if exists "soil_translation_soil_id_foreign";`,
     );
@@ -95,7 +95,7 @@ export class Migration20260127085842 extends Migration {
     );
   }
 
-  override async down(): Promise<void> {
+  override down(): void {
     this.addSql(
       `create table "companion_rule" ("id" varchar(255) not null, "source_id" varchar(255) not null, "target_id" varchar(255) not null, "relation" text check ("relation" in ('good', 'bad', 'allelopathic')) not null default 'good', constraint "companion_rule_pkey" primary key ("id"));`,
     );

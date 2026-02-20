@@ -8,13 +8,16 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   Req,
 } from '@nestjs/common';
 import { PestOccurrencesService } from './pest-occurrences.service';
 import {
   createPestOccurrenceSchema,
+  listPestOccurrencesQuerySchema,
   updatePestOccurrenceSchema,
   CreatePestOccurrenceDto,
+  ListPestOccurrencesQueryDto,
   UpdatePestOccurrenceDto,
 } from './dto/pest-occurrence.schemas';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -30,24 +33,30 @@ export class PestOccurrencesController {
     private readonly pestOccurrencesService: PestOccurrencesService,
   ) {}
 
-  @Get('v1/beds/:bedId/pest-occurrences')
+  @Get('v1/plantings/:plantingId/pest-occurrences')
   list(
     @Req() req: RequestWithUser,
-    @Param('bedId', new ParseUUIDPipe()) bedId: string,
+    @Param('plantingId', new ParseUUIDPipe()) plantingId: string,
+    @Query(new ZodValidationPipe(listPestOccurrencesQuerySchema))
+    query: ListPestOccurrencesQueryDto,
   ) {
-    return this.pestOccurrencesService.list(req.userEntity as User, bedId);
+    return this.pestOccurrencesService.list(
+      req.userEntity as User,
+      plantingId,
+      query,
+    );
   }
 
-  @Post('v1/beds/:bedId/pest-occurrences')
+  @Post('v1/plantings/:plantingId/pest-occurrences')
   create(
     @Req() req: RequestWithUser,
-    @Param('bedId', new ParseUUIDPipe()) bedId: string,
+    @Param('plantingId', new ParseUUIDPipe()) plantingId: string,
     @Body(new ZodValidationPipe(createPestOccurrenceSchema))
     body: CreatePestOccurrenceDto,
   ) {
     return this.pestOccurrencesService.create(
       req.userEntity as User,
-      bedId,
+      plantingId,
       body,
     );
   }

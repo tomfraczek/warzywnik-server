@@ -18,7 +18,6 @@ type ExpoPushMessageData = {
   plantingId?: string;
   diseaseId?: string;
   plantingDiseaseId?: string | null;
-  bedId?: string;
   pestId?: string;
   pestOccurrenceId?: string | null;
 };
@@ -79,7 +78,7 @@ const isReminderPayload = (payload: unknown): payload is ReminderPayload => {
     isNonEmptyString(obj.plantingDiseaseId);
 
   const isPestPayload =
-    isNonEmptyString(obj.bedId) &&
+    isNonEmptyString(obj.plantingId) &&
     isNonEmptyString(obj.pestId) &&
     isNonEmptyString(obj.pestOccurrenceId);
 
@@ -242,19 +241,19 @@ export class PushWorkerService {
       return 'Zastosuj zalecane leczenie choroby.';
     }
     if (reminder.type === ReminderType.PEST_CHECK) {
-      return 'Sprawdź stan szkodników na grządce.';
+      return 'Sprawdź stan szkodników w uprawie.';
     }
     return 'Sprawdź stan choroby w uprawie.';
   }
 
   private buildMessageData(reminder: Reminder): ExpoPushMessageData {
-    const payload = reminder.payload as ReminderPayload;
+    const payload = reminder.payload;
 
     if ('pestOccurrenceId' in payload) {
       return {
         reminderId: reminder.id,
         target: 'pest',
-        bedId: payload.bedId,
+        plantingId: payload.plantingId,
         pestId: payload.pestId,
         pestOccurrenceId: reminder.pestOccurrenceId ?? payload.pestOccurrenceId,
       };

@@ -7,12 +7,12 @@ import {
   Property,
   TextType,
 } from '@mikro-orm/core';
-import { Bed } from '../beds/bed.entity';
+import { Planting } from '../plantings/planting.entity';
 import { Pest } from '../pests/pest.entity';
 import { PestOccurrenceStatus } from '../common/enums/pest-occurrence.enums';
 
 @Entity({ tableName: 'pest_occurrences' })
-@Index({ properties: ['bed'] })
+@Index({ properties: ['planting'] })
 @Index({ properties: ['pest'] })
 @Index({ properties: ['status'] })
 @Index({ properties: ['nextCheckAt'] })
@@ -20,8 +20,8 @@ export class PestOccurrence {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
 
-  @ManyToOne(() => Bed)
-  bed!: Bed;
+  @ManyToOne(() => Planting)
+  planting!: Planting;
 
   @ManyToOne(() => Pest)
   pest!: Pest;
