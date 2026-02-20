@@ -138,7 +138,9 @@ export class ActionTasksService {
     const now = new Date();
 
     const created: ActionTask[] = dto.items.map((item) => {
-      const template = templatesById.get(item.actionTemplateId) as ActionTemplate;
+      const template = templatesById.get(
+        item.actionTemplateId,
+      ) as ActionTemplate;
 
       if (template.target !== ActionTemplateTarget.BED) {
         throw new BadRequestException(

@@ -9,7 +9,12 @@ import { ActionTemplate } from '../action-templates/action-template.entity';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([Bed, Planting, HarvestPromptState, ActionTemplate]),
+    MikroOrmModule.forFeature([
+      Bed,
+      Planting,
+      HarvestPromptState,
+      ActionTemplate,
+    ]),
   ],
   controllers: [HarvestPromptsController],
   providers: [HarvestPromptsService],
