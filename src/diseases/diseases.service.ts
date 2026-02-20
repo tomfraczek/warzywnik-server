@@ -149,7 +149,9 @@ export class DiseasesService {
     }
 
     const uniqueIds = [...new Set(ids)];
-    const templates = await this.em.find(ActionTemplate, { id: { $in: uniqueIds } });
+    const templates = await this.em.find(ActionTemplate, {
+      id: { $in: uniqueIds },
+    });
 
     if (templates.length !== uniqueIds.length) {
       throw new NotFoundException('One or more action templates not found');

@@ -196,7 +196,12 @@ export class PlantingDiseasesService {
   }
 
   async getRecommendedActions(user: User, id: string) {
-    const occurrence = await this.getOccurrenceOrThrow(user, id, undefined, true);
+    const occurrence = await this.getOccurrenceOrThrow(
+      user,
+      id,
+      undefined,
+      true,
+    );
 
     return {
       occurrenceId: occurrence.id,
