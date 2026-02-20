@@ -18,6 +18,7 @@ import { PlantingStatus } from '../common/enums/planting.enums';
 @Index({ properties: ['vegetable'] })
 @Index({ properties: ['status'] })
 @Index({ properties: ['plannedStartDate'] })
+@Index({ properties: ['harvestedAt'] })
 export class Planting {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
@@ -39,6 +40,9 @@ export class Planting {
 
   @Enum({ items: () => PlantingStatus, default: PlantingStatus.PLANNED })
   status: PlantingStatus = PlantingStatus.PLANNED;
+
+  @Property({ type: Date, nullable: true })
+  harvestedAt?: Date | null;
 
   @Property({ type: TextType, nullable: true })
   notes?: string | null;

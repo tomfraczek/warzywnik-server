@@ -13,6 +13,8 @@ import {
 } from '@nestjs/common';
 import { ActionTasksService } from './action-tasks.service';
 import {
+  createBedActionTasksBulkSchema,
+  CreateBedActionTasksBulkDto,
   createActionTaskSchema,
   listActionTasksQuerySchema,
   patchActionTaskSchema,
@@ -70,6 +72,20 @@ export class ActionTasksController {
       req.userEntity as User,
       bedId,
       query,
+    );
+  }
+
+  @Post('v1/beds/:bedId/action-tasks/bulk')
+  createBulkForBed(
+    @Req() req: RequestWithUser,
+    @Param('bedId', new ParseUUIDPipe()) bedId: string,
+    @Body(new ZodValidationPipe(createBedActionTasksBulkSchema))
+    body: CreateBedActionTasksBulkDto,
+  ) {
+    return this.actionTasksService.createBulkForBed(
+      req.userEntity as User,
+      bedId,
+      body,
     );
   }
 

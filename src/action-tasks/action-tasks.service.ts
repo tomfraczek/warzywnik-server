@@ -6,6 +6,7 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ActionTask } from './action-task.entity';
 import {
+  CreateBedActionTasksBulkDto,
   CreateActionTaskDto,
   ListActionTasksQueryDto,
   PatchActionTaskDto,
@@ -105,6 +106,70 @@ export class ActionTasksService {
     });
 
     return items.map((item) => this.serialize(item));
+  }
+
+  async createBulkForBed(
+    user: User,
+    bedId: string,
+    dto: CreateBedActionTasksBulkDto,
+  ) {
+    const bed = await this.getBedOrThrow(user, bedId);
+
+    const templateIds = Array.from(
+      new Set(dto.items.map((item) => item.actionTemplateId)),
+    );
+
+    const templates = await this.em.find(ActionTemplate, {
+      id: { $in: templateIds },
+    });
+
+    const templatesById = new Map(templates.map((item) => [item.id, item]));
+
+    const missingTemplateIds = templateIds.filter(
+      (id) => !templatesById.has(id),
+    );
+
+    if (missingTemplateIds.length > 0) {
+      throw new NotFoundException(
+        `Action template not found: ${missingTemplateIds.join(', ')}`,
+      );
+    }
+
+    const now = new Date();
+
+    const created: ActionTask[] = dto.items.map((item) => {
+      const template = templatesById.get(item.actionTemplateId) as ActionTemplate;
+
+      if (template.target !== ActionTemplateTarget.BED) {
+        throw new BadRequestException(
+          `Action template ${template.id} target is not compatible with bed`,
+        );
+      }
+
+      const task = new ActionTask();
+      task.user = user;
+      task.targetType = ActionTaskTargetType.BED;
+      task.bed = bed;
+      task.planting = null;
+      task.actionTemplate = template;
+      task.title = template.name;
+      task.description =
+        item.description !== undefined
+          ? item.description
+          : (template.description ?? null);
+      task.dueAt = item.dueAt
+        ? this.parseDate(item.dueAt, 'dueAt')
+        : this.addDays(now, template.defaultDueOffsetDays);
+
+      return task;
+    });
+
+    await this.em.persistAndFlush(created);
+    await this.em.populate(created, ['actionTemplate', 'planting', 'bed']);
+
+    return {
+      items: created.map((item) => this.serialize(item)),
+    };
   }
 
   async patch(user: User, id: string, dto: PatchActionTaskDto) {

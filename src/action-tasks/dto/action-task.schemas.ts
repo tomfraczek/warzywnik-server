@@ -21,6 +21,16 @@ export type PatchActionTaskDto = {
   description?: string | null;
 };
 
+export type CreateBedActionTaskBulkItemDto = {
+  actionTemplateId: string;
+  dueAt?: string;
+  description?: string | null;
+};
+
+export type CreateBedActionTasksBulkDto = {
+  items: CreateBedActionTaskBulkItemDto[];
+};
+
 const isoDateSchema = z.string().datetime();
 
 export const createActionTaskSchema = z
@@ -63,3 +73,16 @@ export const patchActionTaskSchema = z
       message: 'At least one field is required',
     },
   );
+
+export const createBedActionTasksBulkSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        actionTemplateId: z.string().uuid(),
+        dueAt: isoDateSchema.optional(),
+        description: z.string().min(1).nullable().optional(),
+      }),
+    )
+    .min(1)
+    .max(100),
+});

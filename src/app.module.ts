@@ -30,6 +30,7 @@ import { DevicesModule } from './devices/devices.module';
 import { PestOccurrencesModule } from './pest-occurrences/pest-occurrences.module';
 import { ActionTemplatesModule } from './action-templates/action-templates.module';
 import { ActionTasksModule } from './action-tasks/action-tasks.module';
+import { HarvestPromptsModule } from './harvest-prompts/harvest-prompts.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { ActionTasksModule } from './action-tasks/action-tasks.module';
     PestOccurrencesModule,
     ActionTemplatesModule,
     ActionTasksModule,
+    HarvestPromptsModule,
   ],
   controllers: [AppController],
   providers: [

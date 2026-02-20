@@ -268,6 +268,7 @@ export class PlantingsService {
       plannedStartDate: planting.plannedStartDate,
       actualStartDate: planting.actualStartDate ?? null,
       status: planting.status,
+      harvestedAt: planting.harvestedAt ?? null,
       notes: planting.notes ?? null,
       createdAt: planting.createdAt,
       updatedAt: planting.updatedAt,
