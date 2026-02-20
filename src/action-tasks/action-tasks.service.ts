@@ -8,10 +8,12 @@ import { ActionTask } from './action-task.entity';
 import {
   CreateBedActionTasksBulkDto,
   CreateActionTaskDto,
+  CreatePlantingActionTasksBulkDto,
   ListActionTasksQueryDto,
   PatchActionTaskDto,
 } from './dto/action-task.schemas';
 import {
+  ActionTaskSource,
   ActionTaskStatus,
   ActionTaskTargetType,
   ActionTemplateTarget,
@@ -20,60 +22,77 @@ import { User } from '../users/user.entity';
 import { Planting } from '../plantings/planting.entity';
 import { Bed } from '../beds/bed.entity';
 import { ActionTemplate } from '../action-templates/action-template.entity';
+import { RemindersService } from '../reminders/reminders.service';
 
 @Injectable()
 export class ActionTasksService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly remindersService: RemindersService,
+  ) {}
 
   async createForPlanting(
     user: User,
     plantingId: string,
     dto: CreateActionTaskDto,
   ) {
-    const planting = await this.getPlantingOrThrow(user, plantingId);
+    return this.em.transactional(async (em) => {
+      const planting = await this.getPlantingOrThrow(user, plantingId, em);
 
-    const task = new ActionTask();
-    task.user = user;
-    task.targetType = ActionTaskTargetType.PLANTING;
-    task.planting = planting;
-    task.bed = null;
+      const task = new ActionTask();
+      task.user = user;
+      task.targetType = ActionTaskTargetType.PLANTING;
+      task.planting = planting;
+      task.bed = null;
+      task.source = ActionTaskSource.MANUAL;
+      task.sourceRefId = null;
 
-    if (dto.actionTemplateId) {
-      const template = await this.em.findOne(ActionTemplate, {
-        id: dto.actionTemplateId,
+      if (dto.actionTemplateId) {
+        const template = await em.findOne(ActionTemplate, {
+          id: dto.actionTemplateId,
+        });
+
+        if (!template) {
+          throw new NotFoundException('Action template not found');
+        }
+
+        if (template.target !== ActionTemplateTarget.PLANTING) {
+          throw new BadRequestException(
+            'Action template target is not compatible with planting',
+          );
+        }
+
+        task.actionTemplate = template;
+        task.title = template.name;
+        task.description =
+          dto.description !== undefined
+            ? dto.description
+            : (template.description ?? null);
+        task.dueAt = dto.dueAt
+          ? this.parseDate(dto.dueAt, 'dueAt')
+          : this.addDays(new Date(), template.defaultDueOffsetDays);
+      } else {
+        task.actionTemplate = null;
+        task.title = dto.title as string;
+        task.description = dto.description ?? null;
+        task.dueAt = dto.dueAt
+          ? this.parseDate(dto.dueAt, 'dueAt')
+          : new Date();
+      }
+
+      em.persist(task);
+      await em.flush();
+
+      await this.remindersService.upsertPendingForActionTask({
+        task,
+        em,
       });
+      await em.flush();
 
-      if (!template) {
-        throw new NotFoundException('Action template not found');
-      }
+      await em.populate(task, ['actionTemplate', 'planting', 'bed']);
 
-      if (template.target !== ActionTemplateTarget.PLANTING) {
-        throw new BadRequestException(
-          'Action template target is not compatible with planting',
-        );
-      }
-
-      task.actionTemplate = template;
-      task.title = template.name;
-      task.description =
-        dto.description !== undefined
-          ? dto.description
-          : (template.description ?? null);
-      task.dueAt = dto.dueAt
-        ? this.parseDate(dto.dueAt, 'dueAt')
-        : this.addDays(new Date(), template.defaultDueOffsetDays);
-    } else {
-      task.actionTemplate = null;
-      task.title = dto.title as string;
-      task.description = dto.description ?? null;
-      task.dueAt = dto.dueAt ? this.parseDate(dto.dueAt, 'dueAt') : null;
-    }
-
-    await this.em.persistAndFlush(task);
-
-    await this.em.populate(task, ['actionTemplate', 'planting', 'bed']);
-
-    return this.serialize(task);
+      return this.serialize(task);
+    });
   }
 
   async listForPlanting(
@@ -113,108 +132,108 @@ export class ActionTasksService {
     bedId: string,
     dto: CreateBedActionTasksBulkDto,
   ) {
-    const bed = await this.getBedOrThrow(user, bedId);
+    return this.em.transactional(async (em) => {
+      const bed = await this.getBedOrThrow(user, bedId, em);
 
-    const templateIds = Array.from(
-      new Set(dto.items.map((item) => item.actionTemplateId)),
-    );
+      const created = await this.createManualBulk({
+        user,
+        items: dto.items,
+        expectedTarget: ActionTemplateTarget.BED,
+        setupTask: (task) => {
+          task.targetType = ActionTaskTargetType.BED;
+          task.bed = bed;
+          task.planting = null;
+        },
+        em,
+      });
 
-    const templates = await this.em.find(ActionTemplate, {
-      id: { $in: templateIds },
+      return { items: created.map((item) => this.serialize(item)) };
     });
+  }
 
-    const templatesById = new Map(templates.map((item) => [item.id, item]));
+  async createBulkForPlanting(
+    user: User,
+    plantingId: string,
+    dto: CreatePlantingActionTasksBulkDto,
+  ) {
+    return this.em.transactional(async (em) => {
+      const planting = await this.getPlantingOrThrow(user, plantingId, em);
 
-    const missingTemplateIds = templateIds.filter(
-      (id) => !templatesById.has(id),
-    );
+      const created = await this.createManualBulk({
+        user,
+        items: dto.items,
+        expectedTarget: ActionTemplateTarget.PLANTING,
+        setupTask: (task) => {
+          task.targetType = ActionTaskTargetType.PLANTING;
+          task.bed = null;
+          task.planting = planting;
+        },
+        em,
+      });
 
-    if (missingTemplateIds.length > 0) {
-      throw new NotFoundException(
-        `Action template not found: ${missingTemplateIds.join(', ')}`,
-      );
-    }
-
-    const now = new Date();
-
-    const created: ActionTask[] = dto.items.map((item) => {
-      const template = templatesById.get(
-        item.actionTemplateId,
-      ) as ActionTemplate;
-
-      if (template.target !== ActionTemplateTarget.BED) {
-        throw new BadRequestException(
-          `Action template ${template.id} target is not compatible with bed`,
-        );
-      }
-
-      const task = new ActionTask();
-      task.user = user;
-      task.targetType = ActionTaskTargetType.BED;
-      task.bed = bed;
-      task.planting = null;
-      task.actionTemplate = template;
-      task.title = template.name;
-      task.description =
-        item.description !== undefined
-          ? item.description
-          : (template.description ?? null);
-      task.dueAt = item.dueAt
-        ? this.parseDate(item.dueAt, 'dueAt')
-        : this.addDays(now, template.defaultDueOffsetDays);
-
-      return task;
+      return { items: created.map((item) => this.serialize(item)) };
     });
-
-    await this.em.persistAndFlush(created);
-    await this.em.populate(created, ['actionTemplate', 'planting', 'bed']);
-
-    return {
-      items: created.map((item) => this.serialize(item)),
-    };
   }
 
   async patch(user: User, id: string, dto: PatchActionTaskDto) {
-    const task = await this.em.findOne(
-      ActionTask,
-      { id, user: user.id },
-      { populate: ['actionTemplate', 'planting', 'bed'] },
-    );
+    return this.em.transactional(async (em) => {
+      const task = await em.findOne(
+        ActionTask,
+        { id, user: user.id },
+        { populate: ['actionTemplate', 'planting', 'bed'] },
+      );
 
-    if (!task) {
-      throw new NotFoundException('Action task not found');
-    }
+      if (!task) {
+        throw new NotFoundException('Action task not found');
+      }
 
-    if (dto.status !== undefined) {
-      task.status = dto.status;
-      task.doneAt = dto.status === ActionTaskStatus.DONE ? new Date() : null;
-    }
+      if (dto.status !== undefined) {
+        task.status = dto.status;
+        task.doneAt = dto.status === ActionTaskStatus.DONE ? new Date() : null;
+      }
 
-    if (dto.dueAt !== undefined) {
-      task.dueAt = dto.dueAt ? this.parseDate(dto.dueAt, 'dueAt') : null;
-    }
+      if (dto.dueAt !== undefined) {
+        task.dueAt = dto.dueAt
+          ? this.parseDate(dto.dueAt, 'dueAt')
+          : new Date();
+      }
 
-    if (dto.title !== undefined) {
-      task.title = dto.title;
-    }
+      if (dto.title !== undefined) {
+        task.title = dto.title;
+      }
 
-    if (dto.description !== undefined) {
-      task.description = dto.description;
-    }
+      if (dto.description !== undefined) {
+        task.description = dto.description;
+      }
 
-    await this.em.flush();
+      await em.flush();
 
-    return this.serialize(task);
+      if (
+        task.status === ActionTaskStatus.DONE ||
+        task.status === ActionTaskStatus.CANCELED
+      ) {
+        await this.remindersService.cancelPendingForActionTask(task.id, em);
+      } else {
+        await this.remindersService.upsertPendingForActionTask({ task, em });
+      }
+
+      await em.flush();
+
+      return this.serialize(task);
+    });
   }
 
   async remove(user: User, id: string) {
-    const task = await this.em.findOne(ActionTask, { id, user: user.id });
+    return this.em.transactional(async (em) => {
+      const task = await em.findOne(ActionTask, { id, user: user.id });
 
-    if (!task) {
-      throw new NotFoundException('Action task not found');
-    }
+      if (!task) {
+        throw new NotFoundException('Action task not found');
+      }
 
-    await this.em.removeAndFlush(task);
+      await this.remindersService.cancelPendingForActionTask(task.id, em);
+      await em.removeAndFlush(task);
+    });
   }
 
   private buildListWhere(user: User, query: ListActionTasksQueryDto) {
@@ -222,8 +241,8 @@ export class ActionTasksService {
       user: user.id,
     };
 
-    if (query.status === 'planned') {
-      where.status = ActionTaskStatus.PLANNED;
+    if (query.status === 'pending') {
+      where.status = ActionTaskStatus.PENDING;
     } else if (query.status === 'done') {
       where.status = ActionTaskStatus.DONE;
     }
@@ -242,8 +261,12 @@ export class ActionTasksService {
     return where;
   }
 
-  private async getPlantingOrThrow(user: User, plantingId: string) {
-    const planting = await this.em.findOne(Planting, {
+  private async getPlantingOrThrow(
+    user: User,
+    plantingId: string,
+    em: EntityManager = this.em,
+  ) {
+    const planting = await em.findOne(Planting, {
       id: plantingId,
       user: user.id,
     });
@@ -255,8 +278,12 @@ export class ActionTasksService {
     return planting;
   }
 
-  private async getBedOrThrow(user: User, bedId: string) {
-    const bed = await this.em.findOne(Bed, {
+  private async getBedOrThrow(
+    user: User,
+    bedId: string,
+    em: EntityManager = this.em,
+  ) {
+    const bed = await em.findOne(Bed, {
       id: bedId,
       user: user.id,
     });
@@ -282,6 +309,77 @@ export class ActionTasksService {
     return copy;
   }
 
+  private async createManualBulk(params: {
+    user: User;
+    items: Array<{ actionTemplateId: string; dueAt?: string; description?: string | null }>;
+    expectedTarget: ActionTemplateTarget;
+    setupTask: (task: ActionTask) => void;
+    em: EntityManager;
+  }) {
+    const templateIds = Array.from(
+      new Set(params.items.map((item) => item.actionTemplateId)),
+    );
+
+    const templates = await params.em.find(ActionTemplate, {
+      id: { $in: templateIds },
+    });
+    const templatesById = new Map(templates.map((item) => [item.id, item]));
+
+    const missingTemplateIds = templateIds.filter(
+      (id) => !templatesById.has(id),
+    );
+
+    if (missingTemplateIds.length > 0) {
+      throw new NotFoundException(
+        `Action template not found: ${missingTemplateIds.join(', ')}`,
+      );
+    }
+
+    const now = new Date();
+    const created: ActionTask[] = params.items.map((item) => {
+      const template = templatesById.get(item.actionTemplateId) as ActionTemplate;
+
+      if (template.target !== params.expectedTarget) {
+        throw new BadRequestException(
+          `Action template ${template.id} target is not compatible with ${params.expectedTarget}`,
+        );
+      }
+
+      const task = new ActionTask();
+      task.user = params.user;
+      params.setupTask(task);
+      task.actionTemplate = template;
+      task.title = template.name;
+      task.description =
+        item.description !== undefined
+          ? item.description
+          : (template.description ?? null);
+      task.dueAt = item.dueAt
+        ? this.parseDate(item.dueAt, 'dueAt')
+        : this.addDays(now, template.defaultDueOffsetDays);
+      task.status = ActionTaskStatus.PENDING;
+      task.source = ActionTaskSource.MANUAL;
+      task.sourceRefId = null;
+
+      return task;
+    });
+
+    params.em.persist(created);
+    await params.em.flush();
+
+    for (const task of created) {
+      await this.remindersService.upsertPendingForActionTask({
+        task,
+        em: params.em,
+      });
+    }
+
+    await params.em.flush();
+    await params.em.populate(created, ['actionTemplate', 'planting', 'bed']);
+
+    return created;
+  }
+
   private serialize(entity: ActionTask) {
     return {
       id: entity.id,
@@ -290,7 +388,9 @@ export class ActionTasksService {
       plantingId: entity.planting?.id ?? null,
       bedId: entity.bed?.id ?? null,
       status: entity.status,
-      dueAt: entity.dueAt ?? null,
+      source: entity.source,
+      sourceRefId: entity.sourceRefId ?? null,
+      dueAt: entity.dueAt,
       title: entity.title,
       description: entity.description ?? null,
       actionTemplate: entity.actionTemplate
@@ -298,6 +398,7 @@ export class ActionTasksService {
             id: entity.actionTemplate.id,
             slug: entity.actionTemplate.slug,
             name: entity.actionTemplate.name,
+        scope: entity.actionTemplate.target,
             target: entity.actionTemplate.target,
             type: entity.actionTemplate.type,
             defaultDueOffsetDays: entity.actionTemplate.defaultDueOffsetDays,

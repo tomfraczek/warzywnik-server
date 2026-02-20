@@ -9,6 +9,7 @@ import {
   RotationGroup,
   DominantNutrientDemand,
 } from '../../common/enums/vegetable.enums';
+import { ActionRuleTrigger } from '../../common/enums/action.enums';
 import type {
   FertilizationStage,
   SowingMethod,
@@ -44,6 +45,15 @@ export type VegetableBaseDto = {
   commonDiseaseIds?: string[];
   goodCompanionIds?: string[];
   badCompanionIds?: string[];
+  actionRules?: VegetableActionRuleDto[];
+};
+
+export type VegetableActionRuleDto = {
+  id?: string;
+  actionTemplateId: string;
+  trigger: ActionRuleTrigger;
+  offsetDays: number;
+  isEnabled?: boolean;
 };
 
 export type CreateVegetableDto = VegetableBaseDto & {
@@ -142,6 +152,14 @@ const fertilizationStageSchema = z.object({
   description: z.string().min(1),
 });
 
+const vegetableActionRuleSchema = z.object({
+  id: z.string().uuid().optional(),
+  actionTemplateId: z.string().uuid(),
+  trigger: z.nativeEnum(ActionRuleTrigger),
+  offsetDays: z.number().int(),
+  isEnabled: z.boolean().optional(),
+});
+
 const baseVegetableSchema = z
   .object({
     slug: slugSchema.optional(),
@@ -176,6 +194,7 @@ const baseVegetableSchema = z
     commonDiseaseIds: z.array(z.string().uuid()).optional(),
     goodCompanionIds: z.array(z.string().uuid()).optional(),
     badCompanionIds: z.array(z.string().uuid()).optional(),
+    actionRules: z.array(vegetableActionRuleSchema).optional(),
   })
   .strict();
 

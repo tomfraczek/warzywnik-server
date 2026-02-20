@@ -9,7 +9,7 @@ export type CreateActionTaskDto = {
 };
 
 export type ListActionTasksQueryDto = {
-  status: 'planned' | 'done' | 'all';
+  status: 'pending' | 'done' | 'all';
   from?: string;
   to?: string;
 };
@@ -29,6 +29,16 @@ export type CreateBedActionTaskBulkItemDto = {
 
 export type CreateBedActionTasksBulkDto = {
   items: CreateBedActionTaskBulkItemDto[];
+};
+
+export type CreatePlantingActionTaskBulkItemDto = {
+  actionTemplateId: string;
+  dueAt?: string;
+  description?: string | null;
+};
+
+export type CreatePlantingActionTasksBulkDto = {
+  items: CreatePlantingActionTaskBulkItemDto[];
 };
 
 const isoDateSchema = z.string().datetime();
@@ -51,7 +61,7 @@ export const createActionTaskSchema = z
   });
 
 export const listActionTasksQuerySchema = z.object({
-  status: z.enum(['planned', 'done', 'all']).default('all'),
+  status: z.enum(['pending', 'done', 'all']).default('all'),
   from: isoDateSchema.optional(),
   to: isoDateSchema.optional(),
 });
@@ -75,6 +85,19 @@ export const patchActionTaskSchema = z
   );
 
 export const createBedActionTasksBulkSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        actionTemplateId: z.string().uuid(),
+        dueAt: isoDateSchema.optional(),
+        description: z.string().min(1).nullable().optional(),
+      }),
+    )
+    .min(1)
+    .max(100),
+});
+
+export const createPlantingActionTasksBulkSchema = z.object({
   items: z
     .array(
       z.object({

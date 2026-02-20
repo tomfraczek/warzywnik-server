@@ -15,6 +15,8 @@ import { ActionTasksService } from './action-tasks.service';
 import {
   createBedActionTasksBulkSchema,
   CreateBedActionTasksBulkDto,
+  createPlantingActionTasksBulkSchema,
+  CreatePlantingActionTasksBulkDto,
   createActionTaskSchema,
   listActionTasksQuerySchema,
   patchActionTaskSchema,
@@ -85,6 +87,20 @@ export class ActionTasksController {
     return this.actionTasksService.createBulkForBed(
       req.userEntity as User,
       bedId,
+      body,
+    );
+  }
+
+  @Post('v1/plantings/:plantingId/action-tasks/bulk')
+  createBulkForPlanting(
+    @Req() req: RequestWithUser,
+    @Param('plantingId', new ParseUUIDPipe()) plantingId: string,
+    @Body(new ZodValidationPipe(createPlantingActionTasksBulkSchema))
+    body: CreatePlantingActionTasksBulkDto,
+  ) {
+    return this.actionTasksService.createBulkForPlanting(
+      req.userEntity as User,
+      plantingId,
       body,
     );
   }

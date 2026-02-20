@@ -23,6 +23,8 @@ import { PlantingDiseaseStatus } from '../common/enums/planting-disease.enums';
 import { Pest } from '../pests/pest.entity';
 import { PestOccurrence } from '../pest-occurrences/pest-occurrence.entity';
 import { PestOccurrenceStatus } from '../common/enums/pest-occurrence.enums';
+import { ActionTask } from '../action-tasks/action-task.entity';
+import { ActionTaskStatus } from '../common/enums/action.enums';
 
 @Injectable()
 export class RemindersService {
@@ -243,6 +245,62 @@ export class RemindersService {
     await this.cancelPending('pest', pestOccurrenceId);
   }
 
+  async upsertPendingForActionTask(params: {
+    task: ActionTask;
+    em?: EntityManager;
+  }) {
+    const em = params.em ?? this.em;
+
+    if (params.task.status !== ActionTaskStatus.PENDING) {
+      await this.cancelPendingForActionTask(params.task.id, em);
+      return;
+    }
+
+    if (!params.task.dueAt) {
+      await this.cancelPendingForActionTask(params.task.id, em);
+      return;
+    }
+
+    await this.cancelPendingForActionTask(params.task.id, em);
+
+    const reminder = new Reminder();
+    reminder.user = params.task.user;
+    reminder.type = ReminderType.ACTION_TASK_DUE;
+    reminder.status = ReminderStatus.PENDING;
+    reminder.scheduledAt = params.task.dueAt;
+    reminder.payload = this.buildActionTaskPayload(params.task);
+    reminder.actionTaskId = params.task.id;
+    reminder.attempts = 0;
+    reminder.lockedAt = null;
+    reminder.lastError = null;
+
+    em.persist(reminder);
+  }
+
+  async cancelPendingForActionTask(
+    actionTaskId: string,
+    em: EntityManager = this.em,
+  ) {
+    const updated = await em.nativeUpdate(
+      Reminder,
+      {
+        actionTaskId,
+        status: { $in: this.activeReminderStatuses },
+      },
+      {
+        status: ReminderStatus.CANCELED,
+        lockedAt: null,
+        lastError: null,
+      },
+    );
+
+    if (updated > 0) {
+      this.logger.log(
+        `canceled action-task reminders=${updated} | actionTask=${actionTaskId}`,
+      );
+    }
+  }
+
   async handlePlantingDiseaseReminderSent(params: { reminderId: string }) {
     await this.em.transactional(async (em) => {
       const reminder = await em.findOne(Reminder, { id: params.reminderId });
@@ -416,6 +474,18 @@ export class RemindersService {
       pestId: pest.id,
       pestOccurrenceId: pestOccurrence.id,
       action: params.action,
+    };
+  }
+
+  private buildActionTaskPayload(task: ActionTask): ReminderPayload {
+    return {
+      kind: 'action',
+      actionTaskId: task.id,
+      actionTemplateId: task.actionTemplate?.id,
+      actionTemplateName: task.actionTemplate?.name ?? task.title,
+      bedId: task.bed?.id,
+      plantingId: task.planting?.id,
+      action: ReminderAction.CHECK,
     };
   }
 
@@ -602,6 +672,7 @@ export class RemindersService {
       payload: reminder.payload,
       plantingDiseaseId: reminder.plantingDiseaseId ?? null,
       pestOccurrenceId: reminder.pestOccurrenceId ?? null,
+      actionTaskId: reminder.actionTaskId ?? null,
       sentAt: reminder.sentAt ?? null,
       attempts: reminder.attempts,
       lastError: reminder.lastError ?? null,

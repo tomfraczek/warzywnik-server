@@ -29,6 +29,8 @@ import {
   RotationGroup,
 } from '../common/enums/vegetable.enums';
 import { DemandLevel as SoilDemandLevel } from '../common/enums/soil.enums';
+import { ActionAutomationService } from '../action-tasks/action-automation.service';
+import { ActionRuleTrigger } from '../common/enums/action.enums';
 
 type WarningResult = WarningOutput;
 
@@ -37,6 +39,7 @@ export class PlantingsService {
   constructor(
     private readonly em: EntityManager,
     private readonly warningsService: WarningsService,
+    private readonly actionAutomationService: ActionAutomationService,
   ) {}
 
   async list(user: User, query: ListPlantingsQueryDto) {
@@ -170,6 +173,15 @@ export class PlantingsService {
     planting.notes = dto.notes ?? null;
 
     await this.em.persistAndFlush(planting);
+
+    await this.actionAutomationService.applyVegetableRules({
+      user,
+      planting,
+      bed,
+      vegetable,
+      trigger: ActionRuleTrigger.ON_PLANTING_CREATED,
+      baseDate: planting.createdAt,
+    });
 
     return await this.serializeWithComputed(planting, bed, vegetable, {
       includeWarnings: true,

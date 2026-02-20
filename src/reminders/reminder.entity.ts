@@ -30,13 +30,27 @@ export type PestReminderPayload = {
   action: ReminderAction;
 };
 
-export type ReminderPayload = DiseaseReminderPayload | PestReminderPayload;
+export type ActionTaskReminderPayload = {
+  kind: 'action';
+  actionTaskId: string;
+  actionTemplateId?: string;
+  actionTemplateName?: string;
+  bedId?: string;
+  plantingId?: string;
+  action: ReminderAction;
+};
+
+export type ReminderPayload =
+  | DiseaseReminderPayload
+  | PestReminderPayload
+  | ActionTaskReminderPayload;
 
 @Entity({ tableName: 'reminders' })
 @Index({ properties: ['status', 'scheduledAt'] })
 @Index({ properties: ['user'] })
 @Index({ properties: ['plantingDiseaseId'] })
 @Index({ properties: ['pestOccurrenceId'] })
+@Index({ properties: ['actionTaskId'] })
 export class Reminder {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
@@ -61,6 +75,9 @@ export class Reminder {
 
   @Property({ type: 'uuid', nullable: true })
   pestOccurrenceId?: string | null;
+
+  @Property({ type: 'uuid', nullable: true })
+  actionTaskId?: string | null;
 
   @Property({ type: Date, nullable: true })
   sentAt?: Date | null;

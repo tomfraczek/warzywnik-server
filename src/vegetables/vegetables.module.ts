@@ -5,9 +5,19 @@ import { VegetablesService } from './vegetables.service';
 import { Vegetable } from './vegetable.entity';
 import { Pest } from '../pests/pest.entity';
 import { Disease } from '../diseases/disease.entity';
+import { ActionTemplate } from '../action-templates/action-template.entity';
+import { VegetableActionRule } from './vegetable-action-rule.entity';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Vegetable, Pest, Disease])],
+  imports: [
+    MikroOrmModule.forFeature([
+      Vegetable,
+      Pest,
+      Disease,
+      ActionTemplate,
+      VegetableActionRule,
+    ]),
+  ],
   controllers: [VegetablesController],
   providers: [VegetablesService],
   exports: [VegetablesService],

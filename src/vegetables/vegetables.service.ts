@@ -15,11 +15,14 @@ import {
 import { Pest } from '../pests/pest.entity';
 import { Disease } from '../diseases/disease.entity';
 import { Soil } from '../soils/soil.entity';
+import { ActionTemplate } from '../action-templates/action-template.entity';
 import {
   CreateVegetableDto,
   ListVegetablesQueryDto,
+  VegetableActionRuleDto,
   UpdateVegetableDto,
 } from './dto/vegetable.schemas';
+import { VegetableActionRule } from './vegetable-action-rule.entity';
 
 @Injectable()
 export class VegetablesService {
@@ -96,6 +99,8 @@ export class VegetablesService {
           'commonDiseases',
           'goodCompanions',
           'badCompanions',
+          'actionRules',
+          'actionRules.actionTemplate',
         ],
       },
     );
@@ -177,6 +182,10 @@ export class VegetablesService {
       vegetable.badCompanions.set(companions);
     }
 
+    if (dto.actionRules !== undefined) {
+      await this.replaceActionRules(vegetable, dto.actionRules);
+    }
+
     await this.em.persistAndFlush(vegetable);
 
     await this.em.populate(vegetable, [
@@ -185,6 +194,8 @@ export class VegetablesService {
       'commonDiseases',
       'goodCompanions',
       'badCompanions',
+      'actionRules',
+      'actionRules.actionTemplate',
     ]);
 
     return this.serializeVegetable(vegetable);
@@ -201,6 +212,8 @@ export class VegetablesService {
           'commonDiseases',
           'goodCompanions',
           'badCompanions',
+          'actionRules',
+          'actionRules.actionTemplate',
         ],
       },
     );
@@ -297,6 +310,10 @@ export class VegetablesService {
       vegetable.badCompanions.set(companions);
     }
 
+    if (dto.actionRules !== undefined) {
+      await this.replaceActionRules(vegetable, dto.actionRules);
+    }
+
     await this.em.flush();
 
     return this.serializeVegetable(vegetable);
@@ -374,8 +391,69 @@ export class VegetablesService {
       badCompanions: entity.badCompanions
         .getItems()
         .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
+      actionRules: entity.actionRules.getItems().map((rule) => ({
+        id: rule.id,
+        trigger: rule.trigger,
+        offsetDays: rule.offsetDays,
+        isEnabled: rule.isEnabled,
+        actionTemplate: {
+          id: rule.actionTemplate.id,
+          name: rule.actionTemplate.name,
+          scope: rule.actionTemplate.target,
+          target: rule.actionTemplate.target,
+          type: rule.actionTemplate.type,
+          description: rule.actionTemplate.description ?? null,
+          defaultDueOffsetDays: rule.actionTemplate.defaultDueOffsetDays,
+        },
+      })),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };
+  }
+
+  private async replaceActionRules(
+    vegetable: Vegetable,
+    rules: VegetableActionRuleDto[],
+  ) {
+    await this.em.nativeDelete(VegetableActionRule, {
+      vegetable: vegetable.id,
+    });
+
+    if (rules.length === 0) {
+      vegetable.actionRules.removeAll();
+      return;
+    }
+
+    const templateIds = Array.from(
+      new Set(rules.map((item) => item.actionTemplateId)),
+    );
+
+    const templates = await this.loadEntitiesByIds(
+      ActionTemplate,
+      templateIds,
+      'ActionTemplate',
+    );
+    const templateById = new Map(templates.map((item) => [item.id, item]));
+
+    const items: VegetableActionRule[] = rules.map((item) => {
+      const actionTemplate = templateById.get(item.actionTemplateId);
+      if (!actionTemplate) {
+        throw new BadRequestException(
+          `Missing ActionTemplate ID: ${item.actionTemplateId}`,
+        );
+      }
+
+      const rule = new VegetableActionRule();
+      rule.vegetable = vegetable;
+      rule.actionTemplate = actionTemplate;
+      rule.trigger = item.trigger;
+      rule.offsetDays = item.offsetDays;
+      rule.isEnabled = item.isEnabled ?? true;
+
+      return rule;
+    });
+
+    this.em.persist(items);
+    vegetable.actionRules.set(items);
   }
 }

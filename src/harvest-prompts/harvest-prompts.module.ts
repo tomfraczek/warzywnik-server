@@ -5,16 +5,12 @@ import { HarvestPromptsService } from './harvest-prompts.service';
 import { Bed } from '../beds/bed.entity';
 import { Planting } from '../plantings/planting.entity';
 import { HarvestPromptState } from './harvest-prompt-state.entity';
-import { ActionTemplate } from '../action-templates/action-template.entity';
+import { ActionTasksModule } from '../action-tasks/action-tasks.module';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([
-      Bed,
-      Planting,
-      HarvestPromptState,
-      ActionTemplate,
-    ]),
+    MikroOrmModule.forFeature([Bed, Planting, HarvestPromptState]),
+    ActionTasksModule,
   ],
   controllers: [HarvestPromptsController],
   providers: [HarvestPromptsService],

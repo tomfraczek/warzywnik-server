@@ -6,8 +6,10 @@ import {
   PrimaryKey,
   Property,
   TextType,
+  Unique,
 } from '@mikro-orm/core';
 import {
+  ActionTaskSource,
   ActionTaskStatus,
   ActionTaskTargetType,
 } from '../common/enums/action.enums';
@@ -18,8 +20,12 @@ import { ActionTemplate } from '../action-templates/action-template.entity';
 
 @Entity({ tableName: 'action_tasks' })
 @Index({ properties: ['user', 'dueAt'] })
+@Index({ properties: ['user'] })
 @Index({ properties: ['planting'] })
 @Index({ properties: ['bed'] })
+@Index({ properties: ['status'] })
+@Index({ properties: ['sourceRefId'] })
+@Unique({ properties: ['user', 'source', 'sourceRefId', 'dueAt'] })
 export class ActionTask {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
@@ -37,7 +43,13 @@ export class ActionTask {
   bed?: Bed | null;
 
   @Enum({ items: () => ActionTaskStatus })
-  status: ActionTaskStatus = ActionTaskStatus.PLANNED;
+  status: ActionTaskStatus = ActionTaskStatus.PENDING;
+
+  @Enum({ items: () => ActionTaskSource })
+  source: ActionTaskSource = ActionTaskSource.MANUAL;
+
+  @Property({ type: 'uuid', nullable: true })
+  sourceRefId?: string | null;
 
   @Property({ type: Date, nullable: true })
   dueAt?: Date | null;

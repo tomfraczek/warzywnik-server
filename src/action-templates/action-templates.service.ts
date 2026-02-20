@@ -124,6 +124,7 @@ export class ActionTemplatesService {
       slug: entity.slug,
       name: entity.name,
       description: entity.description ?? null,
+      scope: entity.target,
       target: entity.target,
       type: entity.type,
       defaultDueOffsetDays: entity.defaultDueOffsetDays,

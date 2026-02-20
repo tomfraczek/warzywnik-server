@@ -6,12 +6,23 @@ import { ActionTasksController } from './action-tasks.controller';
 import { ActionTemplate } from '../action-templates/action-template.entity';
 import { Planting } from '../plantings/planting.entity';
 import { Bed } from '../beds/bed.entity';
+import { RemindersModule } from '../reminders/reminders.module';
+import { ActionAutomationService } from './action-automation.service';
+import { VegetableActionRule } from '../vegetables/vegetable-action-rule.entity';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([ActionTask, ActionTemplate, Planting, Bed]),
+    MikroOrmModule.forFeature([
+      ActionTask,
+      ActionTemplate,
+      Planting,
+      Bed,
+      VegetableActionRule,
+    ]),
+    RemindersModule,
   ],
-  providers: [ActionTasksService],
+  providers: [ActionTasksService, ActionAutomationService],
   controllers: [ActionTasksController],
+  exports: [ActionTasksService, ActionAutomationService],
 })
 export class ActionTasksModule {}

@@ -12,12 +12,14 @@ import { PlantingStatus } from '../common/enums/planting.enums';
 import { Month } from '../common/enums/vegetable.enums';
 import { HarvestPromptAnswer } from '../common/enums/harvest-prompt.enums';
 import { HarvestConfirmationDto } from './dto/harvest-prompt.schemas';
-import { ActionTemplate } from '../action-templates/action-template.entity';
-import { ActionTemplateTarget } from '../common/enums/action.enums';
+import { ActionAutomationService } from '../action-tasks/action-automation.service';
 
 @Injectable()
 export class HarvestPromptsService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly actionAutomationService: ActionAutomationService,
+  ) {}
 
   async listForBed(user: User, bedId: string) {
     const bed = await this.em.findOne(Bed, { id: bedId, user: user.id });
@@ -129,7 +131,10 @@ export class HarvestPromptsService {
       planting.harvestedAt = now;
       planting.status = PlantingStatus.FINISHED;
 
-      const postHarvestActions = await this.getPostHarvestActions(em);
+      const postHarvestActions =
+        await this.actionAutomationService.getPostHarvestActionSuggestions(
+          planting.vegetable.id,
+        );
 
       await em.persistAndFlush([state, planting]);
 
@@ -139,42 +144,6 @@ export class HarvestPromptsService {
         postHarvestActions,
       };
     });
-  }
-
-  private async getPostHarvestActions(em: EntityManager) {
-    const slugs = this.getDefaultPostHarvestActionSlugs();
-    if (slugs.length === 0) return [];
-
-    const actions = await em.find(ActionTemplate, {
-      slug: { $in: slugs },
-      target: ActionTemplateTarget.BED,
-    });
-
-    const actionsBySlug = new Map(actions.map((item) => [item.slug, item]));
-
-    return slugs
-      .map((slug) => actionsBySlug.get(slug))
-      .filter((item): item is ActionTemplate => Boolean(item))
-      .map((item) => ({
-        id: item.id,
-        slug: item.slug,
-        name: item.name,
-        description: item.description ?? null,
-        target: item.target,
-        type: item.type,
-        defaultDueOffsetDays: item.defaultDueOffsetDays,
-      }));
-  }
-
-  private getDefaultPostHarvestActionSlugs() {
-    const raw = process.env.DEFAULT_POST_HARVEST_ACTION_SLUGS;
-
-    if (!raw) return [];
-
-    return raw
-      .split(',')
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
   }
 
   private isReadyForHarvest(planting: Planting) {

@@ -19,7 +19,17 @@ export enum ActionTaskTargetType {
 }
 
 export enum ActionTaskStatus {
-  PLANNED = 'planned',
+  PENDING = 'pending',
   DONE = 'done',
-  SKIPPED = 'skipped',
+  CANCELED = 'canceled',
+}
+
+export enum ActionTaskSource {
+  MANUAL = 'MANUAL',
+  VEGETABLE_RULE = 'VEGETABLE_RULE',
+}
+
+export enum ActionRuleTrigger {
+  ON_PLANTING_CREATED = 'ON_PLANTING_CREATED',
+  ON_HARVEST_CONFIRMED = 'ON_HARVEST_CONFIRMED',
 }

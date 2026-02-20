@@ -14,12 +14,15 @@ import { RemindersService } from './reminders.service';
 
 type ExpoPushMessageData = {
   reminderId: string;
-  target: 'disease' | 'pest';
+  target: 'disease' | 'pest' | 'action';
   plantingId?: string;
   diseaseId?: string;
   plantingDiseaseId?: string | null;
   pestId?: string;
   pestOccurrenceId?: string | null;
+  actionTaskId?: string;
+  actionTemplateId?: string;
+  bedId?: string;
 };
 
 type ExpoPushMessage = {
@@ -42,6 +45,7 @@ type ClaimedReminderRow = {
   payload: unknown;
   planting_disease_id: string | null;
   pest_occurrence_id: string | null;
+  action_task_id: string | null;
   sent_at: string | Date | null;
   attempts: number;
   last_error: string | null;
@@ -82,8 +86,10 @@ const isReminderPayload = (payload: unknown): payload is ReminderPayload => {
     isNonEmptyString(obj.pestId) &&
     isNonEmptyString(obj.pestOccurrenceId);
 
+  const isActionPayload = isNonEmptyString(obj.actionTaskId);
+
   return (
-    (isDiseasePayload || isPestPayload) &&
+    (isDiseasePayload || isPestPayload || isActionPayload) &&
     Object.values(ReminderAction).includes(obj.action as ReminderAction)
   );
 };
@@ -189,6 +195,7 @@ export class PushWorkerService {
         r.payload,
         r.planting_disease_id,
         r.pest_occurrence_id,
+        r.action_task_id,
         r.sent_at,
         r.attempts,
         r.last_error,
@@ -213,6 +220,7 @@ export class PushWorkerService {
           payload: this.requirePayload(row.payload, row.id),
           plantingDiseaseId: row.planting_disease_id,
           pestOccurrenceId: row.pest_occurrence_id,
+          actionTaskId: row.action_task_id,
           sentAt: toDate(row.sent_at),
           attempts: row.attempts,
           lastError: row.last_error,
@@ -237,6 +245,14 @@ export class PushWorkerService {
   }
 
   private buildBody(reminder: Reminder): string {
+    if (reminder.type === ReminderType.ACTION_TASK_DUE) {
+      const payload = reminder.payload;
+      if ('kind' in payload && payload.kind === 'action') {
+        return `Czas na: ${payload.actionTemplateName ?? 'zaplanowany zabieg'}`;
+      }
+      return 'Czas na zaplanowany zabieg.';
+    }
+
     if (reminder.type === ReminderType.DISEASE_TREATMENT) {
       return 'Zastosuj zalecane leczenie choroby.';
     }
@@ -248,6 +264,17 @@ export class PushWorkerService {
 
   private buildMessageData(reminder: Reminder): ExpoPushMessageData {
     const payload = reminder.payload;
+
+    if ('kind' in payload && payload.kind === 'action') {
+      return {
+        reminderId: reminder.id,
+        target: 'action',
+        actionTaskId: payload.actionTaskId,
+        actionTemplateId: payload.actionTemplateId,
+        bedId: payload.bedId,
+        plantingId: payload.plantingId,
+      };
+    }
 
     if ('pestOccurrenceId' in payload) {
       return {
@@ -347,6 +374,11 @@ export class PushWorkerService {
         await this.remindersService.handlePestOccurrenceReminderSent({
           reminderId: reminder.id,
         });
+        return;
+      }
+
+      if (reminder.actionTaskId) {
+        return;
       }
     } catch (err: unknown) {
       const message = toErrorMessage(err);

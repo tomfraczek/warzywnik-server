@@ -81,6 +81,79 @@ Rules are applied only when they exist and are both `enabled` and `isActive`.
 - `SUBOPTIMAL_SOWING_TIME`: `vegetableName`, `bedName`, `plannedStartDate` (ISO), `sowingStartMonth`, `sowingEndMonth`
 - `EXPERIMENTAL_SETUP`: `vegetableName`, `bedName`
 
+## Action tasks automation (MVP) — quick smoke test
+
+Assume `API=http://localhost:4000`, valid `Authorization: Bearer <TOKEN>`, and existing IDs:
+- `VEGETABLE_ID`, `BED_ID`, `PLANTING_ID`, `TEMPLATE_PLANTING_ID`, `TEMPLATE_BED_ID`.
+
+1) Update vegetable rules (replace list)
+
+```bash
+curl -X PATCH "$API/v1/vegetables/$VEGETABLE_ID" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "actionRules": [
+      {
+        "actionTemplateId": "'$TEMPLATE_PLANTING_ID'",
+        "trigger": "ON_PLANTING_CREATED",
+        "offsetDays": 2,
+        "isEnabled": true
+      },
+      {
+        "actionTemplateId": "'$TEMPLATE_BED_ID'",
+        "trigger": "ON_HARVEST_CONFIRMED",
+        "offsetDays": 0,
+        "isEnabled": true
+      }
+    ]
+  }'
+```
+
+2) Create planting → automatic `ActionTask` + pending `Reminder`
+
+```bash
+curl -X POST "$API/v1/plantings" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bedId": "'$BED_ID'",
+    "vegetableId": "'$VEGETABLE_ID'",
+    "plannedStartDate": "2026-02-20T09:00:00.000Z"
+  }'
+```
+
+3) Harvest confirmation YES → returns post-harvest action proposals (no auto-create)
+
+```bash
+curl -X POST "$API/v1/plantings/$PLANTING_ID/harvest-confirmation" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"answer":"yes"}'
+```
+
+4) Create selected tasks from modal (bulk) → reminders created
+
+```bash
+curl -X POST "$API/v1/beds/$BED_ID/action-tasks/bulk" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [
+      { "actionTemplateId": "'$TEMPLATE_BED_ID'" }
+    ]
+  }'
+```
+
+5) Mark task DONE → pending reminder canceled
+
+```bash
+curl -X PATCH "$API/v1/action-tasks/$TASK_ID" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"done"}'
+```
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

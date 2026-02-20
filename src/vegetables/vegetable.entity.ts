@@ -4,6 +4,7 @@ import {
   Enum,
   JsonType,
   ManyToMany,
+  OneToMany,
   PrimaryKey,
   Property,
   TextType,
@@ -25,6 +26,7 @@ import {
 import { Pest } from '../pests/pest.entity';
 import { Disease } from '../diseases/disease.entity';
 import { Soil } from '../soils/soil.entity';
+import { VegetableActionRule } from './vegetable-action-rule.entity';
 
 const VEGETABLE_FAMILY_ITEMS: string[] = [
   'BRASSICACEAE',
@@ -161,6 +163,9 @@ export class Vegetable {
     inverseJoinColumn: 'companion_id',
   })
   badCompanions = new Collection<Vegetable>(this);
+
+  @OneToMany(() => VegetableActionRule, (rule) => rule.vegetable)
+  actionRules = new Collection<VegetableActionRule>(this);
 
   @Property({ type: Date, defaultRaw: 'now()' })
   createdAt: Date = new Date();
