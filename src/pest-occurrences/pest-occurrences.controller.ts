@@ -71,6 +71,17 @@ export class PestOccurrencesController {
     return this.pestOccurrencesService.update(req.userEntity as User, id, body);
   }
 
+  @Get('v1/pest-occurrences/:id/recommended-actions')
+  getRecommendedActions(
+    @Req() req: RequestWithUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.pestOccurrencesService.getRecommendedActions(
+      req.userEntity as User,
+      id,
+    );
+  }
+
   @Delete('v1/pest-occurrences/:id')
   @HttpCode(204)
   async remove(

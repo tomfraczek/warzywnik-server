@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Pest } from './pest.entity';
+import { ActionTemplate } from '../action-templates/action-template.entity';
 import {
   CreatePestDto,
   ListPestsQueryDto,
@@ -31,10 +32,11 @@ export class PestsService {
       limit,
       offset: (page - 1) * limit,
       orderBy: { name: 'asc' },
+      populate: ['recommendedActions'],
     });
 
     return {
-      items,
+      items: items.map((item) => this.serialize(item)),
       page,
       limit,
       total,
@@ -42,13 +44,17 @@ export class PestsService {
   }
 
   async getById(id: string) {
-    const entity = await this.em.findOne(Pest, { id });
+    const entity = await this.em.findOne(
+      Pest,
+      { id },
+      { populate: ['recommendedActions'] },
+    );
 
     if (!entity) {
       throw new NotFoundException('Pest not found');
     }
 
-    return entity;
+    return this.serialize(entity);
   }
 
   async create(dto: CreatePestDto) {
@@ -65,12 +71,25 @@ export class PestsService {
     pest.prevention = dto.prevention ?? null;
     pest.treatment = dto.treatment ?? null;
 
+    if (dto.recommendedActionTemplateIds !== undefined) {
+      const templates = await this.getActionTemplatesOrThrow(
+        dto.recommendedActionTemplateIds,
+      );
+      pest.recommendedActions.set(templates);
+    }
+
     await this.em.persistAndFlush(pest);
-    return pest;
+    await this.em.populate(pest, ['recommendedActions']);
+
+    return this.serialize(pest);
   }
 
   async update(id: string, dto: UpdatePestDto) {
-    const pest = await this.em.findOne(Pest, { id });
+    const pest = await this.em.findOne(
+      Pest,
+      { id },
+      { populate: ['recommendedActions'] },
+    );
     if (!pest) {
       throw new NotFoundException('Pest not found');
     }
@@ -103,8 +122,16 @@ export class PestsService {
       pest.treatment = dto.treatment;
     }
 
+    if (dto.recommendedActionTemplateIds !== undefined) {
+      const templates = await this.getActionTemplatesOrThrow(
+        dto.recommendedActionTemplateIds,
+      );
+      pest.recommendedActions.set(templates);
+    }
+
     await this.em.flush();
-    return pest;
+
+    return this.serialize(pest);
   }
 
   async remove(id: string) {
@@ -114,5 +141,37 @@ export class PestsService {
     }
 
     await this.em.removeAndFlush(pest);
+  }
+
+  private async getActionTemplatesOrThrow(ids: string[]) {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const uniqueIds = [...new Set(ids)];
+    const templates = await this.em.find(ActionTemplate, { id: { $in: uniqueIds } });
+
+    if (templates.length !== uniqueIds.length) {
+      throw new NotFoundException('One or more action templates not found');
+    }
+
+    return templates;
+  }
+
+  private serialize(entity: Pest) {
+    return {
+      id: entity.id,
+      slug: entity.slug,
+      name: entity.name,
+      description: entity.description,
+      symptoms: entity.symptoms ?? null,
+      prevention: entity.prevention ?? null,
+      treatment: entity.treatment ?? null,
+      recommendedActionTemplateIds: entity.recommendedActions
+        .getItems()
+        .map((item) => item.id),
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    };
   }
 }

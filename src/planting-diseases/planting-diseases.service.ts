@@ -17,6 +17,7 @@ import { Disease } from '../diseases/disease.entity';
 import { User } from '../users/user.entity';
 import { PlantingDiseaseStatus } from '../common/enums/planting-disease.enums';
 import { RemindersService } from '../reminders/reminders.service';
+import { ActionTemplate } from '../action-templates/action-template.entity';
 
 @Injectable()
 export class PlantingDiseasesService {
@@ -194,6 +195,24 @@ export class PlantingDiseasesService {
     this.logger.log(`deleted planting disease occurrence=${occurrence.id}`);
   }
 
+  async getRecommendedActions(user: User, id: string) {
+    const occurrence = await this.getOccurrenceOrThrow(user, id, undefined, true);
+
+    return {
+      occurrenceId: occurrence.id,
+      kind: 'disease',
+      plantingId: occurrence.planting.id,
+      disease: {
+        id: occurrence.disease.id,
+        name: occurrence.disease.name,
+        slug: occurrence.disease.slug,
+      },
+      actions: occurrence.disease.recommendedActions
+        .getItems()
+        .map((item) => this.serializeActionTemplate(item)),
+    };
+  }
+
   private async ensureNoActiveDuplicate(
     occurrence: PlantingDisease,
     newStatus: PlantingDiseaseStatus,
@@ -231,6 +250,7 @@ export class PlantingDiseasesService {
     user: User,
     id: string,
     plantingId?: string,
+    includeRecommendedActions = false,
   ) {
     const where: Record<string, unknown> = { id };
 
@@ -239,7 +259,9 @@ export class PlantingDiseasesService {
     }
 
     const occurrence = await this.em.findOne(PlantingDisease, where, {
-      populate: ['planting', 'disease'],
+      populate: includeRecommendedActions
+        ? ['planting', 'disease', 'disease.recommendedActions']
+        : ['planting', 'disease'],
     });
 
     if (!occurrence || occurrence.planting.user.id !== user.id) {
@@ -247,6 +269,18 @@ export class PlantingDiseasesService {
     }
 
     return occurrence;
+  }
+
+  private serializeActionTemplate(template: ActionTemplate) {
+    return {
+      id: template.id,
+      slug: template.slug,
+      name: template.name,
+      description: template.description ?? null,
+      target: template.target,
+      type: template.type,
+      defaultDueOffsetDays: template.defaultDueOffsetDays,
+    };
   }
 
   private parseDate(value: string, field: string) {

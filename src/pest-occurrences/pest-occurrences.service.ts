@@ -16,6 +16,7 @@ import { Pest } from '../pests/pest.entity';
 import { User } from '../users/user.entity';
 import { PestOccurrenceStatus } from '../common/enums/pest-occurrence.enums';
 import { RemindersService } from '../reminders/reminders.service';
+import { ActionTemplate } from '../action-templates/action-template.entity';
 
 type PestOccurrenceReminderApi = {
   initializeForPestOccurrence(params: {
@@ -157,6 +158,24 @@ export class PestOccurrencesService {
     this.logger.log(`deleted pest occurrence=${occurrence.id}`);
   }
 
+  async getRecommendedActions(user: User, id: string) {
+    const occurrence = await this.getOccurrenceOrThrow(user, id, true);
+
+    return {
+      occurrenceId: occurrence.id,
+      kind: 'pest',
+      plantingId: occurrence.planting.id,
+      pest: {
+        id: occurrence.pest.id,
+        name: occurrence.pest.name,
+        slug: occurrence.pest.slug,
+      },
+      actions: occurrence.pest.recommendedActions
+        .getItems()
+        .map((item) => this.serializeActionTemplate(item)),
+    };
+  }
+
   private async getPlantingOrThrow(user: User, plantingId: string) {
     const planting = await this.em.findOne(Planting, {
       id: plantingId,
@@ -170,11 +189,19 @@ export class PestOccurrencesService {
     return planting;
   }
 
-  private async getOccurrenceOrThrow(user: User, id: string) {
+  private async getOccurrenceOrThrow(
+    user: User,
+    id: string,
+    includeRecommendedActions = false,
+  ) {
     const occurrence = await this.em.findOne(
       PestOccurrence,
       { id },
-      { populate: ['planting', 'pest'] },
+      {
+        populate: includeRecommendedActions
+          ? ['planting', 'pest', 'pest.recommendedActions']
+          : ['planting', 'pest'],
+      },
     );
 
     if (!occurrence || occurrence.planting.user.id !== user.id) {
@@ -182,6 +209,18 @@ export class PestOccurrencesService {
     }
 
     return occurrence;
+  }
+
+  private serializeActionTemplate(template: ActionTemplate) {
+    return {
+      id: template.id,
+      slug: template.slug,
+      name: template.name,
+      description: template.description ?? null,
+      target: template.target,
+      type: template.type,
+      defaultDueOffsetDays: template.defaultDueOffsetDays,
+    };
   }
 
   private async ensureNoActiveDuplicate(

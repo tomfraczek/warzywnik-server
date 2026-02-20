@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Disease } from './disease.entity';
+import { ActionTemplate } from '../action-templates/action-template.entity';
 import {
   CreateDiseaseDto,
   ListDiseasesQueryDto,
@@ -31,10 +32,11 @@ export class DiseasesService {
       limit,
       offset: (page - 1) * limit,
       orderBy: { name: 'asc' },
+      populate: ['recommendedActions'],
     });
 
     return {
-      items,
+      items: items.map((item) => this.serialize(item)),
       page,
       limit,
       total,
@@ -42,13 +44,17 @@ export class DiseasesService {
   }
 
   async getById(id: string) {
-    const entity = await this.em.findOne(Disease, { id });
+    const entity = await this.em.findOne(
+      Disease,
+      { id },
+      { populate: ['recommendedActions'] },
+    );
 
     if (!entity) {
       throw new NotFoundException('Disease not found');
     }
 
-    return entity;
+    return this.serialize(entity);
   }
 
   async create(dto: CreateDiseaseDto) {
@@ -65,12 +71,25 @@ export class DiseasesService {
     disease.prevention = dto.prevention ?? null;
     disease.treatment = dto.treatment ?? null;
 
+    if (dto.recommendedActionTemplateIds !== undefined) {
+      const templates = await this.getActionTemplatesOrThrow(
+        dto.recommendedActionTemplateIds,
+      );
+      disease.recommendedActions.set(templates);
+    }
+
     await this.em.persistAndFlush(disease);
-    return disease;
+    await this.em.populate(disease, ['recommendedActions']);
+
+    return this.serialize(disease);
   }
 
   async update(id: string, dto: UpdateDiseaseDto) {
-    const disease = await this.em.findOne(Disease, { id });
+    const disease = await this.em.findOne(
+      Disease,
+      { id },
+      { populate: ['recommendedActions'] },
+    );
     if (!disease) {
       throw new NotFoundException('Disease not found');
     }
@@ -103,8 +122,16 @@ export class DiseasesService {
       disease.treatment = dto.treatment;
     }
 
+    if (dto.recommendedActionTemplateIds !== undefined) {
+      const templates = await this.getActionTemplatesOrThrow(
+        dto.recommendedActionTemplateIds,
+      );
+      disease.recommendedActions.set(templates);
+    }
+
     await this.em.flush();
-    return disease;
+
+    return this.serialize(disease);
   }
 
   async remove(id: string) {
@@ -114,5 +141,37 @@ export class DiseasesService {
     }
 
     await this.em.removeAndFlush(disease);
+  }
+
+  private async getActionTemplatesOrThrow(ids: string[]) {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const uniqueIds = [...new Set(ids)];
+    const templates = await this.em.find(ActionTemplate, { id: { $in: uniqueIds } });
+
+    if (templates.length !== uniqueIds.length) {
+      throw new NotFoundException('One or more action templates not found');
+    }
+
+    return templates;
+  }
+
+  private serialize(entity: Disease) {
+    return {
+      id: entity.id,
+      slug: entity.slug,
+      name: entity.name,
+      description: entity.description,
+      symptoms: entity.symptoms ?? null,
+      prevention: entity.prevention ?? null,
+      treatment: entity.treatment ?? null,
+      recommendedActionTemplateIds: entity.recommendedActions
+        .getItems()
+        .map((item) => item.id),
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    };
   }
 }

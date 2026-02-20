@@ -1,0 +1,134 @@
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { ActionTemplate } from './action-template.entity';
+import {
+  CreateActionTemplateDto,
+  ListActionTemplatesQueryDto,
+  UpdateActionTemplateDto,
+} from './dto/action-template.schemas';
+
+@Injectable()
+export class ActionTemplatesService {
+  constructor(private readonly em: EntityManager) {}
+
+  async list(query: ListActionTemplatesQueryDto) {
+    const { page, limit, q } = query;
+
+    const where: Record<string, unknown> = {};
+
+    if (q) {
+      where.$or = [
+        { name: { $ilike: `%${q}%` } },
+        { slug: { $ilike: `%${q}%` } },
+      ];
+    }
+
+    const [items, total] = await this.em.findAndCount(ActionTemplate, where, {
+      limit,
+      offset: (page - 1) * limit,
+      orderBy: { name: 'asc' },
+    });
+
+    return {
+      items: items.map((item) => this.serialize(item)),
+      page,
+      limit,
+      total,
+    };
+  }
+
+  async getById(id: string) {
+    const entity = await this.em.findOne(ActionTemplate, { id });
+
+    if (!entity) {
+      throw new NotFoundException('Action template not found');
+    }
+
+    return this.serialize(entity);
+  }
+
+  async create(dto: CreateActionTemplateDto) {
+    const existing = await this.em.findOne(ActionTemplate, { slug: dto.slug });
+    if (existing) {
+      throw new ConflictException('Action template slug already exists');
+    }
+
+    const template = new ActionTemplate();
+    template.slug = dto.slug;
+    template.name = dto.name;
+    template.description = dto.description ?? null;
+    template.target = dto.target;
+    template.type = dto.type;
+    template.defaultDueOffsetDays = dto.defaultDueOffsetDays ?? 0;
+
+    await this.em.persistAndFlush(template);
+    return this.serialize(template);
+  }
+
+  async update(id: string, dto: UpdateActionTemplateDto) {
+    const template = await this.em.findOne(ActionTemplate, { id });
+    if (!template) {
+      throw new NotFoundException('Action template not found');
+    }
+
+    if (dto.slug && dto.slug !== template.slug) {
+      const existing = await this.em.findOne(ActionTemplate, {
+        slug: dto.slug,
+      });
+      if (existing) {
+        throw new ConflictException('Action template slug already exists');
+      }
+      template.slug = dto.slug;
+    }
+
+    if (dto.name !== undefined) {
+      template.name = dto.name;
+    }
+
+    if (dto.description !== undefined) {
+      template.description = dto.description;
+    }
+
+    if (dto.target !== undefined) {
+      template.target = dto.target;
+    }
+
+    if (dto.type !== undefined) {
+      template.type = dto.type;
+    }
+
+    if (dto.defaultDueOffsetDays !== undefined) {
+      template.defaultDueOffsetDays = dto.defaultDueOffsetDays;
+    }
+
+    await this.em.flush();
+    return this.serialize(template);
+  }
+
+  async remove(id: string) {
+    const template = await this.em.findOne(ActionTemplate, { id });
+    if (!template) {
+      throw new NotFoundException('Action template not found');
+    }
+
+    await this.em.removeAndFlush(template);
+  }
+
+  private serialize(entity: ActionTemplate) {
+    return {
+      id: entity.id,
+      slug: entity.slug,
+      name: entity.name,
+      description: entity.description ?? null,
+      target: entity.target,
+      type: entity.type,
+      defaultDueOffsetDays: entity.defaultDueOffsetDays,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    };
+  }
+}

@@ -1,10 +1,13 @@
 import {
+  Collection,
   Entity,
+  ManyToMany,
   PrimaryKey,
   Property,
   Unique,
   TextType,
 } from '@mikro-orm/core';
+import { ActionTemplate } from '../action-templates/action-template.entity';
 
 @Entity({ tableName: 'pests' })
 export class Pest {
@@ -29,6 +32,14 @@ export class Pest {
 
   @Property({ type: TextType, nullable: true })
   treatment?: string | null;
+
+  @ManyToMany(() => ActionTemplate, undefined, {
+    owner: true,
+    pivotTable: 'pest_recommended_actions',
+    joinColumn: 'pest_id',
+    inverseJoinColumn: 'action_template_id',
+  })
+  recommendedActions = new Collection<ActionTemplate>(this);
 
   @Property({ type: Date, defaultRaw: 'now()' })
   createdAt: Date = new Date();

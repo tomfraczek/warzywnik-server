@@ -75,6 +75,17 @@ export class PlantingDiseasesController {
     );
   }
 
+  @Get('v1/disease-occurrences/:id/recommended-actions')
+  getRecommendedActions(
+    @Req() req: RequestWithUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.plantingDiseasesService.getRecommendedActions(
+      req.userEntity as User,
+      id,
+    );
+  }
+
   @Delete('v1/disease-occurrences/:id')
   @HttpCode(204)
   async remove(

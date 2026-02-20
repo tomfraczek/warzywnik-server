@@ -28,6 +28,8 @@ import { PlantingDiseasesModule } from './planting-diseases/planting-diseases.mo
 import { RemindersModule } from './reminders/reminders.module';
 import { DevicesModule } from './devices/devices.module';
 import { PestOccurrencesModule } from './pest-occurrences/pest-occurrences.module';
+import { ActionTemplatesModule } from './action-templates/action-templates.module';
+import { ActionTasksModule } from './action-tasks/action-tasks.module';
 
 @Module({
   imports: [
@@ -51,6 +53,8 @@ import { PestOccurrencesModule } from './pest-occurrences/pest-occurrences.modul
     RemindersModule,
     DevicesModule,
     PestOccurrencesModule,
+    ActionTemplatesModule,
+    ActionTasksModule,
   ],
   controllers: [AppController],
   providers: [

@@ -7,6 +7,7 @@ export type PestBaseDto = {
   symptoms?: string | null;
   prevention?: string | null;
   treatment?: string | null;
+  recommendedActionTemplateIds?: string[];
 };
 
 export type CreatePestDto = PestBaseDto & {
@@ -35,6 +36,7 @@ const basePestSchema = z.object({
   symptoms: z.string().min(1).nullable().optional(),
   prevention: z.string().min(1).nullable().optional(),
   treatment: z.string().min(1).nullable().optional(),
+  recommendedActionTemplateIds: z.array(z.string().uuid()).optional(),
 });
 
 export const createPestSchema = basePestSchema.extend({
