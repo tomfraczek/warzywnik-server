@@ -81,12 +81,13 @@ Rules are applied only when they exist and are both `enabled` and `isActive`.
 - `SUBOPTIMAL_SOWING_TIME`: `vegetableName`, `bedName`, `plannedStartDate` (ISO), `sowingStartMonth`, `sowingEndMonth`
 - `EXPERIMENTAL_SETUP`: `vegetableName`, `bedName`
 
-## Action tasks automation (MVP) — quick smoke test
+## Deterministic action automation — smoke test
 
 Assume `API=http://localhost:4000`, valid `Authorization: Bearer <TOKEN>`, and existing IDs:
-- `VEGETABLE_ID`, `BED_ID`, `PLANTING_ID`, `TEMPLATE_PLANTING_ID`, `TEMPLATE_BED_ID`.
 
-1) Update vegetable rules (replace list)
+- `VEGETABLE_ID`, `BED_ID`, `PLANTING_ID`, `TEMPLATE_PLANTING_ID`, `TEMPLATE_BED_ID`, `TASK_ID`.
+
+1. Update vegetable rules (replace list, recurring + timeline triggers)
 
 ```bash
 curl -X PATCH "$API/v1/vegetables/$VEGETABLE_ID" \
@@ -96,21 +97,26 @@ curl -X PATCH "$API/v1/vegetables/$VEGETABLE_ID" \
     "actionRules": [
       {
         "actionTemplateId": "'$TEMPLATE_PLANTING_ID'",
-        "trigger": "ON_PLANTING_CREATED",
+        "trigger": "AFTER_SOWING_DAYS",
         "offsetDays": 2,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": ["DIRECT_SOW"],
         "isEnabled": true
       },
       {
         "actionTemplateId": "'$TEMPLATE_BED_ID'",
         "trigger": "ON_HARVEST_CONFIRMED",
         "offsetDays": 0,
+        "schedule": "ONCE",
         "isEnabled": true
       }
     ]
   }'
 ```
 
-2) Create planting → automatic `ActionTask` + pending `Reminder`
+2. Create planting with timeline fields → automatic recompute
 
 ```bash
 curl -X POST "$API/v1/plantings" \
@@ -119,11 +125,34 @@ curl -X POST "$API/v1/plantings" \
   -d '{
     "bedId": "'$BED_ID'",
     "vegetableId": "'$VEGETABLE_ID'",
-    "plannedStartDate": "2026-02-20T09:00:00.000Z"
+    "plannedStartDate": "2026-02-20T09:00:00.000Z",
+    "startMethod": "DIRECT_SOW",
+    "sowedAt": "2026-02-20T09:00:00.000Z",
+    "harvestWindowStart": "2026-05-10T09:00:00.000Z",
+    "harvestWindowEnd": "2026-05-25T09:00:00.000Z",
+    "timelineTimezone": "Europe/Warsaw"
   }'
 ```
 
-3) Harvest confirmation YES → returns post-harvest action proposals (no auto-create)
+3. Manual recompute (optional latest rules + override manual reschedules)
+
+```bash
+curl -X POST "$API/v1/plantings/$PLANTING_ID/recompute-actions" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"useLatestRules":true,"forceOverrideManual":false}'
+```
+
+4. Reschedule task manually (sets manual override flag)
+
+```bash
+curl -X PATCH "$API/v1/action-tasks/$TASK_ID" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"dueAt":"2026-03-01T09:00:00.000Z"}'
+```
+
+5. Harvest confirmation YES → returns `proposals` (no auto-create)
 
 ```bash
 curl -X POST "$API/v1/plantings/$PLANTING_ID/harvest-confirmation" \
@@ -132,7 +161,7 @@ curl -X POST "$API/v1/plantings/$PLANTING_ID/harvest-confirmation" \
   -d '{"answer":"yes"}'
 ```
 
-4) Create selected tasks from modal (bulk) → reminders created
+6. Create selected tasks from modal (bulk) → reminders created
 
 ```bash
 curl -X POST "$API/v1/beds/$BED_ID/action-tasks/bulk" \
@@ -145,7 +174,14 @@ curl -X POST "$API/v1/beds/$BED_ID/action-tasks/bulk" \
   }'
 ```
 
-5) Mark task DONE → pending reminder canceled
+7. Calendar view (tasks + harvest windows + reminders)
+
+```bash
+curl "$API/v1/calendar?from=2026-02-01&to=2026-06-30&includeDoneTasks=true&includeReminders=true" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+8. Mark task DONE → pending reminder canceled
 
 ```bash
 curl -X PATCH "$API/v1/action-tasks/$TASK_ID" \

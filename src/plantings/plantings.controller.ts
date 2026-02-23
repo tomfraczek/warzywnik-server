@@ -13,10 +13,12 @@ import {
 } from '@nestjs/common';
 import { PlantingsService } from './plantings.service';
 import {
-  createPlantingSchema,
+  createPlantingTimelineSchema,
   getPlantingQuerySchema,
   listPlantingsQuerySchema,
-  updatePlantingSchema,
+  recomputePlantingActionsSchema,
+  RecomputePlantingActionsDto,
+  updatePlantingTimelineSchema,
   CreatePlantingDto,
   GetPlantingQueryDto,
   ListPlantingsQueryDto,
@@ -55,7 +57,7 @@ export class PlantingsController {
   @Post()
   create(
     @Req() req: { userEntity?: User },
-    @Body(new ZodValidationPipe(createPlantingSchema))
+    @Body(new ZodValidationPipe(createPlantingTimelineSchema))
     body: CreatePlantingDto,
   ) {
     return this.plantingsService.create(req.userEntity as User, body);
@@ -65,10 +67,24 @@ export class PlantingsController {
   update(
     @Req() req: { userEntity?: User },
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body(new ZodValidationPipe(updatePlantingSchema))
+    @Body(new ZodValidationPipe(updatePlantingTimelineSchema))
     body: UpdatePlantingDto,
   ) {
     return this.plantingsService.update(req.userEntity as User, id, body);
+  }
+
+  @Post(':id/recompute-actions')
+  recomputeActions(
+    @Req() req: { userEntity?: User },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body(new ZodValidationPipe(recomputePlantingActionsSchema))
+    body: RecomputePlantingActionsDto,
+  ) {
+    return this.plantingsService.recomputeActions(
+      req.userEntity as User,
+      id,
+      body,
+    );
   }
 
   @Delete(':id')

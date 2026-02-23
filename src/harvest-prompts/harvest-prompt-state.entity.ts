@@ -1,6 +1,5 @@
 import {
   Entity,
-  Enum,
   Index,
   ManyToOne,
   PrimaryKey,
@@ -9,10 +8,11 @@ import {
 } from '@mikro-orm/core';
 import { User } from '../users/user.entity';
 import { Planting } from '../plantings/planting.entity';
-import { HarvestPromptAnswer } from '../common/enums/harvest-prompt.enums';
+import { Bed } from '../beds/bed.entity';
 
 @Entity({ tableName: 'harvest_prompt_states' })
 @Index({ properties: ['user'] })
+@Index({ properties: ['bed'] })
 @Index({ properties: ['planting'] })
 @Unique({ properties: ['user', 'planting'] })
 export class HarvestPromptState {
@@ -25,14 +25,14 @@ export class HarvestPromptState {
   @ManyToOne(() => Planting)
   planting!: Planting;
 
-  @Property({ type: 'string', length: 10, nullable: true })
-  lastPromptedOn?: string | null;
+  @ManyToOne(() => Bed)
+  bed!: Bed;
 
-  @Property({ type: Date, nullable: true })
-  confirmedHarvestAt?: Date | null;
+  @Property({ type: Date, nullable: true, columnType: 'date' })
+  lastShownOn?: Date | null;
 
-  @Enum({ items: () => HarvestPromptAnswer, nullable: true })
-  lastAnswer?: HarvestPromptAnswer | null;
+  @Property({ type: Date, nullable: true, columnType: 'date' })
+  snoozeUntil?: Date | null;
 
   @Property({ type: Date, defaultRaw: 'now()' })
   createdAt: Date = new Date();

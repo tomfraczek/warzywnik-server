@@ -5,9 +5,10 @@ import { RemindersService } from './reminders.service';
 import { Reminder } from './reminder.entity';
 import { User } from '../users/user.entity';
 import { PushWorkerService } from './push-worker.service';
+import { ActionTask } from '../action-tasks/action-task.entity';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Reminder, User])],
+  imports: [MikroOrmModule.forFeature([Reminder, User, ActionTask])],
   controllers: [RemindersController],
   providers: [RemindersService, PushWorkerService],
   exports: [RemindersService],

@@ -25,7 +25,9 @@ import { ActionTemplate } from '../action-templates/action-template.entity';
 @Index({ properties: ['bed'] })
 @Index({ properties: ['status'] })
 @Index({ properties: ['sourceRefId'] })
-@Unique({ properties: ['user', 'source', 'sourceRefId', 'dueAt'] })
+@Unique({
+  properties: ['user', 'source', 'sourceRefId', 'dueAt', 'cycleIndex'],
+})
 export class ActionTask {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
@@ -50,6 +52,18 @@ export class ActionTask {
 
   @Property({ type: 'uuid', nullable: true })
   sourceRefId?: string | null;
+
+  @Property({ type: 'int', default: 0 })
+  cycleIndex: number = 0;
+
+  @Property({ type: Date, nullable: true })
+  originalDueAt?: Date | null;
+
+  @Property({ type: 'boolean', default: false })
+  isManuallyRescheduled: boolean = false;
+
+  @Property({ type: Date, nullable: true })
+  generatedAt?: Date | null;
 
   @Property({ type: Date, nullable: true })
   dueAt?: Date | null;

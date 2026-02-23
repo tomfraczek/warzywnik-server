@@ -5,3 +5,8 @@ export enum PlantingStatus {
   FINISHED = 'FINISHED',
   CANCELLED = 'CANCELLED',
 }
+
+export enum PlantingStartMethod {
+  DIRECT_SOW = 'DIRECT_SOW',
+  TRANSPLANT = 'TRANSPLANT',
+}

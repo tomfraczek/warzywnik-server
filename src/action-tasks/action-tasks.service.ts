@@ -23,6 +23,7 @@ import { Planting } from '../plantings/planting.entity';
 import { Bed } from '../beds/bed.entity';
 import { ActionTemplate } from '../action-templates/action-template.entity';
 import { RemindersService } from '../reminders/reminders.service';
+import { normalizeDueAt } from '../common/types/date-utils';
 
 @Injectable()
 export class ActionTasksService {
@@ -46,6 +47,10 @@ export class ActionTasksService {
       task.bed = null;
       task.source = ActionTaskSource.MANUAL;
       task.sourceRefId = null;
+      task.cycleIndex = 0;
+      task.originalDueAt = null;
+      task.generatedAt = null;
+      task.isManuallyRescheduled = false;
 
       if (dto.actionTemplateId) {
         const template = await em.findOne(ActionTemplate, {
@@ -69,15 +74,17 @@ export class ActionTasksService {
             ? dto.description
             : (template.description ?? null);
         task.dueAt = dto.dueAt
-          ? this.parseDate(dto.dueAt, 'dueAt')
-          : this.addDays(new Date(), template.defaultDueOffsetDays);
+          ? this.normalizeTaskDueAt(this.parseDate(dto.dueAt, 'dueAt'))
+          : this.normalizeTaskDueAt(
+              this.addDays(new Date(), template.defaultDueOffsetDays),
+            );
       } else {
         task.actionTemplate = null;
         task.title = dto.title as string;
         task.description = dto.description ?? null;
         task.dueAt = dto.dueAt
-          ? this.parseDate(dto.dueAt, 'dueAt')
-          : new Date();
+          ? this.normalizeTaskDueAt(this.parseDate(dto.dueAt, 'dueAt'))
+          : this.normalizeTaskDueAt(new Date());
       }
 
       em.persist(task);
@@ -194,8 +201,9 @@ export class ActionTasksService {
 
       if (dto.dueAt !== undefined) {
         task.dueAt = dto.dueAt
-          ? this.parseDate(dto.dueAt, 'dueAt')
-          : new Date();
+          ? this.normalizeTaskDueAt(this.parseDate(dto.dueAt, 'dueAt'))
+          : this.normalizeTaskDueAt(new Date());
+        task.isManuallyRescheduled = true;
       }
 
       if (dto.title !== undefined) {
@@ -309,9 +317,17 @@ export class ActionTasksService {
     return copy;
   }
 
+  private normalizeTaskDueAt(date: Date) {
+    return normalizeDueAt(date, 'Europe/Warsaw', 9, 0);
+  }
+
   private async createManualBulk(params: {
     user: User;
-    items: Array<{ actionTemplateId: string; dueAt?: string; description?: string | null }>;
+    items: Array<{
+      actionTemplateId: string;
+      dueAt?: string;
+      description?: string | null;
+    }>;
     expectedTarget: ActionTemplateTarget;
     setupTask: (task: ActionTask) => void;
     em: EntityManager;
@@ -337,7 +353,9 @@ export class ActionTasksService {
 
     const now = new Date();
     const created: ActionTask[] = params.items.map((item) => {
-      const template = templatesById.get(item.actionTemplateId) as ActionTemplate;
+      const template = templatesById.get(
+        item.actionTemplateId,
+      ) as ActionTemplate;
 
       if (template.target !== params.expectedTarget) {
         throw new BadRequestException(
@@ -355,11 +373,17 @@ export class ActionTasksService {
           ? item.description
           : (template.description ?? null);
       task.dueAt = item.dueAt
-        ? this.parseDate(item.dueAt, 'dueAt')
-        : this.addDays(now, template.defaultDueOffsetDays);
+        ? this.normalizeTaskDueAt(this.parseDate(item.dueAt, 'dueAt'))
+        : this.normalizeTaskDueAt(
+            this.addDays(now, template.defaultDueOffsetDays),
+          );
       task.status = ActionTaskStatus.PENDING;
       task.source = ActionTaskSource.MANUAL;
       task.sourceRefId = null;
+      task.cycleIndex = 0;
+      task.originalDueAt = null;
+      task.generatedAt = null;
+      task.isManuallyRescheduled = false;
 
       return task;
     });
@@ -390,6 +414,10 @@ export class ActionTasksService {
       status: entity.status,
       source: entity.source,
       sourceRefId: entity.sourceRefId ?? null,
+      cycleIndex: entity.cycleIndex,
+      originalDueAt: entity.originalDueAt ?? null,
+      isManuallyRescheduled: entity.isManuallyRescheduled,
+      generatedAt: entity.generatedAt ?? null,
       dueAt: entity.dueAt,
       title: entity.title,
       description: entity.description ?? null,
@@ -398,7 +426,7 @@ export class ActionTasksService {
             id: entity.actionTemplate.id,
             slug: entity.actionTemplate.slug,
             name: entity.actionTemplate.name,
-        scope: entity.actionTemplate.target,
+            scope: entity.actionTemplate.target,
             target: entity.actionTemplate.target,
             type: entity.actionTemplate.type,
             defaultDueOffsetDays: entity.actionTemplate.defaultDueOffsetDays,

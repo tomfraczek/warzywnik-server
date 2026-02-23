@@ -11,6 +11,7 @@ import {
 import { UserDevice } from '../devices/user-device.entity';
 import { User } from '../users/user.entity';
 import { RemindersService } from './reminders.service';
+import { ActionTask } from '../action-tasks/action-task.entity';
 
 type ExpoPushMessageData = {
   reminderId: string;
@@ -30,6 +31,14 @@ type ExpoPushMessage = {
   title: string;
   body: string;
   data: ExpoPushMessageData;
+};
+
+type ActionTaskContext = {
+  actionTaskId: string;
+  actionTemplateId?: string;
+  actionTemplateName?: string;
+  bedId?: string;
+  plantingId?: string;
 };
 
 type ExpoPushTicket =
@@ -244,12 +253,24 @@ export class PushWorkerService {
     return payload;
   }
 
-  private buildBody(reminder: Reminder): string {
+  private buildBody(
+    reminder: Reminder,
+    actionTask?: ActionTaskContext,
+  ): string {
     if (reminder.type === ReminderType.ACTION_TASK_DUE) {
-      const payload = reminder.payload;
-      if ('kind' in payload && payload.kind === 'action') {
-        return `Czas na: ${payload.actionTemplateName ?? 'zaplanowany zabieg'}`;
+      if (actionTask?.actionTemplateName) {
+        return `Czas na: ${actionTask.actionTemplateName}`;
       }
+
+      const payload = reminder.payload;
+      if (
+        'kind' in payload &&
+        payload.kind === 'action' &&
+        payload.actionTemplateName
+      ) {
+        return `Czas na: ${payload.actionTemplateName}`;
+      }
+
       return 'Czas na zaplanowany zabieg.';
     }
 
@@ -262,8 +283,22 @@ export class PushWorkerService {
     return 'Sprawdź stan choroby w uprawie.';
   }
 
-  private buildMessageData(reminder: Reminder): ExpoPushMessageData {
+  private buildMessageData(
+    reminder: Reminder,
+    actionTask?: ActionTaskContext,
+  ): ExpoPushMessageData {
     const payload = reminder.payload;
+
+    if (actionTask) {
+      return {
+        reminderId: reminder.id,
+        target: 'action',
+        actionTaskId: actionTask.actionTaskId,
+        actionTemplateId: actionTask.actionTemplateId,
+        bedId: actionTask.bedId,
+        plantingId: actionTask.plantingId,
+      };
+    }
 
     if ('kind' in payload && payload.kind === 'action') {
       return {
@@ -319,11 +354,13 @@ export class PushWorkerService {
       return;
     }
 
+    const actionTask = await this.loadActionTaskContext(reminder);
+
     const messages: ExpoPushMessage[] = devices.map((device) => ({
       to: device.expoPushToken,
       title: 'Warzywnik',
-      body: this.buildBody(reminder),
-      data: this.buildMessageData(reminder),
+      body: this.buildBody(reminder, actionTask),
+      data: this.buildMessageData(reminder, actionTask),
     }));
 
     this.logger.log(
@@ -485,5 +522,34 @@ export class PushWorkerService {
     this.logger.warn(
       `marked failure | reminder=${reminderId} | attempts=${attempts} | status=${shouldSkip ? ReminderStatus.SKIPPED : ReminderStatus.PENDING} | error=${message}`,
     );
+  }
+
+  private async loadActionTaskContext(
+    reminder: Reminder,
+  ): Promise<ActionTaskContext | undefined> {
+    if (
+      reminder.type !== ReminderType.ACTION_TASK_DUE ||
+      !reminder.actionTaskId
+    ) {
+      return undefined;
+    }
+
+    const task = await this.em.findOne(
+      ActionTask,
+      { id: reminder.actionTaskId },
+      { populate: ['actionTemplate', 'planting', 'bed'] },
+    );
+
+    if (!task) {
+      return undefined;
+    }
+
+    return {
+      actionTaskId: task.id,
+      actionTemplateId: task.actionTemplate?.id,
+      actionTemplateName: task.actionTemplate?.name ?? task.title,
+      bedId: task.bed?.id,
+      plantingId: task.planting?.id,
+    };
   }
 }

@@ -31,6 +31,7 @@ import { PestOccurrencesModule } from './pest-occurrences/pest-occurrences.modul
 import { ActionTemplatesModule } from './action-templates/action-templates.module';
 import { ActionTasksModule } from './action-tasks/action-tasks.module';
 import { HarvestPromptsModule } from './harvest-prompts/harvest-prompts.module';
+import { CalendarModule } from './calendar/calendar.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { HarvestPromptsModule } from './harvest-prompts/harvest-prompts.module';
     ActionTemplatesModule,
     ActionTasksModule,
     HarvestPromptsModule,
+    CalendarModule,
   ],
   controllers: [AppController],
   providers: [

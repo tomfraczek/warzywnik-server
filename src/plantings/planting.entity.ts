@@ -10,7 +10,10 @@ import {
 import { User } from '../users/user.entity';
 import { Bed } from '../beds/bed.entity';
 import { Vegetable } from '../vegetables/vegetable.entity';
-import { PlantingStatus } from '../common/enums/planting.enums';
+import {
+  PlantingStartMethod,
+  PlantingStatus,
+} from '../common/enums/planting.enums';
 
 @Entity({ tableName: 'plantings' })
 @Index({ properties: ['user'] })
@@ -19,6 +22,10 @@ import { PlantingStatus } from '../common/enums/planting.enums';
 @Index({ properties: ['status'] })
 @Index({ properties: ['plannedStartDate'] })
 @Index({ properties: ['harvestedAt'] })
+@Index({ properties: ['sowedAt'] })
+@Index({ properties: ['transplantedAt'] })
+@Index({ properties: ['harvestWindowStart'] })
+@Index({ properties: ['harvestWindowEnd'] })
 export class Planting {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
@@ -37,6 +44,30 @@ export class Planting {
 
   @Property({ type: Date, nullable: true })
   actualStartDate?: Date | null;
+
+  @Enum({
+    items: () => PlantingStartMethod,
+    default: PlantingStartMethod.DIRECT_SOW,
+  })
+  startMethod: PlantingStartMethod = PlantingStartMethod.DIRECT_SOW;
+
+  @Property({ type: Date, nullable: true })
+  sowedAt?: Date | null;
+
+  @Property({ type: Date, nullable: true })
+  transplantedAt?: Date | null;
+
+  @Property({ type: Date, nullable: true })
+  harvestWindowStart?: Date | null;
+
+  @Property({ type: Date, nullable: true })
+  harvestWindowEnd?: Date | null;
+
+  @Property({ length: 64, default: 'Europe/Warsaw' })
+  timelineTimezone: string = 'Europe/Warsaw';
+
+  @Property({ type: 'int', default: 1 })
+  appliedRulesVersion: number = 1;
 
   @Enum({ items: () => PlantingStatus, default: PlantingStatus.PLANNED })
   status: PlantingStatus = PlantingStatus.PLANNED;

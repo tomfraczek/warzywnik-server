@@ -167,6 +167,9 @@ export class Vegetable {
   @OneToMany(() => VegetableActionRule, (rule) => rule.vegetable)
   actionRules = new Collection<VegetableActionRule>(this);
 
+  @Property({ type: 'int', default: 1 })
+  rulesVersion: number = 1;
+
   @Property({ type: Date, defaultRaw: 'now()' })
   createdAt: Date = new Date();
 

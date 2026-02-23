@@ -10,10 +10,14 @@ import { Vegetable } from '../vegetables/vegetable.entity';
 import {
   CreatePlantingDto,
   ListPlantingsQueryDto,
+  RecomputePlantingActionsDto,
   UpdatePlantingDto,
 } from './dto/planting.schemas';
 import { User } from '../users/user.entity';
-import { PlantingStatus } from '../common/enums/planting.enums';
+import {
+  PlantingStartMethod,
+  PlantingStatus,
+} from '../common/enums/planting.enums';
 import { WarningCode } from '../common/enums/warning.enums';
 import {
   WarningsService,
@@ -30,7 +34,6 @@ import {
 } from '../common/enums/vegetable.enums';
 import { DemandLevel as SoilDemandLevel } from '../common/enums/soil.enums';
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
-import { ActionRuleTrigger } from '../common/enums/action.enums';
 
 type WarningResult = WarningOutput;
 
@@ -169,18 +172,32 @@ export class PlantingsService {
     planting.actualStartDate = dto.actualStartDate
       ? this.parseDate(dto.actualStartDate, 'actualStartDate')
       : null;
+    planting.startMethod = dto.startMethod ?? PlantingStartMethod.DIRECT_SOW;
+    planting.sowedAt = dto.sowedAt
+      ? this.parseDate(dto.sowedAt, 'sowedAt')
+      : null;
+    planting.transplantedAt = dto.transplantedAt
+      ? this.parseDate(dto.transplantedAt, 'transplantedAt')
+      : null;
+    planting.harvestWindowStart = dto.harvestWindowStart
+      ? this.parseDate(dto.harvestWindowStart, 'harvestWindowStart')
+      : null;
+    planting.harvestWindowEnd = dto.harvestWindowEnd
+      ? this.parseDate(dto.harvestWindowEnd, 'harvestWindowEnd')
+      : null;
+    planting.timelineTimezone = dto.timelineTimezone ?? 'Europe/Warsaw';
+    planting.appliedRulesVersion = vegetable.rulesVersion;
     planting.status = dto.status ?? PlantingStatus.PLANNED;
     planting.notes = dto.notes ?? null;
 
+    this.validatePlantingTimeline(planting);
+
     await this.em.persistAndFlush(planting);
 
-    await this.actionAutomationService.applyVegetableRules({
+    await this.actionAutomationService.recomputeForPlanting({
       user,
-      planting,
-      bed,
-      vegetable,
-      trigger: ActionRuleTrigger.ON_PLANTING_CREATED,
-      baseDate: planting.createdAt,
+      plantingId: planting.id,
+      reason: 'PLANTING_CREATED',
     });
 
     return await this.serializeWithComputed(planting, bed, vegetable, {
@@ -230,6 +247,7 @@ export class PlantingsService {
       }
       vegetable = newVegetable;
       planting.vegetable = newVegetable;
+      planting.appliedRulesVersion = newVegetable.rulesVersion;
     } else {
       await this.em.populate(vegetable, ['recommendedSoils']);
     }
@@ -247,6 +265,38 @@ export class PlantingsService {
         : null;
     }
 
+    if (dto.startMethod !== undefined) {
+      planting.startMethod = dto.startMethod;
+    }
+
+    if (dto.sowedAt !== undefined) {
+      planting.sowedAt = dto.sowedAt
+        ? this.parseDate(dto.sowedAt, 'sowedAt')
+        : null;
+    }
+
+    if (dto.transplantedAt !== undefined) {
+      planting.transplantedAt = dto.transplantedAt
+        ? this.parseDate(dto.transplantedAt, 'transplantedAt')
+        : null;
+    }
+
+    if (dto.harvestWindowStart !== undefined) {
+      planting.harvestWindowStart = dto.harvestWindowStart
+        ? this.parseDate(dto.harvestWindowStart, 'harvestWindowStart')
+        : null;
+    }
+
+    if (dto.harvestWindowEnd !== undefined) {
+      planting.harvestWindowEnd = dto.harvestWindowEnd
+        ? this.parseDate(dto.harvestWindowEnd, 'harvestWindowEnd')
+        : null;
+    }
+
+    if (dto.timelineTimezone !== undefined) {
+      planting.timelineTimezone = dto.timelineTimezone;
+    }
+
     if (dto.status !== undefined) {
       planting.status = dto.status;
     }
@@ -255,10 +305,32 @@ export class PlantingsService {
       planting.notes = dto.notes;
     }
 
+    this.validatePlantingTimeline(planting);
+
     await this.em.flush();
+
+    await this.actionAutomationService.recomputeForPlanting({
+      user,
+      plantingId: planting.id,
+      reason: 'PLANTING_TIMELINE_UPDATED',
+    });
 
     return await this.serializeWithComputed(planting, bed, vegetable, {
       includeWarnings: true,
+    });
+  }
+
+  async recomputeActions(
+    user: User,
+    plantingId: string,
+    dto: RecomputePlantingActionsDto,
+  ) {
+    return this.actionAutomationService.recomputeForPlanting({
+      user,
+      plantingId,
+      reason: 'MANUAL_RECOMPUTE',
+      forceOverrideManual: dto.forceOverrideManual,
+      useLatestRules: dto.useLatestRules,
     });
   }
 
@@ -279,6 +351,13 @@ export class PlantingsService {
       vegetableId: planting.vegetable.id,
       plannedStartDate: planting.plannedStartDate,
       actualStartDate: planting.actualStartDate ?? null,
+      startMethod: planting.startMethod,
+      sowedAt: planting.sowedAt ?? null,
+      transplantedAt: planting.transplantedAt ?? null,
+      harvestWindowStart: planting.harvestWindowStart ?? null,
+      harvestWindowEnd: planting.harvestWindowEnd ?? null,
+      timelineTimezone: planting.timelineTimezone,
+      appliedRulesVersion: planting.appliedRulesVersion,
       status: planting.status,
       harvestedAt: planting.harvestedAt ?? null,
       notes: planting.notes ?? null,
@@ -741,5 +820,36 @@ export class PlantingsService {
       throw new BadRequestException(`${field} must be a valid ISO date`);
     }
     return date;
+  }
+
+  private validatePlantingTimeline(planting: Planting) {
+    if (planting.startMethod === PlantingStartMethod.DIRECT_SOW) {
+      if (!planting.sowedAt) {
+        throw new BadRequestException('sowedAt is required for DIRECT_SOW');
+      }
+      if (planting.transplantedAt) {
+        throw new BadRequestException(
+          'transplantedAt must be null for DIRECT_SOW',
+        );
+      }
+    }
+
+    if (planting.startMethod === PlantingStartMethod.TRANSPLANT) {
+      if (!planting.transplantedAt) {
+        throw new BadRequestException(
+          'transplantedAt is required for TRANSPLANT',
+        );
+      }
+    }
+
+    if (
+      planting.harvestWindowStart &&
+      planting.harvestWindowEnd &&
+      planting.harvestWindowStart > planting.harvestWindowEnd
+    ) {
+      throw new BadRequestException(
+        'harvestWindowStart must be less than or equal to harvestWindowEnd',
+      );
+    }
   }
 }

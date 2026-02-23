@@ -9,10 +9,10 @@ import { Planting } from '../plantings/planting.entity';
 import { User } from '../users/user.entity';
 import { HarvestPromptState } from './harvest-prompt-state.entity';
 import { PlantingStatus } from '../common/enums/planting.enums';
-import { Month } from '../common/enums/vegetable.enums';
 import { HarvestPromptAnswer } from '../common/enums/harvest-prompt.enums';
 import { HarvestConfirmationDto } from './dto/harvest-prompt.schemas';
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
+import { toDateOnlyInTimezone } from '../common/types/date-utils';
 
 @Injectable()
 export class HarvestPromptsService {
@@ -56,17 +56,20 @@ export class HarvestPromptsService {
       states.map((state) => [state.planting.id, state]),
     );
 
-    const today = this.getTodayInWarsaw();
+    const today = this.getTodayInWarsawDate();
 
     const items = plantings
       .filter((planting) => {
         const state = statesByPlantingId.get(planting.id);
 
-        if (!this.isReadyForHarvest(planting)) return false;
+        if (!this.isReadyForHarvest(planting, today)) return false;
         if (planting.harvestedAt) return false;
-        if (state?.confirmedHarvestAt) return false;
 
-        return !state?.lastPromptedOn || state.lastPromptedOn < today;
+        if (state?.snoozeUntil && state.snoozeUntil > today) {
+          return false;
+        }
+
+        return !state?.lastShownOn || state.lastShownOn < today;
       })
       .map((planting) => ({
         plantingId: planting.id,
@@ -81,6 +84,8 @@ export class HarvestPromptsService {
         title: planting.vegetable
           ? `Uprawa: ${planting.vegetable.name} — gotowa do zbioru`
           : 'Uprawa gotowa do zbioru',
+        harvestWindowStart: planting.harvestWindowStart ?? null,
+        harvestWindowEnd: planting.harvestWindowEnd ?? null,
         reason: 'HARVEST_WINDOW' as const,
       }));
 
@@ -116,10 +121,10 @@ export class HarvestPromptsService {
         state = new HarvestPromptState();
         state.user = user;
         state.planting = planting;
+        state.bed = planting.bed;
       }
 
-      state.lastPromptedOn = this.getTodayInWarsaw();
-      state.lastAnswer = dto.answer;
+      state.lastShownOn = this.getTodayInWarsawDate();
 
       if (dto.answer === HarvestPromptAnswer.NO) {
         await em.persistAndFlush(state);
@@ -127,26 +132,31 @@ export class HarvestPromptsService {
       }
 
       const now = new Date();
-      state.confirmedHarvestAt = now;
       planting.harvestedAt = now;
       planting.status = PlantingStatus.FINISHED;
+
+      await em.persistAndFlush([state, planting]);
+
+      await this.actionAutomationService.recomputeForPlanting({
+        user,
+        plantingId: planting.id,
+        reason: 'HARVEST_CONFIRMED',
+      });
 
       const postHarvestActions =
         await this.actionAutomationService.getPostHarvestActionSuggestions(
           planting.vegetable.id,
         );
 
-      await em.persistAndFlush([state, planting]);
-
       return {
         plantingId: planting.id,
         bedId: planting.bed.id,
-        postHarvestActions,
+        proposals: postHarvestActions,
       };
     });
   }
 
-  private isReadyForHarvest(planting: Planting) {
+  private isReadyForHarvest(planting: Planting, today?: Date) {
     if (
       planting.status === PlantingStatus.CANCELLED ||
       planting.status === PlantingStatus.FINISHED
@@ -154,95 +164,34 @@ export class HarvestPromptsService {
       return false;
     }
 
-    const now = new Date();
-    const baseDate =
-      planting.actualStartDate ??
-      planting.plannedStartDate ??
-      planting.createdAt;
+    const day = today ?? this.getTodayInWarsawDate();
 
-    if (planting.vegetable.timeToHarvestDaysMin != null) {
-      const readyAt = this.addDays(
-        baseDate,
-        planting.vegetable.timeToHarvestDaysMin,
+    if (planting.harvestWindowStart) {
+      const start = toDateOnlyInTimezone(
+        planting.harvestWindowStart,
+        planting.timelineTimezone,
       );
-      return now >= readyAt;
-    }
 
-    if (planting.vegetable.timeToHarvestDaysMax != null) {
-      const readyAt = this.addDays(
-        baseDate,
-        planting.vegetable.timeToHarvestDaysMax,
-      );
-      return now >= readyAt;
-    }
-
-    if (planting.vegetable.harvestStartMonth != null) {
-      const currentMonth = this.getWarsawMonthIndex();
-      const startMonth = this.monthToIndex(
-        planting.vegetable.harvestStartMonth,
-      );
-      const endMonth =
-        planting.vegetable.harvestEndMonth != null
-          ? this.monthToIndex(planting.vegetable.harvestEndMonth)
-          : null;
-
-      if (endMonth == null) {
-        return currentMonth >= startMonth;
+      if (day < start) {
+        return false;
       }
 
-      return this.isMonthInRange(currentMonth, startMonth, endMonth);
+      if (planting.harvestWindowEnd) {
+        const end = toDateOnlyInTimezone(
+          planting.harvestWindowEnd,
+          planting.timelineTimezone,
+        );
+
+        return day <= end;
+      }
+
+      return true;
     }
 
     return false;
   }
 
-  private monthToIndex(month: Month) {
-    const order: Month[] = [
-      Month.JANUARY,
-      Month.FEBRUARY,
-      Month.MARCH,
-      Month.APRIL,
-      Month.MAY,
-      Month.JUNE,
-      Month.JULY,
-      Month.AUGUST,
-      Month.SEPTEMBER,
-      Month.OCTOBER,
-      Month.NOVEMBER,
-      Month.DECEMBER,
-    ];
-
-    return order.indexOf(month);
-  }
-
-  private isMonthInRange(month: number, start: number, end: number) {
-    if (start <= end) {
-      return month >= start && month <= end;
-    }
-
-    return month >= start || month <= end;
-  }
-
-  private getWarsawMonthIndex() {
-    const formatter = new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'Europe/Warsaw',
-      month: '2-digit',
-    });
-
-    const value = formatter.format(new Date());
-    return Number.parseInt(value, 10) - 1;
-  }
-
-  private getTodayInWarsaw() {
-    return new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'Europe/Warsaw',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(new Date());
-  }
-
-  private addDays(date: Date, days: number) {
-    return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+  private getTodayInWarsawDate() {
+    return toDateOnlyInTimezone(new Date(), 'Europe/Warsaw');
   }
 }

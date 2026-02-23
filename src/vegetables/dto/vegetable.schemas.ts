@@ -9,7 +9,11 @@ import {
   RotationGroup,
   DominantNutrientDemand,
 } from '../../common/enums/vegetable.enums';
-import { ActionRuleTrigger } from '../../common/enums/action.enums';
+import {
+  ActionRuleSchedule,
+  ActionRuleTrigger,
+} from '../../common/enums/action.enums';
+import { PlantingStartMethod } from '../../common/enums/planting.enums';
 import type {
   FertilizationStage,
   SowingMethod,
@@ -53,6 +57,10 @@ export type VegetableActionRuleDto = {
   actionTemplateId: string;
   trigger: ActionRuleTrigger;
   offsetDays: number;
+  schedule: ActionRuleSchedule;
+  everyNDays?: number | null;
+  occurrencesLimit?: number | null;
+  applyIfStartMethod?: PlantingStartMethod[] | null;
   isEnabled?: boolean;
 };
 
@@ -152,13 +160,33 @@ const fertilizationStageSchema = z.object({
   description: z.string().min(1),
 });
 
-const vegetableActionRuleSchema = z.object({
-  id: z.string().uuid().optional(),
-  actionTemplateId: z.string().uuid(),
-  trigger: z.nativeEnum(ActionRuleTrigger),
-  offsetDays: z.number().int(),
-  isEnabled: z.boolean().optional(),
-});
+const vegetableActionRuleSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    actionTemplateId: z.string().uuid(),
+    trigger: z.nativeEnum(ActionRuleTrigger),
+    offsetDays: z.number().int(),
+    schedule: z.nativeEnum(ActionRuleSchedule),
+    everyNDays: z.number().int().positive().nullable().optional(),
+    occurrencesLimit: z.number().int().positive().nullable().optional(),
+    applyIfStartMethod: z
+      .array(z.nativeEnum(PlantingStartMethod))
+      .nullable()
+      .optional(),
+    isEnabled: z.boolean().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (
+      value.schedule === ActionRuleSchedule.EVERY_N_DAYS &&
+      !value.everyNDays
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'everyNDays is required for EVERY_N_DAYS schedule',
+        path: ['everyNDays'],
+      });
+    }
+  });
 
 const baseVegetableSchema = z
   .object({

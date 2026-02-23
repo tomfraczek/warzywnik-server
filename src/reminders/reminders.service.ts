@@ -632,7 +632,7 @@ export class RemindersService {
     }
   }
 
-  private async createPending(
+  private createPending(
     kind: 'disease' | 'pest',
     payload: {
       user: User;

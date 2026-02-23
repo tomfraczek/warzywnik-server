@@ -81,6 +81,7 @@ export class VegetablesService {
         rotationGroup: item.rotationGroup,
         minSoilDepthCm: item.minSoilDepthCm ?? null,
         dominantNutrientDemand: item.dominantNutrientDemand ?? null,
+        rulesVersion: item.rulesVersion,
       })),
       page,
       limit,
@@ -312,6 +313,7 @@ export class VegetablesService {
 
     if (dto.actionRules !== undefined) {
       await this.replaceActionRules(vegetable, dto.actionRules);
+      vegetable.rulesVersion += 1;
     }
 
     await this.em.flush();
@@ -391,10 +393,15 @@ export class VegetablesService {
       badCompanions: entity.badCompanions
         .getItems()
         .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
+      rulesVersion: entity.rulesVersion,
       actionRules: entity.actionRules.getItems().map((rule) => ({
         id: rule.id,
         trigger: rule.trigger,
         offsetDays: rule.offsetDays,
+        schedule: rule.schedule,
+        everyNDays: rule.everyNDays ?? null,
+        occurrencesLimit: rule.occurrencesLimit ?? null,
+        applyIfStartMethod: rule.applyIfStartMethod ?? null,
         isEnabled: rule.isEnabled,
         actionTemplate: {
           id: rule.actionTemplate.id,
@@ -448,6 +455,10 @@ export class VegetablesService {
       rule.actionTemplate = actionTemplate;
       rule.trigger = item.trigger;
       rule.offsetDays = item.offsetDays;
+      rule.schedule = item.schedule;
+      rule.everyNDays = item.everyNDays ?? null;
+      rule.occurrencesLimit = item.occurrencesLimit ?? null;
+      rule.applyIfStartMethod = item.applyIfStartMethod ?? null;
       rule.isEnabled = item.isEnabled ?? true;
 
       return rule;
