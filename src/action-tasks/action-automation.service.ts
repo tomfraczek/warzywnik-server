@@ -168,7 +168,6 @@ export class ActionAutomationService {
     return rules.map((rule) => ({
       actionTemplate: {
         id: rule.actionTemplate.id,
-        slug: rule.actionTemplate.slug,
         name: rule.actionTemplate.name,
         scope: rule.actionTemplate.target,
         target: rule.actionTemplate.target,

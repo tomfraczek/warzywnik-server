@@ -210,7 +210,6 @@ export class PlantingDiseasesService {
       disease: {
         id: occurrence.disease.id,
         name: occurrence.disease.name,
-        slug: occurrence.disease.slug,
       },
       actions: occurrence.disease.recommendedActions
         .getItems()
@@ -279,7 +278,6 @@ export class PlantingDiseasesService {
   private serializeActionTemplate(template: ActionTemplate) {
     return {
       id: template.id,
-      slug: template.slug,
       name: template.name,
       description: template.description ?? null,
       target: template.target,
@@ -303,7 +301,6 @@ export class PlantingDiseasesService {
       disease: entity.disease
         ? {
             id: entity.disease.id,
-            slug: entity.disease.slug,
             name: entity.disease.name,
           }
         : null,

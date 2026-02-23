@@ -42,7 +42,7 @@ export class VegetablesService {
       where.$or = [
         { name: { $ilike: `%${search}%` } },
         { latinName: { $ilike: `%${search}%` } },
-        { slug: { $ilike: `%${search}%` } },
+        { description: { $ilike: `%${search}%` } },
       ];
     }
 
@@ -53,7 +53,6 @@ export class VegetablesService {
       populate: ['recommendedSoils'],
       fields: [
         'id',
-        'slug',
         'name',
         'latinName',
         'imageUrl',
@@ -69,7 +68,6 @@ export class VegetablesService {
     return {
       items: items.map((item) => ({
         id: item.id,
-        slug: item.slug,
         name: item.name,
         latinName: item.latinName ?? null,
         imageUrl: item.imageUrl ?? null,
@@ -114,8 +112,14 @@ export class VegetablesService {
   }
 
   async create(dto: CreateVegetableDto) {
+    const existing = await this.em.findOne(Vegetable, {
+      name: { $ilike: dto.name },
+    });
+    if (existing) {
+      throw new ConflictException('Vegetable name already exists');
+    }
+
     const vegetable = new Vegetable();
-    vegetable.slug = dto.slug;
     vegetable.name = dto.name;
     vegetable.description = dto.description;
     vegetable.latinName = dto.latinName ?? null;
@@ -223,15 +227,19 @@ export class VegetablesService {
       throw new NotFoundException('Vegetable not found');
     }
 
-    if (dto.slug && dto.slug !== vegetable.slug) {
-      const existing = await this.em.findOne(Vegetable, { slug: dto.slug });
+    if (dto.name && dto.name !== vegetable.name) {
+      const existing = await this.em.findOne(Vegetable, {
+        id: { $ne: id },
+        name: { $ilike: dto.name },
+      });
       if (existing) {
-        throw new ConflictException('Vegetable slug already exists');
+        throw new ConflictException('Vegetable name already exists');
       }
-      vegetable.slug = dto.slug;
+      vegetable.name = dto.name;
     }
 
-    if (dto.name !== undefined) vegetable.name = dto.name;
+    if (dto.name !== undefined && dto.name === vegetable.name)
+      vegetable.name = dto.name;
     if (dto.description !== undefined) vegetable.description = dto.description;
     if (dto.latinName !== undefined) vegetable.latinName = dto.latinName;
     if (dto.imageUrl !== undefined) vegetable.imageUrl = dto.imageUrl;
@@ -356,7 +364,6 @@ export class VegetablesService {
   private serializeVegetable(entity: Vegetable) {
     return {
       id: entity.id,
-      slug: entity.slug,
       name: entity.name,
       latinName: entity.latinName ?? null,
       imageUrl: entity.imageUrl ?? null,
@@ -383,16 +390,16 @@ export class VegetablesService {
       fertilizationStages: entity.fertilizationStages ?? null,
       commonPests: entity.commonPests
         .getItems()
-        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
+        .map((item) => ({ id: item.id, name: item.name })),
       commonDiseases: entity.commonDiseases
         .getItems()
-        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
+        .map((item) => ({ id: item.id, name: item.name })),
       goodCompanions: entity.goodCompanions
         .getItems()
-        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
+        .map((item) => ({ id: item.id, name: item.name })),
       badCompanions: entity.badCompanions
         .getItems()
-        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
+        .map((item) => ({ id: item.id, name: item.name })),
       rulesVersion: entity.rulesVersion,
       actionRules: entity.actionRules.getItems().map((rule) => ({
         id: rule.id,

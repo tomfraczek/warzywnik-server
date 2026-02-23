@@ -7,7 +7,6 @@ import {
   IsString,
   Max,
   MaxLength,
-  Matches,
   Min,
   MinLength,
   Validate,
@@ -82,14 +81,6 @@ const IsPhRangeValid =
 export class CreateSoilDto {
   @IsString()
   @MinLength(2)
-  @MaxLength(80)
-  @Matches(/^[a-z0-9-]+$/, {
-    message: 'slug must contain only lowercase letters, numbers and hyphens',
-  })
-  slug!: string;
-
-  @IsString()
-  @MinLength(2)
   @MaxLength(120)
   name!: string;
 
@@ -144,15 +135,6 @@ export class CreateSoilDto {
 }
 
 export class UpdateSoilDto {
-  @IsOptional()
-  @IsString()
-  @MinLength(2)
-  @MaxLength(80)
-  @Matches(/^[a-z0-9-]+$/, {
-    message: 'slug must contain only lowercase letters, numbers and hyphens',
-  })
-  slug?: string;
-
   @IsOptional()
   @IsString()
   @MinLength(2)

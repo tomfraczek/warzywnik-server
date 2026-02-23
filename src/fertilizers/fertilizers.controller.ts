@@ -34,8 +34,8 @@ export class FertilizersController {
   }
 
   @Get(':id')
-  get(@Param('id') idOrSlug: string) {
-    return this.fertilizersService.getByIdOrSlug(idOrSlug);
+  get(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.fertilizersService.getById(id);
   }
 
   @Post()

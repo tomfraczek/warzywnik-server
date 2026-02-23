@@ -12,7 +12,6 @@ import {
 } from '../../common/enums/fertilizer.enums';
 
 export type FertilizerTypeBaseDto = {
-  slug?: string;
   name?: string;
   description?: string;
   category?: FertilizerCategory;
@@ -33,7 +32,6 @@ export type FertilizerTypeBaseDto = {
 };
 
 export type CreateFertilizerTypeDto = FertilizerTypeBaseDto & {
-  slug: string;
   name: string;
   description: string;
   category: FertilizerCategory;
@@ -60,17 +58,10 @@ export type ListFertilizerTypesQueryDto = {
   isActive?: boolean;
 };
 
-const slugSchema = z
-  .string()
-  .min(2)
-  .max(80)
-  .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers and hyphens');
-
 const nameSchema = z.string().min(2).max(120);
 const descriptionSchema = z.string().min(1);
 
 const baseFertilizerTypeSchema = z.object({
-  slug: slugSchema.optional(),
   name: nameSchema.optional(),
   description: descriptionSchema.optional(),
   category: z.nativeEnum(FertilizerCategory).optional(),
@@ -91,7 +82,6 @@ const baseFertilizerTypeSchema = z.object({
 });
 
 export const createFertilizerTypeSchema = baseFertilizerTypeSchema.extend({
-  slug: baseFertilizerTypeSchema.shape.slug.unwrap(),
   name: baseFertilizerTypeSchema.shape.name.unwrap(),
   description: baseFertilizerTypeSchema.shape.description.unwrap(),
   category: baseFertilizerTypeSchema.shape.category.unwrap(),

@@ -62,7 +62,6 @@ const makePlanting = (overrides: Partial<Planting> = {}): Planting =>
 const makeSoil = (overrides: Partial<Soil> = {}): Soil =>
   ({
     id: 'soil-1',
-    slug: 'soil-1',
     name: 'Soil 1',
     description: 'Soil',
     soilType: SoilType.OTHER,

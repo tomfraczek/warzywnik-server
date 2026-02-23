@@ -23,7 +23,7 @@ export class SoilsService {
     if (q) {
       where.$or = [
         { name: { $ilike: `%${q}%` } },
-        { slug: { $ilike: `%${q}%` } },
+        { description: { $ilike: `%${q}%` } },
       ];
     }
 
@@ -36,7 +36,6 @@ export class SoilsService {
     return {
       items: items.map((soil) => ({
         id: soil.id,
-        slug: soil.slug,
         name: soil.name,
         soilType: soil.soilType,
       })),
@@ -56,13 +55,14 @@ export class SoilsService {
   }
 
   async create(dto: CreateSoilDto) {
-    const existing = await this.em.findOne(Soil, { slug: dto.slug });
+    const existing = await this.em.findOne(Soil, {
+      name: { $ilike: dto.name },
+    });
     if (existing) {
-      throw new ConflictException('Soil slug already exists');
+      throw new ConflictException('Soil name already exists');
     }
 
     const soil = new Soil();
-    soil.slug = dto.slug;
     soil.name = dto.name;
     soil.description = dto.description;
     soil.soilType = dto.soilType;
@@ -86,15 +86,18 @@ export class SoilsService {
       throw new NotFoundException('Soil not found');
     }
 
-    if (dto.slug && dto.slug !== soil.slug) {
-      const existing = await this.em.findOne(Soil, { slug: dto.slug });
+    if (dto.name && dto.name !== soil.name) {
+      const existing = await this.em.findOne(Soil, {
+        id: { $ne: id },
+        name: { $ilike: dto.name },
+      });
       if (existing) {
-        throw new ConflictException('Soil slug already exists');
+        throw new ConflictException('Soil name already exists');
       }
-      soil.slug = dto.slug;
+      soil.name = dto.name;
     }
 
-    if (dto.name !== undefined) {
+    if (dto.name !== undefined && dto.name === soil.name) {
       soil.name = dto.name;
     }
 

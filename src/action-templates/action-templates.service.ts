@@ -23,7 +23,7 @@ export class ActionTemplatesService {
     if (q) {
       where.$or = [
         { name: { $ilike: `%${q}%` } },
-        { slug: { $ilike: `%${q}%` } },
+        { description: { $ilike: `%${q}%` } },
       ];
     }
 
@@ -52,13 +52,14 @@ export class ActionTemplatesService {
   }
 
   async create(dto: CreateActionTemplateDto) {
-    const existing = await this.em.findOne(ActionTemplate, { slug: dto.slug });
+    const existing = await this.em.findOne(ActionTemplate, {
+      name: { $ilike: dto.name },
+    });
     if (existing) {
-      throw new ConflictException('Action template slug already exists');
+      throw new ConflictException('Action template name already exists');
     }
 
     const template = new ActionTemplate();
-    template.slug = dto.slug;
     template.name = dto.name;
     template.description = dto.description ?? null;
     template.target = dto.target;
@@ -75,17 +76,18 @@ export class ActionTemplatesService {
       throw new NotFoundException('Action template not found');
     }
 
-    if (dto.slug && dto.slug !== template.slug) {
+    if (dto.name && dto.name !== template.name) {
       const existing = await this.em.findOne(ActionTemplate, {
-        slug: dto.slug,
+        id: { $ne: id },
+        name: { $ilike: dto.name },
       });
       if (existing) {
-        throw new ConflictException('Action template slug already exists');
+        throw new ConflictException('Action template name already exists');
       }
-      template.slug = dto.slug;
+      template.name = dto.name;
     }
 
-    if (dto.name !== undefined) {
+    if (dto.name !== undefined && dto.name === template.name) {
       template.name = dto.name;
     }
 
@@ -121,7 +123,6 @@ export class ActionTemplatesService {
   private serialize(entity: ActionTemplate) {
     return {
       id: entity.id,
-      slug: entity.slug,
       name: entity.name,
       description: entity.description ?? null,
       scope: entity.target,

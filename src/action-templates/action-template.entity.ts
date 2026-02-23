@@ -6,7 +6,6 @@ import {
   PrimaryKey,
   Property,
   TextType,
-  Unique,
 } from '@mikro-orm/core';
 import {
   ActionTemplateTarget,
@@ -19,10 +18,6 @@ import { Disease } from '../diseases/disease.entity';
 export class ActionTemplate {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
-
-  @Property({ length: 80 })
-  @Unique()
-  slug!: string;
 
   @Property({ length: 120 })
   name!: string;

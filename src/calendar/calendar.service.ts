@@ -97,7 +97,6 @@ export class CalendarService {
         vegetable: {
           id: planting.vegetable.id,
           name: planting.vegetable.name,
-          slug: planting.vegetable.slug,
         },
         start: (planting.harvestWindowStart ?? null) as Date | null,
         end: (planting.harvestWindowEnd ?? null) as Date | null,

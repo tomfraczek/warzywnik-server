@@ -168,7 +168,6 @@ export class PestOccurrencesService {
       pest: {
         id: occurrence.pest.id,
         name: occurrence.pest.name,
-        slug: occurrence.pest.slug,
       },
       actions: occurrence.pest.recommendedActions
         .getItems()
@@ -214,7 +213,6 @@ export class PestOccurrencesService {
   private serializeActionTemplate(template: ActionTemplate) {
     return {
       id: template.id,
-      slug: template.slug,
       name: template.name,
       description: template.description ?? null,
       target: template.target,
@@ -250,7 +248,6 @@ export class PestOccurrencesService {
       pest: entity.pest
         ? {
             id: entity.pest.id,
-            slug: entity.pest.slug,
             name: entity.pest.name,
           }
         : null,

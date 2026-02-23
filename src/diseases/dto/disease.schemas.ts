@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 export type DiseaseBaseDto = {
-  slug?: string;
   name?: string;
   description?: string;
   symptoms?: string | null;
@@ -11,7 +10,6 @@ export type DiseaseBaseDto = {
 };
 
 export type CreateDiseaseDto = DiseaseBaseDto & {
-  slug: string;
   name: string;
   description: string;
 };
@@ -25,12 +23,6 @@ export type ListDiseasesQueryDto = {
 };
 
 const baseDiseaseSchema = z.object({
-  slug: z
-    .string()
-    .min(2)
-    .max(80)
-    .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers and hyphens')
-    .optional(),
   name: z.string().min(2).max(120).optional(),
   description: z.string().min(1).optional(),
   symptoms: z.string().min(1).nullable().optional(),
@@ -40,7 +32,6 @@ const baseDiseaseSchema = z.object({
 });
 
 export const createDiseaseSchema = baseDiseaseSchema.extend({
-  slug: baseDiseaseSchema.shape.slug.unwrap(),
   name: baseDiseaseSchema.shape.name.unwrap(),
   description: baseDiseaseSchema.shape.description.unwrap(),
 });

@@ -5,7 +5,6 @@ import {
   PrimaryKey,
   Property,
   TextType,
-  Unique,
 } from '@mikro-orm/core';
 import {
   DemandLevel,
@@ -18,10 +17,6 @@ import {
 export class Soil {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
-
-  @Property({ length: 80 })
-  @Unique()
-  slug!: string;
 
   @Property({ length: 120 })
   name!: string;

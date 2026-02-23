@@ -78,7 +78,6 @@ export class HarvestPromptsService {
           ? {
               id: planting.vegetable.id,
               name: planting.vegetable.name,
-              slug: planting.vegetable.slug,
             }
           : null,
         title: planting.vegetable

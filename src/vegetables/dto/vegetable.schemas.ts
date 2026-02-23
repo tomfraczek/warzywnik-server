@@ -20,7 +20,6 @@ import type {
 } from '../../common/types/vegetable.types';
 
 export type VegetableBaseDto = {
-  slug?: string;
   name?: string;
   latinName?: string | null;
   imageUrl?: string | null;
@@ -65,7 +64,6 @@ export type VegetableActionRuleDto = {
 };
 
 export type CreateVegetableDto = VegetableBaseDto & {
-  slug: string;
   name: string;
   description: string;
 };
@@ -104,11 +102,6 @@ const dominantNutrientDemandSchema = z
   .nullable();
 
 const nonNegativeNumber = z.number().min(0, 'Must be >= 0');
-const slugSchema = z
-  .string()
-  .min(2)
-  .max(80)
-  .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers and hyphens');
 const nameSchema = z.string().min(2).max(120);
 const descriptionSchema = z.string().min(1);
 
@@ -190,7 +183,6 @@ const vegetableActionRuleSchema = z
 
 const baseVegetableSchema = z
   .object({
-    slug: slugSchema.optional(),
     name: nameSchema.optional(),
     latinName: z.string().max(160).nullable().optional(),
     imageUrl: z.string().max(255).nullable().optional(),
@@ -228,7 +220,6 @@ const baseVegetableSchema = z
 
 export const createVegetableSchema = baseVegetableSchema
   .extend({
-    slug: slugSchema,
     name: nameSchema,
     description: descriptionSchema,
   })

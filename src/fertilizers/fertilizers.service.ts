@@ -11,8 +11,6 @@ import {
   UpdateFertilizerTypeDto,
 } from './dto/fertilizer.schemas';
 
-const isUuid = (value: string): boolean => /^[0-9a-fA-F-]{36}$/.test(value);
-
 @Injectable()
 export class FertilizersService {
   constructor(private readonly em: EntityManager) {}
@@ -25,7 +23,7 @@ export class FertilizersService {
     if (q) {
       where.$or = [
         { name: { $ilike: `%${q}%` } },
-        { slug: { $ilike: `%${q}%` } },
+        { description: { $ilike: `%${q}%` } },
       ];
     }
 
@@ -51,10 +49,8 @@ export class FertilizersService {
     };
   }
 
-  async getByIdOrSlug(idOrSlug: string) {
-    const where = isUuid(idOrSlug) ? { id: idOrSlug } : { slug: idOrSlug };
-
-    const entity = await this.em.findOne(FertilizerType, where);
+  async getById(id: string) {
+    const entity = await this.em.findOne(FertilizerType, { id });
 
     if (!entity) {
       throw new NotFoundException('Fertilizer type not found');
@@ -64,13 +60,14 @@ export class FertilizersService {
   }
 
   async create(dto: CreateFertilizerTypeDto) {
-    const existing = await this.em.findOne(FertilizerType, { slug: dto.slug });
+    const existing = await this.em.findOne(FertilizerType, {
+      name: { $ilike: dto.name },
+    });
     if (existing) {
-      throw new ConflictException('Fertilizer type slug already exists');
+      throw new ConflictException('Fertilizer type name already exists');
     }
 
     const fertilizer = new FertilizerType();
-    fertilizer.slug = dto.slug;
     fertilizer.name = dto.name;
     fertilizer.description = dto.description;
     fertilizer.category = dto.category;
@@ -99,17 +96,18 @@ export class FertilizersService {
       throw new NotFoundException('Fertilizer type not found');
     }
 
-    if (dto.slug && dto.slug !== fertilizer.slug) {
+    if (dto.name && dto.name !== fertilizer.name) {
       const existing = await this.em.findOne(FertilizerType, {
-        slug: dto.slug,
+        id: { $ne: id },
+        name: { $ilike: dto.name },
       });
       if (existing) {
-        throw new ConflictException('Fertilizer type slug already exists');
+        throw new ConflictException('Fertilizer type name already exists');
       }
-      fertilizer.slug = dto.slug;
+      fertilizer.name = dto.name;
     }
 
-    if (dto.name !== undefined) {
+    if (dto.name !== undefined && dto.name === fertilizer.name) {
       fertilizer.name = dto.name;
     }
 

@@ -4,7 +4,6 @@ import {
   ManyToMany,
   PrimaryKey,
   Property,
-  Unique,
   TextType,
 } from '@mikro-orm/core';
 import { ActionTemplate } from '../action-templates/action-template.entity';
@@ -13,10 +12,6 @@ import { ActionTemplate } from '../action-templates/action-template.entity';
 export class Disease {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
-
-  @Property({ length: 80 })
-  @Unique()
-  slug!: string;
 
   @Property({ length: 120 })
   name!: string;

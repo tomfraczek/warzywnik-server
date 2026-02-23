@@ -424,7 +424,6 @@ export class ActionTasksService {
       actionTemplate: entity.actionTemplate
         ? {
             id: entity.actionTemplate.id,
-            slug: entity.actionTemplate.slug,
             name: entity.actionTemplate.name,
             scope: entity.actionTemplate.target,
             target: entity.actionTemplate.target,

@@ -5,7 +5,6 @@ import {
 } from '../../common/enums/action.enums';
 
 export type ActionTemplateBaseDto = {
-  slug?: string;
   name?: string;
   description?: string | null;
   target?: ActionTemplateTarget;
@@ -14,7 +13,6 @@ export type ActionTemplateBaseDto = {
 };
 
 export type CreateActionTemplateDto = ActionTemplateBaseDto & {
-  slug: string;
   name: string;
   target: ActionTemplateTarget;
   type: ActionTemplateType;
@@ -29,12 +27,6 @@ export type ListActionTemplatesQueryDto = {
 };
 
 const baseActionTemplateSchema = z.object({
-  slug: z
-    .string()
-    .min(2)
-    .max(80)
-    .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers and hyphens')
-    .optional(),
   name: z.string().min(2).max(120).optional(),
   description: z.string().min(1).nullable().optional(),
   target: z.nativeEnum(ActionTemplateTarget).optional(),
@@ -43,7 +35,6 @@ const baseActionTemplateSchema = z.object({
 });
 
 export const createActionTemplateSchema = baseActionTemplateSchema.extend({
-  slug: baseActionTemplateSchema.shape.slug.unwrap(),
   name: baseActionTemplateSchema.shape.name.unwrap(),
   target: baseActionTemplateSchema.shape.target.unwrap(),
   type: baseActionTemplateSchema.shape.type.unwrap(),

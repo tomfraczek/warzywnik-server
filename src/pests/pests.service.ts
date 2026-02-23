@@ -24,7 +24,7 @@ export class PestsService {
     if (q) {
       where.$or = [
         { name: { $ilike: `%${q}%` } },
-        { slug: { $ilike: `%${q}%` } },
+        { description: { $ilike: `%${q}%` } },
       ];
     }
 
@@ -58,13 +58,14 @@ export class PestsService {
   }
 
   async create(dto: CreatePestDto) {
-    const existing = await this.em.findOne(Pest, { slug: dto.slug });
+    const existing = await this.em.findOne(Pest, {
+      name: { $ilike: dto.name },
+    });
     if (existing) {
-      throw new ConflictException('Pest slug already exists');
+      throw new ConflictException('Pest name already exists');
     }
 
     const pest = new Pest();
-    pest.slug = dto.slug;
     pest.name = dto.name;
     pest.description = dto.description;
     pest.symptoms = dto.symptoms ?? null;
@@ -94,15 +95,18 @@ export class PestsService {
       throw new NotFoundException('Pest not found');
     }
 
-    if (dto.slug && dto.slug !== pest.slug) {
-      const existing = await this.em.findOne(Pest, { slug: dto.slug });
+    if (dto.name && dto.name !== pest.name) {
+      const existing = await this.em.findOne(Pest, {
+        id: { $ne: id },
+        name: { $ilike: dto.name },
+      });
       if (existing) {
-        throw new ConflictException('Pest slug already exists');
+        throw new ConflictException('Pest name already exists');
       }
-      pest.slug = dto.slug;
+      pest.name = dto.name;
     }
 
-    if (dto.name !== undefined) {
+    if (dto.name !== undefined && dto.name === pest.name) {
       pest.name = dto.name;
     }
 
@@ -163,7 +167,6 @@ export class PestsService {
   private serialize(entity: Pest) {
     return {
       id: entity.id,
-      slug: entity.slug,
       name: entity.name,
       description: entity.description,
       symptoms: entity.symptoms ?? null,
