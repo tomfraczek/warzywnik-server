@@ -566,7 +566,7 @@ export class RemindersService {
     await this.cancelPending(params.kind, params.occurrence.id, em);
 
     if (params.kind === 'disease') {
-      await this.createPending(
+      this.createPending(
         params.kind,
         {
           user: params.user,
@@ -585,7 +585,7 @@ export class RemindersService {
       return;
     }
 
-    await this.createPending(
+    this.createPending(
       params.kind,
       {
         user: params.user,

@@ -98,16 +98,16 @@ export class CalendarService {
           id: planting.vegetable.id,
           name: planting.vegetable.name,
         },
-        start: (planting.harvestWindowStart ?? null) as Date | null,
-        end: (planting.harvestWindowEnd ?? null) as Date | null,
-        harvestedAt: (planting.harvestedAt ?? null) as Date | null,
+        start: planting.harvestWindowStart ?? null,
+        end: planting.harvestWindowEnd ?? null,
+        harvestedAt: planting.harvestedAt ?? null,
       })),
       reminders: reminders.map((reminder) => ({
         id: reminder.id,
         type: reminder.type,
         status: reminder.status,
         scheduledAt: reminder.scheduledAt,
-        actionTaskId: (reminder.actionTaskId ?? null) as string | null,
+        actionTaskId: reminder.actionTaskId ?? null,
       })),
     };
   }
