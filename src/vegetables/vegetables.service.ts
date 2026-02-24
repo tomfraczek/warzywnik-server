@@ -62,6 +62,7 @@ export class VegetablesService {
         'rotationGroup',
         'minSoilDepthCm',
         'dominantNutrientDemand',
+        'rulesVersion',
       ],
     });
 
