@@ -10,97 +10,18 @@ export class Migration20260221100000 extends Migration {
       end
     $$;`);
 
-    this.addSql(`do $$
-      begin
-        if not exists (
-          select 1 from pg_enum
-          where enumlabel = 'ON_SOWED'
-            and enumtypid = (select oid from pg_type where typname = 'vegetable_action_rules_trigger_enum')
-        ) then
-          alter type "vegetable_action_rules_trigger_enum" add value 'ON_SOWED';
-        end if;
-      end
-    $$;`);
-    this.addSql(`do $$
-      begin
-        if not exists (
-          select 1 from pg_enum
-          where enumlabel = 'AFTER_SOWING_DAYS'
-            and enumtypid = (select oid from pg_type where typname = 'vegetable_action_rules_trigger_enum')
-        ) then
-          alter type "vegetable_action_rules_trigger_enum" add value 'AFTER_SOWING_DAYS';
-        end if;
-      end
-    $$;`);
-    this.addSql(`do $$
-      begin
-        if not exists (
-          select 1 from pg_enum
-          where enumlabel = 'ON_TRANSPLANTED'
-            and enumtypid = (select oid from pg_type where typname = 'vegetable_action_rules_trigger_enum')
-        ) then
-          alter type "vegetable_action_rules_trigger_enum" add value 'ON_TRANSPLANTED';
-        end if;
-      end
-    $$;`);
-    this.addSql(`do $$
-      begin
-        if not exists (
-          select 1 from pg_enum
-          where enumlabel = 'AFTER_TRANSPLANT_DAYS'
-            and enumtypid = (select oid from pg_type where typname = 'vegetable_action_rules_trigger_enum')
-        ) then
-          alter type "vegetable_action_rules_trigger_enum" add value 'AFTER_TRANSPLANT_DAYS';
-        end if;
-      end
-    $$;`);
-    this.addSql(`do $$
-      begin
-        if not exists (
-          select 1 from pg_enum
-          where enumlabel = 'BEFORE_TRANSPLANT_DAYS'
-            and enumtypid = (select oid from pg_type where typname = 'vegetable_action_rules_trigger_enum')
-        ) then
-          alter type "vegetable_action_rules_trigger_enum" add value 'BEFORE_TRANSPLANT_DAYS';
-        end if;
-      end
-    $$;`);
-    this.addSql(`do $$
-      begin
-        if not exists (
-          select 1 from pg_enum
-          where enumlabel = 'ON_HARVEST_WINDOW_START'
-            and enumtypid = (select oid from pg_type where typname = 'vegetable_action_rules_trigger_enum')
-        ) then
-          alter type "vegetable_action_rules_trigger_enum" add value 'ON_HARVEST_WINDOW_START';
-        end if;
-      end
-    $$;`);
-    this.addSql(`do $$
-      begin
-        if not exists (
-          select 1 from pg_enum
-          where enumlabel = 'BEFORE_HARVEST_WINDOW_START_DAYS'
-            and enumtypid = (select oid from pg_type where typname = 'vegetable_action_rules_trigger_enum')
-        ) then
-          alter type "vegetable_action_rules_trigger_enum" add value 'BEFORE_HARVEST_WINDOW_START_DAYS';
-        end if;
-      end
-    $$;`);
-    this.addSql(`do $$
-      begin
-        if not exists (
-          select 1 from pg_enum
-          where enumlabel = 'AFTER_HARVEST_DAYS'
-            and enumtypid = (select oid from pg_type where typname = 'vegetable_action_rules_trigger_enum')
-        ) then
-          alter type "vegetable_action_rules_trigger_enum" add value 'AFTER_HARVEST_DAYS';
-        end if;
-      end
-    $$;`);
-
+    this.addSql(
+      `alter table "vegetable_action_rules" alter column "trigger" type text using "trigger"::text;`,
+    );
     this.addSql(
       `update "vegetable_action_rules" set "trigger" = 'ON_SOWED' where "trigger" = 'ON_PLANTING_CREATED';`,
+    );
+    this.addSql(`drop type if exists "vegetable_action_rules_trigger_enum";`);
+    this.addSql(
+      `create type "vegetable_action_rules_trigger_enum" as enum ('ON_SOWED', 'AFTER_SOWING_DAYS', 'ON_TRANSPLANTED', 'AFTER_TRANSPLANT_DAYS', 'BEFORE_TRANSPLANT_DAYS', 'ON_HARVEST_WINDOW_START', 'BEFORE_HARVEST_WINDOW_START_DAYS', 'ON_HARVEST_CONFIRMED', 'AFTER_HARVEST_DAYS');`,
+    );
+    this.addSql(
+      `alter table "vegetable_action_rules" alter column "trigger" type "vegetable_action_rules_trigger_enum" using "trigger"::"vegetable_action_rules_trigger_enum";`,
     );
 
     this.addSql(`do $$
