@@ -75,9 +75,7 @@ export class ActionTasksService {
             : (template.description ?? null);
         task.dueAt = dto.dueAt
           ? this.normalizeTaskDueAt(this.parseDate(dto.dueAt, 'dueAt'))
-          : this.normalizeTaskDueAt(
-              this.addDays(new Date(), template.defaultDueOffsetDays),
-            );
+          : this.resolveTemplateDueAt(new Date(), template.defaultDueOffsetDays);
       } else {
         task.actionTemplate = null;
         task.title = dto.title as string;
@@ -321,6 +319,17 @@ export class ActionTasksService {
     return normalizeDueAt(date, 'Europe/Warsaw', 9, 0);
   }
 
+  private resolveTemplateDueAt(
+    baseDate: Date,
+    defaultDueOffsetDays: number | null,
+  ) {
+    if (defaultDueOffsetDays === null) {
+      return null;
+    }
+
+    return this.normalizeTaskDueAt(this.addDays(baseDate, defaultDueOffsetDays));
+  }
+
   private async createManualBulk(params: {
     user: User;
     items: Array<{
@@ -374,9 +383,7 @@ export class ActionTasksService {
           : (template.description ?? null);
       task.dueAt = item.dueAt
         ? this.normalizeTaskDueAt(this.parseDate(item.dueAt, 'dueAt'))
-        : this.normalizeTaskDueAt(
-            this.addDays(now, template.defaultDueOffsetDays),
-          );
+        : this.resolveTemplateDueAt(now, template.defaultDueOffsetDays);
       task.status = ActionTaskStatus.PENDING;
       task.source = ActionTaskSource.MANUAL;
       task.sourceRefId = null;

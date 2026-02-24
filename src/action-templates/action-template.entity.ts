@@ -29,10 +29,10 @@ export class ActionTemplate {
   target: ActionTemplateTarget = ActionTemplateTarget.PLANTING;
 
   @Enum({ items: () => ActionTemplateType })
-  type: ActionTemplateType = ActionTemplateType.OTHER;
+  type: ActionTemplateType = ActionTemplateType.MANUAL_CUSTOM;
 
-  @Property({ type: 'int', default: 0 })
-  defaultDueOffsetDays: number = 0;
+  @Property({ type: 'int', nullable: true })
+  defaultDueOffsetDays: number | null = null;
 
   @ManyToMany(() => Pest, 'recommendedActions')
   recommendedForPests = new Collection<Pest>(this);

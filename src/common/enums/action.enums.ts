@@ -4,13 +4,31 @@ export enum ActionTemplateTarget {
 }
 
 export enum ActionTemplateType {
-  WATER = 'WATER',
-  SPRAY = 'SPRAY',
-  FERTILIZE = 'FERTILIZE',
-  WEED = 'WEED',
-  HARVEST = 'HARVEST',
-  SOIL_PREP = 'SOIL_PREP',
-  OTHER = 'OTHER',
+  SOWING = 'sowing',
+  TRANSPLANTING = 'transplanting',
+  THINNING = 'thinning',
+  HARDENING = 'hardening',
+  WATERING = 'watering',
+  FERTILIZATION = 'fertilization',
+  PRUNING = 'pruning',
+  WEEDING = 'weeding',
+  STAKING = 'staking',
+  HARVEST = 'harvest',
+  PEST_CONTROL = 'pest_control',
+  DISEASE_CONTROL = 'disease_control',
+  SPRAYING = 'spraying',
+  PHYSICAL_PROTECTION = 'physical_protection',
+  TRAP_SETUP = 'trap_setup',
+  SOIL_PREPARATION = 'soil_preparation',
+  SOIL_AMENDMENT = 'soil_amendment',
+  MULCHING = 'mulching',
+  SOIL_TESTING = 'soil_testing',
+  SOIL_REGENERATION = 'soil_regeneration',
+  IRRIGATION_SETUP = 'irrigation_setup',
+  MONITORING = 'monitoring',
+  ROTATION_PLANNING = 'rotation_planning',
+  BED_READY = 'bed_ready',
+  MANUAL_CUSTOM = 'manual_custom',
 }
 
 export enum ActionTaskTargetType {

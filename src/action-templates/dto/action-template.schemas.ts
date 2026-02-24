@@ -9,7 +9,7 @@ export type ActionTemplateBaseDto = {
   description?: string | null;
   target?: ActionTemplateTarget;
   type?: ActionTemplateType;
-  defaultDueOffsetDays?: number;
+  defaultDueOffsetDays?: number | null;
 };
 
 export type CreateActionTemplateDto = ActionTemplateBaseDto & {
@@ -30,14 +30,10 @@ const baseActionTemplateSchema = z.object({
   name: z.string().min(2).max(120).optional(),
   description: z.string().min(1).nullable().optional(),
   target: z.nativeEnum(ActionTemplateTarget).optional(),
-  type: z
-    .preprocess(
-      (value) =>
-        typeof value === 'string' ? value.toUpperCase().trim() : value,
-      z.nativeEnum(ActionTemplateType),
-    )
+  type: z.nativeEnum(ActionTemplateType).optional(),
+  defaultDueOffsetDays: z
+    .union([z.coerce.number().int(), z.null()])
     .optional(),
-  defaultDueOffsetDays: z.coerce.number().int().min(-3650).max(3650).optional(),
 });
 
 export const createActionTemplateSchema = baseActionTemplateSchema.extend({

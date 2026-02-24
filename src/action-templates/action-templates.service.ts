@@ -64,7 +64,7 @@ export class ActionTemplatesService {
     template.description = dto.description ?? null;
     template.target = dto.target;
     template.type = dto.type;
-    template.defaultDueOffsetDays = dto.defaultDueOffsetDays ?? 0;
+    template.defaultDueOffsetDays = dto.defaultDueOffsetDays ?? null;
 
     await this.em.persistAndFlush(template);
     return this.serialize(template);
