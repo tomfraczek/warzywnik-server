@@ -2,40 +2,40 @@ import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20260223120000 extends Migration {
   up(): void {
-    this.addSql(`drop index if exists "pests_slug_unique";`);
     this.addSql(
       `alter table "pests" drop constraint if exists "pests_slug_unique";`,
     );
+    this.addSql(`drop index if exists "pests_slug_unique";`);
     this.addSql(`alter table "pests" drop column if exists "slug";`);
 
-    this.addSql(`drop index if exists "diseases_slug_unique";`);
     this.addSql(
       `alter table "diseases" drop constraint if exists "diseases_slug_unique";`,
     );
+    this.addSql(`drop index if exists "diseases_slug_unique";`);
     this.addSql(`alter table "diseases" drop column if exists "slug";`);
 
-    this.addSql(`drop index if exists "soils_slug_unique";`);
     this.addSql(
       `alter table "soils" drop constraint if exists "soils_slug_unique";`,
     );
+    this.addSql(`drop index if exists "soils_slug_unique";`);
     this.addSql(`alter table "soils" drop column if exists "slug";`);
 
-    this.addSql(`drop index if exists "fertilizer_types_slug_unique";`);
     this.addSql(
       `alter table "fertilizer_types" drop constraint if exists "fertilizer_types_slug_unique";`,
     );
+    this.addSql(`drop index if exists "fertilizer_types_slug_unique";`);
     this.addSql(`alter table "fertilizer_types" drop column if exists "slug";`);
 
-    this.addSql(`drop index if exists "action_templates_slug_unique";`);
     this.addSql(
       `alter table "action_templates" drop constraint if exists "action_templates_slug_unique";`,
     );
+    this.addSql(`drop index if exists "action_templates_slug_unique";`);
     this.addSql(`alter table "action_templates" drop column if exists "slug";`);
 
-    this.addSql(`drop index if exists "vegetables_slug_unique";`);
     this.addSql(
       `alter table "vegetables" drop constraint if exists "vegetables_slug_unique";`,
     );
+    this.addSql(`drop index if exists "vegetables_slug_unique";`);
     this.addSql(`alter table "vegetables" drop column if exists "slug";`);
 
     this.addSql(
