@@ -31,9 +31,7 @@ const baseActionTemplateSchema = z.object({
   description: z.string().min(1).nullable().optional(),
   target: z.nativeEnum(ActionTemplateTarget).optional(),
   type: z.nativeEnum(ActionTemplateType).optional(),
-  defaultDueOffsetDays: z
-    .union([z.coerce.number().int(), z.null()])
-    .optional(),
+  defaultDueOffsetDays: z.union([z.coerce.number().int(), z.null()]).optional(),
 });
 
 export const createActionTemplateSchema = baseActionTemplateSchema.extend({

@@ -75,7 +75,10 @@ export class ActionTasksService {
             : (template.description ?? null);
         task.dueAt = dto.dueAt
           ? this.normalizeTaskDueAt(this.parseDate(dto.dueAt, 'dueAt'))
-          : this.resolveTemplateDueAt(new Date(), template.defaultDueOffsetDays);
+          : this.resolveTemplateDueAt(
+              new Date(),
+              template.defaultDueOffsetDays,
+            );
       } else {
         task.actionTemplate = null;
         task.title = dto.title as string;
@@ -327,7 +330,9 @@ export class ActionTasksService {
       return null;
     }
 
-    return this.normalizeTaskDueAt(this.addDays(baseDate, defaultDueOffsetDays));
+    return this.normalizeTaskDueAt(
+      this.addDays(baseDate, defaultDueOffsetDays),
+    );
   }
 
   private async createManualBulk(params: {
