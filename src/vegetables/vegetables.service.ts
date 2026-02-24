@@ -19,10 +19,44 @@ import { ActionTemplate } from '../action-templates/action-template.entity';
 import {
   CreateVegetableDto,
   ListVegetablesQueryDto,
-  VegetableActionRuleDto,
   UpdateVegetableDto,
 } from './dto/vegetable.schemas';
 import { VegetableActionRule } from './vegetable-action-rule.entity';
+import {
+  ActionRuleSchedule,
+  ActionRuleTrigger,
+} from '../common/enums/action.enums';
+import { PlantingStartMethod } from '../common/enums/planting.enums';
+
+type VegetableActionRuleInput = {
+  actionTemplateId: string;
+  trigger: ActionRuleTrigger;
+  offsetDays: number;
+  schedule: ActionRuleSchedule;
+  everyNDays?: number | null;
+  occurrencesLimit?: number | null;
+  applyIfStartMethod?: PlantingStartMethod[] | null;
+  isEnabled?: boolean;
+};
+
+type VegetableActionRuleView = {
+  id: string;
+  trigger: unknown;
+  offsetDays: number;
+  schedule: unknown;
+  everyNDays?: number | null;
+  occurrencesLimit?: number | null;
+  applyIfStartMethod?: PlantingStartMethod[] | null;
+  isEnabled: boolean;
+  actionTemplate: {
+    id: string;
+    name: string;
+    target: string;
+    type: string;
+    description?: string | null;
+    defaultDueOffsetDays: number;
+  };
+};
 
 @Injectable()
 export class VegetablesService {
@@ -80,7 +114,8 @@ export class VegetablesService {
         rotationGroup: item.rotationGroup,
         minSoilDepthCm: item.minSoilDepthCm ?? null,
         dominantNutrientDemand: item.dominantNutrientDemand ?? null,
-        rulesVersion: item.rulesVersion,
+        rulesVersion: (item as unknown as { rulesVersion: number })
+          .rulesVersion,
       })),
       page,
       limit,
@@ -189,7 +224,10 @@ export class VegetablesService {
     }
 
     if (dto.actionRules !== undefined) {
-      await this.replaceActionRules(vegetable, dto.actionRules);
+      await this.replaceActionRules(
+        vegetable,
+        dto.actionRules as unknown as VegetableActionRuleInput[],
+      );
     }
 
     await this.em.persistAndFlush(vegetable);
@@ -321,7 +359,10 @@ export class VegetablesService {
     }
 
     if (dto.actionRules !== undefined) {
-      await this.replaceActionRules(vegetable, dto.actionRules);
+      await this.replaceActionRules(
+        vegetable,
+        dto.actionRules as unknown as VegetableActionRuleInput[],
+      );
       vegetable.rulesVersion += 1;
     }
 
@@ -363,6 +404,12 @@ export class VegetablesService {
   }
 
   private serializeVegetable(entity: Vegetable) {
+    const actionRules = (
+      entity as unknown as {
+        actionRules: { getItems: () => VegetableActionRule[] };
+      }
+    ).actionRules.getItems();
+
     return {
       id: entity.id,
       name: entity.name,
@@ -401,26 +448,31 @@ export class VegetablesService {
       badCompanions: entity.badCompanions
         .getItems()
         .map((item) => ({ id: item.id, name: item.name })),
-      rulesVersion: entity.rulesVersion,
-      actionRules: entity.actionRules.getItems().map((rule) => ({
-        id: rule.id,
-        trigger: rule.trigger,
-        offsetDays: rule.offsetDays,
-        schedule: rule.schedule,
-        everyNDays: rule.everyNDays ?? null,
-        occurrencesLimit: rule.occurrencesLimit ?? null,
-        applyIfStartMethod: rule.applyIfStartMethod ?? null,
-        isEnabled: rule.isEnabled,
-        actionTemplate: {
-          id: rule.actionTemplate.id,
-          name: rule.actionTemplate.name,
-          scope: rule.actionTemplate.target,
-          target: rule.actionTemplate.target,
-          type: rule.actionTemplate.type,
-          description: rule.actionTemplate.description ?? null,
-          defaultDueOffsetDays: rule.actionTemplate.defaultDueOffsetDays,
-        },
-      })),
+      rulesVersion: (entity as unknown as { rulesVersion: number })
+        .rulesVersion,
+      actionRules: actionRules.map((rule) => {
+        const typedRule = rule as unknown as VegetableActionRuleView;
+
+        return {
+          id: typedRule.id,
+          trigger: String(typedRule.trigger),
+          offsetDays: typedRule.offsetDays,
+          schedule: String(typedRule.schedule),
+          everyNDays: typedRule.everyNDays ?? null,
+          occurrencesLimit: typedRule.occurrencesLimit ?? null,
+          applyIfStartMethod: typedRule.applyIfStartMethod ?? null,
+          isEnabled: typedRule.isEnabled,
+          actionTemplate: {
+            id: typedRule.actionTemplate.id,
+            name: typedRule.actionTemplate.name,
+            scope: typedRule.actionTemplate.target,
+            target: typedRule.actionTemplate.target,
+            type: typedRule.actionTemplate.type,
+            description: typedRule.actionTemplate.description ?? null,
+            defaultDueOffsetDays: typedRule.actionTemplate.defaultDueOffsetDays,
+          },
+        };
+      }),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };
@@ -428,19 +480,30 @@ export class VegetablesService {
 
   private async replaceActionRules(
     vegetable: Vegetable,
-    rules: VegetableActionRuleDto[],
+    rules: VegetableActionRuleInput[],
   ) {
+    const actionRulesCollection = (
+      vegetable as unknown as {
+        actionRules: {
+          removeAll: () => void;
+          set: (items: VegetableActionRule[]) => void;
+        };
+      }
+    ).actionRules;
+
     await this.em.nativeDelete(VegetableActionRule, {
       vegetable: vegetable.id,
     });
 
     if (rules.length === 0) {
-      vegetable.actionRules.removeAll();
+      actionRulesCollection.removeAll();
       return;
     }
 
     const templateIds = Array.from(
-      new Set(rules.map((item) => item.actionTemplateId)),
+      new Set(
+        rules.map((item: VegetableActionRuleInput) => item.actionTemplateId),
+      ),
     );
 
     const templates = await this.loadEntitiesByIds(
@@ -450,29 +513,42 @@ export class VegetablesService {
     );
     const templateById = new Map(templates.map((item) => [item.id, item]));
 
-    const items: VegetableActionRule[] = rules.map((item) => {
-      const actionTemplate = templateById.get(item.actionTemplateId);
-      if (!actionTemplate) {
-        throw new BadRequestException(
-          `Missing ActionTemplate ID: ${item.actionTemplateId}`,
-        );
-      }
+    const items: VegetableActionRule[] = rules.map(
+      (item: VegetableActionRuleInput) => {
+        const actionTemplate = templateById.get(item.actionTemplateId);
+        if (!actionTemplate) {
+          throw new BadRequestException(
+            `Missing ActionTemplate ID: ${item.actionTemplateId}`,
+          );
+        }
 
-      const rule = new VegetableActionRule();
-      rule.vegetable = vegetable;
-      rule.actionTemplate = actionTemplate;
-      rule.trigger = item.trigger;
-      rule.offsetDays = item.offsetDays;
-      rule.schedule = item.schedule;
-      rule.everyNDays = item.everyNDays ?? null;
-      rule.occurrencesLimit = item.occurrencesLimit ?? null;
-      rule.applyIfStartMethod = item.applyIfStartMethod ?? null;
-      rule.isEnabled = item.isEnabled ?? true;
+        const rule = new VegetableActionRule();
+        const ruleEntity = rule as unknown as {
+          vegetable: Vegetable;
+          actionTemplate: ActionTemplate;
+          trigger: unknown;
+          offsetDays: number;
+          schedule: unknown;
+          everyNDays?: number | null;
+          occurrencesLimit?: number | null;
+          applyIfStartMethod?: PlantingStartMethod[] | null;
+          isEnabled: boolean;
+        };
+        ruleEntity.vegetable = vegetable;
+        ruleEntity.actionTemplate = actionTemplate;
+        ruleEntity.trigger = String(item.trigger);
+        ruleEntity.offsetDays = item.offsetDays;
+        ruleEntity.schedule = String(item.schedule);
+        ruleEntity.everyNDays = item.everyNDays ?? null;
+        ruleEntity.occurrencesLimit = item.occurrencesLimit ?? null;
+        ruleEntity.applyIfStartMethod = item.applyIfStartMethod ?? null;
+        ruleEntity.isEnabled = item.isEnabled ?? true;
 
-      return rule;
-    });
+        return rule;
+      },
+    );
 
     this.em.persist(items);
-    vegetable.actionRules.set(items);
+    actionRulesCollection.set(items);
   }
 }
