@@ -97,14 +97,6 @@ const validateTimeline = (
     });
   }
 
-  if (startMethod === PlantingStartMethod.TRANSPLANT && !value.transplantedAt) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'transplantedAt is required for TRANSPLANT',
-      path: ['transplantedAt'],
-    });
-  }
-
   if (value.harvestWindowStart && value.harvestWindowEnd) {
     const start = new Date(value.harvestWindowStart);
     const end = new Date(value.harvestWindowEnd);

@@ -82,7 +82,7 @@ export class Migration20260218130000 extends Migration {
                select min(r.scheduled_at)
                from reminders r
                where r.planting_disease_id = pd.id
-                 and r.status in ('pending', 'processing')
+                 and r.status::text in ('pending', 'processing')
              ),
              case
                when pd.status = 'confirmed' then now() + interval '2 days'
@@ -106,7 +106,7 @@ export class Migration20260218130000 extends Migration {
                row_number() over (partition by planting_disease_id order by scheduled_at asc) as rn
         from reminders
         where planting_disease_id is not null
-          and status in ('pending', 'processing')
+          and status::text in ('pending', 'processing')
       )
       update reminders r
       set status = 'canceled'
@@ -120,7 +120,7 @@ export class Migration20260218130000 extends Migration {
        set scheduled_at = pd.next_check_at
        from planting_diseases pd
        where r.planting_disease_id = pd.id
-         and r.status in ('pending', 'processing')
+         and r.status::text in ('pending', 'processing')
          and pd.next_check_at is not null;`,
     );
   }

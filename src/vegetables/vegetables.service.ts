@@ -223,10 +223,18 @@ export class VegetablesService {
       vegetable.badCompanions.set(companions);
     }
 
-    if (dto.actionRules !== undefined) {
+    const resolvedActionRules =
+      dto.actionRules ??
+      (dto.postHarvestActionTemplateIds !== undefined
+        ? this.mapLegacyPostHarvestActionTemplateIdsToRules(
+            dto.postHarvestActionTemplateIds,
+          )
+        : undefined);
+
+    if (resolvedActionRules !== undefined) {
       await this.replaceActionRules(
         vegetable,
-        dto.actionRules as unknown as VegetableActionRuleInput[],
+        resolvedActionRules as unknown as VegetableActionRuleInput[],
       );
     }
 
@@ -358,10 +366,18 @@ export class VegetablesService {
       vegetable.badCompanions.set(companions);
     }
 
-    if (dto.actionRules !== undefined) {
+    const resolvedActionRules =
+      dto.actionRules ??
+      (dto.postHarvestActionTemplateIds !== undefined
+        ? this.mapLegacyPostHarvestActionTemplateIdsToRules(
+            dto.postHarvestActionTemplateIds,
+          )
+        : undefined);
+
+    if (resolvedActionRules !== undefined) {
       await this.replaceActionRules(
         vegetable,
-        dto.actionRules as unknown as VegetableActionRuleInput[],
+        resolvedActionRules as unknown as VegetableActionRuleInput[],
       );
       vegetable.rulesVersion += 1;
     }
@@ -448,6 +464,26 @@ export class VegetablesService {
       badCompanions: entity.badCompanions
         .getItems()
         .map((item) => ({ id: item.id, name: item.name })),
+      postHarvestActionTemplateIds: Array.from(
+        new Set(
+          actionRules
+            .filter(
+              (rule) =>
+                (rule as unknown as { trigger: string; isEnabled: boolean })
+                  .trigger === ActionRuleTrigger.ON_HARVEST_CONFIRMED &&
+                (rule as unknown as { trigger: string; isEnabled: boolean })
+                  .isEnabled,
+            )
+            .map(
+              (rule) =>
+                (
+                  rule as unknown as {
+                    actionTemplate: { id: string };
+                  }
+                ).actionTemplate.id,
+            ),
+        ),
+      ),
       rulesVersion: (entity as unknown as { rulesVersion: number })
         .rulesVersion,
       actionRules: actionRules.map((rule) => {
@@ -476,6 +512,18 @@ export class VegetablesService {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };
+  }
+
+  private mapLegacyPostHarvestActionTemplateIdsToRules(
+    actionTemplateIds: string[],
+  ): VegetableActionRuleInput[] {
+    return Array.from(new Set(actionTemplateIds)).map((actionTemplateId) => ({
+      actionTemplateId,
+      trigger: ActionRuleTrigger.ON_HARVEST_CONFIRMED,
+      offsetDays: 0,
+      schedule: ActionRuleSchedule.ONCE,
+      isEnabled: true,
+    }));
   }
 
   private async replaceActionRules(

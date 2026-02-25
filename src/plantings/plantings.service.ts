@@ -834,14 +834,6 @@ export class PlantingsService {
       }
     }
 
-    if (planting.startMethod === PlantingStartMethod.TRANSPLANT) {
-      if (!planting.transplantedAt) {
-        throw new BadRequestException(
-          'transplantedAt is required for TRANSPLANT',
-        );
-      }
-    }
-
     if (
       planting.harvestWindowStart &&
       planting.harvestWindowEnd &&

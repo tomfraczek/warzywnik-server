@@ -18,7 +18,7 @@ export class Migration20260218150000 extends Migration {
        set status = 'canceled',
            locked_at = null
        where pest_occurrence_id is not null
-         and status in ('pending', 'processing');`,
+         and status::text in ('pending', 'processing');`,
     );
 
     this.addSql(

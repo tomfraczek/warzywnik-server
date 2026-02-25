@@ -48,6 +48,7 @@ export type VegetableBaseDto = {
   commonDiseaseIds?: string[];
   goodCompanionIds?: string[];
   badCompanionIds?: string[];
+  postHarvestActionTemplateIds?: string[];
   actionRules?: VegetableActionRuleDto[];
 };
 
@@ -214,6 +215,7 @@ const baseVegetableSchema = z
     commonDiseaseIds: z.array(z.string().uuid()).optional(),
     goodCompanionIds: z.array(z.string().uuid()).optional(),
     badCompanionIds: z.array(z.string().uuid()).optional(),
+    postHarvestActionTemplateIds: z.array(z.string().uuid()).optional(),
     actionRules: z.array(vegetableActionRuleSchema).optional(),
   })
   .strict();
