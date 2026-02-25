@@ -32,6 +32,8 @@ import { ActionTemplatesModule } from './action-templates/action-templates.modul
 import { ActionTasksModule } from './action-tasks/action-tasks.module';
 import { HarvestPromptsModule } from './harvest-prompts/harvest-prompts.module';
 import { CalendarModule } from './calendar/calendar.module';
+import { GeoModule } from './geo/geo.module';
+import { LocationsModule } from './locations/locations.module';
 
 @Module({
   imports: [
@@ -59,6 +61,8 @@ import { CalendarModule } from './calendar/calendar.module';
     ActionTasksModule,
     HarvestPromptsModule,
     CalendarModule,
+    GeoModule,
+    LocationsModule,
   ],
   controllers: [AppController],
   providers: [

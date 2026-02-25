@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Put,
   Patch,
   Query,
   Req,
@@ -21,6 +22,11 @@ import {
   patchMeSchema,
 } from './dto/me.schemas';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import {
+  type UpdateMyLocationDto,
+  updateMyLocationSchema,
+} from './dto/location.schemas';
+import { UserLocationResponseDto } from './dto/location.types';
 
 type RequestWithUser = {
   userEntity?: User;
@@ -43,6 +49,16 @@ export class UsersController {
   ): Promise<MeResponse> {
     const user = this.getUserFromRequest(req);
     return this.usersService.patchMe(user.id, body);
+  }
+
+  @Put('users/me/location')
+  putMyLocation(
+    @Req() req: RequestWithUser,
+    @Body(new ZodValidationPipe(updateMyLocationSchema))
+    body: UpdateMyLocationDto,
+  ): Promise<UserLocationResponseDto> {
+    const user = this.getUserFromRequest(req);
+    return this.usersService.updateMyLocation(user.id, body);
   }
 
   @Delete('me')

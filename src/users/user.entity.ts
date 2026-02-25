@@ -2,6 +2,7 @@ import {
   Entity,
   Enum,
   Index,
+  ManyToOne,
   PrimaryKey,
   Property,
   Unique,
@@ -16,6 +17,7 @@ import {
   Units,
   UserSubscription,
 } from '../common/enums/user.enums';
+import { Location } from '../locations/location.entity';
 
 @Entity({ tableName: 'users' })
 @Index({ properties: ['isAdmin'] })
@@ -91,6 +93,9 @@ export class User {
 
   @Property({ type: 'int', default: 1 })
   weekStartsOn: number = 1;
+
+  @ManyToOne(() => Location, { nullable: true, deleteRule: 'set null' })
+  location?: Location | null;
 
   @Property({ type: 'boolean', default: true })
   isActive: boolean = true;

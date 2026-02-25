@@ -10,10 +10,18 @@ import { LocationMode } from '../common/enums/user.enums';
 import { MeResponse } from './dto/me.types';
 import { Bed } from '../beds/bed.entity';
 import { Planting } from '../plantings/planting.entity';
+import { UpdateMyLocationDto } from './dto/location.schemas';
+import { UserLocationResponseDto } from './dto/location.types';
+import { Location } from '../locations/location.entity';
+import { LocationRecordMode } from '../common/enums/location.enums';
+import { LocationEventsService } from '../locations/location-events.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly locationEventsService: LocationEventsService,
+  ) {}
 
   async getOrCreateFromClerkSub(params: {
     clerkUserId: string;
@@ -57,7 +65,11 @@ export class UsersService {
   }
 
   async getMe(userId: string): Promise<MeResponse> {
-    const user = await this.em.findOne(User, { id: userId });
+    const user = await this.em.findOne(
+      User,
+      { id: userId },
+      { populate: ['location'] },
+    );
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -134,6 +146,64 @@ export class UsersService {
     return this.toMeResponse(user);
   }
 
+  async updateMyLocation(
+    userId: string,
+    dto: UpdateMyLocationDto,
+  ): Promise<UserLocationResponseDto> {
+    const user = await this.em.findOne(
+      User,
+      { id: userId },
+      { populate: ['location'] },
+    );
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const location = user.location ?? new Location();
+    const now = new Date();
+
+    if (dto.mode === 'MANUAL') {
+      this.applyManualLocation(location, dto);
+
+      user.locationMode = LocationMode.MANUAL;
+      user.locationLabel = location.label;
+      user.locationLat = location.lat;
+      user.locationLon = location.lon;
+      user.locationUpdatedAt = now;
+    }
+
+    if (dto.mode === 'DEVICE') {
+      this.applyDeviceLocation(location, dto);
+
+      user.locationMode = LocationMode.CURRENT;
+      user.locationLabel = location.label;
+      user.locationLat = location.lat;
+      user.locationLon = location.lon;
+      user.locationUpdatedAt = now;
+    }
+
+    location.updatedAt = now;
+
+    if (!user.location) {
+      this.em.persist(location);
+      user.location = location;
+    }
+
+    await this.em.flush();
+
+    this.locationEventsService.emitLocationUpdated({
+      userId: user.id,
+      locationId: location.id,
+      mode: location.mode,
+      lat: location.lat,
+      lon: location.lon,
+      updatedAt: location.updatedAt.toISOString(),
+    });
+
+    return this.toUserLocationResponse(location);
+  }
+
   async deleteMe(userId: string): Promise<void> {
     await this.em.transactional(async (em) => {
       await em.nativeDelete(Planting, { user: userId });
@@ -172,7 +242,61 @@ export class UsersService {
     }
   }
 
+  private applyManualLocation(
+    location: Location,
+    dto: UpdateMyLocationDto,
+  ): void {
+    if (dto.accuracyM !== undefined) {
+      throw new BadRequestException(
+        'accuracyM is allowed only for DEVICE mode',
+      );
+    }
+
+    location.mode = LocationRecordMode.MANUAL;
+    location.label = dto.label;
+    location.lat = dto.lat;
+    location.lon = dto.lon;
+    location.accuracyM = null;
+    location.providerPlaceId = dto.providerPlaceId ?? null;
+  }
+
+  private applyDeviceLocation(
+    location: Location,
+    dto: UpdateMyLocationDto,
+  ): void {
+    if (dto.providerPlaceId !== undefined) {
+      throw new BadRequestException(
+        'providerPlaceId is allowed only for MANUAL mode',
+      );
+    }
+
+    location.mode = LocationRecordMode.DEVICE;
+    location.label = dto.label;
+    location.lat = dto.lat;
+    location.lon = dto.lon;
+    location.accuracyM = dto.accuracyM ?? null;
+    location.providerPlaceId = null;
+  }
+
+  private toUserLocationResponse(location: Location): UserLocationResponseDto {
+    return {
+      id: location.id,
+      mode: location.mode,
+      label: location.label,
+      lat: location.lat,
+      lon: location.lon,
+      accuracyM: location.accuracyM ?? null,
+      providerPlaceId: location.providerPlaceId ?? null,
+      updatedAt: location.updatedAt,
+    };
+  }
+
   private toMeResponse(user: User): MeResponse {
+    const sourceLocation =
+      user.location && user.location.label && Number.isFinite(user.location.lat)
+        ? user.location
+        : null;
+
     return {
       id: user.id,
       email: user.email ?? null,
@@ -183,11 +307,17 @@ export class UsersService {
       temperatureUnit: user.temperatureUnit,
       precipitationUnit: user.precipitationUnit,
       areaUnit: user.areaUnit,
-      locationMode: user.locationMode,
-      locationLabel: user.locationLabel ?? null,
-      locationLat: user.locationLat ?? null,
-      locationLon: user.locationLon ?? null,
-      locationUpdatedAt: user.locationUpdatedAt ?? null,
+      locationMode:
+        sourceLocation?.mode === LocationRecordMode.MANUAL
+          ? LocationMode.MANUAL
+          : sourceLocation?.mode === LocationRecordMode.DEVICE
+            ? LocationMode.CURRENT
+            : user.locationMode,
+      locationLabel: sourceLocation?.label ?? user.locationLabel ?? null,
+      locationLat: sourceLocation?.lat ?? user.locationLat ?? null,
+      locationLon: sourceLocation?.lon ?? user.locationLon ?? null,
+      locationUpdatedAt:
+        sourceLocation?.updatedAt ?? user.locationUpdatedAt ?? null,
     };
   }
 }

@@ -81,6 +81,40 @@ Rules are applied only when they exist and are both `enabled` and `isActive`.
 - `SUBOPTIMAL_SOWING_TIME`: `vegetableName`, `bedName`, `plannedStartDate` (ISO), `sowingStartMonth`, `sowingEndMonth`
 - `EXPERIMENTAL_SETUP`: `vegetableName`, `bedName`
 
+## GEO proxy + location (backend)
+
+Nowe endpointy GEO:
+
+- `GET /v1/geo/search?q=...&limit=6&lang=pl|en`
+- `GET /v1/geo/reverse?lat=...&lon=...&lang=pl|en`
+
+Cache key i TTL:
+
+- search: `geo:search:<lang>:<sha1(q)>:<limit>`, TTL 7 dni
+- reverse: `geo:reverse:<lang>:<rounded(lat,lon)>`, TTL 30 dni
+- storage: tabela `geo_cache_entries` (TTL egzekwowany w backendzie)
+
+Rate limit dla `/v1/geo/*`:
+
+- domyślnie `30/min` (per user, fallback per IP)
+- konfigurowalne przez `GEO_RATE_LIMIT_PER_MIN`
+
+Konfiguracja providera (Nominatim):
+
+- `GEO_NOMINATIM_BASE_URL` (opcjonalnie, default: `https://nominatim.openstreetmap.org`)
+- `GEO_PROVIDER_TIMEOUT_MS` (opcjonalnie, default: `3500`)
+- `GEO_PROVIDER_USER_AGENT` (**zalecane**: nazwa aplikacji + kontakt)
+
+Przykład `GEO_PROVIDER_USER_AGENT`:
+
+- `Warzywnik/1.0 (+https://twoja-domena.pl; kontakt@twoja-domena.pl)`
+
+Zapis lokalizacji użytkownika:
+
+- `PUT /v1/users/me/location`
+- emituje event domenowy `LOCATION_UPDATED`
+- handler eventu ma TODO pod kolejną iterację (`WeatherSnapshot`)
+
 ## Deterministic action automation — smoke test
 
 Assume `API=http://localhost:4000`, valid `Authorization: Bearer <TOKEN>`, and existing IDs:
