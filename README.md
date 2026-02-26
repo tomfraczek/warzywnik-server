@@ -81,6 +81,30 @@ Rules are applied only when they exist and are both `enabled` and `isActive`.
 - `SUBOPTIMAL_SOWING_TIME`: `vegetableName`, `bedName`, `plannedStartDate` (ISO), `sowingStartMonth`, `sowingEndMonth`
 - `EXPERIMENTAL_SETUP`: `vegetableName`, `bedName`
 
+### Weather warning placeholders (CMS templates)
+
+- `FROST_RISK_NEXT_7_DAYS`: `thresholdC`, `minTempC`, `riskDate`
+- `HARD_FROST_RISK_NEXT_7_DAYS`: `thresholdC`, `minTempC`, `riskDate`
+- `DROUGHT_RISK_NEXT_7_DAYS`: `precipSumMm`, `thresholdMm`
+- `HEAVY_RAIN_RISK_NEXT_48H`: `precipSumMm`, `thresholdMm`, `peakHourPrecipMm`
+- `WIND_DAMAGE_RISK_NEXT_48H`: `windMaxKmh`, `thresholdKmh`
+- `FUNGAL_DISEASE_PRESSURE_HIGH`: `precipSumMm`, `avgTempC`
+- `OVERWATERING_RISK`: `bedName`, `precipSumMm`, `soilDrainage`
+- `GERMINATION_TOO_COLD`: `bedName`, `vegetableName`, `minGerminationTempC`, `forecastMinTempC`
+
+### Weather warning config (DB seed defaults)
+
+Tabela: `weather_warning_config` (edytowalna w CMS/panelu):
+
+- `FROST_RISK_NEXT_7_DAYS`: `{ tempMinThresholdC: 0 }`
+- `HARD_FROST_RISK_NEXT_7_DAYS`: `{ tempMinThresholdC: -5 }`
+- `DROUGHT_RISK_NEXT_7_DAYS`: `{ precipSumThresholdMm7d: 7, considerTempWind: false }`
+- `HEAVY_RAIN_RISK_NEXT_48H`: `{ precipSumThresholdMm48h: 25, precipHourlyPeakThresholdMm: 8 }`
+- `WIND_DAMAGE_RISK_NEXT_48H`: `{ windMaxThresholdKmh: 55 }`
+- `FUNGAL_DISEASE_PRESSURE_HIGH`: `{ precipSumThresholdMm48h: 10, tempMinC: 10, tempMaxC: 24 }`
+- `OVERWATERING_RISK`: `{ precipSumThresholdMm48h: 20, drainageLowValues: ['poor'] }`
+- `GERMINATION_TOO_COLD`: `{ germinationMinTempC: 8, windowHours: 48 }`
+
 ## GEO proxy + location (backend)
 
 Nowe endpointy GEO:

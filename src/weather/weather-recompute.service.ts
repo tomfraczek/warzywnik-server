@@ -6,48 +6,35 @@ import { PlantingStatus } from '../common/enums/planting.enums';
 import { ActionTask } from '../action-tasks/action-task.entity';
 import { ActionTaskStatus } from '../common/enums/action.enums';
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
-import { PlantingsService } from '../plantings/plantings.service';
 import { TasksResponseDto, type TaskDto } from './dto/tasks-response.dto';
 import { WarningDto, WarningsResponseDto } from './dto/warnings-response.dto';
 import { WeatherBasis } from './weather.types';
-
-type WarningCacheEntry = {
-  computedAt: Date;
-  weatherBasis: WeatherBasis;
-  items: WarningDto[];
-};
+import { WeatherService } from './weather.service';
+import { WarningsService } from '../warning-rules/warnings.service';
+import { WarningScope } from '../common/enums/warning.enums';
+import { WeatherWarningOrchestratorService } from './warnings/weather-warning-orchestrator.service';
+import { WeatherTaskPlannerService } from './warnings/weather-task-planner.service';
 
 @Injectable()
 export class WeatherRecomputeService {
   private readonly logger = new Logger(WeatherRecomputeService.name);
-  private readonly warningsCache = new Map<string, WarningCacheEntry>();
-  private readonly tasksComputedAt = new Map<string, Date>();
 
   constructor(
     private readonly em: EntityManager,
     private readonly actionAutomationService: ActionAutomationService,
-    private readonly plantingsService: PlantingsService,
+    private readonly weatherService: WeatherService,
+    private readonly warningsService: WarningsService,
+    private readonly weatherWarningOrchestrator: WeatherWarningOrchestratorService,
+    private readonly weatherTaskPlannerService: WeatherTaskPlannerService,
   ) {}
 
-  async recomputeWarnings(userId: string, weatherBasis: WeatherBasis) {
-    const user = await this.requireUser(userId);
-    const items = await this.plantingsService.listWarningsForUser(user);
-
-    this.warningsCache.set(userId, {
-      computedAt: new Date(),
-      weatherBasis,
-      items: items.map((warning) => ({
-        code: warning.code,
-        severity: warning.severity,
-        title: warning.title,
-        message: warning.message,
-        hint: warning.hint ?? null,
-        details: warning.details ?? null,
-      })),
-    });
-
+  async recomputeWarnings(userId: string, _weatherBasis?: WeatherBasis) {
+    void _weatherBasis;
+    await this.requireUser(userId);
+    const result =
+      await this.weatherWarningOrchestrator.recomputeForUser(userId);
     this.logger.log(
-      `recomputed warnings for user=${userId} count=${items.length} basis=${weatherBasis}`,
+      `recomputed warnings for user=${userId} count=${result.activeCount}`,
     );
   }
 
@@ -73,7 +60,8 @@ export class WeatherRecomputeService {
       });
     }
 
-    this.tasksComputedAt.set(userId, new Date());
+    await this.weatherTaskPlannerService.recomputeWeatherTasksForUser(userId);
+
     this.logger.log(
       `recomputed tasks for user=${userId} plantings=${plantings.length}`,
     );
@@ -81,22 +69,69 @@ export class WeatherRecomputeService {
 
   async getWarningsResponse(
     userId: string,
-    weatherBasis: WeatherBasis,
+    _weatherBasis: WeatherBasis,
   ): Promise<WarningsResponseDto> {
-    const cacheEntry = this.warningsCache.get(userId);
+    void _weatherBasis;
+    await this.requireUser(userId);
+    const weatherBasis =
+      await this.weatherService.tryEnsureWeatherBasis(userId);
 
-    if (!cacheEntry) {
+    let instances =
+      await this.weatherWarningOrchestrator.listActiveForUser(userId);
+
+    const newestComputedAt = instances.reduce<Date | null>((acc, item) => {
+      if (!acc || item.computedAt > acc) {
+        return item.computedAt;
+      }
+      return acc;
+    }, null);
+
+    const isStale =
+      !newestComputedAt ||
+      Date.now() - newestComputedAt.getTime() > 30 * 60 * 1000;
+
+    if (instances.length === 0 || isStale) {
       await this.recomputeWarnings(userId, weatherBasis);
-    } else if (cacheEntry.weatherBasis !== weatherBasis) {
-      await this.recomputeWarnings(userId, weatherBasis);
+      instances =
+        await this.weatherWarningOrchestrator.listActiveForUser(userId);
     }
 
-    const finalEntry = this.warningsCache.get(userId);
+    const candidates = instances.map((instance) => ({
+      code: instance.code,
+      values: instance.values,
+      details: instance.details ?? undefined,
+    }));
+
+    const built = await this.warningsService.buildWarnings(candidates);
+
+    const items: WarningDto[] = built.map((warning, index) => {
+      const instance = instances[index];
+      return {
+        code: warning.code,
+        severity: warning.severity,
+        title: warning.title,
+        message: warning.message,
+        hint: warning.hint ?? null,
+        details: warning.details ?? null,
+        scope: instance?.scope ?? WarningScope.USER,
+        bedId: instance?.bed?.id ?? null,
+        bedName: instance?.bed?.name ?? null,
+        plantingId: instance?.planting?.id ?? null,
+        vegetableName: instance?.planting?.vegetable?.name ?? null,
+      };
+    });
+
+    const computedAt = instances.reduce<Date | null>((acc, instance) => {
+      if (!acc || instance.computedAt > acc) {
+        return instance.computedAt;
+      }
+      return acc;
+    }, null);
 
     return {
-      computedAt: (finalEntry?.computedAt ?? new Date()).toISOString(),
+      computedAt: (computedAt ?? new Date()).toISOString(),
       weatherBasis,
-      items: finalEntry?.items ?? [],
+      items,
     };
   }
 
@@ -127,10 +162,8 @@ export class WeatherRecomputeService {
       isManuallyRescheduled: item.isManuallyRescheduled,
     }));
 
-    const computedAt = this.tasksComputedAt.get(userId) ?? new Date();
-
     return {
-      computedAt: computedAt.toISOString(),
+      computedAt: new Date().toISOString(),
       items: mapped,
     };
   }

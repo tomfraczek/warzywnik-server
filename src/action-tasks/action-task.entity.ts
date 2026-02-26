@@ -25,6 +25,7 @@ import { ActionTemplate } from '../action-templates/action-template.entity';
 @Index({ properties: ['bed'] })
 @Index({ properties: ['status'] })
 @Index({ properties: ['sourceRefId'] })
+@Index({ properties: ['dedupeKey'] })
 @Unique({
   properties: ['user', 'source', 'sourceRefId', 'dueAt', 'cycleIndex'],
 })
@@ -53,6 +54,9 @@ export class ActionTask {
   @Property({ type: 'uuid', nullable: true })
   sourceRefId?: string | null;
 
+  @Property({ type: TextType, nullable: true })
+  dedupeKey?: string | null;
+
   @Property({ type: 'int', default: 0 })
   cycleIndex: number = 0;
 
@@ -73,6 +77,9 @@ export class ActionTask {
 
   @Property({ type: TextType, nullable: true })
   description?: string | null;
+
+  @Property({ type: 'json', columnType: 'jsonb', nullable: true })
+  metadata?: Record<string, unknown> | null;
 
   @ManyToOne(() => ActionTemplate, { nullable: true })
   actionTemplate?: ActionTemplate | null;

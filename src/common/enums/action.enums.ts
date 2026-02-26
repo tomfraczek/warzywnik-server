@@ -32,6 +32,7 @@ export enum ActionTemplateType {
 }
 
 export enum ActionTaskTargetType {
+  USER = 'user',
   BED = 'bed',
   PLANTING = 'planting',
 }
@@ -45,6 +46,7 @@ export enum ActionTaskStatus {
 export enum ActionTaskSource {
   MANUAL = 'MANUAL',
   VEGETABLE_RULE = 'VEGETABLE_RULE',
+  WEATHER_WARNING = 'WEATHER_WARNING',
 }
 
 export enum ActionRuleTrigger {

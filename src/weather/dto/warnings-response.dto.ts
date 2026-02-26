@@ -8,7 +8,11 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { WarningCode, WarningSeverity } from '../../common/enums/warning.enums';
+import {
+  WarningCode,
+  WarningScope,
+  WarningSeverity,
+} from '../../common/enums/warning.enums';
 
 export class WarningDto {
   @IsString()
@@ -30,6 +34,25 @@ export class WarningDto {
   @IsOptional()
   @IsObject()
   details?: Record<string, unknown> | null;
+
+  @IsString()
+  scope!: WarningScope;
+
+  @IsOptional()
+  @IsString()
+  bedId?: string | null;
+
+  @IsOptional()
+  @IsString()
+  bedName?: string | null;
+
+  @IsOptional()
+  @IsString()
+  plantingId?: string | null;
+
+  @IsOptional()
+  @IsString()
+  vegetableName?: string | null;
 }
 
 export class WarningsResponseDto {
