@@ -16,5 +16,6 @@ import { ActionTasksModule } from '../action-tasks/action-tasks.module';
   ],
   providers: [PlantingsService],
   controllers: [PlantingsController],
+  exports: [PlantingsService],
 })
 export class PlantingsModule {}

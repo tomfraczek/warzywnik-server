@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EntityName, FilterQuery } from '@mikro-orm/core';
+import { Collection, FilterQuery } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Vegetable } from './vegetable.entity';
 import {
@@ -39,25 +39,6 @@ type VegetableActionRuleInput = {
   isEnabled?: boolean;
 };
 
-type VegetableActionRuleView = {
-  id: string;
-  trigger: unknown;
-  offsetDays: number;
-  schedule: unknown;
-  everyNDays?: number | null;
-  occurrencesLimit?: number | null;
-  applyIfStartMethod?: PlantingStartMethod[] | null;
-  isEnabled: boolean;
-  actionTemplate: {
-    id: string;
-    name: string;
-    target: string;
-    type: string;
-    description?: string | null;
-    defaultDueOffsetDays: number;
-  };
-};
-
 @Injectable()
 export class VegetablesService {
   constructor(private readonly em: EntityManager) {}
@@ -66,7 +47,7 @@ export class VegetablesService {
     const { page, limit, q, sunExposure, waterDemand, nutrientDemand } = query;
     const search = q?.trim();
 
-    const where: Record<string, unknown> = {};
+    const where: FilterQuery<Vegetable> = {};
 
     if (sunExposure) where.sunExposure = sunExposure;
     if (waterDemand) where.waterDemand = waterDemand;
@@ -114,8 +95,7 @@ export class VegetablesService {
         rotationGroup: item.rotationGroup,
         minSoilDepthCm: item.minSoilDepthCm ?? null,
         dominantNutrientDemand: item.dominantNutrientDemand ?? null,
-        rulesVersion: (item as unknown as { rulesVersion: number })
-          .rulesVersion,
+        rulesVersion: item.rulesVersion,
       })),
       page,
       limit,
@@ -179,47 +159,27 @@ export class VegetablesService {
     vegetable.dominantNutrientDemand = dto.dominantNutrientDemand ?? null;
 
     if (dto.recommendedSoilIds !== undefined) {
-      const soils = await this.loadEntitiesByIds(
-        Soil,
-        dto.recommendedSoilIds,
-        'Soil',
-      );
+      const soils = await this.loadSoilsByIds(dto.recommendedSoilIds);
       vegetable.recommendedSoils.set(soils);
     }
 
     if (dto.commonPestIds) {
-      const pests = await this.loadEntitiesByIds(
-        Pest,
-        dto.commonPestIds,
-        'Pest',
-      );
+      const pests = await this.loadPestsByIds(dto.commonPestIds);
       vegetable.commonPests.set(pests);
     }
 
     if (dto.commonDiseaseIds) {
-      const diseases = await this.loadEntitiesByIds(
-        Disease,
-        dto.commonDiseaseIds,
-        'Disease',
-      );
+      const diseases = await this.loadDiseasesByIds(dto.commonDiseaseIds);
       vegetable.commonDiseases.set(diseases);
     }
 
     if (dto.goodCompanionIds) {
-      const companions = await this.loadEntitiesByIds(
-        Vegetable,
-        dto.goodCompanionIds,
-        'Vegetable',
-      );
+      const companions = await this.loadVegetablesByIds(dto.goodCompanionIds);
       vegetable.goodCompanions.set(companions);
     }
 
     if (dto.badCompanionIds) {
-      const companions = await this.loadEntitiesByIds(
-        Vegetable,
-        dto.badCompanionIds,
-        'Vegetable',
-      );
+      const companions = await this.loadVegetablesByIds(dto.badCompanionIds);
       vegetable.badCompanions.set(companions);
     }
 
@@ -232,10 +192,7 @@ export class VegetablesService {
         : undefined);
 
     if (resolvedActionRules !== undefined) {
-      await this.replaceActionRules(
-        vegetable,
-        resolvedActionRules as unknown as VegetableActionRuleInput[],
-      );
+      await this.replaceActionRules(vegetable, resolvedActionRules);
     }
 
     await this.em.persistAndFlush(vegetable);
@@ -322,47 +279,27 @@ export class VegetablesService {
     if (dto.dominantNutrientDemand !== undefined)
       vegetable.dominantNutrientDemand = dto.dominantNutrientDemand;
     if (dto.recommendedSoilIds !== undefined) {
-      const soils = await this.loadEntitiesByIds(
-        Soil,
-        dto.recommendedSoilIds,
-        'Soil',
-      );
+      const soils = await this.loadSoilsByIds(dto.recommendedSoilIds);
       vegetable.recommendedSoils.set(soils);
     }
 
     if (dto.commonPestIds !== undefined) {
-      const pests = await this.loadEntitiesByIds(
-        Pest,
-        dto.commonPestIds,
-        'Pest',
-      );
+      const pests = await this.loadPestsByIds(dto.commonPestIds);
       vegetable.commonPests.set(pests);
     }
 
     if (dto.commonDiseaseIds !== undefined) {
-      const diseases = await this.loadEntitiesByIds(
-        Disease,
-        dto.commonDiseaseIds,
-        'Disease',
-      );
+      const diseases = await this.loadDiseasesByIds(dto.commonDiseaseIds);
       vegetable.commonDiseases.set(diseases);
     }
 
     if (dto.goodCompanionIds !== undefined) {
-      const companions = await this.loadEntitiesByIds(
-        Vegetable,
-        dto.goodCompanionIds,
-        'Vegetable',
-      );
+      const companions = await this.loadVegetablesByIds(dto.goodCompanionIds);
       vegetable.goodCompanions.set(companions);
     }
 
     if (dto.badCompanionIds !== undefined) {
-      const companions = await this.loadEntitiesByIds(
-        Vegetable,
-        dto.badCompanionIds,
-        'Vegetable',
-      );
+      const companions = await this.loadVegetablesByIds(dto.badCompanionIds);
       vegetable.badCompanions.set(companions);
     }
 
@@ -375,10 +312,7 @@ export class VegetablesService {
         : undefined);
 
     if (resolvedActionRules !== undefined) {
-      await this.replaceActionRules(
-        vegetable,
-        resolvedActionRules as unknown as VegetableActionRuleInput[],
-      );
+      await this.replaceActionRules(vegetable, resolvedActionRules);
       vegetable.rulesVersion += 1;
     }
 
@@ -396,35 +330,84 @@ export class VegetablesService {
     await this.em.removeAndFlush(vegetable);
   }
 
-  private async loadEntitiesByIds<T extends { id: string }>(
-    entity: EntityName<T>,
-    ids: string[],
-    label: string,
-  ): Promise<T[]> {
+  private async loadSoilsByIds(ids: string[]): Promise<Soil[]> {
     if (ids.length === 0) {
       return [];
     }
 
-    const query = { id: { $in: ids } } as unknown as FilterQuery<T>;
-    const items = await this.em.find(entity, query);
+    const items = await this.em.find(Soil, { id: { $in: ids } });
+    this.assertNoMissingIds(ids, items, 'Soil');
+
+    return items;
+  }
+
+  private async loadPestsByIds(ids: string[]): Promise<Pest[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const items = await this.em.find(Pest, { id: { $in: ids } });
+    this.assertNoMissingIds(ids, items, 'Pest');
+
+    return items;
+  }
+
+  private async loadDiseasesByIds(ids: string[]): Promise<Disease[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const items = await this.em.find(Disease, { id: { $in: ids } });
+    this.assertNoMissingIds(ids, items, 'Disease');
+
+    return items;
+  }
+
+  private async loadVegetablesByIds(ids: string[]): Promise<Vegetable[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const items = await this.em.find(Vegetable, { id: { $in: ids } });
+    this.assertNoMissingIds(ids, items, 'Vegetable');
+
+    return items;
+  }
+
+  private async loadActionTemplatesByIds(
+    ids: string[],
+  ): Promise<ActionTemplate[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const items = await this.em.find(ActionTemplate, { id: { $in: ids } });
+    this.assertNoMissingIds(ids, items, 'ActionTemplate');
+
+    return items;
+  }
+
+  private assertNoMissingIds<T extends { id: string }>(
+    expectedIds: string[],
+    items: T[],
+    label: string,
+  ): void {
+    if (expectedIds.length === 0) {
+      return;
+    }
+
     const foundIds = new Set(items.map((item) => item.id));
-    const missing = ids.filter((id) => !foundIds.has(id));
+    const missing = expectedIds.filter((id) => !foundIds.has(id));
 
     if (missing.length) {
       throw new BadRequestException(
         `Missing ${label} IDs: ${missing.join(', ')}`,
       );
     }
-
-    return items;
   }
 
   private serializeVegetable(entity: Vegetable) {
-    const actionRules = (
-      entity as unknown as {
-        actionRules: { getItems: () => VegetableActionRule[] };
-      }
-    ).actionRules.getItems();
+    const actionRules = entity.actionRules.getItems();
 
     return {
       id: entity.id,
@@ -469,43 +452,33 @@ export class VegetablesService {
           actionRules
             .filter(
               (rule) =>
-                (rule as unknown as { trigger: string; isEnabled: boolean })
-                  .trigger === ActionRuleTrigger.ON_HARVEST_CONFIRMED &&
-                (rule as unknown as { trigger: string; isEnabled: boolean })
-                  .isEnabled,
+                rule.trigger === 'ON_HARVEST_CONFIRMED' && rule.isEnabled,
             )
-            .map(
-              (rule) =>
-                (
-                  rule as unknown as {
-                    actionTemplate: { id: string };
-                  }
-                ).actionTemplate.id,
-            ),
+            .map((rule) => rule.actionTemplate.id),
         ),
       ),
-      rulesVersion: (entity as unknown as { rulesVersion: number })
-        .rulesVersion,
+      rulesVersion: entity.rulesVersion,
       actionRules: actionRules.map((rule) => {
-        const typedRule = rule as unknown as VegetableActionRuleView;
-
         return {
-          id: typedRule.id,
-          trigger: String(typedRule.trigger),
-          offsetDays: typedRule.offsetDays,
-          schedule: String(typedRule.schedule),
-          everyNDays: typedRule.everyNDays ?? null,
-          occurrencesLimit: typedRule.occurrencesLimit ?? null,
-          applyIfStartMethod: typedRule.applyIfStartMethod ?? null,
-          isEnabled: typedRule.isEnabled,
+          id: rule.id,
+          trigger: rule.trigger,
+          offsetDays: rule.offsetDays,
+          schedule: rule.schedule,
+          everyNDays: rule.everyNDays ?? null,
+          occurrencesLimit: rule.occurrencesLimit ?? null,
+          applyIfStartMethod:
+            rule.applyIfStartMethod?.map((method) =>
+              this.toPlantingStartMethodEnum(method),
+            ) ?? null,
+          isEnabled: rule.isEnabled,
           actionTemplate: {
-            id: typedRule.actionTemplate.id,
-            name: typedRule.actionTemplate.name,
-            scope: typedRule.actionTemplate.target,
-            target: typedRule.actionTemplate.target,
-            type: typedRule.actionTemplate.type,
-            description: typedRule.actionTemplate.description ?? null,
-            defaultDueOffsetDays: typedRule.actionTemplate.defaultDueOffsetDays,
+            id: rule.actionTemplate.id,
+            name: rule.actionTemplate.name,
+            scope: rule.actionTemplate.target,
+            target: rule.actionTemplate.target,
+            type: rule.actionTemplate.type,
+            description: rule.actionTemplate.description ?? null,
+            defaultDueOffsetDays: rule.actionTemplate.defaultDueOffsetDays,
           },
         };
       }),
@@ -530,14 +503,8 @@ export class VegetablesService {
     vegetable: Vegetable,
     rules: VegetableActionRuleInput[],
   ) {
-    const actionRulesCollection = (
-      vegetable as unknown as {
-        actionRules: {
-          removeAll: () => void;
-          set: (items: VegetableActionRule[]) => void;
-        };
-      }
-    ).actionRules;
+    const actionRulesCollection: Collection<VegetableActionRule> =
+      vegetable.actionRules;
 
     await this.em.nativeDelete(VegetableActionRule, {
       vegetable: vegetable.id,
@@ -554,11 +521,7 @@ export class VegetablesService {
       ),
     );
 
-    const templates = await this.loadEntitiesByIds(
-      ActionTemplate,
-      templateIds,
-      'ActionTemplate',
-    );
+    const templates = await this.loadActionTemplatesByIds(templateIds);
     const templateById = new Map(templates.map((item) => [item.id, item]));
 
     const items: VegetableActionRule[] = rules.map(
@@ -571,26 +534,18 @@ export class VegetablesService {
         }
 
         const rule = new VegetableActionRule();
-        const ruleEntity = rule as unknown as {
-          vegetable: Vegetable;
-          actionTemplate: ActionTemplate;
-          trigger: unknown;
-          offsetDays: number;
-          schedule: unknown;
-          everyNDays?: number | null;
-          occurrencesLimit?: number | null;
-          applyIfStartMethod?: PlantingStartMethod[] | null;
-          isEnabled: boolean;
-        };
-        ruleEntity.vegetable = vegetable;
-        ruleEntity.actionTemplate = actionTemplate;
-        ruleEntity.trigger = String(item.trigger);
-        ruleEntity.offsetDays = item.offsetDays;
-        ruleEntity.schedule = String(item.schedule);
-        ruleEntity.everyNDays = item.everyNDays ?? null;
-        ruleEntity.occurrencesLimit = item.occurrencesLimit ?? null;
-        ruleEntity.applyIfStartMethod = item.applyIfStartMethod ?? null;
-        ruleEntity.isEnabled = item.isEnabled ?? true;
+        rule.vegetable = vegetable;
+        rule.actionTemplate = actionTemplate;
+        rule.trigger = this.toRuleTriggerValue(item.trigger);
+        rule.offsetDays = item.offsetDays;
+        rule.schedule = this.toRuleScheduleValue(item.schedule);
+        rule.everyNDays = item.everyNDays ?? null;
+        rule.occurrencesLimit = item.occurrencesLimit ?? null;
+        rule.applyIfStartMethod =
+          item.applyIfStartMethod?.map((method) =>
+            this.toPlantingStartMethodValue(method),
+          ) ?? null;
+        rule.isEnabled = item.isEnabled ?? true;
 
         return rule;
       },
@@ -598,5 +553,63 @@ export class VegetablesService {
 
     this.em.persist(items);
     actionRulesCollection.set(items);
+  }
+
+  private toRuleTriggerValue(
+    trigger: ActionRuleTrigger,
+  ): VegetableActionRule['trigger'] {
+    switch (trigger) {
+      case ActionRuleTrigger.ON_SOWED:
+        return 'ON_SOWED';
+      case ActionRuleTrigger.AFTER_SOWING_DAYS:
+        return 'AFTER_SOWING_DAYS';
+      case ActionRuleTrigger.ON_TRANSPLANTED:
+        return 'ON_TRANSPLANTED';
+      case ActionRuleTrigger.AFTER_TRANSPLANT_DAYS:
+        return 'AFTER_TRANSPLANT_DAYS';
+      case ActionRuleTrigger.BEFORE_TRANSPLANT_DAYS:
+        return 'BEFORE_TRANSPLANT_DAYS';
+      case ActionRuleTrigger.ON_HARVEST_WINDOW_START:
+        return 'ON_HARVEST_WINDOW_START';
+      case ActionRuleTrigger.BEFORE_HARVEST_WINDOW_START_DAYS:
+        return 'BEFORE_HARVEST_WINDOW_START_DAYS';
+      case ActionRuleTrigger.ON_HARVEST_CONFIRMED:
+        return 'ON_HARVEST_CONFIRMED';
+      case ActionRuleTrigger.AFTER_HARVEST_DAYS:
+        return 'AFTER_HARVEST_DAYS';
+    }
+  }
+
+  private toRuleScheduleValue(
+    schedule: ActionRuleSchedule,
+  ): VegetableActionRule['schedule'] {
+    switch (schedule) {
+      case ActionRuleSchedule.ONCE:
+        return 'ONCE';
+      case ActionRuleSchedule.EVERY_N_DAYS:
+        return 'EVERY_N_DAYS';
+    }
+  }
+
+  private toPlantingStartMethodValue(
+    method: PlantingStartMethod,
+  ): NonNullable<VegetableActionRule['applyIfStartMethod']>[number] {
+    switch (method) {
+      case PlantingStartMethod.DIRECT_SOW:
+        return 'DIRECT_SOW';
+      case PlantingStartMethod.TRANSPLANT:
+        return 'TRANSPLANT';
+    }
+  }
+
+  private toPlantingStartMethodEnum(
+    method: NonNullable<VegetableActionRule['applyIfStartMethod']>[number],
+  ): PlantingStartMethod {
+    switch (method) {
+      case 'DIRECT_SOW':
+        return PlantingStartMethod.DIRECT_SOW;
+      case 'TRANSPLANT':
+        return PlantingStartMethod.TRANSPLANT;
+    }
   }
 }

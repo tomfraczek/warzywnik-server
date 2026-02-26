@@ -1,29 +1,50 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'node:events';
 import {
   LOCATION_UPDATED_EVENT,
   type LocationUpdatedPayload,
+  WEATHER_SNAPSHOT_UPDATED_EVENT,
+  type WeatherSnapshotUpdatedPayload,
 } from './location-events.constants';
 
 @Injectable()
-export class LocationEventsService implements OnModuleInit {
+export class LocationEventsService {
   private readonly emitter = new EventEmitter();
+  private readonly logger = new Logger(LocationEventsService.name);
 
-  onModuleInit(): void {
-    this.emitter.on(
-      LOCATION_UPDATED_EVENT,
-      (payload: LocationUpdatedPayload) => {
-        this.handleLocationUpdated(payload);
-      },
-    );
+  on(
+    eventName:
+      | typeof LOCATION_UPDATED_EVENT
+      | typeof WEATHER_SNAPSHOT_UPDATED_EVENT,
+    listener: (
+      payload: LocationUpdatedPayload | WeatherSnapshotUpdatedPayload,
+    ) => void,
+  ): void {
+    this.emitter.on(eventName, listener);
+  }
+
+  off(
+    eventName:
+      | typeof LOCATION_UPDATED_EVENT
+      | typeof WEATHER_SNAPSHOT_UPDATED_EVENT,
+    listener: (
+      payload: LocationUpdatedPayload | WeatherSnapshotUpdatedPayload,
+    ) => void,
+  ): void {
+    this.emitter.off(eventName, listener);
   }
 
   emitLocationUpdated(payload: LocationUpdatedPayload): void {
     this.emitter.emit(LOCATION_UPDATED_EVENT, payload);
+    this.logger.debug(
+      `Emitted ${LOCATION_UPDATED_EVENT} for user=${payload.userId}`,
+    );
   }
 
-  private handleLocationUpdated(payload: LocationUpdatedPayload): void {
-    void payload;
-    // TODO(weather): enqueue weather refresh based on LOCATION_UPDATED event
+  emitWeatherSnapshotUpdated(payload: WeatherSnapshotUpdatedPayload): void {
+    this.emitter.emit(WEATHER_SNAPSHOT_UPDATED_EVENT, payload);
+    this.logger.debug(
+      `Emitted ${WEATHER_SNAPSHOT_UPDATED_EVENT} for user=${payload.userId} stale=${payload.stale}`,
+    );
   }
 }

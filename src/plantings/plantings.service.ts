@@ -334,6 +334,48 @@ export class PlantingsService {
     });
   }
 
+  async listWarningsForUser(user: User): Promise<WarningOutput[]> {
+    const plantings = await this.em.find(
+      Planting,
+      {
+        user: user.id,
+        status: {
+          $in: [
+            PlantingStatus.PLANNED,
+            PlantingStatus.ACTIVE,
+            PlantingStatus.HARVESTING,
+          ],
+        },
+      },
+      {
+        populate: [
+          'bed',
+          'bed.soil',
+          'vegetable',
+          'vegetable.recommendedSoils',
+        ],
+      },
+    );
+
+    const rulesMap = await this.warningsService.getRulesMap(
+      Object.values(WarningCode),
+    );
+
+    const flattened: WarningOutput[] = [];
+
+    for (const planting of plantings) {
+      const warnings = await this.computeWarnings(
+        planting,
+        planting.bed,
+        planting.vegetable,
+        rulesMap,
+      );
+      flattened.push(...warnings);
+    }
+
+    return flattened;
+  }
+
   async remove(user: User, id: string) {
     const planting = await this.em.findOne(Planting, { id, user: user.id });
     if (!planting) {

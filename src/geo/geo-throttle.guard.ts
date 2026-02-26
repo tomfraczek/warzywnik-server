@@ -64,7 +64,7 @@ export class GeoThrottleGuard implements CanActivate {
     }
 
     if (Array.isArray(xff) && xff.length > 0) {
-      return xff[0] as string;
+      return xff[0];
     }
 
     return req.ip ?? 'unknown';
