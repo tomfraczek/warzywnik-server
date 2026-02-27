@@ -10,10 +10,14 @@ import { TasksResponseDto, type TaskDto } from './dto/tasks-response.dto';
 import { WarningDto, WarningsResponseDto } from './dto/warnings-response.dto';
 import { WeatherBasis } from './weather.types';
 import { WeatherService } from './weather.service';
-import { WarningsService } from '../warning-rules/warnings.service';
+import {
+  WarningsService,
+  type WarningOutput,
+} from '../warning-rules/warnings.service';
 import { WarningScope } from '../common/enums/warning.enums';
 import { WeatherWarningOrchestratorService } from './warnings/weather-warning-orchestrator.service';
 import { WeatherTaskPlannerService } from './warnings/weather-task-planner.service';
+import { WeatherSnapshot } from './weather-snapshot.entity';
 
 @Injectable()
 export class WeatherRecomputeService {
@@ -90,14 +94,33 @@ export class WeatherRecomputeService {
       !newestComputedAt ||
       Date.now() - newestComputedAt.getTime() > 30 * 60 * 1000;
 
-    if (instances.length === 0 || isStale) {
+    const latestSnapshot = await this.em.findOne(
+      WeatherSnapshot,
+      { user: userId },
+      { orderBy: { fetchedAt: 'desc' } },
+    );
+
+    const hasNewerWeatherSnapshot =
+      !!latestSnapshot &&
+      (!newestComputedAt || latestSnapshot.fetchedAt > newestComputedAt);
+
+    if (instances.length === 0 || isStale || hasNewerWeatherSnapshot) {
       await this.recomputeWarnings(userId, weatherBasis);
       instances =
         await this.weatherWarningOrchestrator.listActiveForUser(userId);
     }
 
     const buildFromInstances = async (source: typeof instances) => {
-      const candidates = source.map((instance) => {
+      const rulesMap = await this.warningsService.getRulesMap(
+        source.map((instance) => instance.code),
+      );
+
+      const built: Array<{
+        instance: (typeof source)[number];
+        warning: WarningOutput;
+      }> = [];
+
+      for (const instance of source) {
         const fallbackValues: Record<string, string | number> = {};
 
         const resolvedBedName =
@@ -112,14 +135,25 @@ export class WeatherRecomputeService {
           fallbackValues.vegetableName = resolvedVegetableName;
         }
 
-        return {
+        const candidate = {
           code: instance.code,
           values: { ...fallbackValues, ...instance.values },
           details: instance.details ?? undefined,
         };
-      });
 
-      return this.warningsService.buildWarnings(candidates);
+        const [warning] = await this.warningsService.buildWarnings(
+          [candidate],
+          rulesMap,
+        );
+
+        if (!warning) {
+          continue;
+        }
+
+        built.push({ instance, warning });
+      }
+
+      return built;
     };
 
     let built = await buildFromInstances(instances);
@@ -128,7 +162,7 @@ export class WeatherRecomputeService {
       !!text && /\{\s*[^{}]+\s*\}/.test(text);
 
     const hasUnresolved = built.some(
-      (warning) =>
+      ({ warning }) =>
         hasUnresolvedPlaceholder(warning.message) ||
         hasUnresolvedPlaceholder(warning.hint),
     );
@@ -143,9 +177,9 @@ export class WeatherRecomputeService {
       built = await buildFromInstances(instances);
     }
 
-    const items: WarningDto[] = built.map((warning, index) => {
-      const instance = instances[index];
+    const items: WarningDto[] = built.map(({ warning, instance }) => {
       return {
+        dedupeKey: `weather:${instance.dedupeKey}`,
         code: warning.code,
         severity: warning.severity,
         title: warning.title,

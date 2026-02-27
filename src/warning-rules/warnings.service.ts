@@ -24,6 +24,7 @@ export type WarningRulesMap = Map<WarningCode, WarningRule>;
 @Injectable()
 export class WarningsService {
   private readonly logger = new Logger(WarningsService.name);
+  private readonly unresolvedPlaceholderPattern = /\{\s*([^{}]+?)\s*\}/g;
 
   constructor(private readonly em: EntityManager) {}
 
@@ -62,6 +63,38 @@ export class WarningsService {
 
   private hasUnresolvedPlaceholders(text: string | null | undefined): boolean {
     return !!text && /\{\s*[^{}]+\s*\}/.test(text);
+  }
+
+  private fallbackForPlaceholder(key: string): string {
+    const normalized = this.normalizeTemplateKey(key);
+
+    if (normalized === 'bedname') {
+      return 'Twoja lokalizacja';
+    }
+
+    if (normalized === 'vegetablename') {
+      return 'Twoja roślina';
+    }
+
+    return '';
+  }
+
+  private sanitizeRenderedText(
+    text: string | null | undefined,
+  ): string | null | undefined {
+    if (text === null || text === undefined) {
+      return text;
+    }
+
+    const withoutRawPlaceholders = text.replace(
+      this.unresolvedPlaceholderPattern,
+      (_match, rawKey: string) => this.fallbackForPlaceholder(rawKey.trim()),
+    );
+
+    return withoutRawPlaceholders
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\s+([,.;:!?])/g, '$1')
+      .trim();
   }
 
   private extractDetailString(
@@ -151,9 +184,17 @@ export class WarningsService {
         ? this.applyTemplate(rule.hintTemplate, resolvedValues)
         : null;
 
+      const sanitizedMessage =
+        this.sanitizeRenderedText(message) || 'Sprawdź ostrzeżenie pogodowe.';
+      const sanitizedHint = this.sanitizeRenderedText(hint);
+      const finalHint =
+        typeof sanitizedHint === 'string' && sanitizedHint.length === 0
+          ? null
+          : sanitizedHint;
+
       if (
-        this.hasUnresolvedPlaceholders(message) ||
-        this.hasUnresolvedPlaceholders(hint)
+        this.hasUnresolvedPlaceholders(sanitizedMessage) ||
+        this.hasUnresolvedPlaceholders(finalHint)
       ) {
         this.logger.warn(
           `unresolved placeholder(s) code=${candidate.code} values=${JSON.stringify(
@@ -166,8 +207,8 @@ export class WarningsService {
         code: candidate.code,
         severity: rule.severity,
         title: rule.title,
-        message,
-        hint: hint ?? undefined,
+        message: sanitizedMessage,
+        hint: finalHint ?? undefined,
         details: candidate.details ?? undefined,
       });
     }

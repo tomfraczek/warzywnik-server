@@ -16,6 +16,9 @@ import {
 
 export class WarningDto {
   @IsString()
+  dedupeKey!: string;
+
+  @IsString()
   code!: WarningCode;
 
   @IsString()
