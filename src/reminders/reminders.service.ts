@@ -35,11 +35,6 @@ export class RemindersService {
   private readonly maxRemindersSuspected = 3;
   private readonly maxRemindersConfirmed = 2;
 
-  private readonly activeReminderStatuses = [
-    ReminderStatus.PENDING,
-    ReminderStatus.PROCESSING,
-  ];
-
   constructor(private readonly em: EntityManager) {}
 
   async list(user: User, query: ListRemindersQueryDto) {
@@ -281,18 +276,15 @@ export class RemindersService {
     actionTaskId: string,
     em: EntityManager = this.em,
   ) {
-    const updated = await em.nativeUpdate(
-      Reminder,
-      {
-        actionTaskId,
-        status: { $in: this.activeReminderStatuses },
-      },
-      {
-        status: ReminderStatus.CANCELED,
-        lockedAt: null,
-        lastError: null,
-      },
-    );
+    const result = (await em.getConnection().execute(
+      `update reminders
+         set status = ?, locked_at = null, last_error = null
+         where action_task_id = ?
+           and status::text in ('pending', 'processing')`,
+      [ReminderStatus.CANCELED, actionTaskId],
+    )) as { rowCount?: number };
+
+    const updated = result.rowCount ?? 0;
 
     if (updated > 0) {
       this.logger.log(
@@ -608,22 +600,18 @@ export class RemindersService {
     occurrenceId: string,
     em: EntityManager = this.em,
   ) {
-    const where =
-      kind === 'disease'
-        ? {
-            plantingDiseaseId: occurrenceId,
-            status: { $in: this.activeReminderStatuses },
-          }
-        : {
-            pestOccurrenceId: occurrenceId,
-            status: { $in: this.activeReminderStatuses },
-          };
+    const column =
+      kind === 'disease' ? 'planting_disease_id' : 'pest_occurrence_id';
 
-    const updated = await em.nativeUpdate(Reminder, where, {
-      status: ReminderStatus.CANCELED,
-      lockedAt: null,
-      lastError: null,
-    });
+    const result = (await em.getConnection().execute(
+      `update reminders
+         set status = ?, locked_at = null, last_error = null
+         where ${column} = ?
+           and status::text in ('pending', 'processing')`,
+      [ReminderStatus.CANCELED, occurrenceId],
+    )) as { rowCount?: number };
+
+    const updated = result.rowCount ?? 0;
 
     if (updated > 0) {
       this.logger.log(

@@ -41,20 +41,23 @@ export class WarningsService {
       normalizedValues.set(this.normalizeTemplateKey(key), value);
     }
 
-    return template.replace(/\{\s*([^{}]+?)\s*\}/g, (_match, rawKey: string) => {
-      const key = rawKey.trim();
-      const directValue = values[key];
-      if (directValue !== undefined) {
-        return String(directValue);
-      }
+    return template.replace(
+      /\{\s*([^{}]+?)\s*\}/g,
+      (_match, rawKey: string) => {
+        const key = rawKey.trim();
+        const directValue = values[key];
+        if (directValue !== undefined) {
+          return String(directValue);
+        }
 
-      const normalizedValue = normalizedValues.get(
-        this.normalizeTemplateKey(key),
-      );
-      return normalizedValue !== undefined
-        ? String(normalizedValue)
-        : `{${key}}`;
-    });
+        const normalizedValue = normalizedValues.get(
+          this.normalizeTemplateKey(key),
+        );
+        return normalizedValue !== undefined
+          ? String(normalizedValue)
+          : `{${key}}`;
+      },
+    );
   }
 
   private hasUnresolvedPlaceholders(text: string | null | undefined): boolean {
@@ -143,10 +146,7 @@ export class WarningsService {
         bedNameById,
       );
 
-      const message = this.applyTemplate(
-        rule.messageTemplate,
-        resolvedValues,
-      );
+      const message = this.applyTemplate(rule.messageTemplate, resolvedValues);
       const hint = rule.hintTemplate
         ? this.applyTemplate(rule.hintTemplate, resolvedValues)
         : null;

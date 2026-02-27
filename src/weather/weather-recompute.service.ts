@@ -138,7 +138,8 @@ export class WeatherRecomputeService {
         `detected unresolved warning placeholder(s) for user=${userId}, forcing recompute`,
       );
       await this.recomputeWarnings(userId, weatherBasis);
-      instances = await this.weatherWarningOrchestrator.listActiveForUser(userId);
+      instances =
+        await this.weatherWarningOrchestrator.listActiveForUser(userId);
       built = await buildFromInstances(instances);
     }
 
