@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { WarningRule } from './warning-rule.entity';
 import { WarningCode, WarningSeverity } from '../common/enums/warning.enums';
+import { Bed } from '../beds/bed.entity';
 
 export type WarningOutput = {
   code: WarningCode;
@@ -22,16 +23,92 @@ export type WarningRulesMap = Map<WarningCode, WarningRule>;
 
 @Injectable()
 export class WarningsService {
+  private readonly logger = new Logger(WarningsService.name);
+
   constructor(private readonly em: EntityManager) {}
+
+  private normalizeTemplateKey(key: string): string {
+    return key.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  }
 
   private applyTemplate(
     template: string,
     values: Record<string, string | number>,
   ) {
-    return template.replace(/\{(\w+)\}/g, (_match, key: string) => {
-      const value = values[key];
-      return value !== undefined ? String(value) : `{${key}}`;
+    const normalizedValues = new Map<string, string | number>();
+
+    for (const [key, value] of Object.entries(values)) {
+      normalizedValues.set(this.normalizeTemplateKey(key), value);
+    }
+
+    return template.replace(/\{\s*([^{}]+?)\s*\}/g, (_match, rawKey: string) => {
+      const key = rawKey.trim();
+      const directValue = values[key];
+      if (directValue !== undefined) {
+        return String(directValue);
+      }
+
+      const normalizedValue = normalizedValues.get(
+        this.normalizeTemplateKey(key),
+      );
+      return normalizedValue !== undefined
+        ? String(normalizedValue)
+        : `{${key}}`;
     });
+  }
+
+  private hasUnresolvedPlaceholders(text: string | null | undefined): boolean {
+    return !!text && /\{\s*[^{}]+\s*\}/.test(text);
+  }
+
+  private extractDetailString(
+    details: Record<string, unknown> | null | undefined,
+    key: string,
+  ): string | null {
+    const value = details?.[key];
+    return typeof value === 'string' && value.trim().length > 0
+      ? value.trim()
+      : null;
+  }
+
+  private async resolveTemplateValues(
+    candidate: WarningCandidate,
+    bedNameById: Map<string, string>,
+  ): Promise<Record<string, string | number>> {
+    const resolvedValues = { ...candidate.values };
+
+    const hasBedNameValue =
+      typeof resolvedValues.bedName === 'string' &&
+      resolvedValues.bedName.trim().length > 0;
+    if (hasBedNameValue) {
+      return resolvedValues;
+    }
+
+    const details = candidate.details ?? null;
+    const detailsBedName = this.extractDetailString(details, 'bedName');
+    if (detailsBedName) {
+      resolvedValues.bedName = detailsBedName;
+      return resolvedValues;
+    }
+
+    const bedId = this.extractDetailString(details, 'bedId');
+    if (!bedId) {
+      return resolvedValues;
+    }
+
+    const cachedBedName = bedNameById.get(bedId);
+    if (cachedBedName) {
+      resolvedValues.bedName = cachedBedName;
+      return resolvedValues;
+    }
+
+    const bed = await this.em.findOne(Bed, { id: bedId });
+    if (bed?.name) {
+      bedNameById.set(bedId, bed.name);
+      resolvedValues.bedName = bed.name;
+    }
+
+    return resolvedValues;
   }
 
   async getRulesMap(codes: WarningCode[]): Promise<WarningRulesMap> {
@@ -53,20 +130,39 @@ export class WarningsService {
     const codes = candidates.map((candidate) => candidate.code);
     const rules = rulesMap ?? (await this.getRulesMap(codes));
 
-    return candidates.reduce<WarningOutput[]>((acc, candidate) => {
+    const outputs: WarningOutput[] = [];
+    const bedNameById = new Map<string, string>();
+
+    for (const candidate of candidates) {
       const rule = rules.get(candidate.code);
-      if (!rule) return acc;
-      if (!rule.enabled || !rule.isActive) return acc;
+      if (!rule) continue;
+      if (!rule.enabled || !rule.isActive) continue;
+
+      const resolvedValues = await this.resolveTemplateValues(
+        candidate,
+        bedNameById,
+      );
 
       const message = this.applyTemplate(
         rule.messageTemplate,
-        candidate.values,
+        resolvedValues,
       );
       const hint = rule.hintTemplate
-        ? this.applyTemplate(rule.hintTemplate, candidate.values)
+        ? this.applyTemplate(rule.hintTemplate, resolvedValues)
         : null;
 
-      acc.push({
+      if (
+        this.hasUnresolvedPlaceholders(message) ||
+        this.hasUnresolvedPlaceholders(hint)
+      ) {
+        this.logger.warn(
+          `unresolved placeholder(s) code=${candidate.code} values=${JSON.stringify(
+            resolvedValues,
+          )}`,
+        );
+      }
+
+      outputs.push({
         code: candidate.code,
         severity: rule.severity,
         title: rule.title,
@@ -74,9 +170,9 @@ export class WarningsService {
         hint: hint ?? undefined,
         details: candidate.details ?? undefined,
       });
+    }
 
-      return acc;
-    }, []);
+    return outputs;
   }
 
   async buildWarning(

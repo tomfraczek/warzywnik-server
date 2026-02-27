@@ -35,15 +35,24 @@ export class DroughtRiskNext7DaysEvaluator implements WeatherWarningEvaluator {
 
     if (precipSumMm >= precipSumThresholdMm7d) return [];
 
+    const resolvedBedName =
+      ctx.beds.length === 1
+        ? ctx.beds[0].name
+        : ctx.beds.length > 1
+          ? 'Twoich grządkach'
+          : 'grządce';
+
     return [
       {
         scope: WarningScope.USER,
         code: WarningCode.DROUGHT_RISK_NEXT_7_DAYS,
         values: {
+          bedName: resolvedBedName,
           precipSumMm: Number(precipSumMm.toFixed(2)),
           thresholdMm: precipSumThresholdMm7d,
         },
         details: {
+          bedName: resolvedBedName,
           precipByDay,
           precipSumMm: Number(precipSumMm.toFixed(2)),
           thresholdMm: precipSumThresholdMm7d,

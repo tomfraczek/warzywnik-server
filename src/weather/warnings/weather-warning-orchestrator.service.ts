@@ -168,7 +168,7 @@ export class WeatherWarningOrchestratorService {
         validTo: { $gt: now },
       },
       {
-        populate: ['bed', 'planting', 'planting.vegetable'],
+        populate: ['bed', 'planting', 'planting.bed', 'planting.vegetable'],
         orderBy: [{ computedAt: 'desc' }, { createdAt: 'desc' }],
       },
     );

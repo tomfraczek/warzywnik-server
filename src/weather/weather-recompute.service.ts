@@ -96,13 +96,51 @@ export class WeatherRecomputeService {
         await this.weatherWarningOrchestrator.listActiveForUser(userId);
     }
 
-    const candidates = instances.map((instance) => ({
-      code: instance.code,
-      values: instance.values,
-      details: instance.details ?? undefined,
-    }));
+    const buildFromInstances = async (source: typeof instances) => {
+      const candidates = source.map((instance) => {
+        const fallbackValues: Record<string, string | number> = {};
 
-    const built = await this.warningsService.buildWarnings(candidates);
+        const resolvedBedName =
+          instance.bed?.name ?? instance.planting?.bed?.name ?? null;
+        if (resolvedBedName) {
+          fallbackValues.bedName = resolvedBedName;
+        }
+
+        const resolvedVegetableName =
+          instance.planting?.vegetable?.name ?? null;
+        if (resolvedVegetableName) {
+          fallbackValues.vegetableName = resolvedVegetableName;
+        }
+
+        return {
+          code: instance.code,
+          values: { ...fallbackValues, ...instance.values },
+          details: instance.details ?? undefined,
+        };
+      });
+
+      return this.warningsService.buildWarnings(candidates);
+    };
+
+    let built = await buildFromInstances(instances);
+
+    const hasUnresolvedPlaceholder = (text?: string | null) =>
+      !!text && /\{\s*[^{}]+\s*\}/.test(text);
+
+    const hasUnresolved = built.some(
+      (warning) =>
+        hasUnresolvedPlaceholder(warning.message) ||
+        hasUnresolvedPlaceholder(warning.hint),
+    );
+
+    if (hasUnresolved) {
+      this.logger.warn(
+        `detected unresolved warning placeholder(s) for user=${userId}, forcing recompute`,
+      );
+      await this.recomputeWarnings(userId, weatherBasis);
+      instances = await this.weatherWarningOrchestrator.listActiveForUser(userId);
+      built = await buildFromInstances(instances);
+    }
 
     const items: WarningDto[] = built.map((warning, index) => {
       const instance = instances[index];

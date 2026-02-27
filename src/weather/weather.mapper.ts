@@ -176,8 +176,6 @@ export function mapSnapshotToWeatherResponse(params: {
   location: { label: string; lat: number; lon: number };
   message?: string;
 }): WeatherResponseDto {
-  console.log('MAPPER_VERSION', '2026-02-26_1');
-  console.log('CURRENT_FROM_DB', params.snapshot.data?.current);
   const snapshotData = params.snapshot.data as LegacyWeatherSnapshotData;
   const dailyPoints = snapshotData.daily ?? [];
   const hourlyPoints = snapshotData.hourly ?? [];
