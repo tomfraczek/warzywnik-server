@@ -37,7 +37,6 @@ export class SoilsService {
       items: items.map((soil) => ({
         id: soil.id,
         name: soil.name,
-        soilType: soil.soilType,
       })),
       page,
       limit,
@@ -65,7 +64,6 @@ export class SoilsService {
     const soil = new Soil();
     soil.name = dto.name;
     soil.description = dto.description;
-    soil.soilType = dto.soilType;
     soil.structure = dto.structure;
     soil.waterRetention = dto.waterRetention;
     soil.drainage = dto.drainage;
@@ -103,10 +101,6 @@ export class SoilsService {
 
     if (dto.description !== undefined) {
       soil.description = dto.description;
-    }
-
-    if (dto.soilType !== undefined) {
-      soil.soilType = dto.soilType;
     }
 
     if (dto.structure !== undefined) {

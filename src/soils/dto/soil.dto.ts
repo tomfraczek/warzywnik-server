@@ -20,7 +20,6 @@ import {
   DemandLevel,
   DrainageLevel,
   SoilStructure,
-  SoilType,
 } from '../../common/enums/soil.enums';
 
 const trimArrayItems = (value: unknown): unknown => {
@@ -88,9 +87,6 @@ export class CreateSoilDto {
   @MinLength(1)
   description!: string;
 
-  @IsEnum(SoilType)
-  soilType!: SoilType;
-
   @IsEnum(SoilStructure)
   structure!: SoilStructure;
 
@@ -145,10 +141,6 @@ export class UpdateSoilDto {
   @IsString()
   @MinLength(1)
   description?: string;
-
-  @IsOptional()
-  @IsEnum(SoilType)
-  soilType?: SoilType;
 
   @IsOptional()
   @IsEnum(SoilStructure)

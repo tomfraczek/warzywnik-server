@@ -10,7 +10,6 @@ import {
   DemandLevel,
   DrainageLevel,
   SoilStructure,
-  SoilType,
 } from '../common/enums/soil.enums';
 
 @Entity({ tableName: 'soils' })
@@ -23,9 +22,6 @@ export class Soil {
 
   @Property({ type: TextType })
   description!: string;
-
-  @Enum({ items: () => SoilType })
-  soilType!: SoilType;
 
   @Enum({ items: () => SoilStructure })
   structure!: SoilStructure;

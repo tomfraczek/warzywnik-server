@@ -14,9 +14,9 @@ import {
   DemandLevel,
   DrainageLevel,
   SoilStructure,
-  SoilType,
 } from '../common/enums/soil.enums';
 import { WarningsService } from '../warning-rules/warnings.service';
+import { ActionAutomationService } from '../action-tasks/action-automation.service';
 import { Planting } from './planting.entity';
 import { Bed } from '../beds/bed.entity';
 import { Vegetable } from '../vegetables/vegetable.entity';
@@ -44,8 +44,12 @@ const createService = (previousPlantings: Planting[] = []) => {
       .mockName('buildWarnings'),
   } as unknown as WarningsService;
 
+  const actionAutomationService = {
+    syncForPlanting: jest.fn().mockResolvedValue(undefined),
+  } as unknown as ActionAutomationService;
+
   return {
-    service: new PlantingsService(em, warningsService),
+    service: new PlantingsService(em, warningsService, actionAutomationService),
     em,
     warningsService,
   };
@@ -64,7 +68,6 @@ const makeSoil = (overrides: Partial<Soil> = {}): Soil =>
     id: 'soil-1',
     name: 'Soil 1',
     description: 'Soil',
-    soilType: SoilType.OTHER,
     structure: SoilStructure.LOOSE,
     waterRetention: DemandLevel.MEDIUM,
     drainage: DrainageLevel.MEDIUM,
