@@ -276,15 +276,15 @@ export class RemindersService {
     actionTaskId: string,
     em: EntityManager = this.em,
   ) {
-    const result = (await em.getConnection().execute(
+    const result: unknown = await em.getConnection().execute(
       `update reminders
          set status = ?, locked_at = null, last_error = null
          where action_task_id = ?
            and status::text in ('pending', 'processing')`,
       [ReminderStatus.CANCELED, actionTaskId],
-    )) as { rowCount?: number };
+    );
 
-    const updated = result.rowCount ?? 0;
+    const updated = this.extractUpdatedRows(result);
 
     if (updated > 0) {
       this.logger.log(
@@ -603,15 +603,15 @@ export class RemindersService {
     const column =
       kind === 'disease' ? 'planting_disease_id' : 'pest_occurrence_id';
 
-    const result = (await em.getConnection().execute(
+    const result: unknown = await em.getConnection().execute(
       `update reminders
          set status = ?, locked_at = null, last_error = null
          where ${column} = ?
            and status::text in ('pending', 'processing')`,
       [ReminderStatus.CANCELED, occurrenceId],
-    )) as { rowCount?: number };
+    );
 
-    const updated = result.rowCount ?? 0;
+    const updated = this.extractUpdatedRows(result);
 
     if (updated > 0) {
       this.logger.log(
@@ -648,6 +648,19 @@ export class RemindersService {
     }
 
     em.persist(reminder);
+  }
+
+  private extractUpdatedRows(result: unknown): number {
+    if (!result || typeof result !== 'object') {
+      return 0;
+    }
+
+    if (!('rowCount' in result)) {
+      return 0;
+    }
+
+    const rowCount = (result as { rowCount?: unknown }).rowCount;
+    return typeof rowCount === 'number' ? rowCount : 0;
   }
 
   private serialize(reminder: Reminder) {

@@ -7,7 +7,13 @@ import {
   TextType,
   Unique,
 } from '@mikro-orm/core';
-import { WarningCode, WarningSeverity } from '../common/enums/warning.enums';
+import {
+  WarningCode,
+  WarningRuleCategory,
+  WarningRuleDayPart,
+  WarningRuleHorizon,
+  WarningSeverity,
+} from '../common/enums/warning.enums';
 
 @Entity({ tableName: 'warning_rules' })
 @Index({ properties: ['enabled'] })
@@ -22,6 +28,21 @@ export class WarningRule {
 
   @Property({ type: 'boolean', default: true })
   enabled: boolean = true;
+
+  @Enum({
+    items: () => WarningRuleCategory,
+    default: WarningRuleCategory.WEATHER_OUTDOOR,
+  })
+  category: WarningRuleCategory = WarningRuleCategory.WEATHER_OUTDOOR;
+
+  @Enum({ items: () => WarningRuleHorizon, default: WarningRuleHorizon.RADAR })
+  horizon: WarningRuleHorizon = WarningRuleHorizon.RADAR;
+
+  @Enum({ items: () => WarningRuleDayPart, default: WarningRuleDayPart.ANY })
+  dayPart: WarningRuleDayPart = WarningRuleDayPart.ANY;
+
+  @Property({ type: 'boolean', default: false })
+  generatesTask: boolean = false;
 
   @Enum({ items: () => WarningSeverity, default: WarningSeverity.WARNING })
   severity: WarningSeverity = WarningSeverity.WARNING;

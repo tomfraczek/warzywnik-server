@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CultivationEnvironment } from '../../common/enums/bed.enums';
 
 export type BedBaseDto = {
   name?: string;
@@ -15,6 +16,7 @@ export type BedBaseDto = {
   measuredK?: number | null;
   measuredPh?: number | null;
   isActive?: boolean;
+  cultivationEnvironment?: CultivationEnvironment;
 };
 
 export type CreateBedDto = BedBaseDto & {
@@ -51,6 +53,7 @@ const baseBedSchema = z.object({
   measuredK: percentageSchema.nullable().optional(),
   measuredPh: phSchema.nullable().optional(),
   isActive: z.boolean().optional(),
+  cultivationEnvironment: z.nativeEnum(CultivationEnvironment).optional(),
 });
 
 export const createBedSchema = baseBedSchema.extend({

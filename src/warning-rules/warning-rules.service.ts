@@ -10,7 +10,13 @@ import {
   ListWarningRulesQueryDto,
   UpdateWarningRuleDto,
 } from './dto/warning-rule.schemas';
-import { WarningCode, WarningSeverity } from '../common/enums/warning.enums';
+import {
+  WarningCode,
+  WarningRuleCategory,
+  WarningRuleDayPart,
+  WarningRuleHorizon,
+  WarningSeverity,
+} from '../common/enums/warning.enums';
 
 const isUuid = (value: string): boolean => /^[0-9a-fA-F-]{36}$/.test(value);
 
@@ -20,6 +26,10 @@ export class WarningRulesService {
 
   async list(query: ListWarningRulesQueryDto) {
     const { page, limit, q, enabled, severity } = query;
+    const category = (query as { category?: WarningRuleCategory }).category;
+    const horizon = (query as { horizon?: WarningRuleHorizon }).horizon;
+    const dayPart = (query as { dayPart?: WarningRuleDayPart }).dayPart;
+    const generatesTask = (query as { generatesTask?: boolean }).generatesTask;
 
     const where: Record<string, unknown> = {};
 
@@ -33,6 +43,22 @@ export class WarningRulesService {
 
     if (severity) {
       where.severity = severity;
+    }
+
+    if (category) {
+      where.category = category;
+    }
+
+    if (horizon) {
+      where.horizon = horizon;
+    }
+
+    if (dayPart) {
+      where.dayPart = dayPart;
+    }
+
+    if (generatesTask !== undefined) {
+      where.generatesTask = generatesTask;
     }
 
     const [items, total] = await this.em.findAndCount(WarningRule, where, {
@@ -76,6 +102,10 @@ export class WarningRulesService {
     const rule = new WarningRule();
     rule.code = dto.code;
     rule.enabled = dto.enabled ?? true;
+    rule.category = dto.category ?? WarningRuleCategory.WEATHER_OUTDOOR;
+    rule.horizon = dto.horizon ?? WarningRuleHorizon.RADAR;
+    rule.dayPart = dto.dayPart ?? WarningRuleDayPart.ANY;
+    rule.generatesTask = dto.generatesTask ?? false;
     rule.severity = dto.severity ?? WarningSeverity.WARNING;
     rule.title = dto.title;
     rule.messageTemplate = dto.messageTemplate;
@@ -108,6 +138,22 @@ export class WarningRulesService {
 
     if (dto.severity !== undefined) {
       rule.severity = dto.severity;
+    }
+
+    if (dto.category !== undefined) {
+      rule.category = dto.category;
+    }
+
+    if (dto.horizon !== undefined) {
+      rule.horizon = dto.horizon;
+    }
+
+    if (dto.dayPart !== undefined) {
+      rule.dayPart = dto.dayPart;
+    }
+
+    if (dto.generatesTask !== undefined) {
+      rule.generatesTask = dto.generatesTask;
     }
 
     if (dto.title !== undefined) {

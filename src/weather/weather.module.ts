@@ -25,6 +25,8 @@ import { WindDamageRiskNext48hEvaluator } from './warnings/evaluators/wind-damag
 import { FungalDiseasePressureHighEvaluator } from './warnings/evaluators/fungal-disease-pressure-high.evaluator';
 import { OverwateringRiskEvaluator } from './warnings/evaluators/overwatering-risk.evaluator';
 import { GerminationTooColdEvaluator } from './warnings/evaluators/germination-too-cold.evaluator';
+import { OperationalWeatherWarningsEvaluator } from './warnings/evaluators/operational-weather-warnings.evaluator';
+import { GreenhouseWeatherWarningsEvaluator } from './warnings/evaluators/greenhouse-weather-warnings.evaluator';
 import { WeatherWarningOrchestratorService } from './warnings/weather-warning-orchestrator.service';
 import { WeatherTaskPlannerService } from './warnings/weather-task-planner.service';
 import { WeatherWarningsSeedService } from './warnings/weather-warnings.seed.service';
@@ -62,6 +64,8 @@ import { Bed } from '../beds/bed.entity';
     FungalDiseasePressureHighEvaluator,
     OverwateringRiskEvaluator,
     GerminationTooColdEvaluator,
+    OperationalWeatherWarningsEvaluator,
+    GreenhouseWeatherWarningsEvaluator,
     WeatherWarningOrchestratorService,
     WeatherTaskPlannerService,
     WeatherWarningsSeedService,

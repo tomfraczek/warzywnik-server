@@ -1,9 +1,19 @@
 import { z } from 'zod';
-import { WarningCode, WarningSeverity } from '../../common/enums/warning.enums';
+import {
+  WarningCode,
+  WarningRuleCategory,
+  WarningRuleDayPart,
+  WarningRuleHorizon,
+  WarningSeverity,
+} from '../../common/enums/warning.enums';
 
 export type WarningRuleBaseDto = {
   code?: WarningCode;
   enabled?: boolean;
+  category?: WarningRuleCategory;
+  horizon?: WarningRuleHorizon;
+  dayPart?: WarningRuleDayPart;
+  generatesTask?: boolean;
   severity?: WarningSeverity;
   title?: string;
   messageTemplate?: string;
@@ -27,6 +37,10 @@ export type ListWarningRulesQueryDto = {
   q?: string;
   enabled?: boolean;
   severity?: WarningSeverity;
+  category?: WarningRuleCategory;
+  horizon?: WarningRuleHorizon;
+  dayPart?: WarningRuleDayPart;
+  generatesTask?: boolean;
 };
 
 const titleSchema = z.string().min(1).max(120);
@@ -35,6 +49,10 @@ const messageTemplateSchema = z.string().min(1);
 const baseWarningRuleSchema = z.object({
   code: z.nativeEnum(WarningCode).optional(),
   enabled: z.boolean().optional(),
+  category: z.nativeEnum(WarningRuleCategory).optional(),
+  horizon: z.nativeEnum(WarningRuleHorizon).optional(),
+  dayPart: z.nativeEnum(WarningRuleDayPart).optional(),
+  generatesTask: z.boolean().optional(),
   severity: z.nativeEnum(WarningSeverity).optional(),
   title: titleSchema.optional(),
   messageTemplate: messageTemplateSchema.optional(),
@@ -58,4 +76,8 @@ export const listWarningRulesQuerySchema = z.object({
   q: z.string().min(1).optional(),
   enabled: z.coerce.boolean().optional(),
   severity: z.nativeEnum(WarningSeverity).optional(),
+  category: z.nativeEnum(WarningRuleCategory).optional(),
+  horizon: z.nativeEnum(WarningRuleHorizon).optional(),
+  dayPart: z.nativeEnum(WarningRuleDayPart).optional(),
+  generatesTask: z.coerce.boolean().optional(),
 });

@@ -11,6 +11,7 @@ import { ActionTask } from '../../action-tasks/action-task.entity';
 import { WarningInstance } from './warning-instance.entity';
 import { Bed } from '../../beds/bed.entity';
 import { Planting } from '../../plantings/planting.entity';
+import { getLocalDate, localDatePlusDays } from './weather-warning.types';
 
 type TaskProposal = {
   dedupeKey: string;
@@ -22,6 +23,49 @@ type TaskProposal = {
   plantingId?: string | null;
   metadata?: Record<string, unknown>;
 };
+
+const OPERATIONAL_TASK_CODES = new Set<WarningCode>([
+  WarningCode.FROST_RISK_TODAY_NIGHT,
+  WarningCode.FROST_RISK_TOMORROW_NIGHT,
+  WarningCode.HARD_FROST_RISK_TODAY_NIGHT,
+  WarningCode.HARD_FROST_RISK_TOMORROW_NIGHT,
+  WarningCode.HEAVY_RAIN_TODAY_DAY,
+  WarningCode.HEAVY_RAIN_TODAY_NIGHT,
+  WarningCode.HEAVY_RAIN_TOMORROW_DAY,
+  WarningCode.HEAVY_RAIN_TOMORROW_NIGHT,
+  WarningCode.WIND_DAMAGE_TODAY_DAY,
+  WarningCode.WIND_DAMAGE_TODAY_NIGHT,
+  WarningCode.WIND_DAMAGE_TOMORROW_DAY,
+  WarningCode.WIND_DAMAGE_TOMORROW_NIGHT,
+  WarningCode.WATERING_NEEDED_TODAY,
+  WarningCode.WATERING_NEEDED_TOMORROW,
+  WarningCode.SOWING_PAUSE_TOO_COLD_TODAY,
+  WarningCode.SOWING_PAUSE_TOO_COLD_TOMORROW,
+  WarningCode.GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT,
+  WarningCode.GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT,
+  WarningCode.OVERWATERING_PREPARE_TODAY,
+  WarningCode.OVERWATERING_PREPARE_TOMORROW,
+  WarningCode.OVERWATERING_CHECK_TODAY,
+  WarningCode.OVERWATERING_CHECK_TOMORROW,
+  WarningCode.GREENHOUSE_FROST_RISK_TODAY_NIGHT,
+  WarningCode.GREENHOUSE_FROST_RISK_TOMORROW_NIGHT,
+  WarningCode.GREENHOUSE_HARD_FROST_RISK_TODAY_NIGHT,
+  WarningCode.GREENHOUSE_HARD_FROST_RISK_TOMORROW_NIGHT,
+  WarningCode.GREENHOUSE_HEAT_WAVE_TODAY_DAY,
+  WarningCode.GREENHOUSE_HEAT_WAVE_TOMORROW_DAY,
+  WarningCode.GREENHOUSE_STRONG_WIND_TODAY_DAY,
+  WarningCode.GREENHOUSE_STRONG_WIND_TOMORROW_DAY,
+  WarningCode.GREENHOUSE_STORM_TODAY_DAY,
+  WarningCode.GREENHOUSE_STORM_TOMORROW_DAY,
+  WarningCode.GREENHOUSE_HEAVY_RAIN_TODAY_DAY,
+  WarningCode.GREENHOUSE_HEAVY_RAIN_TOMORROW_DAY,
+  WarningCode.GREENHOUSE_SNOW_LOAD_TODAY,
+  WarningCode.GREENHOUSE_SNOW_LOAD_TOMORROW,
+  WarningCode.GREENHOUSE_WET_SNOW_TODAY,
+  WarningCode.GREENHOUSE_WET_SNOW_TOMORROW,
+  WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TODAY,
+  WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TOMORROW,
+]);
 
 @Injectable()
 export class WeatherTaskPlannerService {
@@ -46,7 +90,7 @@ export class WeatherTaskPlannerService {
       { populate: ['bed', 'planting', 'planting.vegetable'] },
     );
 
-    const proposals = this.buildProposalsFromWarnings(warnings, now);
+    const proposals = this.buildProposalsFromWarnings(warnings, now, userId);
     const proposalByKey = new Map(
       proposals.map((item) => [item.dedupeKey, item]),
     );
@@ -109,7 +153,6 @@ export class WeatherTaskPlannerService {
       for (const task of existing) {
         if (!task.dedupeKey) continue;
         if (proposalByKey.has(task.dedupeKey)) continue;
-
         task.status = ActionTaskStatus.CANCELED;
       }
 
@@ -124,109 +167,200 @@ export class WeatherTaskPlannerService {
   private buildProposalsFromWarnings(
     warnings: WarningInstance[],
     now: Date,
+    userId: string,
   ): TaskProposal[] {
-    const proposals: TaskProposal[] = [];
+    const proposals = new Map<string, TaskProposal>();
 
     for (const warning of warnings) {
-      const key = `weather:${warning.dedupeKey}`;
+      if (!OPERATIONAL_TASK_CODES.has(warning.code)) {
+        continue;
+      }
+
+      const localDate = this.resolveLocalDate(warning);
+      if (!localDate || !this.isTodayOrTomorrow(localDate, warning, now)) {
+        continue;
+      }
+
+      const dedupeKey = this.buildDedupeKey({
+        code: warning.code,
+        userId,
+        localDate,
+        bedId: warning.bed?.id ?? null,
+        plantingId: warning.planting?.id ?? null,
+      });
+
+      const baseMetadata = {
+        localDate,
+        ...(warning.details ?? {}),
+      };
+
+      const base: Omit<TaskProposal, 'title' | 'description'> = {
+        dedupeKey,
+        dueAt: warning.validFrom,
+        targetType: warning.planting?.id
+          ? ActionTaskTargetType.PLANTING
+          : warning.bed?.id
+            ? ActionTaskTargetType.BED
+            : ActionTaskTargetType.USER,
+        bedId: warning.bed?.id ?? null,
+        plantingId: warning.planting?.id ?? null,
+        metadata: baseMetadata,
+      };
 
       switch (warning.code) {
-        case WarningCode.FROST_RISK_NEXT_7_DAYS:
-        case WarningCode.HARD_FROST_RISK_NEXT_7_DAYS: {
-          const riskDate = this.getDate(warning.values?.riskDate);
-          const dueAt = riskDate
-            ? new Date(riskDate.getTime() - 12 * 60 * 60 * 1000)
-            : now;
-          proposals.push({
-            dedupeKey: key,
-            title: 'Okryj rośliny',
-            description: 'Przygotuj osłony przed prognozowanym mrozem.',
-            dueAt,
+        case WarningCode.WATERING_NEEDED_TODAY:
+        case WarningCode.WATERING_NEEDED_TOMORROW:
+          proposals.set(dedupeKey, {
+            ...base,
             targetType: ActionTaskTargetType.USER,
-          });
-          break;
-        }
-
-        case WarningCode.DROUGHT_RISK_NEXT_7_DAYS:
-          proposals.push({
-            dedupeKey: key,
-            title: 'Podlej',
-            description: 'Wykonaj podlewanie ze względu na ryzyko suszy.',
-            dueAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
-            targetType: ActionTaskTargetType.USER,
+            title: 'Podlej uprawy',
+            description: 'Podlewanie operacyjne zaplanowane na dziś/jutro.',
           });
           break;
 
-        case WarningCode.HEAVY_RAIN_RISK_NEXT_48H:
-          proposals.push({
-            dedupeKey: key,
-            title: 'Sprawdź odpływ / zabezpiecz grządkę',
-            description: 'Przygotuj odpływ wody przed intensywnymi opadami.',
-            dueAt: this.hoursBefore(warning.details?.peakHour, 3, now),
-            targetType: ActionTaskTargetType.USER,
-          });
-          break;
-
-        case WarningCode.WIND_DAMAGE_RISK_NEXT_48H:
-          proposals.push({
-            dedupeKey: key,
-            title: 'Zabezpiecz podpory',
-            description: 'Wzmocnij podpory przed silnym wiatrem.',
-            dueAt: this.hoursBefore(warning.details?.peakHour, 4, now),
-            targetType: ActionTaskTargetType.USER,
-          });
-          break;
-
-        case WarningCode.OVERWATERING_RISK:
-          proposals.push({
-            dedupeKey: key,
-            title: 'Sprawdź zastoiska / drenaż',
-            description: 'Sprawdź odpływ i ewentualnie popraw drenaż.',
-            dueAt: this.hoursBefore(warning.details?.peakHour, 2, now),
+        case WarningCode.OVERWATERING_PREPARE_TODAY:
+        case WarningCode.OVERWATERING_PREPARE_TOMORROW:
+          proposals.set(dedupeKey, {
+            ...base,
             targetType: ActionTaskTargetType.BED,
-            bedId: warning.bed?.id ?? null,
+            title: 'Przygotuj drenaż przed opadami',
+            description: 'Sprawdź odpływ i zabezpiecz grządkę.',
           });
           break;
 
-        case WarningCode.GERMINATION_TOO_COLD:
-          proposals.push({
-            dedupeKey: key,
-            title: 'Wstrzymaj siew / osłoń wysiew',
-            description: 'Temperatura za niska dla bezpiecznego kiełkowania.',
-            dueAt: now,
+        case WarningCode.OVERWATERING_CHECK_TODAY:
+        case WarningCode.OVERWATERING_CHECK_TOMORROW:
+          proposals.set(dedupeKey, {
+            ...base,
+            targetType: ActionTaskTargetType.BED,
+            dueAt: warning.validTo,
+            title: 'Sprawdź zastoiska po opadach',
+            description: 'Skontroluj zastoje wody i korzenie.',
+          });
+          break;
+
+        case WarningCode.SOWING_PAUSE_TOO_COLD_TODAY:
+        case WarningCode.SOWING_PAUSE_TOO_COLD_TOMORROW:
+          proposals.set(dedupeKey, {
+            ...base,
             targetType: ActionTaskTargetType.PLANTING,
-            bedId: warning.bed?.id ?? null,
-            plantingId: warning.planting?.id ?? null,
+            title: 'Wstrzymaj siew',
+            description: 'Warunki termiczne są zbyt niskie.',
+          });
+          break;
+
+        case WarningCode.GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT:
+        case WarningCode.GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT:
+          proposals.set(dedupeKey, {
+            ...base,
+            targetType: ActionTaskTargetType.PLANTING,
+            title: 'Osłoń młode siewki na noc',
+            description: 'Nocą prognozowane jest ryzyko zimna.',
+          });
+          break;
+
+        case WarningCode.GREENHOUSE_HEAT_WAVE_TODAY_DAY:
+        case WarningCode.GREENHOUSE_HEAT_WAVE_TOMORROW_DAY:
+          proposals.set(dedupeKey, {
+            ...base,
+            targetType: ActionTaskTargetType.BED,
+            title: 'Schłodź szklarnię / tunel',
+            description: 'Zadbaj o wietrzenie i ograniczenie przegrzania.',
+          });
+          break;
+
+        case WarningCode.GREENHOUSE_SNOW_LOAD_TODAY:
+        case WarningCode.GREENHOUSE_SNOW_LOAD_TOMORROW:
+        case WarningCode.GREENHOUSE_WET_SNOW_TODAY:
+        case WarningCode.GREENHOUSE_WET_SNOW_TOMORROW:
+          proposals.set(dedupeKey, {
+            ...base,
+            targetType: ActionTaskTargetType.BED,
+            title: 'Odśnież konstrukcję',
+            description: 'Usuń śnieg z dachu szklarni/tunelu.',
           });
           break;
 
         default:
-          break;
+          proposals.set(dedupeKey, {
+            ...base,
+            title:
+              warning.code === WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TODAY ||
+              warning.code === WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TOMORROW
+                ? 'Zamknij wietrzniki i osłoń uprawę'
+                : warning.code === WarningCode.HEAVY_RAIN_TODAY_DAY ||
+                    warning.code === WarningCode.HEAVY_RAIN_TODAY_NIGHT ||
+                    warning.code === WarningCode.HEAVY_RAIN_TOMORROW_DAY ||
+                    warning.code === WarningCode.HEAVY_RAIN_TOMORROW_NIGHT ||
+                    warning.code ===
+                      WarningCode.GREENHOUSE_HEAVY_RAIN_TODAY_DAY ||
+                    warning.code ===
+                      WarningCode.GREENHOUSE_HEAVY_RAIN_TOMORROW_DAY
+                  ? 'Zabezpiecz odpływ i osłony'
+                  : warning.code === WarningCode.WIND_DAMAGE_TODAY_DAY ||
+                      warning.code === WarningCode.WIND_DAMAGE_TODAY_NIGHT ||
+                      warning.code === WarningCode.WIND_DAMAGE_TOMORROW_DAY ||
+                      warning.code === WarningCode.WIND_DAMAGE_TOMORROW_NIGHT ||
+                      warning.code ===
+                        WarningCode.GREENHOUSE_STRONG_WIND_TODAY_DAY ||
+                      warning.code ===
+                        WarningCode.GREENHOUSE_STRONG_WIND_TOMORROW_DAY ||
+                      warning.code === WarningCode.GREENHOUSE_STORM_TODAY_DAY ||
+                      warning.code === WarningCode.GREENHOUSE_STORM_TOMORROW_DAY
+                    ? 'Zabezpiecz podpory i osłony'
+                    : 'Zabezpiecz rośliny na noc',
+            description: 'Operacyjne działanie pogodowe na dziś/jutro.',
+          });
       }
     }
 
-    return proposals;
+    return Array.from(proposals.values());
   }
 
-  private hoursBefore(value: unknown, hours: number, fallback: Date): Date {
-    const date = this.getDate(value);
-    if (!date) {
-      return fallback;
+  private resolveLocalDate(warning: WarningInstance): string | null {
+    const localDate = warning.details?.localDate;
+    if (
+      typeof localDate === 'string' &&
+      /^\d{4}-\d{2}-\d{2}$/.test(localDate)
+    ) {
+      return localDate;
     }
-
-    return new Date(date.getTime() - hours * 60 * 60 * 1000);
+    if (
+      warning.validFrom instanceof Date &&
+      !Number.isNaN(warning.validFrom.getTime())
+    ) {
+      return warning.validFrom.toISOString().slice(0, 10);
+    }
+    return null;
   }
 
-  private getDate(value: unknown): Date | null {
-    if (typeof value !== 'string' && typeof value !== 'number') {
-      return null;
+  private buildDedupeKey(params: {
+    code: WarningCode;
+    userId: string;
+    localDate: string;
+    bedId?: string | null;
+    plantingId?: string | null;
+  }): string {
+    const base = `weather:${params.code}:${params.userId}:${params.localDate}`;
+    if (params.plantingId) {
+      return `${base}:planting:${params.plantingId}`;
     }
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return null;
+    if (params.bedId) {
+      return `${base}:bed:${params.bedId}`;
     }
+    return base;
+  }
 
-    return date;
+  private isTodayOrTomorrow(
+    localDate: string,
+    warning: WarningInstance,
+    now: Date,
+  ): boolean {
+    const timezone = warning.details?.timezone;
+    const timeZone =
+      typeof timezone === 'string' && timezone.length > 0 ? timezone : 'UTC';
+    const today = getLocalDate(now, timeZone);
+    const tomorrow = localDatePlusDays(today, 1);
+    return localDate === today || localDate === tomorrow;
   }
 }

@@ -1,6 +1,7 @@
 import {
   Collection,
   Entity,
+  Enum,
   Index,
   ManyToOne,
   OneToMany,
@@ -11,6 +12,7 @@ import {
 import { User } from '../users/user.entity';
 import { Soil } from '../soils/soil.entity';
 import { Planting } from '../plantings/planting.entity';
+import { CultivationEnvironment } from '../common/enums/bed.enums';
 
 @Entity({ tableName: 'beds' })
 @Index({ properties: ['user'] })
@@ -60,6 +62,13 @@ export class Bed {
 
   @Property({ type: 'boolean', default: true })
   isActive: boolean = true;
+
+  @Enum({
+    items: () => CultivationEnvironment,
+    default: CultivationEnvironment.GROUND_OUTDOOR,
+  })
+  cultivationEnvironment: CultivationEnvironment =
+    CultivationEnvironment.GROUND_OUTDOOR;
 
   @OneToMany(() => Planting, (planting: Planting) => planting.bed)
   plantings = new Collection<Planting>(this);

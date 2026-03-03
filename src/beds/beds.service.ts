@@ -12,6 +12,7 @@ import {
   UpdateBedDto,
 } from './dto/bed.schemas';
 import { User } from '../users/user.entity';
+import { CultivationEnvironment } from '../common/enums/bed.enums';
 
 @Injectable()
 export class BedsService {
@@ -81,6 +82,8 @@ export class BedsService {
     bed.measuredK = dto.measuredK ?? null;
     bed.measuredPh = dto.measuredPh ?? null;
     bed.isActive = dto.isActive ?? true;
+    bed.cultivationEnvironment =
+      dto.cultivationEnvironment ?? CultivationEnvironment.GROUND_OUTDOOR;
 
     const soilId = dto.soilId !== undefined ? dto.soilId : dto.soil;
 
@@ -126,6 +129,9 @@ export class BedsService {
     if (dto.measuredK !== undefined) bed.measuredK = dto.measuredK;
     if (dto.measuredPh !== undefined) bed.measuredPh = dto.measuredPh;
     if (dto.isActive !== undefined) bed.isActive = dto.isActive;
+    if (dto.cultivationEnvironment !== undefined) {
+      bed.cultivationEnvironment = dto.cultivationEnvironment;
+    }
 
     const soilId = dto.soilId !== undefined ? dto.soilId : dto.soil;
 
@@ -171,6 +177,7 @@ export class BedsService {
       measuredK: bed.measuredK ?? null,
       measuredPh: bed.measuredPh ?? null,
       isActive: bed.isActive,
+      cultivationEnvironment: bed.cultivationEnvironment,
       createdAt: bed.createdAt,
       updatedAt: bed.updatedAt,
     };

@@ -1,5 +1,6 @@
 import { DrainageLevel } from '../../../common/enums/soil.enums';
 import { WarningCode } from '../../../common/enums/warning.enums';
+import { CultivationEnvironment } from '../../../common/enums/bed.enums';
 import { Bed } from '../../../beds/bed.entity';
 import { Planting } from '../../../plantings/planting.entity';
 import { PlantingStatus } from '../../../common/enums/planting.enums';
@@ -13,6 +14,7 @@ import { HardFrostRiskNext7DaysEvaluator } from './hard-frost-risk-next-7-days.e
 import { HeavyRainRiskNext48hEvaluator } from './heavy-rain-risk-next-48h.evaluator';
 import { OverwateringRiskEvaluator } from './overwatering-risk.evaluator';
 import { WindDamageRiskNext48hEvaluator } from './wind-damage-risk-next-48h.evaluator';
+import { OperationalWeatherWarningsEvaluator } from './operational-weather-warnings.evaluator';
 
 const configService = {
   getParams: jest.fn((code: WarningCode) => {
@@ -33,6 +35,19 @@ const configService = {
         return { precipSumThresholdMm48h: 20, drainageLowValues: ['poor'] };
       case WarningCode.GERMINATION_TOO_COLD:
         return { germinationMinTempC: 8, windowHours: 48 };
+      case WarningCode.FROST_RISK_TODAY_NIGHT:
+        return {
+          frostThresholdC: 0,
+          hardFrostThresholdC: -5,
+          heavyRainWindowThresholdMm: 12,
+          heavyRainPeakThresholdMm: 7,
+          windThresholdKmh: 55,
+          wateringDailyPrecipMaxMm: 2,
+          wateringHighTempC: 24,
+          wateringHighWindKmh: 32,
+          overwateringPrecipMm: 20,
+          germinationMinTempC: 8,
+        };
       default:
         return {};
     }
@@ -45,6 +60,7 @@ const buildContext = () => {
     id: 'bed-1',
     name: 'Bed 1',
     soil: { drainage: DrainageLevel.POOR },
+    cultivationEnvironment: CultivationEnvironment.GROUND_OUTDOOR,
   } as unknown as Bed;
   const planting = {
     id: 'planting-1',
@@ -144,5 +160,41 @@ describe('Weather warning evaluators', () => {
     ctx.snapshotData.hourly[0].temp = 4;
     const out = await evaluator.evaluate(ctx);
     expect(out[0]?.code).toBe(WarningCode.GERMINATION_TOO_COLD);
+  });
+
+  it('Operational evaluator classifies day/night deterministically', async () => {
+    const evaluator = new OperationalWeatherWarningsEvaluator(configService);
+    const ctx = buildContext();
+    ctx.snapshotData.timezone = 'Europe/Warsaw';
+    ctx.snapshotData.hourly = [
+      {
+        time: '2026-02-26T02:00:00.000Z',
+        temp: -2,
+        precip: 0,
+        rain: 0,
+        snow: 0,
+        wind: 10,
+        weatherCode: 1,
+        isDay: false,
+      },
+      {
+        time: '2026-02-26T10:00:00.000Z',
+        temp: 11,
+        precip: 0,
+        rain: 0,
+        snow: 0,
+        wind: 12,
+        weatherCode: 1,
+        isDay: true,
+      },
+    ];
+
+    const out = await evaluator.evaluate(ctx);
+    expect(
+      out.some((item) => item.code === WarningCode.FROST_RISK_TODAY_NIGHT),
+    ).toBe(true);
+    expect(
+      out.some((item) => item.code === WarningCode.FROST_RISK_TOMORROW_NIGHT),
+    ).toBe(false);
   });
 });

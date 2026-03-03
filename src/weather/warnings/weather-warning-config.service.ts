@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { WarningCode } from '../../common/enums/warning.enums';
 import { WeatherWarningConfig } from './weather-warning-config.entity';
 
-const DEFAULT_CONFIG: Record<WarningCode, Record<string, unknown>> = {
+const DEFAULT_CONFIG: Partial<Record<WarningCode, Record<string, unknown>>> = {
   [WarningCode.SOIL_NOT_RECOMMENDED]: {},
   [WarningCode.PH_OUT_OF_RANGE]: {},
   [WarningCode.DEPTH_TOO_SMALL]: {},
@@ -40,6 +40,30 @@ const DEFAULT_CONFIG: Record<WarningCode, Record<string, unknown>> = {
     germinationMinTempC: 8,
     windowHours: 48,
   },
+  [WarningCode.FROST_RISK_TODAY_NIGHT]: {
+    frostThresholdC: 0,
+    hardFrostThresholdC: -5,
+    heavyRainWindowThresholdMm: 12,
+    heavyRainPeakThresholdMm: 7,
+    windThresholdKmh: 55,
+    wateringDailyPrecipMaxMm: 2,
+    wateringHighTempC: 24,
+    wateringHighWindKmh: 32,
+    overwateringPrecipMm: 20,
+    germinationMinTempC: 8,
+  },
+  [WarningCode.GREENHOUSE_FROST_RISK_TODAY_NIGHT]: {
+    frostThresholdC: 0,
+    hardFrostThresholdC: -5,
+    heatWaveThresholdC: 32,
+    strongWindThresholdKmh: 45,
+    heavyRainThresholdMm: 12,
+    stormWindThresholdKmh: 60,
+    stormRainThresholdMm: 4,
+    snowLoadThresholdMm: 4,
+    wetSnowThresholdMm: 1,
+    suddenTempDropThresholdC: 10,
+  },
 };
 
 const SCHEMAS: Partial<
@@ -74,6 +98,30 @@ const SCHEMAS: Partial<
   [WarningCode.GERMINATION_TOO_COLD]: z.object({
     germinationMinTempC: z.number(),
     windowHours: z.number().int().positive(),
+  }),
+  [WarningCode.FROST_RISK_TODAY_NIGHT]: z.object({
+    frostThresholdC: z.number(),
+    hardFrostThresholdC: z.number(),
+    heavyRainWindowThresholdMm: z.number().nonnegative(),
+    heavyRainPeakThresholdMm: z.number().nonnegative(),
+    windThresholdKmh: z.number().nonnegative(),
+    wateringDailyPrecipMaxMm: z.number().nonnegative(),
+    wateringHighTempC: z.number(),
+    wateringHighWindKmh: z.number().nonnegative(),
+    overwateringPrecipMm: z.number().nonnegative(),
+    germinationMinTempC: z.number(),
+  }),
+  [WarningCode.GREENHOUSE_FROST_RISK_TODAY_NIGHT]: z.object({
+    frostThresholdC: z.number(),
+    hardFrostThresholdC: z.number(),
+    heatWaveThresholdC: z.number(),
+    strongWindThresholdKmh: z.number().nonnegative(),
+    heavyRainThresholdMm: z.number().nonnegative(),
+    stormWindThresholdKmh: z.number().nonnegative(),
+    stormRainThresholdMm: z.number().nonnegative(),
+    snowLoadThresholdMm: z.number().nonnegative(),
+    wetSnowThresholdMm: z.number().nonnegative(),
+    suddenTempDropThresholdC: z.number().nonnegative(),
   }),
 };
 
