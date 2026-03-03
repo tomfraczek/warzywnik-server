@@ -1,4 +1,10 @@
-import { Controller, Get, Req, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { User } from '../users/user.entity';
 import { WeatherService } from './weather.service';
 import { WeatherRecomputeService } from './weather-recompute.service';
@@ -9,6 +15,8 @@ import { TasksResponseDto } from './dto/tasks-response.dto';
 type RequestWithUser = {
   userEntity?: User;
 };
+
+type TaskStatusFilter = 'pending' | 'done' | 'all';
 
 @Controller('v1/users/me')
 export class WeatherController {
@@ -37,9 +45,32 @@ export class WeatherController {
   }
 
   @Get('tasks')
-  async getTasks(@Req() req: RequestWithUser): Promise<TasksResponseDto> {
+  async getTasks(
+    @Req() req: RequestWithUser,
+    @Query('status') status?: string,
+    @Query('includeDone') includeDone?: string,
+  ): Promise<TasksResponseDto> {
     const user = this.getUserFromRequest(req);
-    return this.weatherRecomputeService.getTasksResponse(user.id);
+    const normalizedStatus = this.resolveTaskStatusFilter(status, includeDone);
+    return this.weatherRecomputeService.getTasksResponse(
+      user.id,
+      normalizedStatus,
+    );
+  }
+
+  private resolveTaskStatusFilter(
+    status?: string,
+    includeDone?: string,
+  ): TaskStatusFilter {
+    if (status === 'pending' || status === 'done' || status === 'all') {
+      return status;
+    }
+
+    if (includeDone === 'true') {
+      return 'all';
+    }
+
+    return 'pending';
   }
 
   private getUserFromRequest(req: RequestWithUser): User {

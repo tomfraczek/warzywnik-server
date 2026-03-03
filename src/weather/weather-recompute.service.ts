@@ -4,9 +4,17 @@ import { User } from '../users/user.entity';
 import { Planting } from '../plantings/planting.entity';
 import { PlantingStatus } from '../common/enums/planting.enums';
 import { ActionTask } from '../action-tasks/action-task.entity';
-import { ActionTaskStatus } from '../common/enums/action.enums';
+import {
+  ActionTaskSource,
+  ActionTaskStatus,
+  ActionTaskTargetType,
+} from '../common/enums/action.enums';
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
-import { TasksResponseDto, type TaskDto } from './dto/tasks-response.dto';
+import {
+  TasksResponseDto,
+  type TaskDto,
+  type TaskMetaDto,
+} from './dto/tasks-response.dto';
 import { WarningDto, WarningsResponseDto } from './dto/warnings-response.dto';
 import { WeatherBasis } from './weather.types';
 import { WeatherService } from './weather.service';
@@ -14,10 +22,13 @@ import {
   WarningsService,
   type WarningOutput,
 } from '../warning-rules/warnings.service';
-import { WarningScope } from '../common/enums/warning.enums';
+import { WarningCode, WarningScope } from '../common/enums/warning.enums';
 import { WeatherWarningOrchestratorService } from './warnings/weather-warning-orchestrator.service';
 import { WeatherTaskPlannerService } from './warnings/weather-task-planner.service';
 import { WeatherSnapshot } from './weather-snapshot.entity';
+import { Bed } from '../beds/bed.entity';
+
+type TaskStatusFilter = 'pending' | 'done' | 'all';
 
 @Injectable()
 export class WeatherRecomputeService {
@@ -208,19 +219,43 @@ export class WeatherRecomputeService {
     };
   }
 
-  async getTasksResponse(userId: string): Promise<TasksResponseDto> {
-    await this.requireUser(userId);
+  async getTasksResponse(
+    userId: string,
+    statusFilter: TaskStatusFilter = 'pending',
+  ): Promise<TasksResponseDto> {
+    const user = await this.requireUser(userId);
+
+    const statusCondition =
+      statusFilter === 'all'
+        ? { $in: [ActionTaskStatus.PENDING, ActionTaskStatus.DONE] }
+        : statusFilter === 'done'
+          ? ActionTaskStatus.DONE
+          : ActionTaskStatus.PENDING;
 
     const items = await this.em.find(
       ActionTask,
       {
         user: userId,
-        status: { $in: [ActionTaskStatus.PENDING, ActionTaskStatus.DONE] },
+        status: statusCondition,
       },
       {
         orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }],
       },
     );
+
+    const hasUserScopeWeatherTask = items.some(
+      (item) =>
+        item.source === ActionTaskSource.WEATHER_WARNING &&
+        item.targetType === ActionTaskTargetType.USER,
+    );
+
+    let activeBedsCountForUserScope: number | undefined;
+    if (hasUserScopeWeatherTask) {
+      activeBedsCountForUserScope = await this.em.count(Bed, {
+        user: userId,
+        isActive: true,
+      });
+    }
 
     const mapped: TaskDto[] = items.map((item) => ({
       id: item.id,
@@ -233,6 +268,7 @@ export class WeatherRecomputeService {
       plantingId: item.planting?.id ?? null,
       bedId: item.bed?.id ?? null,
       isManuallyRescheduled: item.isManuallyRescheduled,
+      meta: this.buildTaskMeta(item, user, activeBedsCountForUserScope),
     }));
 
     return {
@@ -247,5 +283,52 @@ export class WeatherRecomputeService {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  private buildTaskMeta(
+    item: ActionTask,
+    user: User,
+    activeBedsCountForUserScope?: number,
+  ): TaskMetaDto | null {
+    if (item.source !== ActionTaskSource.WEATHER_WARNING) {
+      return null;
+    }
+
+    const warningCode = this.extractWarningCode(item.dedupeKey);
+
+    if (item.targetType === ActionTaskTargetType.USER) {
+      return {
+        scope: WarningScope.USER,
+        affectsAllBeds: true,
+        affectedBedsCount: activeBedsCountForUserScope,
+        locationLabel: user.locationLabel ?? null,
+        warningCode: warningCode ?? undefined,
+      };
+    }
+
+    if (item.targetType === ActionTaskTargetType.BED) {
+      return {
+        scope: WarningScope.BED,
+        affectsAllBeds: false,
+        affectedBedIds: item.bed?.id ? [item.bed.id] : undefined,
+        warningCode: warningCode ?? undefined,
+      };
+    }
+
+    return {
+      scope: WarningScope.PLANTING,
+      affectsAllBeds: false,
+      affectedBedIds: item.bed?.id ? [item.bed.id] : undefined,
+      warningCode: warningCode ?? undefined,
+    };
+  }
+
+  private extractWarningCode(dedupeKey?: string | null) {
+    if (!dedupeKey) {
+      return null;
+    }
+
+    const match = /:code:([^:]+)$/.exec(dedupeKey);
+    return (match?.[1] as WarningCode | undefined) ?? null;
   }
 }

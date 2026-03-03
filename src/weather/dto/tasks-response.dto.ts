@@ -1,7 +1,10 @@
 import {
   IsArray,
   IsBoolean,
+  IsEnum,
   IsISO8601,
+  IsInt,
+  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
@@ -12,6 +15,32 @@ import {
   ActionTaskStatus,
   ActionTaskTargetType,
 } from '../../common/enums/action.enums';
+import { WarningCode, WarningScope } from '../../common/enums/warning.enums';
+
+export class TaskMetaDto {
+  @IsEnum(WarningScope)
+  scope!: WarningScope;
+
+  @IsBoolean()
+  affectsAllBeds!: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  affectedBedIds?: string[];
+
+  @IsOptional()
+  @IsInt()
+  affectedBedsCount?: number;
+
+  @IsOptional()
+  @IsString()
+  locationLabel?: string | null;
+
+  @IsOptional()
+  @IsEnum(WarningCode)
+  warningCode?: WarningCode;
+}
 
 export class TaskDto {
   @IsString()
@@ -47,6 +76,12 @@ export class TaskDto {
 
   @IsBoolean()
   isManuallyRescheduled!: boolean;
+
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => TaskMetaDto)
+  meta?: TaskMetaDto | null;
 }
 
 export class TasksResponseDto {
