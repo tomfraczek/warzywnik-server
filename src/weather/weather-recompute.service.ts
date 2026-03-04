@@ -58,6 +58,7 @@ export class WeatherRecomputeService {
 
     const plantings = await this.em.find(Planting, {
       user: user.id,
+      bed: { isActive: true },
       status: {
         $in: [
           PlantingStatus.PLANNED,
@@ -237,6 +238,11 @@ export class WeatherRecomputeService {
       {
         user: userId,
         status: statusCondition,
+        $or: [
+          { bed: null, planting: null },
+          { bed: { isActive: true } },
+          { planting: { bed: { isActive: true } } },
+        ],
       },
       {
         orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }],

@@ -96,6 +96,20 @@ export class WeatherTaskPlannerService {
     );
 
     await this.em.transactional(async (em) => {
+      const connection = (
+        em as unknown as {
+          getConnection?: () => {
+            execute: (sql: string, params?: unknown[]) => Promise<unknown>;
+          };
+        }
+      ).getConnection?.();
+
+      if (connection) {
+        await connection.execute('select pg_advisory_xact_lock(hashtext(?))', [
+          `weather-task-planner:${userId}`,
+        ]);
+      }
+
       const existing = await em.find(ActionTask, {
         user: userId,
         source: ActionTaskSource.WEATHER_WARNING,

@@ -31,6 +31,5 @@ export const getCalendarQuerySchema = z
 
 export const calendarReminderStatuses = [
   ReminderStatus.PENDING,
-  ReminderStatus.PROCESSING,
   ReminderStatus.SENT,
 ] as const;

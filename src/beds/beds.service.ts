@@ -6,6 +6,9 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Bed } from './bed.entity';
 import { Soil } from '../soils/soil.entity';
+import { WarningInstance } from '../weather/warnings/warning-instance.entity';
+import { ActionTask } from '../action-tasks/action-task.entity';
+import { ActionTaskStatus } from '../common/enums/action.enums';
 import {
   CreateBedDto,
   ListBedsQueryDto,
@@ -13,10 +16,14 @@ import {
 } from './dto/bed.schemas';
 import { User } from '../users/user.entity';
 import { CultivationEnvironment } from '../common/enums/bed.enums';
+import { WeatherRecomputeService } from '../weather/weather-recompute.service';
 
 @Injectable()
 export class BedsService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly weatherRecomputeService: WeatherRecomputeService,
+  ) {}
 
   async list(user: User, query: ListBedsQueryDto) {
     const { page, limit, q, isActive } = query;
@@ -116,6 +123,8 @@ export class BedsService {
       throw new NotFoundException('Bed not found');
     }
 
+    const previousIsActive = bed.isActive;
+
     if (dto.name !== undefined) bed.name = dto.name;
     if (dto.description !== undefined) bed.description = dto.description;
     if (dto.locationLabel !== undefined) bed.locationLabel = dto.locationLabel;
@@ -146,6 +155,14 @@ export class BedsService {
     }
 
     await this.em.flush();
+
+    await this.handleBedStatusTransition(
+      user,
+      bed.id,
+      previousIsActive,
+      bed.isActive,
+    );
+
     // NOTE: Bed changes (soil, depth, measurements) affect planting warnings.
     // Clients should refetch plantings for this bed after updates.
     return this.serializeBed(bed);
@@ -157,8 +174,59 @@ export class BedsService {
       throw new NotFoundException('Bed not found');
     }
 
+    const previousIsActive = bed.isActive;
     bed.isActive = false;
     await this.em.flush();
+
+    await this.handleBedStatusTransition(
+      user,
+      bed.id,
+      previousIsActive,
+      bed.isActive,
+    );
+  }
+
+  private async handleBedStatusTransition(
+    user: User,
+    bedId: string,
+    previousIsActive: boolean,
+    nextIsActive: boolean,
+  ) {
+    if (previousIsActive === nextIsActive) {
+      return;
+    }
+
+    if (!nextIsActive) {
+      const now = new Date();
+
+      const warnings = await this.em.find(WarningInstance, {
+        user: user.id,
+        isActive: true,
+        $or: [{ bed: bedId }, { planting: { bed: bedId } }],
+      });
+
+      for (const warning of warnings) {
+        warning.isActive = false;
+        warning.validTo = now;
+        warning.computedAt = now;
+      }
+
+      const tasks = await this.em.find(ActionTask, {
+        user: user.id,
+        status: ActionTaskStatus.PENDING,
+        $or: [{ bed: bedId }, { planting: { bed: bedId } }],
+      });
+
+      for (const task of tasks) {
+        task.status = ActionTaskStatus.CANCELED;
+      }
+
+      await this.em.flush();
+      return;
+    }
+
+    await this.weatherRecomputeService.recomputeWarnings(user.id);
+    await this.weatherRecomputeService.recomputeTasks(user.id);
   }
 
   private serializeBed(bed: Bed) {

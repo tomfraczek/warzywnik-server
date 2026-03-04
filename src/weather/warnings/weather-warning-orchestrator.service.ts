@@ -60,6 +60,7 @@ export class WeatherWarningOrchestratorService {
       Planting,
       {
         user: userId,
+        bed: { isActive: true },
         status: {
           $in: [
             PlantingStatus.PLANNED,
@@ -160,6 +161,11 @@ export class WeatherWarningOrchestratorService {
         user: userId,
         isActive: true,
         validTo: { $gt: now },
+        $or: [
+          { bed: null, planting: null },
+          { bed: { isActive: true } },
+          { planting: { bed: { isActive: true } } },
+        ],
       },
       {
         populate: ['bed', 'planting', 'planting.bed', 'planting.vegetable'],
