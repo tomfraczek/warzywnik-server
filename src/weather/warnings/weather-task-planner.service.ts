@@ -210,7 +210,7 @@ export class WeatherTaskPlannerService {
 
       const base: Omit<TaskProposal, 'title' | 'description'> = {
         dedupeKey,
-        dueAt: warning.validFrom,
+        dueAt: this.resolveTaskDueAt(warning),
         targetType: warning.planting?.id
           ? ActionTaskTargetType.PLANTING
           : warning.bed?.id
@@ -376,5 +376,16 @@ export class WeatherTaskPlannerService {
     const today = getLocalDate(now, timeZone);
     const tomorrow = localDatePlusDays(today, 1);
     return localDate === today || localDate === tomorrow;
+  }
+
+  private resolveTaskDueAt(warning: WarningInstance): Date {
+    if (
+      warning.validFrom instanceof Date &&
+      !Number.isNaN(warning.validFrom.getTime())
+    ) {
+      return new Date(warning.validFrom.getTime() + 12 * 60 * 60 * 1000);
+    }
+
+    return new Date();
   }
 }

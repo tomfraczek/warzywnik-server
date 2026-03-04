@@ -56,6 +56,20 @@ export class WeatherWarningOrchestratorService {
       { populate: ['soil'] },
     );
 
+    const computedAt = new Date();
+    if (beds.length === 0) {
+      await this.deactivateAllActiveForUser(user.id, computedAt);
+      this.logger.log(
+        `recomputed warning instances user=${userId} active=0 basis=${weatherBasis} (no active beds)`,
+      );
+
+      return {
+        computedAt,
+        weatherBasis,
+        activeCount: 0,
+      };
+    }
+
     const plantings = await this.em.find(
       Planting,
       {
@@ -89,7 +103,6 @@ export class WeatherWarningOrchestratorService {
     }
 
     const desiredKeys = new Set(deduped.keys());
-    const computedAt = new Date();
 
     await this.em.transactional(async (em) => {
       for (const input of deduped.values()) {
@@ -155,6 +168,15 @@ export class WeatherWarningOrchestratorService {
     userId: string,
     now = new Date(),
   ): Promise<WarningInstance[]> {
+    const activeBedsCount = await this.em.count(Bed, {
+      user: userId,
+      isActive: true,
+    });
+
+    if (activeBedsCount === 0) {
+      return [];
+    }
+
     return this.em.find(
       WarningInstance,
       {
@@ -172,6 +194,26 @@ export class WeatherWarningOrchestratorService {
         orderBy: [{ computedAt: 'desc' }, { createdAt: 'desc' }],
       },
     );
+  }
+
+  private async deactivateAllActiveForUser(
+    userId: string,
+    computedAt: Date,
+  ): Promise<void> {
+    await this.em.transactional(async (em) => {
+      const currentlyActive = await em.find(WarningInstance, {
+        user: userId,
+        isActive: true,
+      });
+
+      for (const active of currentlyActive) {
+        active.isActive = false;
+        active.validTo = computedAt;
+        active.computedAt = computedAt;
+      }
+
+      await em.flush();
+    });
   }
 
   private async evaluateAll(
