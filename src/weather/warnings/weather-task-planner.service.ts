@@ -379,6 +379,18 @@ export class WeatherTaskPlannerService {
   }
 
   private resolveTaskDueAt(warning: WarningInstance): Date {
+    const localDate = this.resolveLocalDate(warning);
+    const timezone = warning.details?.timezone;
+    const timeZone =
+      typeof timezone === 'string' && timezone.length > 0 ? timezone : 'UTC';
+
+    if (localDate) {
+      const localNoon = this.localDateAtHourUtc(localDate, timeZone, 12);
+      if (localNoon) {
+        return localNoon;
+      }
+    }
+
     if (
       warning.validFrom instanceof Date &&
       !Number.isNaN(warning.validFrom.getTime())
@@ -387,5 +399,74 @@ export class WeatherTaskPlannerService {
     }
 
     return new Date();
+  }
+
+  private localDateAtHourUtc(
+    localDate: string,
+    timeZone: string,
+    hour: number,
+  ): Date | null {
+    const [yearRaw, monthRaw, dayRaw] = localDate.split('-').map(Number);
+    if (!yearRaw || !monthRaw || !dayRaw) {
+      return null;
+    }
+
+    let utcTs = Date.UTC(yearRaw, monthRaw - 1, dayRaw, hour, 0, 0, 0);
+    const targetTs = Date.UTC(yearRaw, monthRaw - 1, dayRaw, hour, 0, 0, 0);
+
+    for (let i = 0; i < 4; i += 1) {
+      const local = this.toParts(new Date(utcTs), timeZone);
+      const localTs = Date.UTC(
+        local.year,
+        local.month - 1,
+        local.day,
+        local.hour,
+        local.minute,
+        local.second,
+        0,
+      );
+      const diff = targetTs - localTs;
+      if (diff === 0) {
+        break;
+      }
+      utcTs += diff;
+    }
+
+    return new Date(utcTs);
+  }
+
+  private toParts(
+    date: Date,
+    timeZone: string,
+  ): {
+    year: number;
+    month: number;
+    day: number;
+    hour: number;
+    minute: number;
+    second: number;
+  } {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
+
+    const parts = formatter.formatToParts(date);
+    const partByType = new Map(parts.map((item) => [item.type, item.value]));
+
+    return {
+      year: Number(partByType.get('year') ?? '1970'),
+      month: Number(partByType.get('month') ?? '01'),
+      day: Number(partByType.get('day') ?? '01'),
+      hour: Number(partByType.get('hour') ?? '00'),
+      minute: Number(partByType.get('minute') ?? '00'),
+      second: Number(partByType.get('second') ?? '00'),
+    };
   }
 }
