@@ -56,6 +56,22 @@ export class WarningDto {
   @IsOptional()
   @IsString()
   vegetableName?: string | null;
+
+  @IsOptional()
+  @IsString()
+  localDate?: string | null;
+
+  @IsOptional()
+  @IsIn(['DAY', 'NIGHT', 'ANY'])
+  dayPart?: 'DAY' | 'NIGHT' | 'ANY' | null;
+
+  @IsOptional()
+  @IsString()
+  validFrom?: string | null;
+
+  @IsOptional()
+  @IsString()
+  validTo?: string | null;
 }
 
 export class WarningsResponseDto {

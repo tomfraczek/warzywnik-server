@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CultivationEnvironment } from '../../../common/enums/bed.enums';
 import { PlantingStatus } from '../../../common/enums/planting.enums';
 import { WarningCode, WarningScope } from '../../../common/enums/warning.enums';
@@ -56,6 +56,10 @@ const normalizeBedName = (name?: string | null): string => {
 export class OperationalWeatherWarningsEvaluator
   implements WeatherWarningEvaluator
 {
+  private readonly logger = new Logger(
+    OperationalWeatherWarningsEvaluator.name,
+  );
+
   constructor(private readonly configService: WeatherWarningConfigService) {}
 
   async evaluate(
@@ -73,6 +77,26 @@ export class OperationalWeatherWarningsEvaluator
       ctx,
       timezone,
       new Set(dateOrder),
+    );
+
+    const dailyTempMinByDate = new Map<string, number>();
+    for (const day of ctx.snapshotData?.daily ?? []) {
+      if (typeof day.date === 'string' && typeof day.tempMin === 'number') {
+        dailyTempMinByDate.set(day.date, day.tempMin);
+      }
+    }
+
+    this.logger.log(
+      `[DIAG] evaluate user=${ctx.user.id} tz=${timezone} todayLocalDate=${todayLocalDate} tomorrowLocalDate=${tomorrowLocalDate}`,
+    );
+    this.logger.log(
+      `[DIAG] daily dates from snapshot: ${(ctx.snapshotData?.daily ?? []).map((d) => d.date).join(', ') || 'NONE'}`,
+    );
+    this.logger.log(
+      `[DIAG] dailyTempMinByDate today=${dailyTempMinByDate.get(todayLocalDate) ?? 'MISSING'} tomorrow=${dailyTempMinByDate.get(tomorrowLocalDate) ?? 'MISSING'}`,
+    );
+    this.logger.debug(
+      `evaluate user=${ctx.user.id} tz=${timezone} dateOrder=${dateOrder.join(',')} hourly=${ctx.snapshotData?.hourly?.length ?? 0} metricsDays=${Array.from(metricsByDate.keys()).join(',')}`,
     );
 
     const outdoorBeds = ctx.beds.filter((bed) =>
@@ -105,6 +129,10 @@ export class OperationalWeatherWarningsEvaluator
     }
 
     const result: WarningInstanceUpsertInput[] = [];
+    const generatedByDay: Record<'today' | 'tomorrow', number> = {
+      today: 0,
+      tomorrow: 0,
+    };
 
     const {
       frostThresholdC,
@@ -131,8 +159,14 @@ export class OperationalWeatherWarningsEvaluator
     }>(WarningCode.FROST_RISK_TODAY_NIGHT);
 
     dateOrder.forEach((localDate, dayIndex) => {
+      const beforeCount = result.length;
       const dayMetrics = metricsByDate.get(localDate);
-      if (!dayMetrics) return;
+      if (!dayMetrics) {
+        this.logger.debug(
+          `no metrics for user=${ctx.user.id} localDate=${localDate} day=${dayIndex === 0 ? 'today' : 'tomorrow'}`,
+        );
+        return;
+      }
 
       const dayLabel = dayIndex === 0 ? 'Dziś' : 'Jutro';
       const bounds = localDayBoundsUtc(localDate, timezone);
@@ -143,7 +177,8 @@ export class OperationalWeatherWarningsEvaluator
         bedName: normalizeBedName(bed.name),
       }));
 
-      const nightMin = dayMetrics.NIGHT.minTempC;
+      const nightMin =
+        dailyTempMinByDate.get(localDate) ?? Number.POSITIVE_INFINITY;
       const nightValid = Number.isFinite(nightMin);
 
       if (nightValid && nightMin <= frostThresholdC && outdoorBeds.length > 0) {
@@ -327,6 +362,10 @@ export class OperationalWeatherWarningsEvaluator
         dayMetrics.NIGHT.maxWindKmh,
       );
 
+      this.logger.debug(
+        `metrics user=${ctx.user.id} localDate=${localDate} day=${dayIndex === 0 ? 'today' : 'tomorrow'} nightMin=${nightValid ? nightMin.toFixed(1) : 'NA'} dayPrecip=${dayMetrics.DAY.precipSumMm.toFixed(2)} nightPrecip=${dayMetrics.NIGHT.precipSumMm.toFixed(2)} dayWindMax=${dayMetrics.DAY.maxWindKmh.toFixed(1)} nightWindMax=${dayMetrics.NIGHT.maxWindKmh.toFixed(1)} totalPrecip=${totalPrecipMm.toFixed(2)} maxTemp=${Number.isFinite(maxTempC) ? maxTempC.toFixed(1) : 'NA'} maxWind=${maxWindKmh.toFixed(1)}`,
+      );
+
       if (
         outdoorBeds.length > 0 &&
         totalPrecipMm <= wateringDailyPrecipMaxMm &&
@@ -467,7 +506,8 @@ export class OperationalWeatherWarningsEvaluator
         });
       }
 
-      const riskyNightTempC = dayMetrics.NIGHT.minTempC;
+      const riskyNightTempC =
+        dailyTempMinByDate.get(localDate) ?? Number.POSITIVE_INFINITY;
       if (
         Number.isFinite(riskyNightTempC) &&
         riskyNightTempC < germinationMinTempC
@@ -582,7 +622,24 @@ export class OperationalWeatherWarningsEvaluator
           });
         });
       }
+
+      const produced = result.length - beforeCount;
+      if (produced > 0) {
+        generatedByDay[dayIndex === 0 ? 'today' : 'tomorrow'] += produced;
+        const pushed = result.slice(beforeCount).map((r) => r.code);
+        this.logger.log(
+          `[DIAG] pushed ${produced} warning(s) for ${dayIndex === 0 ? 'today' : 'tomorrow'} (${localDate}): ${pushed.join(', ')}`,
+        );
+      } else {
+        this.logger.log(
+          `[DIAG] no warnings pushed for ${dayIndex === 0 ? 'today' : 'tomorrow'} (${localDate}) nightMin=${nightValid ? nightMin.toFixed(1) : 'INVALID'} frostThreshold=${frostThresholdC} hardFrostThreshold=${hardFrostThresholdC} germinationMin=${germinationMinTempC} outdoorBeds=${outdoorBeds.length} supportedPlantings=${supportedPlantings.length}`,
+        );
+      }
     });
+
+    this.logger.debug(
+      `warnings summary user=${ctx.user.id} today=${generatedByDay.today} tomorrow=${generatedByDay.tomorrow}`,
+    );
 
     return result.map((item) => ({
       ...item,

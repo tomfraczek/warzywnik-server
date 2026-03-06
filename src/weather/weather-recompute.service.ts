@@ -190,6 +190,8 @@ export class WeatherRecomputeService {
     }
 
     const items: WarningDto[] = built.map(({ warning, instance }) => {
+      const detailsLocalDate = instance.details?.localDate;
+      const detailsDayPart = instance.details?.dayPart;
       return {
         dedupeKey: `weather:${instance.dedupeKey}`,
         code: warning.code,
@@ -203,6 +205,22 @@ export class WeatherRecomputeService {
         bedName: instance?.bed?.name ?? null,
         plantingId: instance?.planting?.id ?? null,
         vegetableName: instance?.planting?.vegetable?.name ?? null,
+        localDate:
+          typeof detailsLocalDate === 'string' ? detailsLocalDate : null,
+        dayPart:
+          detailsDayPart === 'DAY' ||
+          detailsDayPart === 'NIGHT' ||
+          detailsDayPart === 'ANY'
+            ? detailsDayPart
+            : null,
+        validFrom:
+          instance.validFrom instanceof Date
+            ? instance.validFrom.toISOString()
+            : null,
+        validTo:
+          instance.validTo instanceof Date
+            ? instance.validTo.toISOString()
+            : null,
       };
     });
 

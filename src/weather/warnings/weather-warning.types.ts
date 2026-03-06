@@ -99,7 +99,7 @@ const getDateHourFormatter = (timeZone: string): Intl.DateTimeFormat => {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: false,
+    hourCycle: 'h23', // must be h23 (0-23), NOT hour12:false which can return hour=24 for midnight
   });
   localDateHourFormatterCache.set(timeZone, formatter);
   return formatter;
@@ -214,8 +214,19 @@ export const localDayBoundsUtc = (
   const [yearRaw, monthRaw, dayRaw] = localDate.split('-').map(Number);
   if (!yearRaw || !monthRaw || !dayRaw) return null;
 
-  return {
-    start: zonedTimeToUtc(timeZone, yearRaw, monthRaw, dayRaw, 0, 0, 0, 0),
-    end: zonedTimeToUtc(timeZone, yearRaw, monthRaw, dayRaw, 23, 59, 59, 999),
-  };
+  const start = zonedTimeToUtc(timeZone, yearRaw, monthRaw, dayRaw, 0, 0, 0, 0);
+
+  // Compute end as start-of-this-day + 24 h - 1 ms.
+  // This avoids calling zonedTimeToUtc with 23:59:59 (oscillates in UTC+ zones)
+  // and avoids any Intl hour12/h24 ambiguity for midnight.
+  // On DST-transition days the day is 23h or 25h, so end may land 1h early/late,
+  // but that is acceptable for validTo purposes.
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1);
+
+  console.error(
+    `[BOUNDS] localDate=${localDate} tz=${timeZone} ` +
+      `start=${start.toISOString()} end=${end.toISOString()}`,
+  );
+
+  return { start, end };
 };

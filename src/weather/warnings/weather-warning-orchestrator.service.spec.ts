@@ -67,6 +67,11 @@ describe('WeatherWarningOrchestratorService', () => {
       makeEvaluator([]) as never,
       makeEvaluator([]) as never,
       makeEvaluator([]) as never,
+      makeEvaluator([]) as never,
+      makeEvaluator([]) as never,
+      makeEvaluator([]) as never,
+      makeEvaluator([]) as never,
+      makeEvaluator([]) as never,
     );
 
     await service.recomputeForUser('user-1');

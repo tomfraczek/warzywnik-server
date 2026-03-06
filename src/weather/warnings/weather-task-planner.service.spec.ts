@@ -108,6 +108,9 @@ describe('WeatherTaskPlannerService', () => {
         }
       }),
       flush: jest.fn(() => Promise.resolve(undefined)),
+      fork: jest.fn(function (this: unknown) {
+        return this;
+      }),
     };
 
     const service = new WeatherTaskPlannerService(em as never);

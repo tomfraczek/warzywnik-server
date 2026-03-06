@@ -74,13 +74,14 @@ export class WeatherTaskPlannerService {
   constructor(private readonly em: EntityManager) {}
 
   async recomputeWeatherTasksForUser(userId: string): Promise<void> {
-    const user = await this.em.findOne(User, { id: userId });
+    const em = this.em.fork();
+    const user = await em.findOne(User, { id: userId });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     const now = new Date();
-    const warnings = await this.em.find(
+    const warnings = await em.find(
       WarningInstance,
       {
         user: userId,
@@ -91,13 +92,29 @@ export class WeatherTaskPlannerService {
     );
 
     const proposals = this.buildProposalsFromWarnings(warnings, now, userId);
+
+    this.logger.debug(
+      `planner db-fetch user=${userId} total=${warnings.length} codes=${warnings
+        .map((w) => {
+          const localDate =
+            typeof w.details?.localDate === 'string'
+              ? w.details.localDate
+              : 'unknown';
+          const validTo =
+            w.validTo instanceof Date
+              ? w.validTo.toISOString()
+              : String(w.validTo);
+          return `${w.code}@${localDate}(validTo=${validTo})`;
+        })
+        .join(', ')}`,
+    );
     const proposalByKey = new Map(
       proposals.map((item) => [item.dedupeKey, item]),
     );
 
-    await this.em.transactional(async (em) => {
+    await em.transactional(async (txEm) => {
       const connection = (
-        em as unknown as {
+        txEm as unknown as {
           getConnection?: () => {
             execute: (sql: string, params?: unknown[]) => Promise<unknown>;
           };
@@ -110,7 +127,7 @@ export class WeatherTaskPlannerService {
         ]);
       }
 
-      const existing = await em.find(ActionTask, {
+      const existing = await txEm.find(ActionTask, {
         user: userId,
         source: ActionTaskSource.WEATHER_WARNING,
         status: ActionTaskStatus.PENDING,
@@ -131,10 +148,10 @@ export class WeatherTaskPlannerService {
           current.dueAt = proposal.dueAt;
           current.targetType = proposal.targetType;
           current.bed = proposal.bedId
-            ? em.getReference(Bed, proposal.bedId)
+            ? txEm.getReference(Bed, proposal.bedId)
             : null;
           current.planting = proposal.plantingId
-            ? em.getReference(Planting, proposal.plantingId)
+            ? txEm.getReference(Planting, proposal.plantingId)
             : null;
           current.metadata = proposal.metadata ?? null;
           continue;
@@ -154,14 +171,14 @@ export class WeatherTaskPlannerService {
         task.generatedAt = now;
 
         if (proposal.bedId) {
-          task.bed = em.getReference(Bed, proposal.bedId);
+          task.bed = txEm.getReference(Bed, proposal.bedId);
         }
 
         if (proposal.plantingId) {
-          task.planting = em.getReference(Planting, proposal.plantingId);
+          task.planting = txEm.getReference(Planting, proposal.plantingId);
         }
 
-        em.persist(task);
+        txEm.persist(task);
       }
 
       for (const task of existing) {
@@ -170,7 +187,7 @@ export class WeatherTaskPlannerService {
         task.status = ActionTaskStatus.CANCELED;
       }
 
-      await em.flush();
+      await txEm.flush();
     });
 
     this.logger.log(
@@ -184,14 +201,24 @@ export class WeatherTaskPlannerService {
     userId: string,
   ): TaskProposal[] {
     const proposals = new Map<string, TaskProposal>();
+    let skippedUnsupportedCode = 0;
+    let skippedMissingLocalDate = 0;
+    let skippedOutsideTodayTomorrow = 0;
 
     for (const warning of warnings) {
       if (!OPERATIONAL_TASK_CODES.has(warning.code)) {
+        skippedUnsupportedCode += 1;
         continue;
       }
 
       const localDate = this.resolveLocalDate(warning);
-      if (!localDate || !this.isTodayOrTomorrow(localDate, warning, now)) {
+      if (!localDate) {
+        skippedMissingLocalDate += 1;
+        continue;
+      }
+
+      if (!this.isTodayOrTomorrow(localDate, warning, now)) {
+        skippedOutsideTodayTomorrow += 1;
         continue;
       }
 
@@ -202,6 +229,10 @@ export class WeatherTaskPlannerService {
         bedId: warning.bed?.id ?? null,
         plantingId: warning.planting?.id ?? null,
       });
+
+      this.logger.debug(
+        `warning code=${warning.code} localDate=${localDate} dedupeKey=${dedupeKey} bedId=${warning.bed?.id ?? null} plantingId=${warning.planting?.id ?? null}`,
+      );
 
       const baseMetadata = {
         localDate,
@@ -327,6 +358,25 @@ export class WeatherTaskPlannerService {
           });
       }
     }
+
+    const proposalByDate: Record<string, number> = {};
+    for (const proposal of proposals.values()) {
+      const localDateValue = proposal.metadata?.localDate;
+      if (typeof localDateValue !== 'string') {
+        continue;
+      }
+      proposalByDate[localDateValue] =
+        (proposalByDate[localDateValue] ?? 0) + 1;
+    }
+
+    const proposalByDateSummary = Object.entries(proposalByDate)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, count]) => `${date}:${count}`)
+      .join(',');
+
+    this.logger.debug(
+      `planner user=${userId} warnings=${warnings.length} proposals=${proposals.size} byDate=${proposalByDateSummary || 'none'} skippedUnsupported=${skippedUnsupportedCode} skippedMissingLocalDate=${skippedMissingLocalDate} skippedOutsideTodayTomorrow=${skippedOutsideTodayTomorrow}`,
+    );
 
     return Array.from(proposals.values());
   }
