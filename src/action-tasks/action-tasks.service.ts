@@ -24,12 +24,15 @@ import { Bed } from '../beds/bed.entity';
 import { ActionTemplate } from '../action-templates/action-template.entity';
 import { RemindersService } from '../reminders/reminders.service';
 import { normalizeDueAt } from '../common/types/date-utils';
+import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
+import { PlantingEventType } from '../common/enums/planting-event.enums';
 
 @Injectable()
 export class ActionTasksService {
   constructor(
     private readonly em: EntityManager,
     private readonly remindersService: RemindersService,
+    private readonly plantingInsightsService: PlantingInsightsService,
   ) {}
 
   async createForPlanting(
@@ -184,7 +187,20 @@ export class ActionTasksService {
   }
 
   async patch(user: User, id: string, dto: PatchActionTaskDto) {
-    return this.em.transactional(async (em) => {
+    type ActionEventParams = {
+      plantingId: string;
+      userId: string;
+      bedId: string;
+      vegetableId: string;
+      taskId: string;
+      actionType: string;
+      source: ActionTaskSource;
+      doneAt: Date;
+    };
+
+    let actionEventParams: ActionEventParams | null = null;
+
+    const result = await this.em.transactional(async (em) => {
       const task = await em.findOne(
         ActionTask,
         { id, user: user.id },
@@ -226,10 +242,50 @@ export class ActionTasksService {
         await this.remindersService.upsertPendingForActionTask({ task, em });
       }
 
+      // Capture event params for PLANTING_ACTION_COMPLETED before transaction ends
+      if (
+        task.status === ActionTaskStatus.DONE &&
+        task.targetType === ActionTaskTargetType.PLANTING &&
+        task.planting != null &&
+        task.actionTemplate != null &&
+        task.doneAt != null
+      ) {
+        await em.populate(task.planting, ['bed', 'vegetable']);
+        actionEventParams = {
+          plantingId: task.planting.id,
+          userId: user.id,
+          bedId: task.planting.bed.id,
+          vegetableId: task.planting.vegetable.id,
+          taskId: task.id,
+          actionType: task.actionTemplate.type,
+          source: task.source,
+          doneAt: task.doneAt,
+        };
+      }
+
       await em.flush();
 
       return this.serialize(task);
     });
+
+    if (actionEventParams) {
+      const p = actionEventParams as ActionEventParams;
+      await this.plantingInsightsService.recordEvent({
+        plantingId: p.plantingId,
+        userId: p.userId,
+        bedId: p.bedId,
+        vegetableId: p.vegetableId,
+        eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+        eventTime: p.doneAt,
+        payload: {
+          taskId: p.taskId,
+          actionType: p.actionType,
+          source: p.source,
+        },
+      });
+    }
+
+    return result;
   }
 
   async remove(user: User, id: string) {

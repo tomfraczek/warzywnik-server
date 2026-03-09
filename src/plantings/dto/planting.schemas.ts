@@ -134,3 +134,43 @@ export const recomputePlantingActionsSchema = z.object({
   forceOverrideManual: z.coerce.boolean().optional().default(false),
   useLatestRules: z.coerce.boolean().optional().default(false),
 });
+
+export const harvestResultSchema = z.object({
+  yieldKg: z.number().min(0).nullable().optional(),
+  qualityRating: z.number().int().min(1).max(5).nullable().optional(),
+  notes: z.string().trim().min(1).nullable().optional(),
+});
+
+export type HarvestResultDto = z.infer<typeof harvestResultSchema>;
+
+export const createHarvestResultSchema = z
+  .object({
+    harvestedAt: isoDateSchema.nullable().optional(),
+    yieldKg: z.number().min(0).nullable().optional(),
+    qualityRating: z.number().int().min(1).max(5).nullable().optional(),
+    notes: z.string().trim().min(1).nullable().optional(),
+  })
+  .superRefine((val, ctx) => {
+    const hasValue =
+      val.yieldKg !== undefined ||
+      val.qualityRating !== undefined ||
+      val.notes !== undefined;
+    if (!hasValue) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'At least one of yieldKg, qualityRating, notes must be provided',
+      });
+    }
+  });
+
+export type CreateHarvestResultDto = z.infer<typeof createHarvestResultSchema>;
+
+export const updateHarvestResultSchema = z.object({
+  harvestedAt: isoDateSchema.nullable().optional(),
+  yieldKg: z.number().min(0).nullable().optional(),
+  qualityRating: z.number().int().min(1).max(5).nullable().optional(),
+  notes: z.string().trim().min(1).nullable().optional(),
+});
+
+export type UpdateHarvestResultDto = z.infer<typeof updateHarvestResultSchema>;

@@ -35,6 +35,7 @@ import { CalendarModule } from './calendar/calendar.module';
 import { GeoModule } from './geo/geo.module';
 import { LocationsModule } from './locations/locations.module';
 import { WeatherModule } from './weather/weather.module';
+import { PlantingInsightsModule } from './planting-insights/planting-insights.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { WeatherModule } from './weather/weather.module';
     GeoModule,
     LocationsModule,
     WeatherModule,
+    PlantingInsightsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -48,8 +48,18 @@ const createService = (previousPlantings: Planting[] = []) => {
     syncForPlanting: jest.fn().mockResolvedValue(undefined),
   } as unknown as ActionAutomationService;
 
+  const plantingInsightsService = {
+    recordEvent: jest.fn().mockResolvedValue(undefined),
+    buildSeasonSummary: jest.fn().mockResolvedValue(undefined),
+  } as unknown as import('./plantings.service').PlantingsService;
+
   return {
-    service: new PlantingsService(em, warningsService, actionAutomationService),
+    service: new PlantingsService(
+      em,
+      warningsService,
+      actionAutomationService,
+      plantingInsightsService as unknown as import('../planting-insights/planting-insights.service').PlantingInsightsService,
+    ),
     em,
     warningsService,
   };

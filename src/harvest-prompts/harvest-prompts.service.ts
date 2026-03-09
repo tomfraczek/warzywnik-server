@@ -13,12 +13,15 @@ import { HarvestPromptAnswer } from '../common/enums/harvest-prompt.enums';
 import { HarvestConfirmationDto } from './dto/harvest-prompt.schemas';
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
 import { toDateOnlyInTimezone } from '../common/types/date-utils';
+import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
+import { PlantingEventType } from '../common/enums/planting-event.enums';
 
 @Injectable()
 export class HarvestPromptsService {
   constructor(
     private readonly em: EntityManager,
     private readonly actionAutomationService: ActionAutomationService,
+    private readonly plantingInsightsService: PlantingInsightsService,
   ) {}
 
   async listForBed(user: User, bedId: string) {
@@ -96,63 +99,97 @@ export class HarvestPromptsService {
     plantingId: string,
     dto: HarvestConfirmationDto,
   ) {
-    return this.em.transactional(async (em) => {
-      const planting = await em.findOne(
-        Planting,
-        { id: plantingId, user: user.id },
-        { populate: ['bed', 'vegetable'] },
-      );
-
-      if (!planting) {
-        throw new NotFoundException('Planting not found');
-      }
-
-      if (!this.isReadyForHarvest(planting)) {
-        throw new BadRequestException('Planting is not ready for harvest yet');
-      }
-
-      let state = await em.findOne(HarvestPromptState, {
-        user: user.id,
-        planting: planting.id,
-      });
-
-      if (!state) {
-        state = new HarvestPromptState();
-        state.user = user;
-        state.planting = planting;
-        state.bed = planting.bed;
-      }
-
-      state.lastShownOn = this.getTodayInWarsawDate();
-
-      if (dto.answer === HarvestPromptAnswer.NO) {
-        await em.persistAndFlush(state);
-        return null;
-      }
-
-      const now = new Date();
-      planting.harvestedAt = now;
-      planting.status = PlantingStatus.FINISHED;
-
-      await em.persistAndFlush([state, planting]);
-
-      await this.actionAutomationService.recomputeForPlanting({
-        user,
-        plantingId: planting.id,
-        reason: 'HARVEST_CONFIRMED',
-      });
-
-      const postHarvestActions =
-        await this.actionAutomationService.getPostHarvestActionSuggestions(
-          planting.vegetable.id,
+    return this.em
+      .transactional(async (em) => {
+        const planting = await em.findOne(
+          Planting,
+          { id: plantingId, user: user.id },
+          { populate: ['bed', 'vegetable'] },
         );
 
-      return {
-        plantingId: planting.id,
-        bedId: planting.bed.id,
-        proposals: postHarvestActions,
-      };
-    });
+        if (!planting) {
+          throw new NotFoundException('Planting not found');
+        }
+
+        if (!this.isReadyForHarvest(planting)) {
+          throw new BadRequestException(
+            'Planting is not ready for harvest yet',
+          );
+        }
+
+        let state = await em.findOne(HarvestPromptState, {
+          user: user.id,
+          planting: planting.id,
+        });
+
+        if (!state) {
+          state = new HarvestPromptState();
+          state.user = user;
+          state.planting = planting;
+          state.bed = planting.bed;
+        }
+
+        state.lastShownOn = this.getTodayInWarsawDate();
+
+        if (dto.answer === HarvestPromptAnswer.NO) {
+          await em.persistAndFlush(state);
+          return null;
+        }
+
+        const now = new Date();
+        planting.harvestedAt = now;
+        planting.status = PlantingStatus.FINISHED;
+
+        await em.persistAndFlush([state, planting]);
+
+        await this.actionAutomationService.recomputeForPlanting({
+          user,
+          plantingId: planting.id,
+          reason: 'HARVEST_CONFIRMED',
+        });
+
+        const postHarvestActions =
+          await this.actionAutomationService.getPostHarvestActionSuggestions(
+            planting.vegetable.id,
+          );
+
+        const confirmedPlantingId = planting.id;
+        const confirmedBedId = planting.bed.id;
+
+        return {
+          plantingId: confirmedPlantingId,
+          bedId: confirmedBedId,
+          proposals: postHarvestActions,
+        };
+      })
+      .then(async (result) => {
+        if (result) {
+          await this.plantingInsightsService.recordEvent({
+            plantingId: result.plantingId,
+            userId: user.id,
+            bedId: result.bedId,
+            vegetableId: await this.getVegetableIdForPlanting(
+              result.plantingId,
+            ),
+            eventType: PlantingEventType.PLANTING_HARVEST_FINISHED,
+            eventTime: new Date(),
+            payload: { plantingId: result.plantingId },
+          });
+          await this.plantingInsightsService.buildSeasonSummary(
+            result.plantingId,
+          );
+        }
+        return result;
+      });
+  }
+
+  private async getVegetableIdForPlanting(plantingId: string): Promise<string> {
+    const planting = await this.em.findOne(
+      Planting,
+      { id: plantingId },
+      { populate: ['vegetable'] },
+    );
+    return planting?.vegetable.id ?? '';
   }
 
   private isReadyForHarvest(planting: Planting, today?: Date) {

@@ -9,6 +9,7 @@ import { Bed } from '../beds/bed.entity';
 import { RemindersModule } from '../reminders/reminders.module';
 import { ActionAutomationService } from './action-automation.service';
 import { VegetableActionRule } from '../vegetables/vegetable-action-rule.entity';
+import { PlantingInsightsModule } from '../planting-insights/planting-insights.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { VegetableActionRule } from '../vegetables/vegetable-action-rule.entity'
       VegetableActionRule,
     ]),
     RemindersModule,
+    PlantingInsightsModule,
   ],
   providers: [ActionTasksService, ActionAutomationService],
   controllers: [ActionTasksController],

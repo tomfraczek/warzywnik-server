@@ -5,12 +5,16 @@ import {
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Planting } from './planting.entity';
+import { HarvestResult } from './harvest-result.entity';
 import { Bed } from '../beds/bed.entity';
 import { Vegetable } from '../vegetables/vegetable.entity';
 import {
+  CreateHarvestResultDto,
   CreatePlantingDto,
+  HarvestResultDto,
   ListPlantingsQueryDto,
   RecomputePlantingActionsDto,
+  UpdateHarvestResultDto,
   UpdatePlantingDto,
 } from './dto/planting.schemas';
 import { User } from '../users/user.entity';
@@ -34,8 +38,21 @@ import {
 } from '../common/enums/vegetable.enums';
 import { DemandLevel as SoilDemandLevel } from '../common/enums/soil.enums';
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
+import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
+import { PlantingEventType } from '../common/enums/planting-event.enums';
 
 type WarningResult = WarningOutput;
+
+type SerializedHarvestResult = {
+  id: string;
+  plantingId: string;
+  harvestedAt: Date | null;
+  yieldKg: number | null;
+  qualityRating: number | null;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 @Injectable()
 export class PlantingsService {
@@ -43,6 +60,7 @@ export class PlantingsService {
     private readonly em: EntityManager,
     private readonly warningsService: WarningsService,
     private readonly actionAutomationService: ActionAutomationService,
+    private readonly plantingInsightsService: PlantingInsightsService,
   ) {}
 
   async list(user: User, query: ListPlantingsQueryDto) {
@@ -78,8 +96,9 @@ export class PlantingsService {
           'bed.soil',
           'vegetable',
           'vegetable.recommendedSoils',
+          'harvestResults',
         ] as const)
-      : (['bed', 'vegetable'] as const);
+      : (['bed', 'vegetable', 'harvestResults'] as const);
 
     const [items, total] = await this.em.findAndCount(Planting, where, {
       limit,
@@ -114,8 +133,9 @@ export class PlantingsService {
           'bed.soil',
           'vegetable',
           'vegetable.recommendedSoils',
+          'harvestResults',
         ] as const)
-      : (['bed', 'vegetable'] as const);
+      : (['bed', 'vegetable', 'harvestResults'] as const);
 
     const planting = await this.em.findOne(
       Planting,
@@ -194,6 +214,22 @@ export class PlantingsService {
 
     await this.em.persistAndFlush(planting);
 
+    await this.plantingInsightsService.recordEvent({
+      plantingId: planting.id,
+      userId: user.id,
+      bedId: bed.id,
+      vegetableId: vegetable.id,
+      eventType: PlantingEventType.PLANTING_CREATED,
+      eventTime: new Date(),
+      payload: {
+        plannedStartDate: planting.plannedStartDate.toISOString(),
+        startMethod: planting.startMethod,
+        bedId: bed.id,
+        vegetableId: vegetable.id,
+        rulesVersion: planting.appliedRulesVersion,
+      },
+    });
+
     await this.actionAutomationService.recomputeForPlanting({
       user,
       plantingId: planting.id,
@@ -210,7 +246,7 @@ export class PlantingsService {
       Planting,
       { id, user: user.id },
       {
-        populate: ['bed', 'vegetable'],
+        populate: ['bed', 'vegetable', 'harvestResults'],
       },
     );
 
@@ -297,6 +333,8 @@ export class PlantingsService {
       planting.timelineTimezone = dto.timelineTimezone;
     }
 
+    const previousStatus = planting.status;
+
     if (dto.status !== undefined) {
       planting.status = dto.status;
     }
@@ -308,6 +346,57 @@ export class PlantingsService {
     this.validatePlantingTimeline(planting);
 
     await this.em.flush();
+
+    const now = new Date();
+    const plantingId = planting.id;
+    const userId = user.id;
+    const bedId = bed.id;
+    const vegetableId = vegetable.id;
+
+    if (dto.sowedAt !== undefined && dto.sowedAt !== null) {
+      await this.plantingInsightsService.recordEvent({
+        plantingId,
+        userId,
+        bedId,
+        vegetableId,
+        eventType: PlantingEventType.PLANTING_SOWED,
+        eventTime: planting.sowedAt ?? now,
+        payload: { sowedAt: planting.sowedAt?.toISOString() ?? null },
+      });
+    }
+
+    if (dto.transplantedAt !== undefined && dto.transplantedAt !== null) {
+      await this.plantingInsightsService.recordEvent({
+        plantingId,
+        userId,
+        bedId,
+        vegetableId,
+        eventType: PlantingEventType.PLANTING_TRANSPLANTED,
+        eventTime: planting.transplantedAt ?? now,
+        payload: {
+          transplantedAt: planting.transplantedAt?.toISOString() ?? null,
+        },
+      });
+    }
+
+    if (dto.status !== undefined && dto.status !== previousStatus) {
+      await this.plantingInsightsService.recordEvent({
+        plantingId,
+        userId,
+        bedId,
+        vegetableId,
+        eventType: PlantingEventType.PLANTING_STATUS_CHANGED,
+        eventTime: now,
+        payload: { from: previousStatus, to: dto.status },
+      });
+
+      if (
+        dto.status === PlantingStatus.FINISHED ||
+        dto.status === PlantingStatus.CANCELLED
+      ) {
+        await this.plantingInsightsService.buildSeasonSummary(plantingId);
+      }
+    }
 
     await this.actionAutomationService.recomputeForPlanting({
       user,
@@ -377,12 +466,178 @@ export class PlantingsService {
   }
 
   async remove(user: User, id: string) {
-    const planting = await this.em.findOne(Planting, { id, user: user.id });
+    const planting = await this.em.findOne(
+      Planting,
+      { id, user: user.id },
+      { populate: ['bed', 'vegetable'] },
+    );
     if (!planting) {
       throw new NotFoundException('Planting not found');
     }
 
+    const previousStatus = planting.status;
     planting.status = PlantingStatus.CANCELLED;
+    await this.em.flush();
+
+    if (previousStatus !== PlantingStatus.CANCELLED) {
+      await this.plantingInsightsService.recordEvent({
+        plantingId: planting.id,
+        userId: user.id,
+        bedId: planting.bed.id,
+        vegetableId: planting.vegetable.id,
+        eventType: PlantingEventType.PLANTING_CANCELLED,
+        eventTime: new Date(),
+        payload: { previousStatus },
+      });
+
+      await this.plantingInsightsService.buildSeasonSummary(planting.id);
+    }
+  }
+
+  async updateHarvestResult(user: User, id: string, dto: HarvestResultDto) {
+    const planting = await this.em.findOne(
+      Planting,
+      { id, user: user.id },
+      { populate: ['bed', 'vegetable'] },
+    );
+
+    if (!planting) {
+      throw new NotFoundException('Planting not found');
+    }
+
+    if (dto.yieldKg !== undefined) {
+      planting.yieldKg = dto.yieldKg;
+    }
+
+    if (dto.qualityRating !== undefined) {
+      planting.yieldQualityRating = dto.qualityRating;
+    }
+
+    if (dto.notes !== undefined) {
+      planting.yieldNotes = this.normalizeNotes(dto.notes, 'notes');
+    }
+
+    await this.em.flush();
+
+    return this.serializePlanting(planting);
+  }
+
+  async createHarvestResult(
+    user: User,
+    plantingId: string,
+    dto: CreateHarvestResultDto,
+  ) {
+    const planting = await this.em.findOne(
+      Planting,
+      { id: plantingId, user: user.id },
+      { populate: ['bed', 'vegetable', 'harvestResults'] },
+    );
+
+    if (!planting) {
+      throw new NotFoundException('Planting not found');
+    }
+
+    const notes = this.normalizeNotes(dto.notes, 'notes');
+    this.assertHasHarvestPayload(dto.yieldKg, dto.qualityRating, notes);
+
+    const record = new HarvestResult();
+    record.planting = planting;
+    record.harvestedAt =
+      dto.harvestedAt !== undefined
+        ? dto.harvestedAt
+          ? this.parseDate(dto.harvestedAt, 'harvestedAt')
+          : null
+        : null;
+    record.yieldKg = dto.yieldKg ?? null;
+    record.qualityRating = dto.qualityRating ?? null;
+    record.notes = notes;
+
+    this.em.persist(record);
+    planting.harvestResults.add(record);
+
+    this.syncLegacyYieldFieldsFromRecords(planting);
+
+    await this.em.flush();
+
+    return this.serializeHarvestResult(record);
+  }
+
+  async updateHarvestResultRecord(
+    user: User,
+    plantingId: string,
+    recordId: string,
+    dto: UpdateHarvestResultDto,
+  ) {
+    const planting = await this.em.findOne(
+      Planting,
+      { id: plantingId, user: user.id },
+      { populate: ['bed', 'vegetable', 'harvestResults'] },
+    );
+
+    if (!planting) {
+      throw new NotFoundException('Planting not found');
+    }
+
+    const record = planting.harvestResults
+      .getItems()
+      .find((item) => item.id === recordId);
+
+    if (!record) {
+      throw new NotFoundException('Harvest result not found');
+    }
+
+    if (dto.harvestedAt !== undefined) {
+      record.harvestedAt = dto.harvestedAt
+        ? this.parseDate(dto.harvestedAt, 'harvestedAt')
+        : null;
+    }
+
+    if (dto.yieldKg !== undefined) {
+      record.yieldKg = dto.yieldKg;
+    }
+
+    if (dto.qualityRating !== undefined) {
+      record.qualityRating = dto.qualityRating;
+    }
+
+    if (dto.notes !== undefined) {
+      record.notes = this.normalizeNotes(dto.notes, 'notes');
+    }
+
+    this.syncLegacyYieldFieldsFromRecords(planting);
+
+    await this.em.flush();
+
+    return this.serializeHarvestResult(record);
+  }
+
+  async deleteHarvestResultRecord(
+    user: User,
+    plantingId: string,
+    recordId: string,
+  ) {
+    const planting = await this.em.findOne(
+      Planting,
+      { id: plantingId, user: user.id },
+      { populate: ['bed', 'vegetable', 'harvestResults'] },
+    );
+
+    if (!planting) {
+      throw new NotFoundException('Planting not found');
+    }
+
+    const record = planting.harvestResults
+      .getItems()
+      .find((item) => item.id === recordId);
+
+    if (!record) {
+      throw new NotFoundException('Harvest result not found');
+    }
+
+    planting.harvestResults.remove(record);
+
+    this.syncLegacyYieldFieldsFromRecords(planting);
+
     await this.em.flush();
   }
 
@@ -403,9 +658,87 @@ export class PlantingsService {
       status: planting.status,
       harvestedAt: planting.harvestedAt ?? null,
       notes: planting.notes ?? null,
+      yieldKg: planting.yieldKg != null ? Number(planting.yieldKg) : null,
+      yieldQualityRating: planting.yieldQualityRating ?? null,
+      yieldNotes: planting.yieldNotes ?? null,
+      harvestResults: this.serializeHarvestResults(planting),
       createdAt: planting.createdAt,
       updatedAt: planting.updatedAt,
     };
+  }
+
+  private serializeHarvestResults(
+    planting: Planting,
+  ): SerializedHarvestResult[] {
+    const records = planting.harvestResults?.getItems() ?? [];
+    return records
+      .slice()
+      .sort((a, b) => {
+        const aTime = (a.harvestedAt ?? a.createdAt).getTime();
+        const bTime = (b.harvestedAt ?? b.createdAt).getTime();
+        return aTime - bTime;
+      })
+      .map((record) => this.serializeHarvestResult(record));
+  }
+
+  private serializeHarvestResult(
+    record: HarvestResult,
+  ): SerializedHarvestResult {
+    return {
+      id: record.id,
+      plantingId: record.planting.id,
+      harvestedAt: record.harvestedAt ?? null,
+      yieldKg: record.yieldKg != null ? Number(record.yieldKg) : null,
+      qualityRating: record.qualityRating ?? null,
+      notes: record.notes ?? null,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+    };
+  }
+
+  private syncLegacyYieldFieldsFromRecords(planting: Planting) {
+    const sorted = this.serializeHarvestResults(planting);
+    const latest = sorted.at(-1) ?? null;
+
+    planting.yieldKg = latest?.yieldKg ?? null;
+    planting.yieldQualityRating = latest?.qualityRating ?? null;
+    planting.yieldNotes = latest?.notes ?? null;
+  }
+
+  private normalizeNotes(value: string | null | undefined, fieldName: string) {
+    if (value === undefined) {
+      return undefined;
+    }
+
+    if (value === null) {
+      return null;
+    }
+
+    const trimmed = value.trim();
+    if (trimmed.length < 1) {
+      throw new BadRequestException(
+        `${fieldName} must contain at least 1 non-whitespace character`,
+      );
+    }
+
+    return trimmed;
+  }
+
+  private assertHasHarvestPayload(
+    yieldKg: number | null | undefined,
+    qualityRating: number | null | undefined,
+    notes: string | null | undefined,
+  ) {
+    const hasPayload =
+      yieldKg !== undefined ||
+      qualityRating !== undefined ||
+      notes !== undefined;
+
+    if (!hasPayload) {
+      throw new BadRequestException(
+        'At least one of yieldKg, qualityRating, notes must be provided',
+      );
+    }
   }
 
   private async serializeWithComputed(

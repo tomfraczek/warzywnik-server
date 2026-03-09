@@ -13,15 +13,21 @@ import {
 } from '@nestjs/common';
 import { PlantingsService } from './plantings.service';
 import {
+  createHarvestResultSchema,
   createPlantingTimelineSchema,
   getPlantingQuerySchema,
+  harvestResultSchema,
   listPlantingsQuerySchema,
   recomputePlantingActionsSchema,
   RecomputePlantingActionsDto,
+  updateHarvestResultSchema,
   updatePlantingTimelineSchema,
+  CreateHarvestResultDto,
   CreatePlantingDto,
   GetPlantingQueryDto,
+  HarvestResultDto,
   ListPlantingsQueryDto,
+  UpdateHarvestResultDto,
   UpdatePlantingDto,
 } from './dto/planting.schemas';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -94,5 +100,62 @@ export class PlantingsController {
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
     await this.plantingsService.remove(req.userEntity as User, id);
+  }
+
+  @Patch(':id/harvest-result')
+  updateLegacyHarvestResult(
+    @Req() req: { userEntity?: User },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body(new ZodValidationPipe(harvestResultSchema)) body: HarvestResultDto,
+  ) {
+    return this.plantingsService.updateHarvestResult(
+      req.userEntity as User,
+      id,
+      body,
+    );
+  }
+
+  @Post(':id/harvest-results')
+  createHarvestResult(
+    @Req() req: { userEntity?: User },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body(new ZodValidationPipe(createHarvestResultSchema))
+    body: CreateHarvestResultDto,
+  ) {
+    return this.plantingsService.createHarvestResult(
+      req.userEntity as User,
+      id,
+      body,
+    );
+  }
+
+  @Patch(':id/harvest-results/:recordId')
+  updateHarvestResult(
+    @Req() req: { userEntity?: User },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('recordId', new ParseUUIDPipe()) recordId: string,
+    @Body(new ZodValidationPipe(updateHarvestResultSchema))
+    body: UpdateHarvestResultDto,
+  ) {
+    return this.plantingsService.updateHarvestResultRecord(
+      req.userEntity as User,
+      id,
+      recordId,
+      body,
+    );
+  }
+
+  @Delete(':id/harvest-results/:recordId')
+  @HttpCode(204)
+  async deleteHarvestResult(
+    @Req() req: { userEntity?: User },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('recordId', new ParseUUIDPipe()) recordId: string,
+  ) {
+    await this.plantingsService.deleteHarvestResultRecord(
+      req.userEntity as User,
+      id,
+      recordId,
+    );
   }
 }

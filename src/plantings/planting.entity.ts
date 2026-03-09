@@ -1,8 +1,10 @@
 import {
+  Collection,
   Entity,
   Enum,
   Index,
   ManyToOne,
+  OneToMany,
   PrimaryKey,
   Property,
   TextType,
@@ -14,6 +16,7 @@ import {
   PlantingStartMethod,
   PlantingStatus,
 } from '../common/enums/planting.enums';
+import { HarvestResult } from './harvest-result.entity';
 
 @Entity({ tableName: 'plantings' })
 @Index({ properties: ['user'] })
@@ -77,6 +80,20 @@ export class Planting {
 
   @Property({ type: TextType, nullable: true })
   notes?: string | null;
+
+  @Property({ columnType: 'numeric', nullable: true })
+  yieldKg?: number | null;
+
+  @Property({ type: 'int', nullable: true })
+  yieldQualityRating?: number | null;
+
+  @Property({ type: TextType, nullable: true })
+  yieldNotes?: string | null;
+
+  @OneToMany(() => HarvestResult, (hr) => hr.planting, {
+    orphanRemoval: true,
+  })
+  harvestResults = new Collection<HarvestResult>(this);
 
   @Property({ type: Date, defaultRaw: 'now()' })
   createdAt: Date = new Date();
