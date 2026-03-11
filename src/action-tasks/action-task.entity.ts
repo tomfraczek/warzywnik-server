@@ -17,12 +17,14 @@ import { User } from '../users/user.entity';
 import { Planting } from '../plantings/planting.entity';
 import { Bed } from '../beds/bed.entity';
 import { ActionTemplate } from '../action-templates/action-template.entity';
+import { GrowingSpace } from '../growing-spaces/growing-space.entity';
 
 @Entity({ tableName: 'action_tasks' })
 @Index({ properties: ['user', 'dueAt'] })
 @Index({ properties: ['user'] })
 @Index({ properties: ['planting'] })
 @Index({ properties: ['bed'] })
+@Index({ properties: ['growingSpace'] })
 @Index({ properties: ['status'] })
 @Index({ properties: ['sourceRefId'] })
 @Index({ properties: ['dedupeKey'] })
@@ -44,6 +46,9 @@ export class ActionTask {
 
   @ManyToOne(() => Bed, { nullable: true })
   bed?: Bed | null;
+
+  @ManyToOne(() => GrowingSpace, { nullable: true })
+  growingSpace?: GrowingSpace | null;
 
   @Enum({ items: () => ActionTaskStatus })
   status: ActionTaskStatus = ActionTaskStatus.PENDING;

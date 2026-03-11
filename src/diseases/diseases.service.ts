@@ -16,6 +16,10 @@ import {
 export class DiseasesService {
   constructor(private readonly em: EntityManager) {}
 
+  private normalizeName(name: string): string {
+    return name.trim().replace(/\s+/g, ' ').toLocaleLowerCase('pl-PL');
+  }
+
   async list(query: ListDiseasesQueryDto) {
     const { page, limit, q } = query;
 
@@ -58,19 +62,18 @@ export class DiseasesService {
   }
 
   async create(dto: CreateDiseaseDto) {
-    const existing = await this.em.findOne(Disease, {
-      name: { $ilike: dto.name },
-    });
+    const normalizedName = this.normalizeName(dto.name);
+    const existing = await this.findByNormalizedName(normalizedName);
     if (existing) {
       throw new ConflictException('Disease name already exists');
     }
 
     const disease = new Disease();
-    disease.name = dto.name;
+    disease.name = dto.name.trim().replace(/\s+/g, ' ');
     disease.description = dto.description;
-    disease.symptoms = dto.symptoms ?? null;
-    disease.prevention = dto.prevention ?? null;
-    disease.treatment = dto.treatment ?? null;
+    disease.symptoms = dto.symptoms;
+    disease.prevention = dto.prevention;
+    disease.treatment = dto.treatment;
 
     if (dto.recommendedActionTemplateIds !== undefined) {
       const templates = await this.getActionTemplatesOrThrow(
@@ -96,18 +99,18 @@ export class DiseasesService {
     }
 
     if (dto.name && dto.name !== disease.name) {
-      const existing = await this.em.findOne(Disease, {
-        id: { $ne: id },
-        name: { $ilike: dto.name },
-      });
+      const existing = await this.findByNormalizedName(
+        this.normalizeName(dto.name),
+        id,
+      );
       if (existing) {
         throw new ConflictException('Disease name already exists');
       }
-      disease.name = dto.name;
+      disease.name = dto.name.trim().replace(/\s+/g, ' ');
     }
 
     if (dto.name !== undefined && dto.name === disease.name) {
-      disease.name = dto.name;
+      disease.name = dto.name.trim().replace(/\s+/g, ' ');
     }
 
     if (dto.description !== undefined) {
@@ -162,6 +165,16 @@ export class DiseasesService {
     }
 
     return templates;
+  }
+
+  private async findByNormalizedName(normalizedName: string, excludeId?: string) {
+    const diseases = await this.em.find(Disease, excludeId ? { id: { $ne: excludeId } } : {});
+
+    return (
+      diseases.find(
+        (item) => this.normalizeName(item.name) === normalizedName,
+      ) ?? null
+    );
   }
 
   private serialize(entity: Disease) {

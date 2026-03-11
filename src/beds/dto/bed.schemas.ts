@@ -10,6 +10,7 @@ export type BedBaseDto = {
   depthCm?: number | null;
   soilId?: string | null;
   soil?: string | null;
+  growingSpaceId?: string;
   soilTestingEnabled?: boolean;
   measuredN?: number | null;
   measuredP?: number | null;
@@ -47,6 +48,7 @@ const baseBedSchema = z.object({
   depthCm: positiveIntSchema.nullable().optional(),
   soilId: z.string().uuid().nullable().optional(),
   soil: z.string().uuid().nullable().optional(),
+  growingSpaceId: z.string().uuid().optional(),
   soilTestingEnabled: z.boolean().optional(),
   measuredN: percentageSchema.nullable().optional(),
   measuredP: percentageSchema.nullable().optional(),

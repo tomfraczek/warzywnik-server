@@ -1,6 +1,14 @@
 export enum ActionTemplateTarget {
   BED = 'bed',
   PLANTING = 'planting',
+  SPACE = 'space',
+}
+
+export enum ActionTemplateEnvironment {
+  ANY = 'any',
+  OUTDOOR = 'outdoor',
+  TUNNEL = 'tunnel',
+  GREENHOUSE = 'greenhouse',
 }
 
 export enum ActionTemplateType {
@@ -28,6 +36,14 @@ export enum ActionTemplateType {
   MONITORING = 'monitoring',
   ROTATION_PLANNING = 'rotation_planning',
   BED_READY = 'bed_ready',
+  CLIMATE_CONTROL = 'climate_control',
+  VENTILATION = 'ventilation',
+  HUMIDITY_REDUCTION = 'humidity_reduction',
+  SHADING = 'shading',
+  STRUCTURE_INSPECTION = 'structure_inspection',
+  STRUCTURE_REPAIR = 'structure_repair',
+  SPACE_HYGIENE = 'space_hygiene',
+  SEASONAL_PREPARATION = 'seasonal_preparation',
   MANUAL_CUSTOM = 'manual_custom',
 }
 
@@ -35,6 +51,7 @@ export enum ActionTaskTargetType {
   USER = 'user',
   BED = 'bed',
   PLANTING = 'planting',
+  SPACE = 'space',
 }
 
 export enum ActionTaskStatus {

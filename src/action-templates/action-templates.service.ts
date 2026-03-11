@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ActionTemplate } from './action-template.entity';
+import { ActionTemplateEnvironment } from '../common/enums/action.enums';
 import {
   CreateActionTemplateDto,
   ListActionTemplatesQueryDto,
@@ -63,6 +64,7 @@ export class ActionTemplatesService {
     template.name = dto.name;
     template.description = dto.description ?? null;
     template.target = dto.target;
+    template.environment = dto.environment ?? ActionTemplateEnvironment.ANY;
     template.type = dto.type;
     template.defaultDueOffsetDays = dto.defaultDueOffsetDays ?? null;
 
@@ -99,6 +101,10 @@ export class ActionTemplatesService {
       template.target = dto.target;
     }
 
+    if (dto.environment !== undefined) {
+      template.environment = dto.environment;
+    }
+
     if (dto.type !== undefined) {
       template.type = dto.type;
     }
@@ -127,6 +133,7 @@ export class ActionTemplatesService {
       description: entity.description ?? null,
       scope: entity.target,
       target: entity.target,
+      environment: entity.environment,
       type: entity.type,
       defaultDueOffsetDays: entity.defaultDueOffsetDays,
       createdAt: entity.createdAt,

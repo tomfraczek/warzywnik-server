@@ -44,7 +44,7 @@ export class ActionAutomationService {
       const planting = await em.findOne(
         Planting,
         { id: params.plantingId, user: params.user.id },
-        { populate: ['bed', 'vegetable'] },
+        { populate: ['bed', 'bed.growingSpace', 'vegetable'] },
       );
 
       if (!planting) {
@@ -171,6 +171,7 @@ export class ActionAutomationService {
         name: rule.actionTemplate.name,
         scope: rule.actionTemplate.target,
         target: rule.actionTemplate.target,
+        environment: rule.actionTemplate.environment,
         type: rule.actionTemplate.type,
         description: rule.actionTemplate.description ?? null,
         defaultDueOffsetDays: rule.actionTemplate.defaultDueOffsetDays,
@@ -234,10 +235,19 @@ export class ActionAutomationService {
       task.targetType = ActionTaskTargetType.BED;
       task.bed = params.planting.bed;
       task.planting = null;
+      task.growingSpace = null;
+    } else if (
+      params.rule.actionTemplate.target === ActionTemplateTarget.SPACE
+    ) {
+      task.targetType = ActionTaskTargetType.SPACE;
+      task.growingSpace = params.planting.bed.growingSpace;
+      task.planting = null;
+      task.bed = null;
     } else {
       task.targetType = ActionTaskTargetType.PLANTING;
       task.planting = params.planting;
       task.bed = null;
+      task.growingSpace = null;
     }
 
     params.em.persist(task);
@@ -281,6 +291,7 @@ export class ActionAutomationService {
       actionTemplateName: template.name,
       bedId: task.bed?.id,
       plantingId: task.planting?.id,
+      growingSpaceId: task.growingSpace?.id,
       action: ReminderAction.CHECK,
     };
     reminder.attempts = 0;
@@ -313,9 +324,10 @@ export class ActionAutomationService {
         $or: [
           { planting: params.planting.id },
           { bed: params.planting.bed.id },
+          { growingSpace: params.planting.bed.growingSpace.id },
         ],
       },
-      { populate: ['planting', 'bed'] },
+      { populate: ['planting', 'bed', 'growingSpace'] },
     );
 
     for (const task of generated) {

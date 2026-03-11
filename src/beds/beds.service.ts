@@ -17,6 +17,8 @@ import {
 import { User } from '../users/user.entity';
 import { CultivationEnvironment } from '../common/enums/bed.enums';
 import { WeatherRecomputeService } from '../weather/weather-recompute.service';
+import { GrowingSpace } from '../growing-spaces/growing-space.entity';
+import { GrowingSpaceType } from '../common/enums/growing-space.enums';
 
 @Injectable()
 export class BedsService {
@@ -47,7 +49,7 @@ export class BedsService {
       limit,
       offset: (page - 1) * limit,
       orderBy: { name: 'asc' },
-      populate: ['soil'],
+      populate: ['soil', 'growingSpace'],
     });
 
     return {
@@ -63,7 +65,7 @@ export class BedsService {
       Bed,
       { id, user: user.id },
       {
-        populate: ['soil'],
+        populate: ['soil', 'growingSpace'],
       },
     );
 
@@ -91,6 +93,7 @@ export class BedsService {
     bed.isActive = dto.isActive ?? true;
     bed.cultivationEnvironment =
       dto.cultivationEnvironment ?? CultivationEnvironment.GROUND_OUTDOOR;
+    bed.growingSpace = await this.resolveGrowingSpaceForCreate(user, dto);
 
     const soilId = dto.soilId !== undefined ? dto.soilId : dto.soil;
 
@@ -106,7 +109,7 @@ export class BedsService {
 
     await this.em.persistAndFlush(bed);
 
-    await this.em.populate(bed, ['soil']);
+    await this.em.populate(bed, ['soil', 'growingSpace']);
     return this.serializeBed(bed);
   }
 
@@ -115,7 +118,7 @@ export class BedsService {
       Bed,
       { id, user: user.id },
       {
-        populate: ['soil'],
+        populate: ['soil', 'growingSpace'],
       },
     );
 
@@ -140,6 +143,19 @@ export class BedsService {
     if (dto.isActive !== undefined) bed.isActive = dto.isActive;
     if (dto.cultivationEnvironment !== undefined) {
       bed.cultivationEnvironment = dto.cultivationEnvironment;
+    }
+
+    if (dto.growingSpaceId !== undefined) {
+      const growingSpace = await this.em.findOne(GrowingSpace, {
+        id: dto.growingSpaceId,
+        user: user.id,
+      });
+
+      if (!growingSpace) {
+        throw new BadRequestException('Growing space not found');
+      }
+
+      bed.growingSpace = growingSpace;
     }
 
     const soilId = dto.soilId !== undefined ? dto.soilId : dto.soil;
@@ -246,8 +262,49 @@ export class BedsService {
       measuredPh: bed.measuredPh ?? null,
       isActive: bed.isActive,
       cultivationEnvironment: bed.cultivationEnvironment,
+      growingSpaceId: bed.growingSpace?.id ?? null,
+      growingSpace: bed.growingSpace
+        ? {
+            id: bed.growingSpace.id,
+            name: bed.growingSpace.name,
+            type: bed.growingSpace.type,
+          }
+        : null,
       createdAt: bed.createdAt,
       updatedAt: bed.updatedAt,
     };
+  }
+
+  private async resolveGrowingSpaceForCreate(user: User, dto: CreateBedDto) {
+    if (dto.growingSpaceId) {
+      const growingSpace = await this.em.findOne(GrowingSpace, {
+        id: dto.growingSpaceId,
+        user: user.id,
+      });
+
+      if (!growingSpace) {
+        throw new BadRequestException('Growing space not found');
+      }
+
+      return growingSpace;
+    }
+
+    const existingDefault = await this.em.findOne(GrowingSpace, {
+      user: user.id,
+      name: 'Domyślna przestrzeń',
+    });
+
+    if (existingDefault) {
+      return existingDefault;
+    }
+
+    const createdDefault = new GrowingSpace();
+    createdDefault.user = user;
+    createdDefault.name = 'Domyślna przestrzeń';
+    createdDefault.type = GrowingSpaceType.OUTDOOR;
+    this.em.persist(createdDefault);
+    await this.em.flush();
+
+    return createdDefault;
   }
 }

@@ -74,6 +74,10 @@ export class TaskDto {
   @IsString()
   bedId?: string | null;
 
+  @IsOptional()
+  @IsString()
+  growingSpaceId?: string | null;
+
   @IsBoolean()
   isManuallyRescheduled!: boolean;
 

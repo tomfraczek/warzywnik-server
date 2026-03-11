@@ -37,6 +37,7 @@ export type ActionTaskReminderPayload = {
   actionTemplateName?: string;
   bedId?: string;
   plantingId?: string;
+  growingSpaceId?: string;
   action: ReminderAction;
 };
 

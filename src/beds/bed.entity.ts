@@ -13,6 +13,7 @@ import { User } from '../users/user.entity';
 import { Soil } from '../soils/soil.entity';
 import { Planting } from '../plantings/planting.entity';
 import { CultivationEnvironment } from '../common/enums/bed.enums';
+import { GrowingSpace } from '../growing-spaces/growing-space.entity';
 
 @Entity({ tableName: 'beds' })
 @Index({ properties: ['user'] })
@@ -44,6 +45,9 @@ export class Bed {
 
   @ManyToOne(() => Soil, { nullable: true })
   soil?: Soil | null;
+
+  @ManyToOne(() => GrowingSpace)
+  growingSpace!: GrowingSpace;
 
   @Property({ type: 'boolean', default: false })
   soilTestingEnabled: boolean = false;

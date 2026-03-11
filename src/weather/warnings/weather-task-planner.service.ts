@@ -153,6 +153,7 @@ export class WeatherTaskPlannerService {
           current.planting = proposal.plantingId
             ? txEm.getReference(Planting, proposal.plantingId)
             : null;
+          current.growingSpace = null;
           current.metadata = proposal.metadata ?? null;
           continue;
         }
@@ -169,6 +170,7 @@ export class WeatherTaskPlannerService {
         task.metadata = proposal.metadata ?? null;
         task.isManuallyRescheduled = false;
         task.generatedAt = now;
+        task.growingSpace = null;
 
         if (proposal.bedId) {
           task.bed = txEm.getReference(Bed, proposal.bedId);

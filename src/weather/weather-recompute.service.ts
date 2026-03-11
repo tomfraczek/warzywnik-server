@@ -291,6 +291,7 @@ export class WeatherRecomputeService {
       targetType: item.targetType,
       plantingId: item.planting?.id ?? null,
       bedId: item.bed?.id ?? null,
+      growingSpaceId: item.growingSpace?.id ?? null,
       isManuallyRescheduled: item.isManuallyRescheduled,
       meta: this.buildTaskMeta(item, user, activeBedsCountForUserScope),
     }));

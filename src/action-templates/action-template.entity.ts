@@ -8,6 +8,7 @@ import {
   TextType,
 } from '@mikro-orm/core';
 import {
+  ActionTemplateEnvironment,
   ActionTemplateTarget,
   ActionTemplateType,
 } from '../common/enums/action.enums';
@@ -27,6 +28,9 @@ export class ActionTemplate {
 
   @Enum({ items: () => ActionTemplateTarget })
   target: ActionTemplateTarget = ActionTemplateTarget.PLANTING;
+
+  @Enum({ items: () => ActionTemplateEnvironment })
+  environment: ActionTemplateEnvironment = ActionTemplateEnvironment.ANY;
 
   @Enum({ items: () => ActionTemplateType })
   type: ActionTemplateType = ActionTemplateType.MANUAL_CUSTOM;

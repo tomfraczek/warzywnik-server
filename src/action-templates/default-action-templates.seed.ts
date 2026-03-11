@@ -1,560 +1,660 @@
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ActionTemplate } from './action-template.entity';
 import {
+  ActionTemplateEnvironment,
   ActionTemplateTarget,
   ActionTemplateType,
 } from '../common/enums/action.enums';
 
 type ActionTemplateSeedRecord = {
   name: string;
-  description: string;
+  description: string | null;
   target: ActionTemplateTarget;
+  environment: ActionTemplateEnvironment;
   type: ActionTemplateType;
   defaultDueOffsetDays: number | null;
 };
 
 export const DEFAULT_ACTION_TEMPLATES: readonly ActionTemplateSeedRecord[] = [
   {
-    name: 'Przygotowanie gleby (spulchnienie)',
-    description:
-      'Spulchnij wierzchnią warstwę gleby (15–25 cm), usuń chwasty i kamienie. Poprawia napowietrzenie oraz ułatwia rozwój systemu korzeniowego.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_PREPARATION,
-    defaultDueOffsetDays: -3,
-  },
-  {
-    name: 'Wymieszanie kompostu z glebą',
-    description:
-      'Dodaj kompost i dokładnie wymieszaj z glebą na głębokość 15–20 cm, aby poprawić strukturę i zasobność podłoża.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_AMENDMENT,
-    defaultDueOffsetDays: -2,
-  },
-  {
-    name: 'Wysiew nasion',
-    description:
-      'Wysiej nasiona zgodnie z zalecaną głębokością i rozstawem. Delikatnie przykryj ziemią i ugnieć podłoże.',
+    name: 'Siew nasion',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
     type: ActionTemplateType.SOWING,
-    defaultDueOffsetDays: 0,
+    defaultDueOffsetDays: null,
   },
   {
-    name: 'Podlewanie po siewie',
-    description:
-      'Delikatnie podlej miejsce siewu, aby zapewnić odpowiednią wilgotność do kiełkowania.',
+    name: 'Pikowanie siewek',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.WATERING,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Przerywka siewek',
-    description:
-      'Usuń nadmiar siewek, pozostawiając najsilniejsze rośliny w odpowiednim rozstawie.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.THINNING,
-    defaultDueOffsetDays: 14,
-  },
-  {
-    name: 'Pikowanie rozsady',
-    description:
-      'Przenieś młode rośliny do większych pojemników, aby umożliwić rozwój silnego systemu korzeniowego.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.THINNING,
-    defaultDueOffsetDays: 10,
-  },
-  {
-    name: 'Hartowanie rozsady',
-    description:
-      'Stopniowo wystawiaj rozsadę na warunki zewnętrzne przez 7–10 dni przed wysadzeniem do gruntu.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.HARDENING,
-    defaultDueOffsetDays: -7,
-  },
-  {
-    name: 'Sadzenie rozsady do gruntu',
-    description:
-      'Posadź rozsadę w docelowym miejscu, zachowując odpowiedni rozstaw i głębokość sadzenia.',
-    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
     type: ActionTemplateType.TRANSPLANTING,
-    defaultDueOffsetDays: 0,
+    defaultDueOffsetDays: null,
   },
   {
-    name: 'Montaż podpór',
-    description:
-      'Zamontuj podpory lub paliki dla roślin wymagających podwiązywania.',
+    name: 'Sadzenie rozsady',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.STAKING,
-    defaultDueOffsetDays: 0,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.TRANSPLANTING,
+    defaultDueOffsetDays: null,
   },
   {
-    name: 'Podlewanie',
-    description:
-      'Podlej roślinę odpowiednią ilością wody, utrzymując równomierną wilgotność gleby bez jej przelania.',
+    name: 'Przesadzanie roślin',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.TRANSPLANTING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Dosadzanie roślin',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.TRANSPLANTING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Podlewanie roślin',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
     type: ActionTemplateType.WATERING,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Głębokie podlewanie',
-    description:
-      'Podlej roślinę obficie, aby woda dotarła do głębszych warstw gleby i wspierała rozwój systemu korzeniowego.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.WATERING,
-    defaultDueOffsetDays: 0,
+    defaultDueOffsetDays: null,
   },
   {
     name: 'Kontrola wilgotności gleby',
-    description:
-      'Sprawdź wilgotność gleby ręcznie lub przy pomocy miernika. Unikaj zarówno przesuszenia, jak i przelania.',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
     type: ActionTemplateType.MONITORING,
-    defaultDueOffsetDays: 0,
+    defaultDueOffsetDays: null,
   },
   {
-    name: 'Regulacja systemu nawadniania',
-    description:
-      'Dostosuj częstotliwość i ilość podlewania w systemie automatycznym do aktualnych warunków pogodowych.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.IRRIGATION_SETUP,
-    defaultDueOffsetDays: 0,
+    name: 'Ściółkowanie wokół roślin',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.PHYSICAL_PROTECTION,
+    defaultDueOffsetDays: null,
   },
   {
-    name: 'Ściółkowanie',
-    description:
-      'Nałóż warstwę ściółki (np. słoma, kora, trawa), aby ograniczyć parowanie wody i rozwój chwastów.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.MULCHING,
-    defaultDueOffsetDays: 3,
+    name: 'Usuwanie chwastów przy roślinach',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.WEEDING,
+    defaultDueOffsetDays: null,
   },
   {
     name: 'Nawożenie organiczne',
-    description:
-      'Zastosuj naturalny nawóz (kompost, obornik granulowany, biohumus) w celu poprawy żyzności gleby.',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
     type: ActionTemplateType.FERTILIZATION,
-    defaultDueOffsetDays: 14,
+    defaultDueOffsetDays: null,
   },
   {
-    name: 'Nawożenie azotowe',
-    description:
-      'Zastosuj nawóz bogaty w azot, aby wspomóc wzrost części zielonych roślin.',
+    name: 'Nawożenie mineralne',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
     type: ActionTemplateType.FERTILIZATION,
-    defaultDueOffsetDays: 21,
-  },
-  {
-    name: 'Nawożenie potasowe',
-    description:
-      'Zastosuj nawóz potasowy w celu poprawy kwitnienia, owocowania i odporności roślin.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.FERTILIZATION,
-    defaultDueOffsetDays: 30,
-  },
-  {
-    name: 'Nawożenie fosforowe',
-    description:
-      'Zastosuj nawóz fosforowy wspierający rozwój systemu korzeniowego i wczesny wzrost roślin.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.FERTILIZATION,
-    defaultDueOffsetDays: 10,
-  },
-  {
-    name: 'Nawożenie dolistne',
-    description:
-      'Wykonaj nawożenie dolistne, aby szybko uzupełnić niedobory składników odżywczych.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.FERTILIZATION,
-    defaultDueOffsetDays: 0,
+    defaultDueOffsetDays: null,
   },
   {
     name: 'Aplikacja biohumusu',
-    description:
-      'Zastosuj biohumus w formie podlewania lub oprysku w celu poprawy kondycji roślin.',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
     type: ActionTemplateType.FERTILIZATION,
-    defaultDueOffsetDays: 7,
+    defaultDueOffsetDays: null,
   },
   {
-    name: 'Aplikacja kompostu',
-    description:
-      'Rozłóż kompost na grządce i delikatnie wymieszaj z wierzchnią warstwą gleby.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_AMENDMENT,
-    defaultDueOffsetDays: -3,
-  },
-  {
-    name: 'Zwalczanie mszyc',
-    description:
-      'Wykonaj działanie przeciw mszycom (np. oprysk ekologiczny/chemiczny lub spłukanie). Sprawdź rośliny po 2–3 dniach.',
+    name: 'Nawożenie dolistne',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.PEST_CONTROL,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Zwalczanie przędziorków',
-    description:
-      'Zastosuj odpowiedni środek przeciw przędziorkom. Zwróć uwagę na spodnią stronę liści.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.PEST_CONTROL,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Zwalczanie mączlików',
-    description:
-      'Wykonaj działanie przeciw mączlikom. W razie potrzeby powtórz po kilku dniach.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.PEST_CONTROL,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Oprysk ekologiczny',
-    description:
-      'Zastosuj naturalny oprysk (np. wyciąg z pokrzywy, czosnku lub mydło potasowe).',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.SPRAYING,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Usunięcie ręczne szkodników',
-    description:
-      'Usuń widoczne szkodniki ręcznie lub spłucz je wodą pod ciśnieniem.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.PEST_CONTROL,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Montaż pułapek lepnych',
-    description:
-      'Zamontuj żółte pułapki lepne w celu monitorowania i ograniczenia populacji owadów.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.TRAP_SETUP,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Montaż siatek ochronnych',
-    description:
-      'Zamontuj siatki ochronne w celu zabezpieczenia roślin przed owadami i ptakami.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.PHYSICAL_PROTECTION,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Oprysk przeciwgrzybiczy',
-    description:
-      'Wykonaj oprysk środkiem przeciw chorobom grzybowym zgodnie z zaleceniami producenta.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.DISEASE_CONTROL,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Oprysk miedziowy',
-    description:
-      'Zastosuj preparat miedziowy w celu ograniczenia infekcji bakteryjnych i grzybowych.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.DISEASE_CONTROL,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Oprysk siarkowy',
-    description:
-      'Wykonaj oprysk preparatem siarkowym przy objawach mączniaka i innych chorób grzybowych.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.DISEASE_CONTROL,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Usunięcie porażonych liści',
-    description:
-      'Usuń chore liście i zutylizuj je poza ogrodem, aby ograniczyć rozprzestrzenianie się choroby.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.DISEASE_CONTROL,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Usunięcie całej rośliny',
-    description:
-      'Usuń całą roślinę w przypadku silnego porażenia, aby ochronić pozostałe uprawy.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.DISEASE_CONTROL,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Dezynfekcja narzędzi',
-    description:
-      'Zdezynfekuj narzędzia ogrodnicze po pracy z porażonymi roślinami, aby ograniczyć przenoszenie patogenów.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_REGENERATION,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Odchwaszczanie',
-    description:
-      'Usuń chwasty ręcznie lub narzędziami, aby ograniczyć konkurencję o wodę i składniki odżywcze.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.WEEDING,
-    defaultDueOffsetDays: 7,
-  },
-  {
-    name: 'Przycinanie',
-    description:
-      'Usuń nadmiar pędów lub liści w celu poprawy cyrkulacji powietrza i jakości plonów.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.PRUNING,
-    defaultDueOffsetDays: 21,
-  },
-  {
-    name: 'Usuwanie dolnych liści',
-    description:
-      'Usuń dolne liście, aby ograniczyć ryzyko chorób i poprawić przewiewność.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.PRUNING,
-    defaultDueOffsetDays: 14,
-  },
-  {
-    name: 'Kontrola podpór',
-    description:
-      'Sprawdź stabilność podpór i w razie potrzeby popraw mocowanie roślin.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.MONITORING,
-    defaultDueOffsetDays: 7,
-  },
-  {
-    name: 'Regulacja rozstawu roślin',
-    description:
-      'Dostosuj rozstaw roślin, aby zapewnić lepszy dostęp światła i cyrkulację powietrza.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.THINNING,
-    defaultDueOffsetDays: 14,
-  },
-  {
-    name: 'Usunięcie resztek roślinnych',
-    description:
-      'Usuń pozostałości roślin, korzenie i liście z grządki. Ogranicza to rozwój chorób i szkodników w kolejnym sezonie.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_REGENERATION,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Przekopanie gleby',
-    description:
-      'Przekop grządkę na głębokość 20–30 cm w celu napowietrzenia i rozluźnienia gleby po zakończonej uprawie.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_PREPARATION,
-    defaultDueOffsetDays: 1,
-  },
-  {
-    name: 'Wapnowanie',
-    description:
-      'Zastosuj wapno ogrodnicze w celu regulacji pH gleby (jeśli analiza gleby wskazuje potrzebę).',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_REGENERATION,
-    defaultDueOffsetDays: 7,
-  },
-  {
-    name: 'Nawożenie regeneracyjne',
-    description:
-      'Zastosuj kompost lub nawóz regeneracyjny w celu odbudowy zasobności gleby po intensywnej uprawie.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_AMENDMENT,
-    defaultDueOffsetDays: 3,
-  },
-  {
-    name: 'Wysiew poplonu',
-    description:
-      'Wysiej rośliny poplonowe (np. gorczyca, facelia) w celu poprawy struktury i żyzności gleby.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_REGENERATION,
-    defaultDueOffsetDays: 2,
-  },
-  {
-    name: 'Odkażanie gleby',
-    description:
-      'Zastosuj zabiegi ograniczające patogeny w glebie (np. preparaty biologiczne lub solarizacja).',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_REGENERATION,
-    defaultDueOffsetDays: 5,
-  },
-  {
-    name: 'Test pH gleby',
-    description:
-      'Wykonaj pomiar pH gleby w celu oceny jej odczynu przed kolejną uprawą.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_TESTING,
-    defaultDueOffsetDays: 3,
-  },
-  {
-    name: 'Analiza NPK gleby',
-    description:
-      'Sprawdź poziom azotu, fosforu i potasu, aby dobrać odpowiednie nawożenie przed kolejnym sezonem.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_TESTING,
-    defaultDueOffsetDays: 3,
-  },
-  {
-    name: 'Uzupełnienie kompostu',
-    description:
-      'Dodaj świeży kompost i wymieszaj z glebą w celu poprawy struktury i zasobności.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_AMENDMENT,
-    defaultDueOffsetDays: 7,
-  },
-  {
-    name: 'Napowietrzenie gleby',
-    description:
-      'Spulchnij wierzchnią warstwę gleby bez odwracania struktury, aby poprawić dostęp powietrza.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_PREPARATION,
-    defaultDueOffsetDays: 7,
-  },
-  {
-    name: 'Głębokie spulchnienie',
-    description:
-      'Rozluźnij głębsze warstwy gleby w celu poprawy przepuszczalności i rozwoju korzeni.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_PREPARATION,
-    defaultDueOffsetDays: 10,
-  },
-  {
-    name: 'Kontrola struktury gleby',
-    description:
-      'Oceń strukturę gleby (zbrylenie, przepuszczalność, zawartość próchnicy) przed kolejną uprawą.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.MONITORING,
-    defaultDueOffsetDays: 10,
-  },
-  {
-    name: 'Oznaczenie grządki jako “Ready to use”',
-    description:
-      'Oznacz grządkę jako przygotowaną do kolejnej uprawy po wykonaniu niezbędnych zabiegów.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.BED_READY,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Regularny przegląd uprawy',
-    description:
-      'Sprawdź stan liści, łodyg i owoców pod kątem chorób, szkodników i niedoborów składników odżywczych.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.MONITORING,
-    defaultDueOffsetDays: 7,
-  },
-  {
-    name: 'Kontrola wilgotności (monitoring)',
-    description:
-      'Sprawdź poziom wilgotności gleby i dostosuj podlewanie do aktualnych warunków.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.MONITORING,
-    defaultDueOffsetDays: 3,
-  },
-  {
-    name: 'Kontrola stanu grządki',
-    description:
-      'Oceń ogólny stan grządki: struktura gleby, obecność chwastów, zastoje wody.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.MONITORING,
-    defaultDueOffsetDays: 14,
-  },
-  {
-    name: 'Ochrona przed przymrozkiem',
-    description:
-      'Zabezpiecz rośliny agrowłókniną, tunelami lub innymi osłonami przed spodziewanym przymrozkiem.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.PHYSICAL_PROTECTION,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Ochrona przed upałem',
-    description:
-      'Zastosuj cieniowanie, dodatkowe podlewanie lub ściółkowanie w okresach wysokich temperatur.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.PHYSICAL_PROTECTION,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Montaż osłon wiatrowych',
-    description:
-      'Zabezpiecz rośliny przed silnym wiatrem przy pomocy osłon lub podpór.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.PHYSICAL_PROTECTION,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Wiosenne przekopanie grządki',
-    description:
-      'Przekop glebę po zimie w celu jej napowietrzenia i przygotowania do pierwszej uprawy.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_PREPARATION,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Wiosenne nawożenie startowe',
-    description:
-      'Zastosuj kompost lub nawóz startowy przed pierwszym siewem lub sadzeniem w sezonie.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_AMENDMENT,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Test gleby przed sezonem',
-    description:
-      'Sprawdź pH i zasobność gleby przed rozpoczęciem nowego sezonu upraw.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.SOIL_TESTING,
-    defaultDueOffsetDays: -7,
-  },
-  {
-    name: 'Planowanie płodozmianu',
-    description:
-      'Zaplanuj kolejną uprawę z uwzględnieniem zasad płodozmianu i unikania monokultury.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.ROTATION_PLANNING,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Zmiana rodziny warzyw',
-    description:
-      'Wybierz kolejną uprawę należącą do innej rodziny botanicznej niż poprzednia.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.ROTATION_PLANNING,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Ratunkowe podlewanie',
-    description: 'Natychmiastowe podlewanie w przypadku przesuszenia gleby.',
-    target: ActionTemplateTarget.PLANTING,
-    type: ActionTemplateType.WATERING,
-    defaultDueOffsetDays: 0,
-  },
-  {
-    name: 'Odsączanie nadmiaru wody',
-    description:
-      'Popraw drenaż i usuń zastoiny wody w przypadku przelania lub intensywnych opadów.',
-    target: ActionTemplateTarget.BED,
-    type: ActionTemplateType.IRRIGATION_SETUP,
-    defaultDueOffsetDays: 0,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.FERTILIZATION,
+    defaultDueOffsetDays: null,
   },
   {
     name: 'Awaryjne nawożenie interwencyjne',
-    description:
-      'Szybkie zastosowanie nawozu w przypadku widocznych objawów niedoboru składników.',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
     type: ActionTemplateType.FERTILIZATION,
-    defaultDueOffsetDays: 0,
+    defaultDueOffsetDays: null,
   },
   {
-    name: 'Usunięcie silnie porażonej rośliny',
-    description:
-      'Natychmiastowe usunięcie rośliny w celu ochrony pozostałych upraw.',
+    name: 'Podwiązywanie roślin',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.STAKING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Przycinanie roślin',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.PRUNING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Usuwanie pędów bocznych',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.PRUNING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Usuwanie liści',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.PRUNING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Kontrola szkodników',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.PEST_CONTROL,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Kontrola chorób',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
     type: ActionTemplateType.DISEASE_CONTROL,
-    defaultDueOffsetDays: 0,
+    defaultDueOffsetDays: null,
   },
   {
-    name: 'Zbiór plonu',
-    description: 'Wykonaj zbiór dojrzałych warzyw.',
+    name: 'Usuwanie porażonych części',
+    description: null,
     target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.DISEASE_CONTROL,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Usunięcie całej rośliny (silna choroba)',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.DISEASE_CONTROL,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Oprysk biologiczny',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SPRAYING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Oprysk chemiczny',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SPRAYING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Monitoring wzrostu',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.MONITORING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Monitoring kwitnienia',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.MONITORING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Zapylanie ręczne',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.MANUAL_CUSTOM,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Zbiór plonów',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
     type: ActionTemplateType.HARVEST,
-    defaultDueOffsetDays: 0,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Zbiór nasion',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.HARVEST,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Usunięcie roślin po sezonie',
+    description: null,
+    target: ActionTemplateTarget.PLANTING,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.HARVEST,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Pomiar pH gleby',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_TESTING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Analiza NPK gleby',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_TESTING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Pomiar zasolenia gleby (EC)',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.SOIL_TESTING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Przygotowanie grządki przed sezonem',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_PREPARATION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Spulchnianie gleby',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_PREPARATION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Głębokie spulchnianie (broadfork)',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_PREPARATION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Formowanie grządki',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_PREPARATION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Aplikacja kompostu',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_AMENDMENT,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Aplikacja obornika',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_AMENDMENT,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Aplikacja nawozu zielonego',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_AMENDMENT,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Aplikacja nawozu mineralnego',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_AMENDMENT,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Mulczowanie grządki',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.MULCHING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Uprawa roślin poplonowych',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_REGENERATION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Solarizacja gleby',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.OUTDOOR,
+    type: ActionTemplateType.SOIL_REGENERATION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Przykrycie gleby (agrowłóknina)',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SOIL_REGENERATION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Instalacja systemu nawadniania',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.IRRIGATION_SETUP,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Kontrola wilgotności gleby (grządka)',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.MONITORING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Płukanie gleby (redukcja zasolenia)',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.IRRIGATION_SETUP,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Instalacja siatek ochronnych',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.PHYSICAL_PROTECTION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Instalacja pułapek na szkodniki',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.TRAP_SETUP,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Usuwanie chwastów z grządki',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.WEEDING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Planowanie płodozmianu',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.ROTATION_PLANNING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Zmiana uprawy w grządce',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.ROTATION_PLANNING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Przygotowanie grządki po sezonie',
+    description: null,
+    target: ActionTemplateTarget.BED,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.BED_READY,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Codzienna kontrola klimatu — tunel',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.CLIMATE_CONTROL,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Codzienna kontrola klimatu — szklarnia',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.CLIMATE_CONTROL,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Wentylacja tunelu',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.VENTILATION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Wentylacja szklarni',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.VENTILATION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Redukcja wilgotności — tunel',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.HUMIDITY_REDUCTION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Redukcja wilgotności — szklarnia',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.HUMIDITY_REDUCTION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Instalacja cieniowania — tunel',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.SHADING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Instalacja cieniowania — szklarnia',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.SHADING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Regulacja cieniowania — tunel',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.SHADING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Regulacja cieniowania — szklarnia',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.SHADING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Kontrola konstrukcji tunelu',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.STRUCTURE_INSPECTION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Kontrola konstrukcji szklarni',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.STRUCTURE_INSPECTION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Naprawa folii tunelu',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.STRUCTURE_REPAIR,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Naprawa szyb szklarni',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.STRUCTURE_REPAIR,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Mycie konstrukcji tunelu',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.SPACE_HYGIENE,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Mycie konstrukcji szklarni',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.SPACE_HYGIENE,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Czyszczenie przestrzeni uprawowej',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SPACE_HYGIENE,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Dezynfekcja przestrzeni uprawowej — tunel',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.SPACE_HYGIENE,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Dezynfekcja przestrzeni uprawowej — szklarnia',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.SPACE_HYGIENE,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Usuwanie resztek roślinnych',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SPACE_HYGIENE,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Monitoring temperatury',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.MONITORING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Monitoring wilgotności powietrza',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.MONITORING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Monitoring szkodników (pułapki)',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.MONITORING,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Przygotowanie tunelu do sezonu',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.TUNNEL,
+    type: ActionTemplateType.SEASONAL_PREPARATION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Przygotowanie szklarni do sezonu',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.GREENHOUSE,
+    type: ActionTemplateType.SEASONAL_PREPARATION,
+    defaultDueOffsetDays: null,
+  },
+  {
+    name: 'Przygotowanie do zimy',
+    description: null,
+    target: ActionTemplateTarget.SPACE,
+    environment: ActionTemplateEnvironment.ANY,
+    type: ActionTemplateType.SEASONAL_PREPARATION,
+    defaultDueOffsetDays: null,
   },
 ];
 
@@ -565,6 +665,7 @@ export const upsertDefaultActionTemplates = async (
     const existingExact = await em.findOne(ActionTemplate, {
       name: { $ilike: item.name },
       target: item.target,
+      environment: item.environment,
       type: item.type,
     });
 
@@ -580,6 +681,7 @@ export const upsertDefaultActionTemplates = async (
 
     if (existingByName) {
       existingByName.target = item.target;
+      existingByName.environment = item.environment;
       existingByName.type = item.type;
       existingByName.description = item.description;
       existingByName.defaultDueOffsetDays = item.defaultDueOffsetDays;
@@ -590,6 +692,7 @@ export const upsertDefaultActionTemplates = async (
     template.name = item.name;
     template.description = item.description;
     template.target = item.target;
+    template.environment = item.environment;
     template.type = item.type;
     template.defaultDueOffsetDays = item.defaultDueOffsetDays;
 

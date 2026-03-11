@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  ActionTemplateEnvironment,
   ActionTemplateTarget,
   ActionTemplateType,
 } from '../../common/enums/action.enums';
@@ -8,6 +9,7 @@ export type ActionTemplateBaseDto = {
   name?: string;
   description?: string | null;
   target?: ActionTemplateTarget;
+  environment?: ActionTemplateEnvironment;
   type?: ActionTemplateType;
   defaultDueOffsetDays?: number | null;
 };
@@ -15,6 +17,7 @@ export type ActionTemplateBaseDto = {
 export type CreateActionTemplateDto = ActionTemplateBaseDto & {
   name: string;
   target: ActionTemplateTarget;
+  environment?: ActionTemplateEnvironment;
   type: ActionTemplateType;
 };
 
@@ -30,6 +33,7 @@ const baseActionTemplateSchema = z.object({
   name: z.string().min(2).max(120).optional(),
   description: z.string().min(1).nullable().optional(),
   target: z.nativeEnum(ActionTemplateTarget).optional(),
+  environment: z.nativeEnum(ActionTemplateEnvironment).optional(),
   type: z.nativeEnum(ActionTemplateType).optional(),
   defaultDueOffsetDays: z.union([z.coerce.number().int(), z.null()]).optional(),
 });
@@ -37,6 +41,9 @@ const baseActionTemplateSchema = z.object({
 export const createActionTemplateSchema = baseActionTemplateSchema.extend({
   name: baseActionTemplateSchema.shape.name.unwrap(),
   target: baseActionTemplateSchema.shape.target.unwrap(),
+  environment: baseActionTemplateSchema.shape.environment.default(
+    ActionTemplateEnvironment.ANY,
+  ),
   type: baseActionTemplateSchema.shape.type.unwrap(),
 });
 
