@@ -1,0 +1,33 @@
+[
+  {
+    "name": "Zaraza ziemniaka",
+    "description": "Zaraza ziemniaka to choroba grzybowa występująca najczęściej w uprawie pomidorów, ziemniaków i innych psiankowatych. To choroba o podłożu grzybowym lub grzybopodobnym, która rozwija się najłatwiej wtedy, gdy w uprawie pojawiają się okresy podwyższonej wilgotności, osłabienie roślin lub zaburzenia przewiewności. W praktyce ogrodniczej takie choroby są szczególnie istotne, ponieważ potrafią rozwijać się skrycie przez kilka dni, a następnie w krótkim czasie objąć znaczną część uprawy. Duże znaczenie ma nie tylko sam patogen, ale także mikroklimat łanu, sposób podlewania, zagęszczenie roślin oraz stan higieny stanowiska. Jeżeli warunki sprzyjające utrzymują się dłużej, choroba może szybko przejść z pojedynczych objawów do wyraźnego spadku wigoru i jakości plonu. W atlasie eksperckim warto ją traktować jako jednostkę o dużym znaczeniu praktycznym, ponieważ jej objawy mogą pojawiać się na różnych organach rośliny i wpływać zarówno na zdrowotność, jak i na zdolność budowania plonu. Dobre rozpoznanie tej choroby wymaga łączenia obserwacji objawów z analizą warunków środowiskowych, historii stanowiska i wcześniejszych problemów w uprawie.",
+    "symptoms": "Najczęściej obserwuje się nieregularne brunatne plamy szybko powiększające się na liściach, ciemne smugi na łodygach oraz twarde brunatne plamy na owocach. Objawy mogą pojawiać się najpierw punktowo, a następnie obejmować coraz większą część rośliny lub całej partii uprawy. Warto zwracać uwagę nie tylko na kolor i kształt zmian, ale też na tempo ich narastania, miejsce występowania oraz to, czy problem zaczyna się od starszych, młodszych, dolnych czy górnych części rośliny. Taki kontekst bardzo pomaga odróżnić zaraza ziemniaka od innych problemów o podobnym wyglądzie.",
+    "prevention": "W profilaktyce najważniejsze jest ograniczać długie zwilżenie liści, poprawiać przewiewność i regularnie usuwać dolne liście oraz resztki pożniwne. Dodatkowo duże znaczenie ma regularna obserwacja roślin, szybkie usuwanie podejrzanych tkanek i niedopuszczanie do długiego utrzymywania się warunków sprzyjających rozwojowi problemu. W uprawie pod osłonami należy szczególnie pilnować higieny przestrzeni, wentylacji i ograniczania nadmiaru wilgoci, a w gruncie — zmianowania, stanu gleby i czystości stanowiska po sezonie.",
+    "treatment": "Postępowanie polega przede wszystkim na tym, aby jak najszybciej usuwać porażone tkanki, poprawić przewiewność i zastosować zabiegi przeciw chorobom grzybowym. Należy przy tym pamiętać, że skuteczne działanie zwykle wymaga połączenia kilku elementów: szybkiego ograniczenia źródła problemu, poprawy warunków środowiskowych oraz dobrania zabiegów wspomagających adekwatnych do skali zagrożenia. Im wcześniej zostaną podjęte działania, tym większa szansa na ograniczenie strat i ochronę pozostałej części uprawy.",
+    "recommendedActionTemplateIds": [
+      "c0268fbd-af40-492a-b432-8b316070735a",
+      "58f68c77-c1de-48bf-8a74-b74769b8649f",
+      "b4b45c3d-fb84-4d93-836d-1355af030119",
+      "676888de-28dc-4ba2-a5b3-4816ed27dec2",
+      "09e58a21-d7b5-48c0-8605-f9fa941f8161",
+      "6e7a6228-45c5-4ea1-af2c-eb3700dc00e7",
+      "3b471fb3-c667-4a71-9870-4bd47cde1f63"
+    ]
+  },
+  {
+    "name": "Alternarioza",
+    "description": "Alternarioza to choroba grzybowa występująca najczęściej w uprawie pomidorów, ziemniaków, cebuli oraz wielu innych warzyw. To choroba o podłożu grzybowym lub grzybopodobnym, która rozwija się najłatwiej wtedy, gdy w uprawie pojawiają się okresy podwyższonej wilgotności, osłabienie roślin lub zaburzenia przewiewności. W praktyce ogrodniczej takie choroby są szczególnie istotne, ponieważ potrafią rozwijać się skrycie przez kilka dni, a następnie w krótkim czasie objąć znaczną część uprawy. Duże znaczenie ma nie tylko sam patogen, ale także mikroklimat łanu, sposób podlewania, zagęszczenie roślin oraz stan higieny stanowiska. Jeżeli warunki sprzyjające utrzymują się dłużej, choroba może szybko przejść z pojedynczych objawów do wyraźnego spadku wigoru i jakości plonu. W atlasie eksperckim warto ją traktować jako jednostkę o dużym znaczeniu praktycznym, ponieważ jej objawy mogą pojawiać się na różnych organach rośliny i wpływać zarówno na zdrowotność, jak i na zdolność budowania plonu. Dobre rozpoznanie tej choroby wymaga łączenia obserwacji objawów z analizą warunków środowiskowych, historii stanowiska i wcześniejszych problemów w uprawie.",
+    "symptoms": "Najczęściej obserwuje się suche brunatne plamy z koncentrycznym strefowaniem, żółknięcie i zamieranie starszych liści. Objawy mogą pojawiać się najpierw punktowo, a następnie obejmować coraz większą część rośliny lub całej partii uprawy. Warto zwracać uwagę nie tylko na kolor i kształt zmian, ale też na tempo ich narastania, miejsce występowania oraz to, czy problem zaczyna się od starszych, młodszych, dolnych czy górnych części rośliny. Taki kontekst bardzo pomaga odróżnić alternarioza od innych problemów o podobnym wyglądzie.",
+    "prevention": "W profilaktyce najważniejsze jest utrzymywać rośliny w dobrej kondycji, unikać nadmiernego zagęszczenia i dbać o zmianowanie. Dodatkowo duże znaczenie ma regularna obserwacja roślin, szybkie usuwanie podejrzanych tkanek i niedopuszczanie do długiego utrzymywania się warunków sprzyjających rozwojowi problemu. W uprawie pod osłonami należy szczególnie pilnować higieny przestrzeni, wentylacji i ograniczania nadmiaru wilgoci, a w gruncie — zmianowania, stanu gleby i czystości stanowiska po sezonie.",
+    "treatment": "Postępowanie polega przede wszystkim na tym, aby usuwać porażone liście i stosować ochronę przeciwgrzybiczą połączoną z poprawą warunków uprawy. Należy przy tym pamiętać, że skuteczne działanie zwykle wymaga połączenia kilku elementów: szybkiego ograniczenia źródła problemu, poprawy warunków środowiskowych oraz dobrania zabiegów wspomagających adekwatnych do skali zagrożenia. Im wcześniej zostaną podjęte działania, tym większa szansa na ograniczenie strat i ochronę pozostałej części uprawy.",
+    "recommendedActionTemplateIds": [
+      "c0268fbd-af40-492a-b432-8b316070735a",
+      "58f68c77-c1de-48bf-8a74-b74769b8649f",
+      "b4b45c3d-fb84-4d93-836d-1355af030119",
+      "676888de-28dc-4ba2-a5b3-4816ed27dec2",
+      "09e58a21-d7b5-48c0-8605-f9fa941f8161",
+      "6e7a6228-45c5-4ea1-af2c-eb3700dc00e7"
+    ]
+  }
+]
