@@ -131,6 +131,9 @@ export class Migration20260303120000 extends Migration {
       $$;
     `);
 
+    // Warning data seeding moved to legit seed services.
+    return;
+
     this.addSql(`
       update "warning_rules"
       set "enabled" = false,

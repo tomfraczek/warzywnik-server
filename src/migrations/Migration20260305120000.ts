@@ -2,6 +2,9 @@ import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20260305120000 extends Migration {
   up(): void {
+    // Warning copy seeding moved to legit seed services.
+    return;
+
     this.addSql(`
       update "warning_rules" as wr
       set

@@ -29,7 +29,7 @@ import { OperationalWeatherWarningsEvaluator } from './warnings/evaluators/opera
 import { GreenhouseWeatherWarningsEvaluator } from './warnings/evaluators/greenhouse-weather-warnings.evaluator';
 import { WeatherWarningOrchestratorService } from './warnings/weather-warning-orchestrator.service';
 import { WeatherTaskPlannerService } from './warnings/weather-task-planner.service';
-import { WeatherWarningsSeedService } from './warnings/weather-warnings.seed.service';
+import { WeatherWarningConfigsSeedService } from './warnings/weather-warning-configs.seed.service';
 import { Bed } from '../beds/bed.entity';
 
 @Module({
@@ -68,7 +68,7 @@ import { Bed } from '../beds/bed.entity';
     GreenhouseWeatherWarningsEvaluator,
     WeatherWarningOrchestratorService,
     WeatherTaskPlannerService,
-    WeatherWarningsSeedService,
+    WeatherWarningConfigsSeedService,
   ],
   exports: [WeatherService, WeatherRecomputeService],
 })
