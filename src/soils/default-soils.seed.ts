@@ -198,10 +198,7 @@ export const DEFAULT_SOILS: readonly SoilSeedRecord[] = [
       'Bardzo dobrze zatrzymuje wilgoć',
       'Zawiera dużo materii organicznej',
     ],
-    disadvantages: [
-      'Często kwaśna',
-      'Może być zbyt wilgotna',
-    ],
+    disadvantages: ['Często kwaśna', 'Może być zbyt wilgotna'],
     improvementTips: [
       'Sprawdź pH gleby',
       'Rozważ wapnowanie',
@@ -218,10 +215,7 @@ export const DEFAULT_SOILS: readonly SoilSeedRecord[] = [
     waterRetention: DemandLevel.LOW,
     drainage: DrainageLevel.GOOD,
     fertilityLevel: DemandLevel.LOW,
-    advantages: [
-      'Bardzo dobra przepuszczalność',
-      'Szybko się nagrzewa',
-    ],
+    advantages: ['Bardzo dobra przepuszczalność', 'Szybko się nagrzewa'],
     disadvantages: [
       'Słabo zatrzymuje wodę',
       'Słabo zatrzymuje składniki pokarmowe',
@@ -242,10 +236,7 @@ export const DEFAULT_SOILS: readonly SoilSeedRecord[] = [
     waterRetention: DemandLevel.MEDIUM,
     drainage: DrainageLevel.MEDIUM,
     fertilityLevel: DemandLevel.MEDIUM,
-    advantages: [
-      'Uniwersalna',
-      'Dobra struktura startowa',
-    ],
+    advantages: ['Uniwersalna', 'Dobra struktura startowa'],
     disadvantages: ['Jakość zależy od producenta'],
     improvementTips: [
       'Sprawdzaj skład podłoża',
