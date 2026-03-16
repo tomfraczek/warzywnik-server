@@ -16,6 +16,7 @@ import { Pest } from '../pests/pest.entity';
 import { Disease } from '../diseases/disease.entity';
 import { Soil } from '../soils/soil.entity';
 import { ActionTemplate } from '../action-templates/action-template.entity';
+import { Planting } from '../plantings/planting.entity';
 import {
   CreateVegetableDto,
   ListVegetablesQueryDto,
@@ -73,6 +74,7 @@ export class VegetablesService {
         'imageUrl',
         'recommendedSoils',
         'family',
+        'botanicalFamily',
         'nutrientNeeds',
         'rotationGroup',
         'minSoilDepthCm',
@@ -91,6 +93,7 @@ export class VegetablesService {
           .getItems()
           .map((soil) => soil.id),
         family: item.family,
+        botanicalFamily: item.botanicalFamily ?? null,
         nutrientNeeds: item.nutrientNeeds,
         rotationGroup: item.rotationGroup,
         minSoilDepthCm: item.minSoilDepthCm ?? null,
@@ -153,6 +156,7 @@ export class VegetablesService {
     vegetable.harvestSigns = dto.harvestSigns ?? null;
     vegetable.fertilizationStages = dto.fertilizationStages ?? null;
     vegetable.family = dto.family ?? VegetableFamily.OTHER;
+    vegetable.botanicalFamily = dto.botanicalFamily ?? null;
     vegetable.nutrientNeeds = dto.nutrientNeeds ?? NutrientNeeds.MEDIUM;
     vegetable.rotationGroup = dto.rotationGroup ?? RotationGroup.OTHER;
     vegetable.minSoilDepthCm = dto.minSoilDepthCm ?? null;
@@ -270,6 +274,8 @@ export class VegetablesService {
     if (dto.fertilizationStages !== undefined)
       vegetable.fertilizationStages = dto.fertilizationStages;
     if (dto.family !== undefined) vegetable.family = dto.family;
+    if (dto.botanicalFamily !== undefined)
+      vegetable.botanicalFamily = dto.botanicalFamily;
     if (dto.nutrientNeeds !== undefined)
       vegetable.nutrientNeeds = dto.nutrientNeeds;
     if (dto.rotationGroup !== undefined)
@@ -325,6 +331,13 @@ export class VegetablesService {
     const vegetable = await this.em.findOne(Vegetable, { id });
     if (!vegetable) {
       throw new NotFoundException('Vegetable not found');
+    }
+
+    const plantingCount = await this.em.count(Planting, { vegetable: id });
+    if (plantingCount > 0) {
+      throw new ConflictException(
+        'Cannot delete vegetable because it is referenced by existing plantings',
+      );
     }
 
     await this.em.removeAndFlush(vegetable);
@@ -422,6 +435,7 @@ export class VegetablesService {
         .map((soil) => soil.id),
       nutrientDemand: entity.nutrientDemand ?? null,
       family: entity.family,
+      botanicalFamily: entity.botanicalFamily ?? null,
       nutrientNeeds: entity.nutrientNeeds,
       rotationGroup: entity.rotationGroup,
       minSoilDepthCm: entity.minSoilDepthCm ?? null,

@@ -14,6 +14,7 @@ import {
   Month,
   SunExposure,
   VegetableFamily,
+  BotanicalFamily,
   NutrientNeeds,
   RotationGroup,
   DominantNutrientDemand,
@@ -49,6 +50,21 @@ const ROTATION_GROUP_ITEMS: string[] = [
   'LEAF',
   'FRUITING',
   'OTHER',
+];
+
+const BOTANICAL_FAMILY_ITEMS: string[] = [
+  'SOLANACEAE',
+  'CUCURBITACEAE',
+  'BRASSICACEAE',
+  'AMARYLLIDACEAE',
+  'APIACEAE',
+  'FABACEAE',
+  'AMARANTHACEAE',
+  'ASTERACEAE',
+  'ASPARAGACEAE',
+  'POLYGONACEAE',
+  'MALVACEAE',
+  'POACEAE',
 ];
 
 @Entity({ tableName: 'vegetables' })
@@ -93,6 +109,9 @@ export class Vegetable {
 
   @Enum({ items: ROTATION_GROUP_ITEMS, default: 'OTHER' })
   rotationGroup!: RotationGroup;
+
+  @Enum({ items: BOTANICAL_FAMILY_ITEMS, nullable: true })
+  botanicalFamily?: BotanicalFamily | null;
 
   @Property({ type: 'int', nullable: true })
   minSoilDepthCm?: number | null;

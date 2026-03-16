@@ -5,6 +5,7 @@ import {
   SunExposure,
   SowingMethodType,
   VegetableFamily,
+  BotanicalFamily,
   NutrientNeeds,
   RotationGroup,
   DominantNutrientDemand,
@@ -31,6 +32,7 @@ export type VegetableBaseDto = {
 
   nutrientDemand?: DemandLevel | null;
   family?: VegetableFamily;
+  botanicalFamily?: BotanicalFamily | null;
   nutrientNeeds?: NutrientNeeds;
   rotationGroup?: RotationGroup;
   minSoilDepthCm?: number | null;
@@ -89,6 +91,8 @@ const sowingMethodTypeSchema = z.nativeEnum(SowingMethodType);
 const vegetableFamilySchema = z
   .nativeEnum(VegetableFamily)
   .default(VegetableFamily.OTHER);
+
+const botanicalFamilySchema = z.nativeEnum(BotanicalFamily).nullable();
 
 const nutrientNeedsSchema = z
   .nativeEnum(NutrientNeeds)
@@ -197,6 +201,7 @@ const baseVegetableSchema = z
 
     // defaults are defined on schema level -> no casts needed
     family: vegetableFamilySchema.optional(),
+    botanicalFamily: botanicalFamilySchema.optional(),
     nutrientNeeds: nutrientNeedsSchema.optional(),
     rotationGroup: rotationGroupSchema.optional(),
     minSoilDepthCm: nonNegativeNumber.nullable().optional(),
