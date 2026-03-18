@@ -23,6 +23,10 @@ export type CreateActionTemplateDto = ActionTemplateBaseDto & {
 
 export type UpdateActionTemplateDto = ActionTemplateBaseDto;
 
+export type DeleteActionTemplatesBulkDto = {
+  ids: string[];
+};
+
 export type ListActionTemplatesQueryDto = {
   page: number;
   limit: number;
@@ -48,6 +52,10 @@ export const createActionTemplateSchema = baseActionTemplateSchema.extend({
 });
 
 export const updateActionTemplateSchema = baseActionTemplateSchema;
+
+export const deleteActionTemplatesBulkSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1),
+});
 
 export const listActionTemplatesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

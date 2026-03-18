@@ -13,9 +13,11 @@ import {
 import { ArticlesService } from './articles.service';
 import {
   createArticleSchema,
+  deleteArticlesBulkSchema,
   listArticlesQuerySchema,
   updateArticleSchema,
   CreateArticleDto,
+  DeleteArticlesBulkDto,
   ListArticlesQueryDto,
   UpdateArticleDto,
 } from './dto/article.schemas';
@@ -53,6 +55,15 @@ export class ArticlesController {
     body: UpdateArticleDto,
   ) {
     return this.articlesService.update(id, body);
+  }
+
+  @Delete()
+  @HttpCode(204)
+  async removeBulk(
+    @Body(new ZodValidationPipe(deleteArticlesBulkSchema))
+    body: DeleteArticlesBulkDto,
+  ) {
+    await this.articlesService.removeMany(body.ids);
   }
 
   @Delete(':id')

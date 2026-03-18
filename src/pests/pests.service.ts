@@ -147,6 +147,17 @@ export class PestsService {
     await this.em.removeAndFlush(pest);
   }
 
+  async removeMany(ids: string[]) {
+    const uniqueIds = [...new Set(ids)];
+    const pests = await this.em.find(Pest, { id: { $in: uniqueIds } });
+
+    if (pests.length !== uniqueIds.length) {
+      throw new NotFoundException('One or more pests not found');
+    }
+
+    await this.em.removeAndFlush(pests);
+  }
+
   private async getActionTemplatesOrThrow(ids: string[]) {
     if (ids.length === 0) {
       return [];

@@ -13,9 +13,11 @@ import {
 import { WarningRulesService } from './warning-rules.service';
 import {
   createWarningRuleSchema,
+  deleteWarningRulesBulkSchema,
   listWarningRulesQuerySchema,
   updateWarningRuleSchema,
   CreateWarningRuleDto,
+  DeleteWarningRulesBulkDto,
   ListWarningRulesQueryDto,
   UpdateWarningRuleDto,
 } from './dto/warning-rule.schemas';
@@ -53,6 +55,15 @@ export class WarningRulesController {
     body: UpdateWarningRuleDto,
   ) {
     return this.warningRulesService.update(id, body);
+  }
+
+  @Delete()
+  @HttpCode(204)
+  async removeBulk(
+    @Body(new ZodValidationPipe(deleteWarningRulesBulkSchema))
+    body: DeleteWarningRulesBulkDto,
+  ) {
+    await this.warningRulesService.removeMany(body.ids);
   }
 
   @Delete(':id')

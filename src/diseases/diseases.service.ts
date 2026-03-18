@@ -150,6 +150,17 @@ export class DiseasesService {
     await this.em.removeAndFlush(disease);
   }
 
+  async removeMany(ids: string[]) {
+    const uniqueIds = [...new Set(ids)];
+    const diseases = await this.em.find(Disease, { id: { $in: uniqueIds } });
+
+    if (diseases.length !== uniqueIds.length) {
+      throw new NotFoundException('One or more diseases not found');
+    }
+
+    await this.em.removeAndFlush(diseases);
+  }
+
   private async getActionTemplatesOrThrow(ids: string[]) {
     if (ids.length === 0) {
       return [];
@@ -167,8 +178,14 @@ export class DiseasesService {
     return templates;
   }
 
-  private async findByNormalizedName(normalizedName: string, excludeId?: string) {
-    const diseases = await this.em.find(Disease, excludeId ? { id: { $ne: excludeId } } : {});
+  private async findByNormalizedName(
+    normalizedName: string,
+    excludeId?: string,
+  ) {
+    const diseases = await this.em.find(
+      Disease,
+      excludeId ? { id: { $ne: excludeId } } : {},
+    );
 
     return (
       diseases.find(

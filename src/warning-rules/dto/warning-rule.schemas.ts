@@ -31,6 +31,10 @@ export type CreateWarningRuleDto = WarningRuleBaseDto & {
 
 export type UpdateWarningRuleDto = WarningRuleBaseDto;
 
+export type DeleteWarningRulesBulkDto = {
+  ids: string[];
+};
+
 export type ListWarningRulesQueryDto = {
   page: number;
   limit: number;
@@ -69,6 +73,10 @@ export const createWarningRuleSchema = baseWarningRuleSchema.extend({
 });
 
 export const updateWarningRuleSchema = baseWarningRuleSchema;
+
+export const deleteWarningRulesBulkSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1),
+});
 
 export const listWarningRulesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

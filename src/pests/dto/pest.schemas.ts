@@ -16,6 +16,10 @@ export type CreatePestDto = PestBaseDto & {
 
 export type UpdatePestDto = PestBaseDto;
 
+export type DeletePestsBulkDto = {
+  ids: string[];
+};
+
 export type ListPestsQueryDto = {
   page: number;
   limit: number;
@@ -37,6 +41,10 @@ export const createPestSchema = basePestSchema.extend({
 });
 
 export const updatePestSchema = basePestSchema;
+
+export const deletePestsBulkSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1),
+});
 
 export const listPestsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

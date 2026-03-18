@@ -192,4 +192,15 @@ export class WarningRulesService {
 
     await this.em.removeAndFlush(rule);
   }
+
+  async removeMany(ids: string[]) {
+    const uniqueIds = [...new Set(ids)];
+    const rules = await this.em.find(WarningRule, { id: { $in: uniqueIds } });
+
+    if (rules.length !== uniqueIds.length) {
+      throw new NotFoundException('One or more warning rules not found');
+    }
+
+    await this.em.removeAndFlush(rules);
+  }
 }

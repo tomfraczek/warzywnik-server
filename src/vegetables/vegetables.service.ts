@@ -343,6 +343,28 @@ export class VegetablesService {
     await this.em.removeAndFlush(vegetable);
   }
 
+  async removeMany(ids: string[]) {
+    const uniqueIds = [...new Set(ids)];
+    const vegetables = await this.em.find(Vegetable, {
+      id: { $in: uniqueIds },
+    });
+
+    if (vegetables.length !== uniqueIds.length) {
+      throw new NotFoundException('One or more vegetables not found');
+    }
+
+    const plantingCount = await this.em.count(Planting, {
+      vegetable: { $in: uniqueIds },
+    });
+    if (plantingCount > 0) {
+      throw new ConflictException(
+        'Cannot delete one or more vegetables because they are referenced by existing plantings',
+      );
+    }
+
+    await this.em.removeAndFlush(vegetables);
+  }
+
   private async loadSoilsByIds(ids: string[]): Promise<Soil[]> {
     if (ids.length === 0) {
       return [];

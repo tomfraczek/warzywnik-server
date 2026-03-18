@@ -1,10 +1,12 @@
 import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
+  ArrayMinSize,
   IsEnum,
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   MaxLength,
   Min,
@@ -208,4 +210,11 @@ export class ListSoilsQueryDto {
   @IsString()
   @MinLength(1)
   q?: string;
+}
+
+export class DeleteSoilsBulkDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsUUID('4', { each: true })
+  ids!: string[];
 }

@@ -13,9 +13,11 @@ import {
 import { ActionTemplatesService } from './action-templates.service';
 import {
   createActionTemplateSchema,
+  deleteActionTemplatesBulkSchema,
   listActionTemplatesQuerySchema,
   updateActionTemplateSchema,
   CreateActionTemplateDto,
+  DeleteActionTemplatesBulkDto,
   ListActionTemplatesQueryDto,
   UpdateActionTemplateDto,
 } from './dto/action-template.schemas';
@@ -55,6 +57,15 @@ export class ActionTemplatesController {
     body: UpdateActionTemplateDto,
   ) {
     return this.actionTemplatesService.update(id, body);
+  }
+
+  @Delete()
+  @HttpCode(204)
+  async removeBulk(
+    @Body(new ZodValidationPipe(deleteActionTemplatesBulkSchema))
+    body: DeleteActionTemplatesBulkDto,
+  ) {
+    await this.actionTemplatesService.removeMany(body.ids);
   }
 
   @Delete(':id')

@@ -13,9 +13,11 @@ import {
 import { DiseasesService } from './diseases.service';
 import {
   createDiseaseSchema,
+  deleteDiseasesBulkSchema,
   listDiseasesQuerySchema,
   updateDiseaseSchema,
   CreateDiseaseDto,
+  DeleteDiseasesBulkDto,
   ListDiseasesQueryDto,
   UpdateDiseaseDto,
 } from './dto/disease.schemas';
@@ -51,6 +53,15 @@ export class DiseasesController {
     @Body(new ZodValidationPipe(updateDiseaseSchema)) body: UpdateDiseaseDto,
   ) {
     return this.diseasesService.update(id, body);
+  }
+
+  @Delete()
+  @HttpCode(204)
+  async removeBulk(
+    @Body(new ZodValidationPipe(deleteDiseasesBulkSchema))
+    body: DeleteDiseasesBulkDto,
+  ) {
+    await this.diseasesService.removeMany(body.ids);
   }
 
   @Delete(':id')

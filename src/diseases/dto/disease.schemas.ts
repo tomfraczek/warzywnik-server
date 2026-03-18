@@ -19,6 +19,10 @@ export type CreateDiseaseDto = DiseaseBaseDto & {
 
 export type UpdateDiseaseDto = DiseaseBaseDto;
 
+export type DeleteDiseasesBulkDto = {
+  ids: string[];
+};
+
 export type ListDiseasesQueryDto = {
   page: number;
   limit: number;
@@ -43,6 +47,10 @@ export const createDiseaseSchema = baseDiseaseSchema.extend({
 });
 
 export const updateDiseaseSchema = baseDiseaseSchema;
+
+export const deleteDiseasesBulkSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1),
+});
 
 export const listDiseasesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

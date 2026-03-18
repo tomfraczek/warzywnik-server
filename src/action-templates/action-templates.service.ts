@@ -126,6 +126,19 @@ export class ActionTemplatesService {
     await this.em.removeAndFlush(template);
   }
 
+  async removeMany(ids: string[]) {
+    const uniqueIds = [...new Set(ids)];
+    const templates = await this.em.find(ActionTemplate, {
+      id: { $in: uniqueIds },
+    });
+
+    if (templates.length !== uniqueIds.length) {
+      throw new NotFoundException('One or more action templates not found');
+    }
+
+    await this.em.removeAndFlush(templates);
+  }
+
   private serialize(entity: ActionTemplate) {
     return {
       id: entity.id,

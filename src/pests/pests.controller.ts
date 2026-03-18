@@ -13,9 +13,11 @@ import {
 import { PestsService } from './pests.service';
 import {
   createPestSchema,
+  deletePestsBulkSchema,
   listPestsQuerySchema,
   updatePestSchema,
   CreatePestDto,
+  DeletePestsBulkDto,
   ListPestsQueryDto,
   UpdatePestDto,
 } from './dto/pest.schemas';
@@ -49,6 +51,15 @@ export class PestsController {
     @Body(new ZodValidationPipe(updatePestSchema)) body: UpdatePestDto,
   ) {
     return this.pestsService.update(id, body);
+  }
+
+  @Delete()
+  @HttpCode(204)
+  async removeBulk(
+    @Body(new ZodValidationPipe(deletePestsBulkSchema))
+    body: DeletePestsBulkDto,
+  ) {
+    await this.pestsService.removeMany(body.ids);
   }
 
   @Delete(':id')

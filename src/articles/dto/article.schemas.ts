@@ -34,6 +34,10 @@ export type CreateArticleDto = ArticleBaseDto & {
 
 export type UpdateArticleDto = ArticleBaseDto;
 
+export type DeleteArticlesBulkDto = {
+  ids: string[];
+};
+
 export type ListArticlesQueryDto = {
   page: number;
   limit: number;
@@ -111,6 +115,12 @@ export const createArticleSchema = baseArticleSchema.extend({
 });
 
 export const updateArticleSchema = baseArticleSchema;
+
+export const deleteArticlesBulkSchema = z
+  .object({
+    ids: z.array(z.string().uuid()).min(1),
+  })
+  .strict();
 
 export const listArticlesQuerySchema = z
   .object({

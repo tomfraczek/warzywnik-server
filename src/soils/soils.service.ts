@@ -151,4 +151,15 @@ export class SoilsService {
 
     await this.em.removeAndFlush(soil);
   }
+
+  async removeMany(ids: string[]) {
+    const uniqueIds = [...new Set(ids)];
+    const soils = await this.em.find(Soil, { id: { $in: uniqueIds } });
+
+    if (soils.length !== uniqueIds.length) {
+      throw new NotFoundException('One or more soils not found');
+    }
+
+    await this.em.removeAndFlush(soils);
+  }
 }

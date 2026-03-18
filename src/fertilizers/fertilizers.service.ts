@@ -187,4 +187,17 @@ export class FertilizersService {
 
     await this.em.removeAndFlush(fertilizer);
   }
+
+  async removeMany(ids: string[]) {
+    const uniqueIds = [...new Set(ids)];
+    const fertilizers = await this.em.find(FertilizerType, {
+      id: { $in: uniqueIds },
+    });
+
+    if (fertilizers.length !== uniqueIds.length) {
+      throw new NotFoundException('One or more fertilizer types not found');
+    }
+
+    await this.em.removeAndFlush(fertilizers);
+  }
 }

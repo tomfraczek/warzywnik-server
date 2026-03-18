@@ -229,6 +229,17 @@ export class ArticlesService {
     await this.em.removeAndFlush(article);
   }
 
+  async removeMany(ids: string[]) {
+    const uniqueIds = [...new Set(ids)];
+    const articles = await this.em.find(Article, { id: { $in: uniqueIds } });
+
+    if (articles.length !== uniqueIds.length) {
+      throw new NotFoundException('One or more articles not found');
+    }
+
+    await this.em.removeAndFlush(articles);
+  }
+
   private serializeListItem(article: ArticleListItem) {
     return {
       id: article.id,

@@ -15,6 +15,7 @@ import {
 import { SoilsService } from './soils.service';
 import {
   CreateSoilDto,
+  DeleteSoilsBulkDto,
   ListSoilsQueryDto,
   UpdateSoilDto,
 } from './dto/soil.dto';
@@ -52,6 +53,13 @@ export class SoilsController {
     @Body() body: UpdateSoilDto,
   ) {
     return this.soilsService.update(id, body);
+  }
+
+  @Delete()
+  @HttpCode(204)
+  @UsePipes(validationPipe)
+  async removeBulk(@Body() body: DeleteSoilsBulkDto) {
+    await this.soilsService.removeMany(body.ids);
   }
 
   @Delete(':id')

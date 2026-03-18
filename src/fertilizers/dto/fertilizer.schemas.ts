@@ -50,6 +50,10 @@ export type CreateFertilizerTypeDto = FertilizerTypeBaseDto & {
 
 export type UpdateFertilizerTypeDto = FertilizerTypeBaseDto;
 
+export type DeleteFertilizerTypesBulkDto = {
+  ids: string[];
+};
+
 export type ListFertilizerTypesQueryDto = {
   page: number;
   limit: number;
@@ -102,6 +106,10 @@ export const createFertilizerTypeSchema = baseFertilizerTypeSchema.extend({
 });
 
 export const updateFertilizerTypeSchema = baseFertilizerTypeSchema;
+
+export const deleteFertilizerTypesBulkSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1),
+});
 
 export const listFertilizerTypesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

@@ -13,9 +13,11 @@ import {
 import { FertilizersService } from './fertilizers.service';
 import {
   createFertilizerTypeSchema,
+  deleteFertilizerTypesBulkSchema,
   listFertilizerTypesQuerySchema,
   updateFertilizerTypeSchema,
   type CreateFertilizerTypeDto,
+  type DeleteFertilizerTypesBulkDto,
   type ListFertilizerTypesQueryDto,
   type UpdateFertilizerTypeDto,
 } from './dto/fertilizer.schemas';
@@ -53,6 +55,15 @@ export class FertilizersController {
     body: UpdateFertilizerTypeDto,
   ) {
     return this.fertilizersService.update(id, body);
+  }
+
+  @Delete()
+  @HttpCode(204)
+  async removeBulk(
+    @Body(new ZodValidationPipe(deleteFertilizerTypesBulkSchema))
+    body: DeleteFertilizerTypesBulkDto,
+  ) {
+    await this.fertilizersService.removeMany(body.ids);
   }
 
   @Delete(':id')

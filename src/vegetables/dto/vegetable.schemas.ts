@@ -73,6 +73,10 @@ export type CreateVegetableDto = VegetableBaseDto & {
 
 export type UpdateVegetableDto = VegetableBaseDto;
 
+export type DeleteVegetablesBulkDto = {
+  ids: string[];
+};
+
 export type ListVegetablesQueryDto = {
   page: number;
   limit: number;
@@ -302,6 +306,12 @@ export const updateVegetableSchema = baseVegetableSchema.superRefine(
     }
   },
 );
+
+export const deleteVegetablesBulkSchema = z
+  .object({
+    ids: z.array(z.string().uuid()).min(1),
+  })
+  .strict();
 
 export const listVegetablesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
