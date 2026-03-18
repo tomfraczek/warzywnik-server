@@ -8,7 +8,7 @@ type PestSeedRecord = {
   symptoms: string;
   prevention: string;
   treatment: string;
-  recommendedActions: string[];
+  recommendedActionTemplateIds: string[];
 };
 
 export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
@@ -22,12 +22,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Usuwanie miejsc, w których ślimaki mogą się ukrywać, regularne odchwaszczanie grządek oraz stosowanie barier mechanicznych takich jak popiół, trociny lub specjalne obrzeża przeciw ślimakom.',
     treatment:
       'Ręczne zbieranie ślimaków, stosowanie pułapek oraz w przypadku silnej inwazji stosowanie preparatów biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Instalacja pułapek na szkodniki',
-      'Monitoring szkodników (pułapki)',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
+      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -40,12 +40,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Przekopywanie gleby jesienią i wiosną oraz kontrolowanie gleby przed sadzeniem nowych roślin.',
     treatment:
       'Ręczne usuwanie larw podczas prac w ogrodzie oraz stosowanie biologicznych preparatów przeciw larwom w glebie.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Spulchnianie gleby',
-      'Głębokie spulchnianie (broadfork)',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '39a4fa1f-fe4d-497b-b8bf-5580a33ff4c6',
+      'de5accb4-f844-4423-b84e-021cdd397064',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -58,12 +58,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularne przekopywanie gleby, stosowanie płodozmianu oraz unikanie zakładania nowych grządek na terenach wcześniej porośniętych trawą.',
     treatment:
       'Stosowanie pułapek glebowych, głębokie spulchnianie gleby oraz usuwanie larw podczas prac ogrodowych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Instalacja pułapek na szkodniki',
-      'Spulchnianie gleby',
-      'Głębokie spulchnianie (broadfork)',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
+      '39a4fa1f-fe4d-497b-b8bf-5580a33ff4c6',
+      'de5accb4-f844-4423-b84e-021cdd397064',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -76,11 +76,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularne przekopywanie gleby oraz usuwanie miejsc sprzyjających rozwojowi szkodnika.',
     treatment:
       'Stosowanie pułapek glebowych oraz mechaniczne niszczenie tuneli.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Instalacja pułapek na szkodniki',
-      'Spulchnianie gleby',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
+      '39a4fa1f-fe4d-497b-b8bf-5580a33ff4c6',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -93,11 +93,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Stosowanie płodozmianu oraz uprawy roślin poplonowych ograniczających rozwój nicieni.',
     treatment:
       'Poprawa struktury gleby oraz stosowanie biologicznych metod ograniczania populacji nicieni.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Uprawa roślin poplonowych',
-      'Solarizacja gleby',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '88405217-3087-47a3-a37a-ea0e1c597203',
+      'a43552b5-8d3d-41c0-b956-2025b6dd0b04',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -110,11 +110,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularne kontrolowanie roślin oraz wspieranie naturalnych wrogów gąsienic takich jak ptaki.',
     treatment:
       'Ręczne usuwanie gąsienic oraz stosowanie oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Oprysk biologiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -127,12 +127,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Stosowanie osłon z agrowłókniny oraz regularna kontrola liści.',
     treatment:
       'Ręczne usuwanie gąsienic oraz stosowanie oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Oprysk biologiczny',
-      'Instalacja siatek ochronnych',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '76c3ae24-9c26-4db9-a053-46c50bb88787',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -143,11 +143,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Drobne liczne dziury w liściach oraz obecność małych zielonych gąsienic.',
     prevention: 'Regularna kontrola roślin oraz stosowanie płodozmianu.',
     treatment: 'Usuwanie gąsienic oraz stosowanie oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Oprysk biologiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -157,11 +157,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     symptoms: 'Podgryzione łodygi młodych roślin oraz nagłe zamieranie siewek.',
     prevention: 'Regularne odchwaszczanie grządek oraz przekopywanie gleby.',
     treatment: 'Stosowanie pułapek oraz ręczne usuwanie gąsienic.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Instalacja pułapek na szkodniki',
-      'Usunięcie ręczne szkodników',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -172,11 +172,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention: 'Regularna kontrola roślin oraz usuwanie chwastów.',
     treatment:
       'Ręczne usuwanie gąsienic oraz stosowanie oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Oprysk biologiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -188,12 +188,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention: 'Regularne kontrolowanie roślin oraz stosowanie płodozmianu.',
     treatment:
       'Ręczne zbieranie larw i chrząszczy oraz stosowanie oprysków biologicznych lub chemicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Oprysk biologiczny',
-      'Oprysk chemiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      'f52cb753-5cd1-4ae6-888a-2850c592d498',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -204,11 +204,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention:
       'Utrzymywanie wilgotnej gleby oraz stosowanie osłon z agrowłókniny.',
     treatment: 'Stosowanie oprysków ekologicznych oraz przykrywanie roślin.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Instalacja siatek ochronnych',
-      'Oprysk ekologiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '76c3ae24-9c26-4db9-a053-46c50bb88787',
+      '0359692e-8d11-4611-a85c-5066fb3303cc',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -220,11 +220,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularna kontrola roślin oraz wspieranie naturalnych wrogów szkodników.',
     treatment:
       'Ręczne usuwanie chrząszczy oraz stosowanie oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Oprysk biologiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -237,12 +237,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularne monitorowanie roślin oraz stosowanie pułapek feromonowych.',
     treatment:
       'Ręczne usuwanie gąsienic oraz stosowanie oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Monitoring szkodników (pułapki)',
-      'Instalacja pułapek na szkodniki',
-      'Oprysk biologiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
+      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -254,12 +254,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention:
       'Regularne kontrolowanie owoców oraz usuwanie uszkodzonych części roślin.',
     treatment: 'Stosowanie pułapek feromonowych oraz oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Monitoring szkodników (pułapki)',
-      'Instalacja pułapek na szkodniki',
-      'Oprysk biologiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
+      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -272,12 +272,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Stosowanie płodozmianu, sadzenie roślin w odpowiednich odstępach, stosowanie osłon z agrowłókniny oraz regularne kontrolowanie podstawy roślin.',
     treatment:
       'Usuwanie silnie porażonych roślin, stosowanie pułapek oraz w razie konieczności oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Monitoring szkodników (pułapki)',
-      'Instalacja siatek ochronnych',
-      'Usunięcie ręczne szkodników',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
+      '76c3ae24-9c26-4db9-a053-46c50bb88787',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -290,12 +290,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Stosowanie płodozmianu, sadzenie cebuli w miejscach przewiewnych oraz stosowanie osłon ochronnych.',
     treatment:
       'Usuwanie porażonych roślin oraz stosowanie pułapek i oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Monitoring szkodników (pułapki)',
-      'Instalacja siatek ochronnych',
-      'Usunięcie ręczne szkodników',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
+      '76c3ae24-9c26-4db9-a053-46c50bb88787',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -308,10 +308,10 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Stosowanie zdrowego materiału siewnego, odpowiednie przygotowanie gleby oraz unikanie wysiewu w zbyt zimnej i wilgotnej glebie.',
     treatment:
       'Usuwanie porażonych siewek oraz stosowanie biologicznych metod ograniczania populacji szkodnika.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Regularny przegląd uprawy',
-      'Poprawa warunków kiełkowania',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      // Removed: no ActionTemplate ID mapping for "Poprawa warunków kiełkowania" in the dictionary.
     ],
   },
   {
@@ -324,11 +324,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Uprawa marchwi w miejscach przewiewnych i słonecznych, stosowanie płodozmianu oraz osłon z agrowłókniny.',
     treatment:
       'Usuwanie porażonych roślin oraz stosowanie pułapek i oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Monitoring szkodników (pułapki)',
-      'Instalacja siatek ochronnych',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
+      '76c3ae24-9c26-4db9-a053-46c50bb88787',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -341,13 +341,13 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularna kontrola liści roślin kapustnych, wspieranie naturalnych wrogów mszyc oraz stosowanie płodozmianu.',
     treatment:
       'Ręczne usuwanie kolonii mszyc oraz stosowanie oprysków ekologicznych lub biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Oprysk ekologiczny',
-      'Oprysk biologiczny',
-      'Zwalczanie mszyc',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '0359692e-8d11-4611-a85c-5066fb3303cc',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '4ea08205-5c4b-47bb-b24f-030460e608fc',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -360,13 +360,13 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularna kontrola młodych pędów roślin oraz wspieranie obecności naturalnych drapieżników takich jak biedronki.',
     treatment:
       'Usuwanie kolonii mszyc oraz stosowanie oprysków biologicznych i ekologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Oprysk ekologiczny',
-      'Oprysk biologiczny',
-      'Zwalczanie mszyc',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '0359692e-8d11-4611-a85c-5066fb3303cc',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '4ea08205-5c4b-47bb-b24f-030460e608fc',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -379,13 +379,13 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularna kontrola roślin w szklarni oraz stosowanie tablic lepnych do monitorowania populacji.',
     treatment:
       'Stosowanie tablic lepnych, oprysków biologicznych oraz usuwanie silnie porażonych liści.',
-    recommendedActions: [
-      'Monitoring szkodników (pułapki)',
-      'Montaż pułapek lepnych',
-      'Kontrola szkodników',
-      'Oprysk biologiczny',
-      'Oprysk ekologiczny',
-      'Zwalczanie mączlików',
+    recommendedActionTemplateIds: [
+      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
+      'a93bdbc0-e3f0-40fe-98d7-526d3aed3547',
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '0359692e-8d11-4611-a85c-5066fb3303cc',
+      '6f1a3389-8f9b-4d4d-b7c6-95dd6ecc839a',
     ],
   },
   {
@@ -398,12 +398,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Utrzymywanie odpowiedniej wilgotności powietrza w szklarni oraz regularna kontrola spodniej strony liści.',
     treatment:
       'Usuwanie porażonych liści oraz stosowanie oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Oprysk biologiczny',
-      'Oprysk ekologiczny',
-      'Zwalczanie przędziorków',
-      'Monitoring szkodników (pułapki)',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '0359692e-8d11-4611-a85c-5066fb3303cc',
+      'c42f45a7-6902-4ca1-895b-93f905f598a6',
+      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
     ],
   },
   {
@@ -415,12 +415,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention: 'Regularne monitorowanie upraw oraz stosowanie tablic lepnych.',
     treatment:
       'Stosowanie oprysków biologicznych oraz usuwanie silnie porażonych części roślin.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Monitoring szkodników (pułapki)',
-      'Montaż pułapek lepnych',
-      'Oprysk biologiczny',
-      'Oprysk ekologiczny',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
+      'a93bdbc0-e3f0-40fe-98d7-526d3aed3547',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '0359692e-8d11-4611-a85c-5066fb3303cc',
     ],
   },
   {
@@ -433,11 +433,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularne kontrolowanie liści oraz usuwanie porażonych części roślin.',
     treatment:
       'Usuwanie porażonych liści oraz stosowanie oprysków biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usuwanie porażonych części',
-      'Oprysk biologiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '37447ae0-c2a0-444f-a43e-e09383d6bdb8',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -449,11 +449,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention:
       'Regularna kontrola roślin oraz utrzymywanie odpowiedniej wilgotności gleby.',
     treatment: 'Stosowanie oprysków ekologicznych oraz biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Oprysk ekologiczny',
-      'Oprysk biologiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '0359692e-8d11-4611-a85c-5066fb3303cc',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -466,12 +466,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularne kontrolowanie łodyg i liści roślin oraz utrzymywanie dobrej kondycji roślin poprzez właściwe nawożenie i podlewanie.',
     treatment:
       'Mechaniczne usuwanie owadów z roślin, stosowanie oprysków ekologicznych oraz biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Oprysk ekologiczny',
-      'Oprysk biologiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '0359692e-8d11-4611-a85c-5066fb3303cc',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -484,12 +484,12 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularna kontrola roślin oraz utrzymywanie odpowiedniej wilgotności powietrza w szklarni.',
     treatment:
       'Usuwanie kolonii ręcznie oraz stosowanie oprysków ekologicznych lub biologicznych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Usunięcie ręczne szkodników',
-      'Oprysk ekologiczny',
-      'Oprysk biologiczny',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      'd9b6515c-1915-4342-a079-cc6029194ebd',
+      '0359692e-8d11-4611-a85c-5066fb3303cc',
+      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -501,10 +501,10 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention:
       'Utrzymywanie ogrodu w czystości oraz ograniczanie miejsc, w których gryzonie mogą się ukrywać.',
     treatment: 'Stosowanie pułapek oraz odstraszaczy.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Instalacja pułapek na szkodniki',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -515,10 +515,10 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention:
       'Usuwanie miejsc, w których myszy mogą się ukrywać oraz utrzymywanie porządku w ogrodzie.',
     treatment: 'Stosowanie pułapek oraz odstraszaczy.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Instalacja pułapek na szkodniki',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -528,10 +528,10 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     symptoms: 'Kopce ziemi na powierzchni grządek oraz liczne tunele w glebie.',
     prevention: 'Stosowanie barier mechanicznych oraz odstraszaczy.',
     treatment: 'Instalacja pułapek lub odstraszaczy dźwiękowych.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Instalacja pułapek na szkodniki',
-      'Regularny przegląd uprawy',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
     ],
   },
   {
@@ -542,11 +542,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention:
       'Ograniczanie populacji mszyc oraz usuwanie miejsc sprzyjających zakładaniu gniazd przez mrówki.',
     treatment: 'Stosowanie pułapek na mrówki oraz ograniczanie kolonii mszyc.',
-    recommendedActions: [
-      'Kontrola szkodników',
-      'Instalacja pułapek na szkodniki',
-      'Regularny przegląd uprawy',
-      'Zwalczanie mszyc',
+    recommendedActionTemplateIds: [
+      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
+      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
+      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '4ea08205-5c4b-47bb-b24f-030460e608fc',
     ],
   },
 ] as const;
@@ -559,6 +559,19 @@ export async function upsertDefaultPests(
   em: EntityManager,
   logger?: LoggerLike,
 ): Promise<void> {
+  const actionTemplateIds = [
+    ...new Set(
+      DEFAULT_PESTS.flatMap((seed) => seed.recommendedActionTemplateIds),
+    ),
+  ];
+  const actionTemplates = actionTemplateIds.length
+    ? await em.find(ActionTemplate, { id: { $in: actionTemplateIds } })
+    : [];
+
+  const actionTemplateById = new Map(
+    actionTemplates.map((item) => [item.id, item]),
+  );
+
   for (const seed of DEFAULT_PESTS) {
     let pest = await em.findOne(Pest, {
       name: { $ilike: seed.name },
@@ -574,23 +587,20 @@ export async function upsertDefaultPests(
     pest.prevention = seed.prevention;
     pest.treatment = seed.treatment;
 
-    const actionTemplates: ActionTemplate[] = [];
-    for (const actionName of seed.recommendedActions) {
-      const actionTemplate = await em.findOne(ActionTemplate, {
-        name: { $ilike: actionName },
-      });
+    const linkedTemplates = seed.recommendedActionTemplateIds
+      .map((id) => actionTemplateById.get(id))
+      .filter((item): item is ActionTemplate => Boolean(item));
 
-      if (!actionTemplate) {
-        logger?.warn(
-          `Action template not found for pest "${seed.name}": "${actionName}"`,
-        );
-        continue;
-      }
-
-      actionTemplates.push(actionTemplate);
+    if (linkedTemplates.length !== seed.recommendedActionTemplateIds.length) {
+      const missingIds = seed.recommendedActionTemplateIds.filter(
+        (id) => !actionTemplateById.has(id),
+      );
+      logger?.warn(
+        `Pest seed "${seed.name}" references missing ActionTemplate IDs: ${missingIds.join(', ')}`,
+      );
     }
 
-    pest.recommendedActions.set(actionTemplates);
+    pest.recommendedActions.set(linkedTemplates);
     em.persist(pest);
   }
 
