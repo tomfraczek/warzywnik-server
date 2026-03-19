@@ -25,6 +25,133 @@ type WarningRuleSeed = {
   isActive?: boolean;
 };
 
+const hintUpdatesByCode: Record<string, string> = {
+  HEAVY_RAIN_TODAY_DAY:
+    'Sprawdź odpływ wody, drożność międzyrzędzi i miejsca, gdzie może tworzyć się zastój. W miarę możliwości wstrzymaj podlewanie i po opadach oceń, czy gleba nie jest zbita lub zalana.',
+  HEAVY_RAIN_TODAY_NIGHT:
+    'Sprawdź odpływ wody, drożność międzyrzędzi i miejsca, gdzie może tworzyć się zastój. W miarę możliwości wstrzymaj podlewanie i po opadach oceń, czy gleba nie jest zbita lub zalana.',
+  HEAVY_RAIN_TOMORROW_DAY:
+    'Sprawdź odpływ wody, drożność międzyrzędzi i miejsca, gdzie może tworzyć się zastój. W miarę możliwości wstrzymaj podlewanie i po opadach oceń, czy gleba nie jest zbita lub zalana.',
+  HEAVY_RAIN_TOMORROW_NIGHT:
+    'Sprawdź odpływ wody, drożność międzyrzędzi i miejsca, gdzie może tworzyć się zastój. W miarę możliwości wstrzymaj podlewanie i po opadach oceń, czy gleba nie jest zbita lub zalana.',
+
+  WIND_DAMAGE_TODAY_DAY:
+    'Zabezpiecz podpory, podwiąż wyższe rośliny i usuń lekkie elementy, które może porwać wiatr. Po zdarzeniu sprawdź uszkodzenia pędów, liści i ewentualne przechylenie roślin.',
+  WIND_DAMAGE_TODAY_NIGHT:
+    'Zabezpiecz podpory, podwiąż wyższe rośliny i usuń lekkie elementy, które może porwać wiatr. Po zdarzeniu sprawdź uszkodzenia pędów, liści i ewentualne przechylenie roślin.',
+  WIND_DAMAGE_TOMORROW_DAY:
+    'Zabezpiecz podpory, podwiąż wyższe rośliny i usuń lekkie elementy, które może porwać wiatr. Po zdarzeniu sprawdź uszkodzenia pędów, liści i ewentualne przechylenie roślin.',
+  WIND_DAMAGE_TOMORROW_NIGHT:
+    'Zabezpiecz podpory, podwiąż wyższe rośliny i usuń lekkie elementy, które może porwać wiatr. Po zdarzeniu sprawdź uszkodzenia pędów, liści i ewentualne przechylenie roślin.',
+
+  GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT:
+    'Osłoń kiełkujące lub świeżo wzeszłe rośliny agrowłókniną, mini tunelem albo inną lekką osłoną. Najbardziej wrażliwy jest etap wschodów i pierwszych liścieni.',
+  GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT:
+    'Osłoń kiełkujące lub świeżo wzeszłe rośliny agrowłókniną, mini tunelem albo inną lekką osłoną. Najbardziej wrażliwy jest etap wschodów i pierwszych liścieni.',
+
+  FROST_RISK_TODAY_NIGHT:
+    'Przygotuj osłonę dla roślin wrażliwych na chłód, szczególnie młodych warzyw ciepłolubnych. Rano sprawdź liście i wstrzymaj cięcie lub inne zabiegi do czasu oceny uszkodzeń.',
+  FROST_RISK_TOMORROW_NIGHT:
+    'Przygotuj osłonę dla roślin wrażliwych na chłód, szczególnie młodych warzyw ciepłolubnych. Rano sprawdź liście i wstrzymaj cięcie lub inne zabiegi do czasu oceny uszkodzeń.',
+
+  HARD_FROST_RISK_TODAY_NIGHT:
+    'Zastosuj mocniejsze zabezpieczenie niż przy zwykłym przymrozku: kilka warstw osłony, przeniesienie pojemników albo dodatkowe zabezpieczenie konstrukcji. Przy dłuższym okresie chłodu zaplanuj ochronę z wyprzedzeniem.',
+  HARD_FROST_RISK_TOMORROW_NIGHT:
+    'Zastosuj mocniejsze zabezpieczenie niż przy zwykłym przymrozku: kilka warstw osłony, przeniesienie pojemników albo dodatkowe zabezpieczenie konstrukcji. Przy dłuższym okresie chłodu zaplanuj ochronę z wyprzedzeniem.',
+  HARD_FROST_RISK_NEXT_7_DAYS:
+    'Zastosuj mocniejsze zabezpieczenie niż przy zwykłym przymrozku: kilka warstw osłony, przeniesienie pojemników albo dodatkowe zabezpieczenie konstrukcji. Przy dłuższym okresie chłodu zaplanuj ochronę z wyprzedzeniem.',
+
+  WATERING_NEEDED_TODAY:
+    'Sprawdź wilgotność gleby w strefie korzeniowej, nie tylko na powierzchni. Jeśli podłoże jest suche głębiej, wykonaj rzadsze, ale obfitsze podlewanie zamiast lekkiego zraszania.',
+  WATERING_NEEDED_TOMORROW:
+    'Sprawdź wilgotność gleby w strefie korzeniowej, nie tylko na powierzchni. Jeśli podłoże jest suche głębiej, wykonaj rzadsze, ale obfitsze podlewanie zamiast lekkiego zraszania.',
+
+  OVERWATERING_PREPARE_TODAY:
+    'Przed opadami udrożnij odpływ wody, sprawdź brzegi grządki i usuń przeszkody, które zatrzymują spływ. Najlepiej działać zanim gleba zostanie zalana.',
+  OVERWATERING_PREPARE_TOMORROW:
+    'Przed opadami udrożnij odpływ wody, sprawdź brzegi grządki i usuń przeszkody, które zatrzymują spływ. Najlepiej działać zanim gleba zostanie zalana.',
+
+  OVERWATERING_CHECK_TODAY:
+    'Po opadach sprawdź, czy woda nie stoi w zagłębieniach i czy gleba nie jest lepka oraz pozbawiona przewiewności. Wstrzymaj kolejne podlewanie do czasu poprawy warunków powietrzno-wodnych.',
+  OVERWATERING_CHECK_TOMORROW:
+    'Po opadach sprawdź, czy woda nie stoi w zagłębieniach i czy gleba nie jest lepka oraz pozbawiona przewiewności. Wstrzymaj kolejne podlewanie do czasu poprawy warunków powietrzno-wodnych.',
+
+  SOWING_PAUSE_TOO_COLD_TODAY:
+    'Wstrzymaj siew do czasu poprawy temperatury gleby i warunków startowych. Zbyt wczesny siew często wydłuża wschody i zwiększa ryzyko nierównomiernego rozwoju.',
+  SOWING_PAUSE_TOO_COLD_TOMORROW:
+    'Wstrzymaj siew do czasu poprawy temperatury gleby i warunków startowych. Zbyt wczesny siew często wydłuża wschody i zwiększa ryzyko nierównomiernego rozwoju.',
+
+  GREENHOUSE_SUDDEN_TEMP_DROP_TODAY:
+    'Sprawdź możliwość domknięcia szklarni lub tunelu przed nocą i przygotuj dodatkową osłonę dla najwrażliwszych roślin. Gwałtowny spadek temperatury jest szczególnie niebezpieczny przy dużej amplitudzie dobowej.',
+  GREENHOUSE_SUDDEN_TEMP_DROP_TOMORROW:
+    'Sprawdź możliwość domknięcia szklarni lub tunelu przed nocą i przygotuj dodatkową osłonę dla najwrażliwszych roślin. Gwałtowny spadek temperatury jest szczególnie niebezpieczny przy dużej amplitudzie dobowej.',
+
+  GREENHOUSE_WET_SNOW_TODAY:
+    'Kontroluj dach i poszycie konstrukcji, ponieważ mokry śnieg szybko zwiększa obciążenie. W razie potrzeby usuń śnieg możliwie wcześnie i sprawdź newralgiczne punkty stelaża.',
+  GREENHOUSE_WET_SNOW_TOMORROW:
+    'Kontroluj dach i poszycie konstrukcji, ponieważ mokry śnieg szybko zwiększa obciążenie. W razie potrzeby usuń śnieg możliwie wcześnie i sprawdź newralgiczne punkty stelaża.',
+
+  GREENHOUSE_SNOW_LOAD_TODAY:
+    'Sprawdź wytrzymałość konstrukcji, podpory i miejsca łączeń. Przy ryzyku dużego obciążenia nie czekaj na odkształcenie — usuń zalegający śnieg jak najszybciej.',
+  GREENHOUSE_SNOW_LOAD_TOMORROW:
+    'Sprawdź wytrzymałość konstrukcji, podpory i miejsca łączeń. Przy ryzyku dużego obciążenia nie czekaj na odkształcenie — usuń zalegający śnieg jak najszybciej.',
+
+  GREENHOUSE_HEAVY_RAIN_TODAY_DAY:
+    'Skontroluj odpływ wody wokół szklarni lub tunelu, rynny i miejsca, gdzie może dochodzić do podmakania wejść albo boków konstrukcji. Problem często dotyczy otoczenia obiektu bardziej niż samego wnętrza.',
+  GREENHOUSE_HEAVY_RAIN_TOMORROW_DAY:
+    'Skontroluj odpływ wody wokół szklarni lub tunelu, rynny i miejsca, gdzie może dochodzić do podmakania wejść albo boków konstrukcji. Problem często dotyczy otoczenia obiektu bardziej niż samego wnętrza.',
+
+  GREENHOUSE_STORM_TODAY_DAY:
+    'Sprawdź zamknięcia, mocowania folii lub szyb oraz stabilność drzwi i wietrzników. Burza może uszkodzić zarówno konstrukcję, jak i rośliny ustawione przy wejściach oraz ścianach.',
+  GREENHOUSE_STORM_TOMORROW_DAY:
+    'Sprawdź zamknięcia, mocowania folii lub szyb oraz stabilność drzwi i wietrzników. Burza może uszkodzić zarówno konstrukcję, jak i rośliny ustawione przy wejściach oraz ścianach.',
+
+  GREENHOUSE_HEAT_WAVE_TODAY_DAY:
+    'Zadbaj o przewietrzanie, cieniowanie i kontrolę temperatury wewnątrz obiektu. W uprawie pod osłonami stres cieplny narasta szybciej niż w gruncie, nawet gdy na zewnątrz warunki wydają się jeszcze akceptowalne.',
+  GREENHOUSE_HEAT_WAVE_TOMORROW_DAY:
+    'Zadbaj o przewietrzanie, cieniowanie i kontrolę temperatury wewnątrz obiektu. W uprawie pod osłonami stres cieplny narasta szybciej niż w gruncie, nawet gdy na zewnątrz warunki wydają się jeszcze akceptowalne.',
+
+  GREENHOUSE_STRONG_WIND_TODAY_DAY:
+    'Sprawdź mocowanie konstrukcji, folii, drzwi i elementów ruchomych. Zabezpiecz lekkie wyposażenie oraz wszystko, co może uderzać o osłonę podczas podmuchów.',
+  GREENHOUSE_STRONG_WIND_TOMORROW_DAY:
+    'Sprawdź mocowanie konstrukcji, folii, drzwi i elementów ruchomych. Zabezpiecz lekkie wyposażenie oraz wszystko, co może uderzać o osłonę podczas podmuchów.',
+
+  GREENHOUSE_FROST_RISK_TODAY_NIGHT:
+    'Pod osłoną temperatura również może spaść do poziomu groźnego dla roślin ciepłolubnych. Rozważ dodatkową warstwę ochrony wewnątrz obiektu lub czasowe dogrzanie, jeśli taki wariant jest dostępny.',
+  GREENHOUSE_FROST_RISK_TOMORROW_NIGHT:
+    'Pod osłoną temperatura również może spaść do poziomu groźnego dla roślin ciepłolubnych. Rozważ dodatkową warstwę ochrony wewnątrz obiektu lub czasowe dogrzanie, jeśli taki wariant jest dostępny.',
+
+  GREENHOUSE_HARD_FROST_RISK_TODAY_NIGHT:
+    'Przy silnym mrozie sama osłona konstrukcyjna może nie wystarczyć. Warto połączyć zamknięcie obiektu z dodatkową osłoną roślin, izolacją pojemników lub inną formą awaryjnego zabezpieczenia.',
+  GREENHOUSE_HARD_FROST_RISK_TOMORROW_NIGHT:
+    'Przy silnym mrozie sama osłona konstrukcyjna może nie wystarczyć. Warto połączyć zamknięcie obiektu z dodatkową osłoną roślin, izolacją pojemników lub inną formą awaryjnego zabezpieczenia.',
+
+  FUNGAL_DISEASE_PRESSURE_HIGH:
+    'Po uruchomieniu tej reguły warto łączyć ją z wilgotnością liścia, czasem zwilżenia i przewietrzaniem. Sama pogoda bywa niewystarczająca do trafnego alarmu dla chorób grzybowych.',
+  OVERWATERING_RISK:
+    'Ten kod został zastąpiony przez bardziej operacyjne warningi PREPARE i CHECK. Jeśli wróci do użycia, powinien pełnić rolę ogólnego sygnału wstępnego, a nie końcowej rekomendacji.',
+  GERMINATION_TOO_COLD:
+    'Ten kod został zastąpiony przez rozdzielenie na wstrzymanie siewu i ochronę kiełkujących roślin. W obecnym modelu lepiej zostawić go wyłączonego, żeby nie dublować komunikatów.',
+};
+
+const cooldownUpdatesByCode: Record<string, number> = {
+  DRAINAGE_MISMATCH: 30,
+  HARVEST_WINDOW_MISSED: 7,
+  PH_OUT_OF_RANGE: 30,
+  WATER_RETENTION_MISMATCH: 30,
+  ROTATION_RISK: 30,
+  DEPTH_TOO_SMALL: 60,
+  SUBOPTIMAL_SOWING_TIME: 7,
+  FAMILY_REPETITION: 30,
+  EXPERIMENTAL_SETUP: 30,
+  SOIL_NOT_RECOMMENDED: 30,
+  NPK_TOO_LOW: 21,
+};
+
+const cooldownFixesByCode: Record<string, number> = {
+  HARD_FROST_RISK_NEXT_7_DAYS: 1,
+};
+
 @Injectable()
 export class WeatherWarningsSeedService implements OnModuleInit {
   private readonly logger = new Logger(WeatherWarningsSeedService.name);
@@ -131,12 +258,94 @@ export class WeatherWarningsSeedService implements OnModuleInit {
       rule.generatesTask = seed.generatesTask;
       rule.title = seed.title;
       rule.messageTemplate = seed.messageTemplate;
-      rule.hintTemplate = seed.hintTemplate ?? null;
+      rule.hintTemplate =
+        hintUpdatesByCode[seed.code] ??
+        seed.hintTemplate ??
+        rule.hintTemplate ??
+        null;
+      rule.cooldownDays =
+        cooldownUpdatesByCode[seed.code] ??
+        cooldownFixesByCode[seed.code] ??
+        rule.cooldownDays ??
+        null;
 
       this.em.persist(rule);
     }
 
     await this.em.flush();
+
+    await this.applyGlobalRuleOverrides();
+    await this.validateRuleSeedState();
+  }
+
+  private async applyGlobalRuleOverrides(): Promise<void> {
+    const codes = Array.from(
+      new Set([
+        ...Object.keys(hintUpdatesByCode),
+        ...Object.keys(cooldownUpdatesByCode),
+        ...Object.keys(cooldownFixesByCode),
+      ]),
+    ) as WarningCode[];
+
+    const rules = await this.em.find(WarningRule, {
+      code: { $in: codes },
+    });
+
+    for (const rule of rules) {
+      rule.hintTemplate =
+        hintUpdatesByCode[rule.code] ?? rule.hintTemplate ?? null;
+      rule.cooldownDays =
+        cooldownUpdatesByCode[rule.code] ??
+        cooldownFixesByCode[rule.code] ??
+        rule.cooldownDays ??
+        null;
+      this.em.persist(rule);
+    }
+
+    await this.em.flush();
+  }
+
+  private async validateRuleSeedState(): Promise<void> {
+    const rules = await this.em.find(WarningRule, {});
+
+    const missingCooldown = rules.filter(
+      (rule) => rule.cooldownDays === null || rule.cooldownDays === undefined,
+    );
+    if (missingCooldown.length > 0) {
+      const codes = missingCooldown.map((rule) => rule.code).join(', ');
+      throw new Error(
+        `Seed validation failed: missing cooldownDays for ${codes}`,
+      );
+    }
+
+    const emptyHintsForEnabled = rules.filter(
+      (rule) =>
+        rule.enabled &&
+        (!rule.hintTemplate || rule.hintTemplate.trim().length === 0),
+    );
+    if (emptyHintsForEnabled.length > 0) {
+      const codes = emptyHintsForEnabled.map((rule) => rule.code).join(', ');
+      throw new Error(
+        `Seed validation failed: empty hintTemplate for enabled rules: ${codes}`,
+      );
+    }
+
+    const duplicatedCodes = rules
+      .map((rule) => rule.code)
+      .filter((code, index, arr) => arr.indexOf(code) !== index);
+    if (duplicatedCodes.length > 0) {
+      throw new Error(
+        `Seed validation failed: duplicated codes: ${Array.from(new Set(duplicatedCodes)).join(', ')}`,
+      );
+    }
+
+    const tooLongTitles = rules.filter((rule) => rule.title.length > 120);
+    if (tooLongTitles.length > 0) {
+      const codes = tooLongTitles.map((rule) => rule.code).join(', ');
+      throw new Error(
+        `Seed validation failed: title length exceeds DB limit for ${codes}`,
+      );
+    }
   }
 
   private async upsertConfigSeeds() {
