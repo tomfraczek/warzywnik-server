@@ -16,9 +16,9 @@ type DiseaseSeedRecord = {
 
 function loadDefaultDiseases(): readonly DiseaseSeedRecord[] {
   const candidatePaths = [
+    resolve(process.cwd(), 'src/diseases/default-diseases.seed.json'),
     resolve(process.cwd(), 'temp/diseases_seed_complete.json'),
     '/Users/tomaszfraczek/Downloads/diseases_seed_complete.json',
-    resolve(process.cwd(), 'src/diseases/default-diseases.seed.json'),
   ];
 
   for (const filePath of candidatePaths) {
@@ -103,7 +103,14 @@ export async function upsertDefaultDiseases(
       );
     }
 
-    disease.recommendedActions.set(linkedTemplates);
+    if (seed.recommendedActionTemplateIds.length === 0) {
+      disease.recommendedActions.set([]);
+    } else if (
+      linkedTemplates.length === seed.recommendedActionTemplateIds.length
+    ) {
+      disease.recommendedActions.set(linkedTemplates);
+    }
+
     em.persist(disease);
   }
 

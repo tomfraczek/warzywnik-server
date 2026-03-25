@@ -23,11 +23,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Ręczne zbieranie ślimaków, stosowanie pułapek oraz w przypadku silnej inwazji stosowanie preparatów biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
-      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      '2f038b95-b639-4663-b3c1-929d598f0d04',
+      '80086f58-94c6-4767-bc89-2272a54e5b42',
+      '0d401c03-657e-4f3a-8b6c-f89334bde3c8',
     ],
   },
   {
@@ -41,11 +41,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Ręczne usuwanie larw podczas prac w ogrodzie oraz stosowanie biologicznych preparatów przeciw larwom w glebie.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '39a4fa1f-fe4d-497b-b8bf-5580a33ff4c6',
-      'de5accb4-f844-4423-b84e-021cdd397064',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '2f7e746a-7ddc-4c3f-8e82-da3bebf4d348',
+      '24f47270-22af-420f-9897-2ab997097e90',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      'a0e0af88-cd46-4887-8368-3b53855c631e',
     ],
   },
   {
@@ -59,11 +59,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Stosowanie pułapek glebowych, głębokie spulchnianie gleby oraz usuwanie larw podczas prac ogrodowych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
-      '39a4fa1f-fe4d-497b-b8bf-5580a33ff4c6',
-      'de5accb4-f844-4423-b84e-021cdd397064',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      '2f7e746a-7ddc-4c3f-8e82-da3bebf4d348',
+      '24f47270-22af-420f-9897-2ab997097e90',
+      'a0e0af88-cd46-4887-8368-3b53855c631e',
     ],
   },
   {
@@ -77,10 +77,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Stosowanie pułapek glebowych oraz mechaniczne niszczenie tuneli.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
-      '39a4fa1f-fe4d-497b-b8bf-5580a33ff4c6',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      '24f47270-22af-420f-9897-2ab997097e90',
+      '2f7e746a-7ddc-4c3f-8e82-da3bebf4d348',
+      '2f038b95-b639-4663-b3c1-929d598f0d04',
     ],
   },
   {
@@ -94,10 +95,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Poprawa struktury gleby oraz stosowanie biologicznych metod ograniczania populacji nicieni.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '88405217-3087-47a3-a37a-ea0e1c597203',
-      'a43552b5-8d3d-41c0-b956-2025b6dd0b04',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      'a0e0af88-cd46-4887-8368-3b53855c631e',
+      'feb3dc7d-95ad-4eeb-94f8-057a9e4c8401',
+      '17ecdf56-6c18-47d9-a079-0ef0f0be0cef',
+      '24f47270-22af-420f-9897-2ab997097e90',
     ],
   },
   {
@@ -111,10 +113,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Ręczne usuwanie gąsienic oraz stosowanie oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
     ],
   },
   {
@@ -128,11 +131,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Ręczne usuwanie gąsienic oraz stosowanie oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '76c3ae24-9c26-4db9-a053-46c50bb88787',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
     ],
   },
   {
@@ -144,10 +147,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention: 'Regularna kontrola roślin oraz stosowanie płodozmianu.',
     treatment: 'Usuwanie gąsienic oraz stosowanie oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
+      'a0e0af88-cd46-4887-8368-3b53855c631e',
     ],
   },
   {
@@ -158,10 +162,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention: 'Regularne odchwaszczanie grządek oraz przekopywanie gleby.',
     treatment: 'Stosowanie pułapek oraz ręczne usuwanie gąsienic.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      '2f038b95-b639-4663-b3c1-929d598f0d04',
+      '2f7e746a-7ddc-4c3f-8e82-da3bebf4d348',
+      '24f47270-22af-420f-9897-2ab997097e90',
     ],
   },
   {
@@ -173,10 +178,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Ręczne usuwanie gąsienic oraz stosowanie oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      '91f19983-279f-4a9f-980e-c785bc77456e',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
     ],
   },
   {
@@ -189,11 +195,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Ręczne zbieranie larw i chrząszczy oraz stosowanie oprysków biologicznych lub chemicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      'f52cb753-5cd1-4ae6-888a-2850c592d498',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '247ef9d5-0189-4e06-b49e-fe1ce8912944',
+      'a0e0af88-cd46-4887-8368-3b53855c631e',
     ],
   },
   {
@@ -205,10 +211,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Utrzymywanie wilgotnej gleby oraz stosowanie osłon z agrowłókniny.',
     treatment: 'Stosowanie oprysków ekologicznych oraz przykrywanie roślin.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '76c3ae24-9c26-4db9-a053-46c50bb88787',
-      '0359692e-8d11-4611-a85c-5066fb3303cc',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
+      '0d401c03-657e-4f3a-8b6c-f89334bde3c8',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '865790da-ac83-4b32-92f4-ed70d958c05b',
     ],
   },
   {
@@ -221,10 +228,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Ręczne usuwanie chrząszczy oraz stosowanie oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '247ef9d5-0189-4e06-b49e-fe1ce8912944',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
     ],
   },
   {
@@ -238,11 +246,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Ręczne usuwanie gąsienic oraz stosowanie oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
-      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
     ],
   },
   {
@@ -255,11 +263,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularne kontrolowanie owoców oraz usuwanie uszkodzonych części roślin.',
     treatment: 'Stosowanie pułapek feromonowych oraz oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
-      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
     ],
   },
   {
@@ -273,11 +281,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Usuwanie silnie porażonych roślin, stosowanie pułapek oraz w razie konieczności oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
-      '76c3ae24-9c26-4db9-a053-46c50bb88787',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      'a0e0af88-cd46-4887-8368-3b53855c631e',
+      '50641388-0792-44f4-bed6-6e7a601a291e',
     ],
   },
   {
@@ -291,11 +299,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Usuwanie porażonych roślin oraz stosowanie pułapek i oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
-      '76c3ae24-9c26-4db9-a053-46c50bb88787',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      'a0e0af88-cd46-4887-8368-3b53855c631e',
+      '50641388-0792-44f4-bed6-6e7a601a291e',
     ],
   },
   {
@@ -309,9 +317,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Usuwanie porażonych siewek oraz stosowanie biologicznych metod ograniczania populacji szkodnika.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
-      // Removed: no ActionTemplate ID mapping for "Poprawa warunków kiełkowania" in the dictionary.
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      'a0e0af88-cd46-4887-8368-3b53855c631e',
+      '24f47270-22af-420f-9897-2ab997097e90',
+      '2f7e746a-7ddc-4c3f-8e82-da3bebf4d348',
+      '50641388-0792-44f4-bed6-6e7a601a291e',
     ],
   },
   {
@@ -325,10 +335,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Usuwanie porażonych roślin oraz stosowanie pułapek i oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
-      '76c3ae24-9c26-4db9-a053-46c50bb88787',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      'a0e0af88-cd46-4887-8368-3b53855c631e',
     ],
   },
   {
@@ -342,12 +353,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Ręczne usuwanie kolonii mszyc oraz stosowanie oprysków ekologicznych lub biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '0359692e-8d11-4611-a85c-5066fb3303cc',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '4ea08205-5c4b-47bb-b24f-030460e608fc',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
+      'a0e0af88-cd46-4887-8368-3b53855c631e',
     ],
   },
   {
@@ -361,12 +371,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Usuwanie kolonii mszyc oraz stosowanie oprysków biologicznych i ekologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '0359692e-8d11-4611-a85c-5066fb3303cc',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '4ea08205-5c4b-47bb-b24f-030460e608fc',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '247ef9d5-0189-4e06-b49e-fe1ce8912944',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
     ],
   },
   {
@@ -380,12 +389,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Stosowanie tablic lepnych, oprysków biologicznych oraz usuwanie silnie porażonych liści.',
     recommendedActionTemplateIds: [
-      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
-      'a93bdbc0-e3f0-40fe-98d7-526d3aed3547',
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '0359692e-8d11-4611-a85c-5066fb3303cc',
-      '6f1a3389-8f9b-4d4d-b7c6-95dd6ecc839a',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
     ],
   },
   {
@@ -399,11 +407,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Usuwanie porażonych liści oraz stosowanie oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '0359692e-8d11-4611-a85c-5066fb3303cc',
-      'c42f45a7-6902-4ca1-895b-93f905f598a6',
-      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
+      'a6146059-2bd7-4955-a7f7-e75b60d8f383',
     ],
   },
   {
@@ -416,11 +424,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Stosowanie oprysków biologicznych oraz usuwanie silnie porażonych części roślin.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'c5438d67-d5cd-4c4b-b9e4-7ec5881165cc',
-      'a93bdbc0-e3f0-40fe-98d7-526d3aed3547',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '0359692e-8d11-4611-a85c-5066fb3303cc',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
     ],
   },
   {
@@ -434,10 +442,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Usuwanie porażonych liści oraz stosowanie oprysków biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '37447ae0-c2a0-444f-a43e-e09383d6bdb8',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
     ],
   },
   {
@@ -450,10 +459,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Regularna kontrola roślin oraz utrzymywanie odpowiedniej wilgotności gleby.',
     treatment: 'Stosowanie oprysków ekologicznych oraz biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '0359692e-8d11-4611-a85c-5066fb3303cc',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '865790da-ac83-4b32-92f4-ed70d958c05b',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
     ],
   },
   {
@@ -467,11 +477,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Mechaniczne usuwanie owadów z roślin, stosowanie oprysków ekologicznych oraz biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '0359692e-8d11-4611-a85c-5066fb3303cc',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '247ef9d5-0189-4e06-b49e-fe1ce8912944',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
+      '3d1da511-8b91-4d10-adb2-bcfbbb8df7ac',
     ],
   },
   {
@@ -485,11 +495,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     treatment:
       'Usuwanie kolonii ręcznie oraz stosowanie oprysków ekologicznych lub biologicznych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      'd9b6515c-1915-4342-a079-cc6029194ebd',
-      '0359692e-8d11-4611-a85c-5066fb3303cc',
-      '650bb9a6-5c38-4c8c-8198-a0fcfc732c6e',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      'f3125db1-a49c-4395-ba44-64f2244045cc',
+      '247ef9d5-0189-4e06-b49e-fe1ce8912944',
+      '32e9612e-3fc4-4057-ad9d-2f90c1425945',
+      'a6146059-2bd7-4955-a7f7-e75b60d8f383',
     ],
   },
   {
@@ -502,9 +512,10 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Utrzymywanie ogrodu w czystości oraz ograniczanie miejsc, w których gryzonie mogą się ukrywać.',
     treatment: 'Stosowanie pułapek oraz odstraszaczy.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
+      '2f038b95-b639-4663-b3c1-929d598f0d04',
+      '2d8f8015-4932-4987-968a-dfd7f48589dc',
     ],
   },
   {
@@ -516,9 +527,10 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Usuwanie miejsc, w których myszy mogą się ukrywać oraz utrzymywanie porządku w ogrodzie.',
     treatment: 'Stosowanie pułapek oraz odstraszaczy.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
+      '2f038b95-b639-4663-b3c1-929d598f0d04',
+      '2d8f8015-4932-4987-968a-dfd7f48589dc',
     ],
   },
   {
@@ -529,9 +541,10 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
     prevention: 'Stosowanie barier mechanicznych oraz odstraszaczy.',
     treatment: 'Instalacja pułapek lub odstraszaczy dźwiękowych.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      '32ad9ea5-999f-4b0b-b144-c4f80a0cff6f',
+      '24f47270-22af-420f-9897-2ab997097e90',
+      '2f7e746a-7ddc-4c3f-8e82-da3bebf4d348',
     ],
   },
   {
@@ -543,10 +556,11 @@ export const DEFAULT_PESTS: readonly PestSeedRecord[] = [
       'Ograniczanie populacji mszyc oraz usuwanie miejsc sprzyjających zakładaniu gniazd przez mrówki.',
     treatment: 'Stosowanie pułapek na mrówki oraz ograniczanie kolonii mszyc.',
     recommendedActionTemplateIds: [
-      'f3f85e28-3985-411b-bbd6-28cea9cfb180',
-      '2a11d4cd-d417-4603-90a6-9ff671aa6525',
-      '58f68c77-c1de-48bf-8a74-b74769b8649f',
-      '4ea08205-5c4b-47bb-b24f-030460e608fc',
+      '6845afd4-12ac-48d1-9eea-0da9767fa526',
+      'a236763a-fdc6-420c-94a6-b387c78a4f1c',
+      '91f19983-279f-4a9f-980e-c785bc77456e',
+      '2f038b95-b639-4663-b3c1-929d598f0d04',
+      '11c0f77c-3781-468d-9a75-e19a130b0f90',
     ],
   },
 ] as const;
