@@ -6,6 +6,7 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ActionTemplate } from './action-template.entity';
 import { ActionTemplateEnvironment } from '../common/enums/action.enums';
+import { toSlug } from '../common/utils/slug.util';
 import {
   CreateActionTemplateDto,
   ListActionTemplatesQueryDto,
@@ -62,6 +63,7 @@ export class ActionTemplatesService {
 
     const template = new ActionTemplate();
     template.name = dto.name;
+    template.slug = toSlug(dto.name);
     template.description = dto.description ?? null;
     template.target = dto.target;
     template.environment = dto.environment ?? ActionTemplateEnvironment.ANY;
@@ -87,10 +89,12 @@ export class ActionTemplatesService {
         throw new ConflictException('Action template name already exists');
       }
       template.name = dto.name;
+      template.slug = toSlug(dto.name);
     }
 
     if (dto.name !== undefined && dto.name === template.name) {
       template.name = dto.name;
+      template.slug = toSlug(dto.name);
     }
 
     if (dto.description !== undefined) {
@@ -143,6 +147,7 @@ export class ActionTemplatesService {
     return {
       id: entity.id,
       name: entity.name,
+      slug: entity.slug,
       description: entity.description ?? null,
       scope: entity.target,
       target: entity.target,

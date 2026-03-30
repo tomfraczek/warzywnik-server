@@ -6,6 +6,7 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Disease } from './disease.entity';
 import { ActionTemplate } from '../action-templates/action-template.entity';
+import { toSlug } from '../common/utils/slug.util';
 import {
   CreateDiseaseDto,
   ListDiseasesQueryDto,
@@ -70,6 +71,7 @@ export class DiseasesService {
 
     const disease = new Disease();
     disease.name = dto.name.trim().replace(/\s+/g, ' ');
+    disease.slug = toSlug(disease.name);
     disease.description = dto.description;
     disease.symptoms = dto.symptoms;
     disease.prevention = dto.prevention;
@@ -107,10 +109,12 @@ export class DiseasesService {
         throw new ConflictException('Disease name already exists');
       }
       disease.name = dto.name.trim().replace(/\s+/g, ' ');
+      disease.slug = toSlug(disease.name);
     }
 
     if (dto.name !== undefined && dto.name === disease.name) {
       disease.name = dto.name.trim().replace(/\s+/g, ' ');
+      disease.slug = toSlug(disease.name);
     }
 
     if (dto.description !== undefined) {
@@ -198,6 +202,7 @@ export class DiseasesService {
     return {
       id: entity.id,
       name: entity.name,
+      slug: entity.slug,
       description: entity.description,
       symptoms: entity.symptoms ?? null,
       prevention: entity.prevention ?? null,

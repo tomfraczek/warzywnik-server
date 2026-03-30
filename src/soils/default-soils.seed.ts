@@ -5,6 +5,7 @@ import {
   DrainageLevel,
   SoilStructure,
 } from '../common/enums/soil.enums';
+import { toSlug } from '../common/utils/slug.util';
 
 type SoilSeedRecord = {
   name: string;
@@ -260,16 +261,24 @@ export const DEFAULT_SOILS: readonly SoilSeedRecord[] = [
 
 export async function upsertDefaultSoils(em: EntityManager): Promise<void> {
   for (const seed of DEFAULT_SOILS) {
+    const slug = toSlug(seed.name);
     let soil = await em.findOne(Soil, {
-      name: { $ilike: seed.name },
+      slug,
     });
 
     if (!soil) {
+      soil = await em.findOne(Soil, {
+        name: { $ilike: seed.name },
+      });
+    }
+
+    if (!soil) {
       soil = new Soil();
-      soil.name = seed.name;
     }
 
     soil.description = seed.description;
+    soil.name = seed.name;
+    soil.slug = slug;
     soil.structure = seed.structure;
     soil.waterRetention = seed.waterRetention;
     soil.drainage = seed.drainage;

@@ -1,6 +1,7 @@
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Pest } from './pest.entity';
 import { ActionTemplate } from '../action-templates/action-template.entity';
+import { toSlug } from '../common/utils/slug.util';
 
 type PestSeedRecord = {
   name: string;
@@ -573,44 +574,60 @@ export async function upsertDefaultPests(
   em: EntityManager,
   logger?: LoggerLike,
 ): Promise<void> {
-  const actionTemplateIds = [
+  const actionTemplateRefs = [
     ...new Set(
       DEFAULT_PESTS.flatMap((seed) => seed.recommendedActionTemplateIds),
     ),
   ];
-  const actionTemplates = actionTemplateIds.length
-    ? await em.find(ActionTemplate, { id: { $in: actionTemplateIds } })
+  const actionTemplates = actionTemplateRefs.length
+    ? await em.find(ActionTemplate, {
+        $or: [
+          { id: { $in: actionTemplateRefs } },
+          { slug: { $in: actionTemplateRefs } },
+        ],
+      })
     : [];
 
-  const actionTemplateById = new Map(
-    actionTemplates.map((item) => [item.id, item]),
+  const actionTemplateByRef = new Map(
+    actionTemplates.flatMap((item) => [
+      [item.id, item] as const,
+      [item.slug, item] as const,
+    ]),
   );
 
   for (const seed of DEFAULT_PESTS) {
+    const slug = toSlug(seed.name);
     let pest = await em.findOne(Pest, {
-      name: { $ilike: seed.name },
+      slug,
     });
 
     if (!pest) {
-      pest = new Pest();
-      pest.name = seed.name;
+      pest = await em.findOne(Pest, {
+        name: { $ilike: seed.name },
+      });
     }
 
+    if (!pest) {
+      pest = new Pest();
+    }
+
+    pest.name = seed.name;
+    pest.slug = slug;
     pest.description = seed.description;
     pest.symptoms = seed.symptoms;
     pest.prevention = seed.prevention;
     pest.treatment = seed.treatment;
 
     const linkedTemplates = seed.recommendedActionTemplateIds
-      .map((id) => actionTemplateById.get(id))
+      .map((ref) => actionTemplateByRef.get(ref))
       .filter((item): item is ActionTemplate => Boolean(item));
 
     if (linkedTemplates.length !== seed.recommendedActionTemplateIds.length) {
       const missingIds = seed.recommendedActionTemplateIds.filter(
-        (id) => !actionTemplateById.has(id),
+        (ref) => !actionTemplateByRef.has(ref),
       );
       logger?.warn(
-        `Pest seed "${seed.name}" references missing ActionTemplate IDs: ${missingIds.join(', ')}`,
+        `Pest seed "${seed.name}" references missing ActionTemplate refs: ${missingIds.join(', ')}`,
       );
     }
 

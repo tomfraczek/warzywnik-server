@@ -6,6 +6,7 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Pest } from './pest.entity';
 import { ActionTemplate } from '../action-templates/action-template.entity';
+import { toSlug } from '../common/utils/slug.util';
 import {
   CreatePestDto,
   ListPestsQueryDto,
@@ -67,6 +68,7 @@ export class PestsService {
 
     const pest = new Pest();
     pest.name = dto.name;
+    pest.slug = toSlug(dto.name);
     pest.description = dto.description;
     pest.symptoms = dto.symptoms ?? null;
     pest.prevention = dto.prevention ?? null;
@@ -104,10 +106,12 @@ export class PestsService {
         throw new ConflictException('Pest name already exists');
       }
       pest.name = dto.name;
+      pest.slug = toSlug(dto.name);
     }
 
     if (dto.name !== undefined && dto.name === pest.name) {
       pest.name = dto.name;
+      pest.slug = toSlug(dto.name);
     }
 
     if (dto.description !== undefined) {
@@ -179,6 +183,7 @@ export class PestsService {
     return {
       id: entity.id,
       name: entity.name,
+      slug: entity.slug,
       description: entity.description,
       symptoms: entity.symptoms ?? null,
       prevention: entity.prevention ?? null,

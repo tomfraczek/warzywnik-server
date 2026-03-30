@@ -11,6 +11,7 @@ import {
   RiskLevel,
   SoilStructureEffect,
 } from '../common/enums/fertilizer.enums';
+import { toSlug } from '../common/utils/slug.util';
 
 type FertilizerSeedRecord = {
   name: string;
@@ -1488,15 +1489,23 @@ export async function upsertDefaultFertilizers(
   em: EntityManager,
 ): Promise<void> {
   for (const seed of DEFAULT_FERTILIZERS) {
+    const slug = toSlug(seed.name);
     let fertilizer = await em.findOne(FertilizerType, {
-      name: { $ilike: seed.name },
+      slug,
     });
 
     if (!fertilizer) {
-      fertilizer = new FertilizerType();
-      fertilizer.name = seed.name;
+      fertilizer = await em.findOne(FertilizerType, {
+        name: { $ilike: seed.name },
+      });
     }
 
+    if (!fertilizer) {
+      fertilizer = new FertilizerType();
+    }
+
+    fertilizer.name = seed.name;
+    fertilizer.slug = slug;
     fertilizer.description = seed.description;
     fertilizer.category = seed.category;
     fertilizer.form = seed.form;

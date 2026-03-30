@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { FertilizerType } from './fertilizer-type.entity';
+import { toSlug } from '../common/utils/slug.util';
 import {
   CreateFertilizerTypeDto,
   ListFertilizerTypesQueryDto,
@@ -69,6 +70,7 @@ export class FertilizersService {
 
     const fertilizer = new FertilizerType();
     fertilizer.name = dto.name;
+    fertilizer.slug = toSlug(dto.name);
     fertilizer.description = dto.description;
     fertilizer.category = dto.category;
     fertilizer.form = dto.form;
@@ -105,10 +107,12 @@ export class FertilizersService {
         throw new ConflictException('Fertilizer type name already exists');
       }
       fertilizer.name = dto.name;
+      fertilizer.slug = toSlug(dto.name);
     }
 
     if (dto.name !== undefined && dto.name === fertilizer.name) {
       fertilizer.name = dto.name;
+      fertilizer.slug = toSlug(dto.name);
     }
 
     if (dto.description !== undefined) {

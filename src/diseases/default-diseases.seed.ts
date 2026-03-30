@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { Logger } from '@nestjs/common';
 import { ActionTemplate } from '../action-templates/action-template.entity';
 import { Disease } from './disease.entity';
+import { toSlug } from '../common/utils/slug.util';
 
 type DiseaseSeedRecord = {
   name: string;
@@ -65,11 +66,19 @@ export async function upsertDefaultDiseases(
     ),
   ];
   const actionTemplates = actionTemplateIds.length
-    ? await em.find(ActionTemplate, { id: { $in: actionTemplateIds } })
+    ? await em.find(ActionTemplate, {
+        $or: [
+          { id: { $in: actionTemplateIds } },
+          { slug: { $in: actionTemplateIds } },
+        ],
+      })
     : [];
 
-  const actionTemplateById = new Map(
-    actionTemplates.map((item) => [item.id, item]),
+  const actionTemplateByRef = new Map(
+    actionTemplates.flatMap((item) => [
+      [item.id, item] as const,
+      [item.slug, item] as const,
+    ]),
   );
 
   for (const seed of DEFAULT_DISEASES) {
@@ -82,13 +91,14 @@ export async function upsertDefaultDiseases(
     }
 
     disease.name = seed.name.trim().replace(/\s+/g, ' ');
+    disease.slug = toSlug(disease.name);
     disease.description = seed.description;
     disease.symptoms = seed.symptoms;
     disease.prevention = seed.prevention;
     disease.treatment = seed.treatment;
 
     const linkedTemplates = seed.recommendedActionTemplateIds
-      .map((id) => actionTemplateById.get(id))
+      .map((ref) => actionTemplateByRef.get(ref))
       .filter((item): item is ActionTemplate => Boolean(item));
 
     if (
@@ -96,10 +106,10 @@ export async function upsertDefaultDiseases(
       logger
     ) {
       const missingIds = seed.recommendedActionTemplateIds.filter(
-        (id) => !actionTemplateById.has(id),
+        (ref) => !actionTemplateByRef.has(ref),
       );
       logger.warn(
-        `Disease seed "${seed.name}" references missing ActionTemplate IDs: ${missingIds.join(', ')}`,
+        `Disease seed "${seed.name}" references missing ActionTemplate refs: ${missingIds.join(', ')}`,
       );
     }
 

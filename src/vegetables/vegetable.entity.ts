@@ -75,6 +75,9 @@ export class Vegetable {
   @Property({ length: 120 })
   name!: string;
 
+  @Property({ length: 180, unique: true })
+  slug!: string;
+
   @Property({ length: 160, nullable: true })
   latinName?: string | null;
 

@@ -28,6 +28,7 @@ import {
   ActionRuleTrigger,
 } from '../common/enums/action.enums';
 import { PlantingStartMethod } from '../common/enums/planting.enums';
+import { toSlug } from '../common/utils/slug.util';
 
 type VegetableActionRuleInput = {
   actionTemplateId: string;
@@ -70,6 +71,7 @@ export class VegetablesService {
       fields: [
         'id',
         'name',
+        'slug',
         'latinName',
         'imageUrl',
         'recommendedSoils',
@@ -87,6 +89,7 @@ export class VegetablesService {
       items: items.map((item) => ({
         id: item.id,
         name: item.name,
+        slug: item.slug,
         latinName: item.latinName ?? null,
         imageUrl: item.imageUrl ?? null,
         recommendedSoilIds: item.recommendedSoils
@@ -140,6 +143,7 @@ export class VegetablesService {
 
     const vegetable = new Vegetable();
     vegetable.name = dto.name;
+    vegetable.slug = toSlug(dto.name);
     vegetable.description = dto.description;
     vegetable.latinName = dto.latinName ?? null;
     vegetable.imageUrl = dto.imageUrl ?? null;
@@ -244,10 +248,13 @@ export class VegetablesService {
         throw new ConflictException('Vegetable name already exists');
       }
       vegetable.name = dto.name;
+      vegetable.slug = toSlug(dto.name);
     }
 
     if (dto.name !== undefined && dto.name === vegetable.name)
       vegetable.name = dto.name;
+    if (dto.name !== undefined && dto.name === vegetable.name)
+      vegetable.slug = toSlug(dto.name);
     if (dto.description !== undefined) vegetable.description = dto.description;
     if (dto.latinName !== undefined) vegetable.latinName = dto.latinName;
     if (dto.imageUrl !== undefined) vegetable.imageUrl = dto.imageUrl;
@@ -447,6 +454,7 @@ export class VegetablesService {
     return {
       id: entity.id,
       name: entity.name,
+      slug: entity.slug,
       latinName: entity.latinName ?? null,
       imageUrl: entity.imageUrl ?? null,
       description: entity.description,

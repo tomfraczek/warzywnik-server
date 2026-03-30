@@ -20,6 +20,9 @@ export class Soil {
   @Property({ length: 120 })
   name!: string;
 
+  @Property({ length: 160, unique: true })
+  slug!: string;
+
   @Property({ type: TextType })
   description!: string;
 

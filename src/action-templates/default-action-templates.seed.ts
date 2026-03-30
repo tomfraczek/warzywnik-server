@@ -5,6 +5,7 @@ import {
   ActionTemplateTarget,
   ActionTemplateType,
 } from '../common/enums/action.enums';
+import { toSlug } from '../common/utils/slug.util';
 
 type ActionTemplateSeedRecord = {
   name: string;
@@ -662,6 +663,18 @@ export const upsertDefaultActionTemplates = async (
   em: EntityManager,
 ): Promise<void> => {
   for (const item of DEFAULT_ACTION_TEMPLATES) {
+    const slug = toSlug(item.name);
+    const existingBySlug = await em.findOne(ActionTemplate, { slug });
+    if (existingBySlug) {
+      existingBySlug.name = item.name;
+      existingBySlug.description = item.description;
+      existingBySlug.target = item.target;
+      existingBySlug.environment = item.environment;
+      existingBySlug.type = item.type;
+      existingBySlug.defaultDueOffsetDays = item.defaultDueOffsetDays;
+      continue;
+    }
+
     const existingExact = await em.findOne(ActionTemplate, {
       name: { $ilike: item.name },
       target: item.target,
@@ -670,6 +683,8 @@ export const upsertDefaultActionTemplates = async (
     });
 
     if (existingExact) {
+      existingExact.slug = slug;
+      existingExact.name = item.name;
       existingExact.description = item.description;
       existingExact.defaultDueOffsetDays = item.defaultDueOffsetDays;
       continue;
@@ -680,6 +695,8 @@ export const upsertDefaultActionTemplates = async (
     });
 
     if (existingByName) {
+      existingByName.name = item.name;
+      existingByName.slug = slug;
       existingByName.target = item.target;
       existingByName.environment = item.environment;
       existingByName.type = item.type;
@@ -690,6 +707,7 @@ export const upsertDefaultActionTemplates = async (
 
     const template = new ActionTemplate();
     template.name = item.name;
+    template.slug = slug;
     template.description = item.description;
     template.target = item.target;
     template.environment = item.environment;

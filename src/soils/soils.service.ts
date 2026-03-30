@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Soil } from './soil.entity';
+import { toSlug } from '../common/utils/slug.util';
 import {
   CreateSoilDto,
   ListSoilsQueryDto,
@@ -37,6 +38,7 @@ export class SoilsService {
       items: items.map((soil) => ({
         id: soil.id,
         name: soil.name,
+        slug: soil.slug,
       })),
       page,
       limit,
@@ -63,6 +65,7 @@ export class SoilsService {
 
     const soil = new Soil();
     soil.name = dto.name;
+    soil.slug = toSlug(dto.name);
     soil.description = dto.description;
     soil.structure = dto.structure;
     soil.waterRetention = dto.waterRetention;
@@ -93,10 +96,12 @@ export class SoilsService {
         throw new ConflictException('Soil name already exists');
       }
       soil.name = dto.name;
+      soil.slug = toSlug(dto.name);
     }
 
     if (dto.name !== undefined && dto.name === soil.name) {
       soil.name = dto.name;
+      soil.slug = toSlug(dto.name);
     }
 
     if (dto.description !== undefined) {

@@ -23,6 +23,9 @@ export class ActionTemplate {
   @Property({ length: 120 })
   name!: string;
 
+  @Property({ length: 180, unique: true })
+  slug!: string;
+
   @Property({ type: TextType, nullable: true })
   description?: string | null;
 
