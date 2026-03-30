@@ -172,22 +172,22 @@ export class VegetablesService {
     }
 
     if (dto.commonPestIds) {
-      const pests = await this.loadPestsByIds(dto.commonPestIds);
+      const pests = await this.loadPestsByRefs(dto.commonPestIds);
       vegetable.commonPests.set(pests);
     }
 
     if (dto.commonDiseaseIds) {
-      const diseases = await this.loadDiseasesByIds(dto.commonDiseaseIds);
+      const diseases = await this.loadDiseasesByRefs(dto.commonDiseaseIds);
       vegetable.commonDiseases.set(diseases);
     }
 
     if (dto.goodCompanionIds) {
-      const companions = await this.loadVegetablesByIds(dto.goodCompanionIds);
+      const companions = await this.loadVegetablesByRefs(dto.goodCompanionIds);
       vegetable.goodCompanions.set(companions);
     }
 
     if (dto.badCompanionIds) {
-      const companions = await this.loadVegetablesByIds(dto.badCompanionIds);
+      const companions = await this.loadVegetablesByRefs(dto.badCompanionIds);
       vegetable.badCompanions.set(companions);
     }
 
@@ -297,22 +297,22 @@ export class VegetablesService {
     }
 
     if (dto.commonPestIds !== undefined) {
-      const pests = await this.loadPestsByIds(dto.commonPestIds);
+      const pests = await this.loadPestsByRefs(dto.commonPestIds);
       vegetable.commonPests.set(pests);
     }
 
     if (dto.commonDiseaseIds !== undefined) {
-      const diseases = await this.loadDiseasesByIds(dto.commonDiseaseIds);
+      const diseases = await this.loadDiseasesByRefs(dto.commonDiseaseIds);
       vegetable.commonDiseases.set(diseases);
     }
 
     if (dto.goodCompanionIds !== undefined) {
-      const companions = await this.loadVegetablesByIds(dto.goodCompanionIds);
+      const companions = await this.loadVegetablesByRefs(dto.goodCompanionIds);
       vegetable.goodCompanions.set(companions);
     }
 
     if (dto.badCompanionIds !== undefined) {
-      const companions = await this.loadVegetablesByIds(dto.badCompanionIds);
+      const companions = await this.loadVegetablesByRefs(dto.badCompanionIds);
       vegetable.badCompanions.set(companions);
     }
 
@@ -383,35 +383,44 @@ export class VegetablesService {
     return items;
   }
 
-  private async loadPestsByIds(ids: string[]): Promise<Pest[]> {
-    if (ids.length === 0) {
+  private async loadPestsByRefs(refs: string[]): Promise<Pest[]> {
+    if (refs.length === 0) {
       return [];
     }
 
-    const items = await this.em.find(Pest, { id: { $in: ids } });
-    this.assertNoMissingIds(ids, items, 'Pest');
+    const uniqueRefs = [...new Set(refs)];
+    const items = await this.em.find(Pest, {
+      $or: [{ slug: { $in: uniqueRefs } }, { id: { $in: uniqueRefs } }],
+    });
+    this.assertNoMissingRefs(uniqueRefs, items, 'Pest');
 
     return items;
   }
 
-  private async loadDiseasesByIds(ids: string[]): Promise<Disease[]> {
-    if (ids.length === 0) {
+  private async loadDiseasesByRefs(refs: string[]): Promise<Disease[]> {
+    if (refs.length === 0) {
       return [];
     }
 
-    const items = await this.em.find(Disease, { id: { $in: ids } });
-    this.assertNoMissingIds(ids, items, 'Disease');
+    const uniqueRefs = [...new Set(refs)];
+    const items = await this.em.find(Disease, {
+      $or: [{ slug: { $in: uniqueRefs } }, { id: { $in: uniqueRefs } }],
+    });
+    this.assertNoMissingRefs(uniqueRefs, items, 'Disease');
 
     return items;
   }
 
-  private async loadVegetablesByIds(ids: string[]): Promise<Vegetable[]> {
-    if (ids.length === 0) {
+  private async loadVegetablesByRefs(refs: string[]): Promise<Vegetable[]> {
+    if (refs.length === 0) {
       return [];
     }
 
-    const items = await this.em.find(Vegetable, { id: { $in: ids } });
-    this.assertNoMissingIds(ids, items, 'Vegetable');
+    const uniqueRefs = [...new Set(refs)];
+    const items = await this.em.find(Vegetable, {
+      $or: [{ slug: { $in: uniqueRefs } }, { id: { $in: uniqueRefs } }],
+    });
+    this.assertNoMissingRefs(uniqueRefs, items, 'Vegetable');
 
     return items;
   }
@@ -444,6 +453,32 @@ export class VegetablesService {
     if (missing.length) {
       throw new BadRequestException(
         `Missing ${label} IDs: ${missing.join(', ')}`,
+      );
+    }
+  }
+
+  private assertNoMissingRefs<T extends { id: string; slug: string }>(
+    expectedRefs: string[],
+    items: T[],
+    label: string,
+  ): void {
+    if (expectedRefs.length === 0) {
+      return;
+    }
+
+    const expected = new Set(expectedRefs);
+    const matched = new Set<string>();
+
+    for (const item of items) {
+      if (expected.has(item.id)) matched.add(item.id);
+      if (expected.has(item.slug)) matched.add(item.slug);
+    }
+
+    const missing = expectedRefs.filter((ref) => !matched.has(ref));
+
+    if (missing.length) {
+      throw new BadRequestException(
+        `Missing ${label} references (slug/id): ${missing.join(', ')}`,
       );
     }
   }
@@ -481,16 +516,16 @@ export class VegetablesService {
       fertilizationStages: entity.fertilizationStages ?? null,
       commonPests: entity.commonPests
         .getItems()
-        .map((item) => ({ id: item.id, name: item.name })),
+        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
       commonDiseases: entity.commonDiseases
         .getItems()
-        .map((item) => ({ id: item.id, name: item.name })),
+        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
       goodCompanions: entity.goodCompanions
         .getItems()
-        .map((item) => ({ id: item.id, name: item.name })),
+        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
       badCompanions: entity.badCompanions
         .getItems()
-        .map((item) => ({ id: item.id, name: item.name })),
+        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
       postHarvestActionTemplateIds: Array.from(
         new Set(
           actionRules

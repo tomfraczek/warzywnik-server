@@ -113,6 +113,7 @@ const dominantNutrientDemandSchema = z
 const nonNegativeNumber = z.number().min(0, 'Must be >= 0');
 const nameSchema = z.string().min(2).max(120);
 const descriptionSchema = z.string().min(1);
+const slugRefSchema = z.string().min(1).max(180);
 
 const sowingMethodSchema = z
   .object({
@@ -220,10 +221,10 @@ const baseVegetableSchema = z
     harvestEndMonth: monthSchema.nullable().optional(),
     harvestSigns: z.string().min(1).nullable().optional(),
     fertilizationStages: z.array(fertilizationStageSchema).optional(),
-    commonPestIds: z.array(z.string().uuid()).optional(),
-    commonDiseaseIds: z.array(z.string().uuid()).optional(),
-    goodCompanionIds: z.array(z.string().uuid()).optional(),
-    badCompanionIds: z.array(z.string().uuid()).optional(),
+    commonPestIds: z.array(slugRefSchema).optional(),
+    commonDiseaseIds: z.array(slugRefSchema).optional(),
+    goodCompanionIds: z.array(slugRefSchema).optional(),
+    badCompanionIds: z.array(slugRefSchema).optional(),
     postHarvestActionTemplateIds: z.array(z.string().uuid()).optional(),
     actionRules: z.array(vegetableActionRuleSchema).optional(),
   })
