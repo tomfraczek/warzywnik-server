@@ -100,7 +100,9 @@ export class BedsService {
     if (soilId === null) {
       bed.soil = null;
     } else if (soilId) {
-      const soil = await this.em.findOne(Soil, { id: soilId });
+      const soil = await this.em.findOne(Soil, {
+        $or: [{ slug: soilId }, { id: soilId }],
+      });
       if (!soil) {
         throw new BadRequestException('Soil not found');
       }
@@ -163,7 +165,9 @@ export class BedsService {
     if (soilId === null) {
       bed.soil = null;
     } else if (soilId !== undefined) {
-      const soil = await this.em.findOne(Soil, { id: soilId });
+      const soil = await this.em.findOne(Soil, {
+        $or: [{ slug: soilId }, { id: soilId }],
+      });
       if (!soil) {
         throw new BadRequestException('Soil not found');
       }
@@ -255,6 +259,7 @@ export class BedsService {
       widthCm: bed.widthCm ?? null,
       depthCm: bed.depthCm ?? null,
       soilId: bed.soil?.id ?? null,
+      soilSlug: bed.soil?.slug ?? null,
       soilTestingEnabled: bed.soilTestingEnabled,
       measuredN: bed.measuredN ?? null,
       measuredP: bed.measuredP ?? null,

@@ -72,7 +72,8 @@ const seasonsSchema = z.array(seasonSchema);
 const contextSchema = z.nativeEnum(ArticleContext);
 const contextsSchema = z.array(contextSchema).min(1);
 
-const uuidArraySchema = z.array(z.string().uuid());
+const slugRefSchema = z.string().min(1).max(180);
+const slugRefArraySchema = z.array(slugRefSchema);
 const statusSchema = z.nativeEnum(ArticleStatus);
 const coverImageSchema = z.string().max(255).nullable();
 
@@ -87,11 +88,11 @@ const baseArticleSchema = z
     seasons: seasonsSchema.optional(),
     contexts: contextsSchema.optional(),
     priority: prioritySchema.optional(),
-    relatedVegetableIds: uuidArraySchema.optional(),
-    relatedSoilIds: uuidArraySchema.optional(),
-    relatedFertilizerIds: uuidArraySchema.optional(),
-    relatedDiseaseIds: uuidArraySchema.optional(),
-    relatedPestIds: uuidArraySchema.optional(),
+    relatedVegetableIds: slugRefArraySchema.optional(),
+    relatedSoilIds: slugRefArraySchema.optional(),
+    relatedFertilizerIds: slugRefArraySchema.optional(),
+    relatedDiseaseIds: slugRefArraySchema.optional(),
+    relatedPestIds: slugRefArraySchema.optional(),
     status: statusSchema.optional(),
     publishedAt: z.coerce.date().nullable().optional(),
   })
@@ -106,11 +107,11 @@ export const createArticleSchema = baseArticleSchema.extend({
   months: monthsSchema.default([]),
   seasons: seasonsSchema.default([]),
   priority: prioritySchema.default(3),
-  relatedVegetableIds: uuidArraySchema.default([]),
-  relatedSoilIds: uuidArraySchema.default([]),
-  relatedFertilizerIds: uuidArraySchema.default([]),
-  relatedDiseaseIds: uuidArraySchema.default([]),
-  relatedPestIds: uuidArraySchema.default([]),
+  relatedVegetableIds: slugRefArraySchema.default([]),
+  relatedSoilIds: slugRefArraySchema.default([]),
+  relatedFertilizerIds: slugRefArraySchema.default([]),
+  relatedDiseaseIds: slugRefArraySchema.default([]),
+  relatedPestIds: slugRefArraySchema.default([]),
   status: statusSchema.default(ArticleStatus.DRAFT),
 });
 
@@ -131,10 +132,10 @@ export const listArticlesQuerySchema = z
     month: z.coerce.number().int().min(1).max(12).optional(),
     season: seasonSchema.optional(),
     context: contextSchema.optional(),
-    vegetableId: z.string().uuid().optional(),
-    soilId: z.string().uuid().optional(),
-    fertilizerId: z.string().uuid().optional(),
-    diseaseId: z.string().uuid().optional(),
-    pestId: z.string().uuid().optional(),
+    vegetableId: slugRefSchema.optional(),
+    soilId: slugRefSchema.optional(),
+    fertilizerId: slugRefSchema.optional(),
+    diseaseId: slugRefSchema.optional(),
+    pestId: slugRefSchema.optional(),
   })
   .strict();

@@ -24,7 +24,7 @@ export type ListPlantingDiseasesQueryDto = {
 const isoDateSchema = z.string().datetime();
 
 export const createPlantingDiseaseSchema = z.object({
-  diseaseId: z.string().uuid(),
+  diseaseId: z.string().min(1).max(180),
   status: z.nativeEnum(PlantingDiseaseStatus).optional(),
   severity: z.nativeEnum(DiseaseSeverity).nullable().optional(),
   observedAt: isoDateSchema.optional(),

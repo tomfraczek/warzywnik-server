@@ -166,7 +166,7 @@ const fertilizationStageSchema = z.object({
 const vegetableActionRuleSchema = z
   .object({
     id: z.string().uuid().optional(),
-    actionTemplateId: z.string().uuid(),
+    actionTemplateId: slugRefSchema,
     trigger: z.nativeEnum(ActionRuleTrigger),
     offsetDays: z.number().int(),
     schedule: z.nativeEnum(ActionRuleSchedule),
@@ -200,7 +200,7 @@ const baseVegetableSchema = z
     sunExposure: sunExposureSchema.nullable().optional(),
     waterDemand: demandLevelSchema.nullable().optional(),
 
-    recommendedSoilIds: z.array(z.string().uuid()).optional(),
+    recommendedSoilIds: z.array(slugRefSchema).optional(),
 
     nutrientDemand: demandLevelSchema.nullable().optional(),
 
@@ -225,7 +225,7 @@ const baseVegetableSchema = z
     commonDiseaseIds: z.array(slugRefSchema).optional(),
     goodCompanionIds: z.array(slugRefSchema).optional(),
     badCompanionIds: z.array(slugRefSchema).optional(),
-    postHarvestActionTemplateIds: z.array(z.string().uuid()).optional(),
+    postHarvestActionTemplateIds: z.array(slugRefSchema).optional(),
     actionRules: z.array(vegetableActionRuleSchema).optional(),
   })
   .strict();

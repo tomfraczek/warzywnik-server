@@ -94,7 +94,7 @@ export class VegetablesService {
         imageUrl: item.imageUrl ?? null,
         recommendedSoilIds: item.recommendedSoils
           .getItems()
-          .map((soil) => soil.id),
+          .map((soil) => soil.slug),
         family: item.family,
         botanicalFamily: item.botanicalFamily ?? null,
         nutrientNeeds: item.nutrientNeeds,
@@ -167,7 +167,7 @@ export class VegetablesService {
     vegetable.dominantNutrientDemand = dto.dominantNutrientDemand ?? null;
 
     if (dto.recommendedSoilIds !== undefined) {
-      const soils = await this.loadSoilsByIds(dto.recommendedSoilIds);
+      const soils = await this.loadSoilsByRefs(dto.recommendedSoilIds);
       vegetable.recommendedSoils.set(soils);
     }
 
@@ -292,7 +292,7 @@ export class VegetablesService {
     if (dto.dominantNutrientDemand !== undefined)
       vegetable.dominantNutrientDemand = dto.dominantNutrientDemand;
     if (dto.recommendedSoilIds !== undefined) {
-      const soils = await this.loadSoilsByIds(dto.recommendedSoilIds);
+      const soils = await this.loadSoilsByRefs(dto.recommendedSoilIds);
       vegetable.recommendedSoils.set(soils);
     }
 
@@ -372,13 +372,16 @@ export class VegetablesService {
     await this.em.removeAndFlush(vegetables);
   }
 
-  private async loadSoilsByIds(ids: string[]): Promise<Soil[]> {
-    if (ids.length === 0) {
+  private async loadSoilsByRefs(refs: string[]): Promise<Soil[]> {
+    if (refs.length === 0) {
       return [];
     }
 
-    const items = await this.em.find(Soil, { id: { $in: ids } });
-    this.assertNoMissingIds(ids, items, 'Soil');
+    const uniqueRefs = [...new Set(refs)];
+    const items = await this.em.find(Soil, {
+      $or: [{ slug: { $in: uniqueRefs } }, { id: { $in: uniqueRefs } }],
+    });
+    this.assertNoMissingRefs(uniqueRefs, items, 'Soil');
 
     return items;
   }
@@ -425,15 +428,18 @@ export class VegetablesService {
     return items;
   }
 
-  private async loadActionTemplatesByIds(
-    ids: string[],
+  private async loadActionTemplatesByRefs(
+    refs: string[],
   ): Promise<ActionTemplate[]> {
-    if (ids.length === 0) {
+    if (refs.length === 0) {
       return [];
     }
 
-    const items = await this.em.find(ActionTemplate, { id: { $in: ids } });
-    this.assertNoMissingIds(ids, items, 'ActionTemplate');
+    const uniqueRefs = [...new Set(refs)];
+    const items = await this.em.find(ActionTemplate, {
+      $or: [{ slug: { $in: uniqueRefs } }, { id: { $in: uniqueRefs } }],
+    });
+    this.assertNoMissingRefs(uniqueRefs, items, 'ActionTemplate');
 
     return items;
   }
@@ -497,7 +503,7 @@ export class VegetablesService {
       waterDemand: entity.waterDemand ?? null,
       recommendedSoilIds: entity.recommendedSoils
         .getItems()
-        .map((soil) => soil.id),
+        .map((soil) => soil.slug),
       nutrientDemand: entity.nutrientDemand ?? null,
       family: entity.family,
       botanicalFamily: entity.botanicalFamily ?? null,
@@ -533,7 +539,7 @@ export class VegetablesService {
               (rule) =>
                 rule.trigger === 'ON_HARVEST_CONFIRMED' && rule.isEnabled,
             )
-            .map((rule) => rule.actionTemplate.id),
+            .map((rule) => rule.actionTemplate.slug),
         ),
       ),
       rulesVersion: entity.rulesVersion,
@@ -552,6 +558,7 @@ export class VegetablesService {
           isEnabled: rule.isEnabled,
           actionTemplate: {
             id: rule.actionTemplate.id,
+            slug: rule.actionTemplate.slug,
             name: rule.actionTemplate.name,
             scope: rule.actionTemplate.target,
             target: rule.actionTemplate.target,
@@ -600,15 +607,20 @@ export class VegetablesService {
       ),
     );
 
-    const templates = await this.loadActionTemplatesByIds(templateIds);
-    const templateById = new Map(templates.map((item) => [item.id, item]));
+    const templates = await this.loadActionTemplatesByRefs(templateIds);
+    const templateByRef = new Map(
+      templates.flatMap((item) => [
+        [item.id, item] as const,
+        [item.slug, item] as const,
+      ]),
+    );
 
     const items: VegetableActionRule[] = rules.map(
       (item: VegetableActionRuleInput) => {
-        const actionTemplate = templateById.get(item.actionTemplateId);
+        const actionTemplate = templateByRef.get(item.actionTemplateId);
         if (!actionTemplate) {
           throw new BadRequestException(
-            `Missing ActionTemplate ID: ${item.actionTemplateId}`,
+            `Missing ActionTemplate reference (slug/id): ${item.actionTemplateId}`,
           );
         }
 

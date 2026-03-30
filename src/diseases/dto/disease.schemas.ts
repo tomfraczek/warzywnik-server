@@ -35,7 +35,7 @@ const baseDiseaseSchema = z.object({
   symptoms: z.string().min(1).optional(),
   prevention: z.string().min(1).optional(),
   treatment: z.string().min(1).optional(),
-  recommendedActionTemplateIds: z.array(z.string().uuid()).optional(),
+  recommendedActionTemplateIds: z.array(z.string().min(1).max(180)).optional(),
 });
 
 export const createDiseaseSchema = baseDiseaseSchema.extend({

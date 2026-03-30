@@ -48,19 +48,19 @@ export class Article {
   @Property({ type: 'int', default: 3 })
   priority: number = 3;
 
-  @Property({ type: 'uuid[]' })
+  @Property({ type: 'text[]' })
   relatedVegetableIds: string[] = [];
 
-  @Property({ type: 'uuid[]' })
+  @Property({ type: 'text[]' })
   relatedSoilIds: string[] = [];
 
-  @Property({ type: 'uuid[]' })
+  @Property({ type: 'text[]' })
   relatedFertilizerIds: string[] = [];
 
-  @Property({ type: 'uuid[]' })
+  @Property({ type: 'text[]' })
   relatedDiseaseIds: string[] = [];
 
-  @Property({ type: 'uuid[]' })
+  @Property({ type: 'text[]' })
   relatedPestIds: string[] = [];
 
   @Enum({ items: () => ArticleStatus, default: ArticleStatus.DRAFT })

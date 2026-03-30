@@ -56,7 +56,9 @@ export class PlantingDiseasesService {
   async create(user: User, plantingId: string, dto: CreatePlantingDiseaseDto) {
     const planting = await this.getPlantingOrThrow(user, plantingId);
 
-    const disease = await this.em.findOne(Disease, { id: dto.diseaseId });
+    const disease = await this.em.findOne(Disease, {
+      $or: [{ slug: dto.diseaseId }, { id: dto.diseaseId }],
+    });
     if (!disease) {
       throw new NotFoundException('Disease not found');
     }
@@ -209,6 +211,7 @@ export class PlantingDiseasesService {
       plantingId: occurrence.planting.id,
       disease: {
         id: occurrence.disease.id,
+        slug: occurrence.disease.slug,
         name: occurrence.disease.name,
       },
       actions: occurrence.disease.recommendedActions
@@ -301,6 +304,7 @@ export class PlantingDiseasesService {
       disease: entity.disease
         ? {
             id: entity.disease.id,
+            slug: entity.disease.slug,
             name: entity.disease.name,
           }
         : null,

@@ -75,7 +75,9 @@ export class PestOccurrencesService {
   async create(user: User, plantingId: string, dto: CreatePestOccurrenceDto) {
     const planting = await this.getPlantingOrThrow(user, plantingId);
 
-    const pest = await this.em.findOne(Pest, { id: dto.pestId });
+    const pest = await this.em.findOne(Pest, {
+      $or: [{ slug: dto.pestId }, { id: dto.pestId }],
+    });
     if (!pest) {
       throw new NotFoundException('Pest not found');
     }
@@ -167,6 +169,7 @@ export class PestOccurrencesService {
       plantingId: occurrence.planting.id,
       pest: {
         id: occurrence.pest.id,
+        slug: occurrence.pest.slug,
         name: occurrence.pest.name,
       },
       actions: occurrence.pest.recommendedActions
@@ -248,6 +251,7 @@ export class PestOccurrencesService {
       pest: entity.pest
         ? {
             id: entity.pest.id,
+            slug: entity.pest.slug,
             name: entity.pest.name,
           }
         : null,

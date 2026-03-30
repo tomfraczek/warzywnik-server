@@ -38,6 +38,7 @@ const optionalLabelSchema = z.string().min(1).max(120).nullable();
 const positiveIntSchema = z.number().int().min(1);
 const percentageSchema = z.number().int().min(0).max(100);
 const phSchema = z.number().min(0).max(14);
+const slugRefSchema = z.string().min(1).max(180);
 
 const baseBedSchema = z.object({
   name: nameSchema.optional(),
@@ -46,8 +47,8 @@ const baseBedSchema = z.object({
   lengthCm: positiveIntSchema.nullable().optional(),
   widthCm: positiveIntSchema.nullable().optional(),
   depthCm: positiveIntSchema.nullable().optional(),
-  soilId: z.string().uuid().nullable().optional(),
-  soil: z.string().uuid().nullable().optional(),
+  soilId: slugRefSchema.nullable().optional(),
+  soil: slugRefSchema.nullable().optional(),
   growingSpaceId: z.string().uuid().optional(),
   soilTestingEnabled: z.boolean().optional(),
   measuredN: percentageSchema.nullable().optional(),

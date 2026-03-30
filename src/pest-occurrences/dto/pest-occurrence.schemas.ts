@@ -17,7 +17,7 @@ export type ListPestOccurrencesQueryDto = {
 };
 
 export const createPestOccurrenceSchema = z.object({
-  pestId: z.string().uuid(),
+  pestId: z.string().min(1).max(180),
   status: z.nativeEnum(PestOccurrenceStatus).optional(),
   notes: z.string().min(1).nullable().optional(),
 });

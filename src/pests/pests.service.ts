@@ -162,18 +162,29 @@ export class PestsService {
     await this.em.removeAndFlush(pests);
   }
 
-  private async getActionTemplatesOrThrow(ids: string[]) {
-    if (ids.length === 0) {
+  private async getActionTemplatesOrThrow(refs: string[]) {
+    if (refs.length === 0) {
       return [];
     }
 
-    const uniqueIds = [...new Set(ids)];
+    const uniqueRefs = [...new Set(refs)];
     const templates = await this.em.find(ActionTemplate, {
-      id: { $in: uniqueIds },
+      $or: [{ slug: { $in: uniqueRefs } }, { id: { $in: uniqueRefs } }],
     });
 
-    if (templates.length !== uniqueIds.length) {
-      throw new NotFoundException('One or more action templates not found');
+    const matched = new Set<string>();
+    const expected = new Set(uniqueRefs);
+
+    for (const item of templates) {
+      if (expected.has(item.id)) matched.add(item.id);
+      if (expected.has(item.slug)) matched.add(item.slug);
+    }
+
+    const missing = uniqueRefs.filter((ref) => !matched.has(ref));
+    if (missing.length) {
+      throw new NotFoundException(
+        `One or more action templates not found (slug/id): ${missing.join(', ')}`,
+      );
     }
 
     return templates;
@@ -190,7 +201,7 @@ export class PestsService {
       treatment: entity.treatment ?? null,
       recommendedActionTemplateIds: entity.recommendedActions
         .getItems()
-        .map((item) => item.id),
+        .map((item) => item.slug),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };
