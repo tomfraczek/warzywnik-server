@@ -7,6 +7,7 @@ import { Pest } from '../pests/pest.entity';
 import { Disease } from '../diseases/disease.entity';
 import { ActionTemplate } from '../action-templates/action-template.entity';
 import { VegetableActionRule } from './vegetable-action-rule.entity';
+import { VegetablesSeedService } from './vegetables.seed.service';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { VegetableActionRule } from './vegetable-action-rule.entity';
     ]),
   ],
   controllers: [VegetablesController],
-  providers: [VegetablesService],
+  providers: [VegetablesService, VegetablesSeedService],
   exports: [VegetablesService],
 })
 export class VegetablesModule {}

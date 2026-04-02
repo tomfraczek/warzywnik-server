@@ -28,7 +28,7 @@ export type VegetableBaseDto = {
   sunExposure?: SunExposure | null;
   waterDemand?: DemandLevel | null;
 
-  recommendedSoilIds?: string[];
+  recommendedSoilSlugs?: string[];
 
   nutrientDemand?: DemandLevel | null;
   family?: VegetableFamily;
@@ -46,17 +46,16 @@ export type VegetableBaseDto = {
   harvestEndMonth?: Month | null;
   harvestSigns?: string | null;
   fertilizationStages?: FertilizationStage[];
-  commonPestIds?: string[];
-  commonDiseaseIds?: string[];
-  goodCompanionIds?: string[];
-  badCompanionIds?: string[];
-  postHarvestActionTemplateIds?: string[];
+  commonPestSlugs?: string[];
+  commonDiseaseSlugs?: string[];
+  goodCompanionSlugs?: string[];
+  badCompanionSlugs?: string[];
   actionRules?: VegetableActionRuleDto[];
 };
 
 export type VegetableActionRuleDto = {
   id?: string;
-  actionTemplateId: string;
+  actionTemplateSlug: string;
   trigger: ActionRuleTrigger;
   offsetDays: number;
   schedule: ActionRuleSchedule;
@@ -166,7 +165,7 @@ const fertilizationStageSchema = z.object({
 const vegetableActionRuleSchema = z
   .object({
     id: z.string().uuid().optional(),
-    actionTemplateId: slugRefSchema,
+    actionTemplateSlug: slugRefSchema,
     trigger: z.nativeEnum(ActionRuleTrigger),
     offsetDays: z.number().int(),
     schedule: z.nativeEnum(ActionRuleSchedule),
@@ -200,7 +199,7 @@ const baseVegetableSchema = z
     sunExposure: sunExposureSchema.nullable().optional(),
     waterDemand: demandLevelSchema.nullable().optional(),
 
-    recommendedSoilIds: z.array(slugRefSchema).optional(),
+    recommendedSoilSlugs: z.array(slugRefSchema).optional(),
 
     nutrientDemand: demandLevelSchema.nullable().optional(),
 
@@ -221,11 +220,10 @@ const baseVegetableSchema = z
     harvestEndMonth: monthSchema.nullable().optional(),
     harvestSigns: z.string().min(1).nullable().optional(),
     fertilizationStages: z.array(fertilizationStageSchema).optional(),
-    commonPestIds: z.array(slugRefSchema).optional(),
-    commonDiseaseIds: z.array(slugRefSchema).optional(),
-    goodCompanionIds: z.array(slugRefSchema).optional(),
-    badCompanionIds: z.array(slugRefSchema).optional(),
-    postHarvestActionTemplateIds: z.array(slugRefSchema).optional(),
+    commonPestSlugs: z.array(slugRefSchema).optional(),
+    commonDiseaseSlugs: z.array(slugRefSchema).optional(),
+    goodCompanionSlugs: z.array(slugRefSchema).optional(),
+    badCompanionSlugs: z.array(slugRefSchema).optional(),
     actionRules: z.array(vegetableActionRuleSchema).optional(),
   })
   .strict();

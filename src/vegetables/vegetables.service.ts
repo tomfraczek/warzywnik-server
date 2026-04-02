@@ -31,7 +31,7 @@ import { PlantingStartMethod } from '../common/enums/planting.enums';
 import { toSlug } from '../common/utils/slug.util';
 
 type VegetableActionRuleInput = {
-  actionTemplateId: string;
+  actionTemplateSlug: string;
   trigger: ActionRuleTrigger;
   offsetDays: number;
   schedule: ActionRuleSchedule;
@@ -92,7 +92,7 @@ export class VegetablesService {
         slug: item.slug,
         latinName: item.latinName ?? null,
         imageUrl: item.imageUrl ?? null,
-        recommendedSoilIds: item.recommendedSoils
+        recommendedSoilSlugs: item.recommendedSoils
           .getItems()
           .map((soil) => soil.slug),
         family: item.family,
@@ -118,8 +118,6 @@ export class VegetablesService {
           'recommendedSoils',
           'commonPests',
           'commonDiseases',
-          'goodCompanions',
-          'badCompanions',
           'actionRules',
           'actionRules.actionTemplate',
         ],
@@ -130,7 +128,28 @@ export class VegetablesService {
       throw new NotFoundException('Vegetable not found');
     }
 
-    return this.serializeVegetable(entity);
+    type CompanionRow = { id: string; slug: string; name: string };
+    const conn = this.em.getConnection();
+    const [goodCompanions, badCompanions] = await Promise.all([
+      conn.execute<CompanionRow[]>(
+        `SELECT v.id, v.slug, v.name
+         FROM vegetables v
+         JOIN vegetables_good_companions gc ON gc.companion_id = v.id
+         WHERE gc.vegetable_id = ?`,
+        [entity.id],
+        'all',
+      ),
+      conn.execute<CompanionRow[]>(
+        `SELECT v.id, v.slug, v.name
+         FROM vegetables v
+         JOIN vegetables_bad_companions bc ON bc.companion_id = v.id
+         WHERE bc.vegetable_id = ?`,
+        [entity.id],
+        'all',
+      ),
+    ]);
+
+    return this.serializeVegetable(entity, goodCompanions, badCompanions);
   }
 
   async create(dto: CreateVegetableDto) {
@@ -166,41 +185,35 @@ export class VegetablesService {
     vegetable.minSoilDepthCm = dto.minSoilDepthCm ?? null;
     vegetable.dominantNutrientDemand = dto.dominantNutrientDemand ?? null;
 
-    if (dto.recommendedSoilIds !== undefined) {
-      const soils = await this.loadSoilsByRefs(dto.recommendedSoilIds);
+    if (dto.recommendedSoilSlugs !== undefined) {
+      const soils = await this.loadSoilsByRefs(dto.recommendedSoilSlugs);
       vegetable.recommendedSoils.set(soils);
     }
 
-    if (dto.commonPestIds) {
-      const pests = await this.loadPestsByRefs(dto.commonPestIds);
+    if (dto.commonPestSlugs) {
+      const pests = await this.loadPestsByRefs(dto.commonPestSlugs);
       vegetable.commonPests.set(pests);
     }
 
-    if (dto.commonDiseaseIds) {
-      const diseases = await this.loadDiseasesByRefs(dto.commonDiseaseIds);
+    if (dto.commonDiseaseSlugs) {
+      const diseases = await this.loadDiseasesByRefs(dto.commonDiseaseSlugs);
       vegetable.commonDiseases.set(diseases);
     }
 
-    if (dto.goodCompanionIds) {
-      const companions = await this.loadVegetablesByRefs(dto.goodCompanionIds);
+    if (dto.goodCompanionSlugs) {
+      const companions = await this.loadVegetablesByRefs(
+        dto.goodCompanionSlugs,
+      );
       vegetable.goodCompanions.set(companions);
     }
 
-    if (dto.badCompanionIds) {
-      const companions = await this.loadVegetablesByRefs(dto.badCompanionIds);
+    if (dto.badCompanionSlugs) {
+      const companions = await this.loadVegetablesByRefs(dto.badCompanionSlugs);
       vegetable.badCompanions.set(companions);
     }
 
-    const resolvedActionRules =
-      dto.actionRules ??
-      (dto.postHarvestActionTemplateIds !== undefined
-        ? this.mapLegacyPostHarvestActionTemplateIdsToRules(
-            dto.postHarvestActionTemplateIds,
-          )
-        : undefined);
-
-    if (resolvedActionRules !== undefined) {
-      await this.replaceActionRules(vegetable, resolvedActionRules);
+    if (dto.actionRules !== undefined) {
+      await this.replaceActionRules(vegetable, dto.actionRules);
     }
 
     await this.em.persistAndFlush(vegetable);
@@ -291,41 +304,35 @@ export class VegetablesService {
       vegetable.minSoilDepthCm = dto.minSoilDepthCm;
     if (dto.dominantNutrientDemand !== undefined)
       vegetable.dominantNutrientDemand = dto.dominantNutrientDemand;
-    if (dto.recommendedSoilIds !== undefined) {
-      const soils = await this.loadSoilsByRefs(dto.recommendedSoilIds);
+    if (dto.recommendedSoilSlugs !== undefined) {
+      const soils = await this.loadSoilsByRefs(dto.recommendedSoilSlugs);
       vegetable.recommendedSoils.set(soils);
     }
 
-    if (dto.commonPestIds !== undefined) {
-      const pests = await this.loadPestsByRefs(dto.commonPestIds);
+    if (dto.commonPestSlugs !== undefined) {
+      const pests = await this.loadPestsByRefs(dto.commonPestSlugs);
       vegetable.commonPests.set(pests);
     }
 
-    if (dto.commonDiseaseIds !== undefined) {
-      const diseases = await this.loadDiseasesByRefs(dto.commonDiseaseIds);
+    if (dto.commonDiseaseSlugs !== undefined) {
+      const diseases = await this.loadDiseasesByRefs(dto.commonDiseaseSlugs);
       vegetable.commonDiseases.set(diseases);
     }
 
-    if (dto.goodCompanionIds !== undefined) {
-      const companions = await this.loadVegetablesByRefs(dto.goodCompanionIds);
+    if (dto.goodCompanionSlugs !== undefined) {
+      const companions = await this.loadVegetablesByRefs(
+        dto.goodCompanionSlugs,
+      );
       vegetable.goodCompanions.set(companions);
     }
 
-    if (dto.badCompanionIds !== undefined) {
-      const companions = await this.loadVegetablesByRefs(dto.badCompanionIds);
+    if (dto.badCompanionSlugs !== undefined) {
+      const companions = await this.loadVegetablesByRefs(dto.badCompanionSlugs);
       vegetable.badCompanions.set(companions);
     }
 
-    const resolvedActionRules =
-      dto.actionRules ??
-      (dto.postHarvestActionTemplateIds !== undefined
-        ? this.mapLegacyPostHarvestActionTemplateIdsToRules(
-            dto.postHarvestActionTemplateIds,
-          )
-        : undefined);
-
-    if (resolvedActionRules !== undefined) {
-      await this.replaceActionRules(vegetable, resolvedActionRules);
+    if (dto.actionRules !== undefined) {
+      await this.replaceActionRules(vegetable, dto.actionRules);
       vegetable.rulesVersion += 1;
     }
 
@@ -379,7 +386,7 @@ export class VegetablesService {
 
     const uniqueRefs = [...new Set(refs)];
     const items = await this.em.find(Soil, {
-      $or: [{ slug: { $in: uniqueRefs } }, { id: { $in: uniqueRefs } }],
+      slug: { $in: uniqueRefs },
     });
     this.assertNoMissingRefs(uniqueRefs, items, 'Soil');
 
@@ -393,7 +400,7 @@ export class VegetablesService {
 
     const uniqueRefs = [...new Set(refs)];
     const items = await this.em.find(Pest, {
-      $or: [{ slug: { $in: uniqueRefs } }, { id: { $in: uniqueRefs } }],
+      slug: { $in: uniqueRefs },
     });
     this.assertNoMissingRefs(uniqueRefs, items, 'Pest');
 
@@ -407,7 +414,7 @@ export class VegetablesService {
 
     const uniqueRefs = [...new Set(refs)];
     const items = await this.em.find(Disease, {
-      $or: [{ slug: { $in: uniqueRefs } }, { id: { $in: uniqueRefs } }],
+      slug: { $in: uniqueRefs },
     });
     this.assertNoMissingRefs(uniqueRefs, items, 'Disease');
 
@@ -421,7 +428,7 @@ export class VegetablesService {
 
     const uniqueRefs = [...new Set(refs)];
     const items = await this.em.find(Vegetable, {
-      $or: [{ slug: { $in: uniqueRefs } }, { id: { $in: uniqueRefs } }],
+      slug: { $in: uniqueRefs },
     });
     this.assertNoMissingRefs(uniqueRefs, items, 'Vegetable');
 
@@ -437,7 +444,7 @@ export class VegetablesService {
 
     const uniqueRefs = [...new Set(refs)];
     const items = await this.em.find(ActionTemplate, {
-      $or: [{ slug: { $in: uniqueRefs } }, { id: { $in: uniqueRefs } }],
+      slug: { $in: uniqueRefs },
     });
     this.assertNoMissingRefs(uniqueRefs, items, 'ActionTemplate');
 
@@ -463,7 +470,7 @@ export class VegetablesService {
     }
   }
 
-  private assertNoMissingRefs<T extends { id: string; slug: string }>(
+  private assertNoMissingRefs<T extends { slug: string }>(
     expectedRefs: string[],
     items: T[],
     label: string,
@@ -472,25 +479,34 @@ export class VegetablesService {
       return;
     }
 
-    const expected = new Set(expectedRefs);
-    const matched = new Set<string>();
-
-    for (const item of items) {
-      if (expected.has(item.id)) matched.add(item.id);
-      if (expected.has(item.slug)) matched.add(item.slug);
-    }
-
-    const missing = expectedRefs.filter((ref) => !matched.has(ref));
+    const foundSlugs = new Set(items.map((item) => item.slug));
+    const missing = expectedRefs.filter((ref) => !foundSlugs.has(ref));
 
     if (missing.length) {
       throw new BadRequestException(
-        `Missing ${label} references (slug/id): ${missing.join(', ')}`,
+        `Missing ${label} slugs: ${missing.join(', ')}`,
       );
     }
   }
 
-  private serializeVegetable(entity: Vegetable) {
+  private serializeVegetable(
+    entity: Vegetable,
+    goodCompanions?: { id: string; slug: string; name: string }[],
+    badCompanions?: { id: string; slug: string; name: string }[],
+  ) {
     const actionRules = entity.actionRules.getItems();
+
+    const resolvedGoodCompanions =
+      goodCompanions ??
+      entity.goodCompanions
+        .getItems()
+        .map((item) => ({ id: item.id, slug: item.slug, name: item.name }));
+
+    const resolvedBadCompanions =
+      badCompanions ??
+      entity.badCompanions
+        .getItems()
+        .map((item) => ({ id: item.id, slug: item.slug, name: item.name }));
 
     return {
       id: entity.id,
@@ -501,7 +517,7 @@ export class VegetablesService {
       description: entity.description,
       sunExposure: entity.sunExposure ?? null,
       waterDemand: entity.waterDemand ?? null,
-      recommendedSoilIds: entity.recommendedSoils
+      recommendedSoilSlugs: entity.recommendedSoils
         .getItems()
         .map((soil) => soil.slug),
       nutrientDemand: entity.nutrientDemand ?? null,
@@ -526,22 +542,8 @@ export class VegetablesService {
       commonDiseases: entity.commonDiseases
         .getItems()
         .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
-      goodCompanions: entity.goodCompanions
-        .getItems()
-        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
-      badCompanions: entity.badCompanions
-        .getItems()
-        .map((item) => ({ id: item.id, slug: item.slug, name: item.name })),
-      postHarvestActionTemplateIds: Array.from(
-        new Set(
-          actionRules
-            .filter(
-              (rule) =>
-                rule.trigger === 'ON_HARVEST_CONFIRMED' && rule.isEnabled,
-            )
-            .map((rule) => rule.actionTemplate.slug),
-        ),
-      ),
+      goodCompanions: resolvedGoodCompanions,
+      badCompanions: resolvedBadCompanions,
       rulesVersion: entity.rulesVersion,
       actionRules: actionRules.map((rule) => {
         return {
@@ -560,7 +562,6 @@ export class VegetablesService {
             id: rule.actionTemplate.id,
             slug: rule.actionTemplate.slug,
             name: rule.actionTemplate.name,
-            scope: rule.actionTemplate.target,
             target: rule.actionTemplate.target,
             type: rule.actionTemplate.type,
             description: rule.actionTemplate.description ?? null,
@@ -573,54 +574,32 @@ export class VegetablesService {
     };
   }
 
-  private mapLegacyPostHarvestActionTemplateIdsToRules(
-    actionTemplateIds: string[],
-  ): VegetableActionRuleInput[] {
-    return Array.from(new Set(actionTemplateIds)).map((actionTemplateId) => ({
-      actionTemplateId,
-      trigger: ActionRuleTrigger.ON_HARVEST_CONFIRMED,
-      offsetDays: 0,
-      schedule: ActionRuleSchedule.ONCE,
-      isEnabled: true,
-    }));
-  }
-
   private async replaceActionRules(
     vegetable: Vegetable,
     rules: VegetableActionRuleInput[],
   ) {
-    const actionRulesCollection: Collection<VegetableActionRule> =
-      vegetable.actionRules;
-
-    await this.em.nativeDelete(VegetableActionRule, {
-      vegetable: vegetable.id,
-    });
+    // Dzięki orphanRemoval: true na relacji, collection.set() automatycznie:
+    //   1. planuje DELETE dla starych reguł (MikroORM obsługuje kolejność: DELETE przed INSERT)
+    //   2. planuje INSERT dla nowych reguł
+    // Nie ma potrzeby ręcznego em.remove() ani nativeDelete().
 
     if (rules.length === 0) {
-      actionRulesCollection.removeAll();
+      vegetable.actionRules.set([]);
       return;
     }
 
-    const templateIds = Array.from(
-      new Set(
-        rules.map((item: VegetableActionRuleInput) => item.actionTemplateId),
-      ),
-    );
-
-    const templates = await this.loadActionTemplatesByRefs(templateIds);
-    const templateByRef = new Map(
-      templates.flatMap((item) => [
-        [item.id, item] as const,
-        [item.slug, item] as const,
-      ]),
-    );
+    const templateSlugs = [
+      ...new Set(rules.map((item) => item.actionTemplateSlug)),
+    ];
+    const templates = await this.loadActionTemplatesByRefs(templateSlugs);
+    const templateBySlug = new Map(templates.map((t) => [t.slug, t]));
 
     const items: VegetableActionRule[] = rules.map(
       (item: VegetableActionRuleInput) => {
-        const actionTemplate = templateByRef.get(item.actionTemplateId);
+        const actionTemplate = templateBySlug.get(item.actionTemplateSlug);
         if (!actionTemplate) {
           throw new BadRequestException(
-            `Missing ActionTemplate reference (slug/id): ${item.actionTemplateId}`,
+            `Missing ActionTemplate reference: ${item.actionTemplateSlug}`,
           );
         }
 
@@ -642,8 +621,7 @@ export class VegetablesService {
       },
     );
 
-    this.em.persist(items);
-    actionRulesCollection.set(items);
+    vegetable.actionRules.set(items);
   }
 
   private toRuleTriggerValue(
