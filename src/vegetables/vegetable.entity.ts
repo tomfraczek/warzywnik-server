@@ -181,9 +181,7 @@ export class Vegetable {
   })
   badCompanions = new Collection<Vegetable>(this);
 
-  @OneToMany(() => VegetableActionRule, (rule) => rule.vegetable, {
-    orphanRemoval: true,
-  })
+  @OneToMany(() => VegetableActionRule, (rule) => rule.vegetable)
   actionRules = new Collection<VegetableActionRule>(this);
 
   @Property({ type: 'int', default: 1 })

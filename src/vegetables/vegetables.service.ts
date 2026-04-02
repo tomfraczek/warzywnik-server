@@ -242,8 +242,6 @@ export class VegetablesService {
           'commonDiseases',
           'goodCompanions',
           'badCompanions',
-          'actionRules',
-          'actionRules.actionTemplate',
         ],
       },
     );
@@ -337,6 +335,11 @@ export class VegetablesService {
     }
 
     await this.em.flush();
+
+    await this.em.populate(vegetable, [
+      'actionRules',
+      'actionRules.actionTemplate',
+    ]);
 
     return this.serializeVegetable(vegetable);
   }
@@ -578,15 +581,14 @@ export class VegetablesService {
     vegetable: Vegetable,
     rules: VegetableActionRuleInput[],
   ) {
-    // Dzięki orphanRemoval: true na relacji, collection.set() automatycznie:
-    //   1. planuje DELETE dla starych reguł (MikroORM obsługuje kolejność: DELETE przed INSERT)
-    //   2. planuje INSERT dla nowych reguł
-    // Nie ma potrzeby ręcznego em.remove() ani nativeDelete().
+    // nativeDelete wykonuje DELETE natychmiast (przed flush),
+    // więc INSERT nowych reguł przy flush() nie natrafi na konflikt unique.
+    // Nie używamy set() ani orphanRemoval – to unika traversal całego grafu encji.
+    await this.em.nativeDelete(VegetableActionRule, {
+      vegetable: vegetable.id,
+    });
 
-    if (rules.length === 0) {
-      vegetable.actionRules.set([]);
-      return;
-    }
+    if (rules.length === 0) return;
 
     const templateSlugs = [
       ...new Set(rules.map((item) => item.actionTemplateSlug)),
@@ -621,7 +623,7 @@ export class VegetablesService {
       },
     );
 
-    vegetable.actionRules.set(items);
+    this.em.persist(items);
   }
 
   private toRuleTriggerValue(
