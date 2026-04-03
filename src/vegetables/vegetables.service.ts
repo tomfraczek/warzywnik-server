@@ -236,13 +236,7 @@ export class VegetablesService {
       Vegetable,
       { id },
       {
-        populate: [
-          'recommendedSoils',
-          'commonPests',
-          'commonDiseases',
-          'goodCompanions',
-          'badCompanions',
-        ],
+        populate: ['recommendedSoils', 'commonPests', 'commonDiseases'],
       },
     );
 
@@ -347,7 +341,28 @@ export class VegetablesService {
       'actionRules.actionTemplate',
     ]);
 
-    return this.serializeVegetable(vegetable);
+    type CompanionRow = { id: string; slug: string; name: string };
+    const conn = this.em.getConnection();
+    const [goodCompanions, badCompanions] = await Promise.all([
+      conn.execute<CompanionRow[]>(
+        `SELECT v.id, v.slug, v.name
+         FROM vegetables v
+         JOIN vegetables_good_companions gc ON gc.companion_id = v.id
+         WHERE gc.vegetable_id = ?`,
+        [vegetable.id],
+        'all',
+      ),
+      conn.execute<CompanionRow[]>(
+        `SELECT v.id, v.slug, v.name
+         FROM vegetables v
+         JOIN vegetables_bad_companions bc ON bc.companion_id = v.id
+         WHERE bc.vegetable_id = ?`,
+        [vegetable.id],
+        'all',
+      ),
+    ]);
+
+    return this.serializeVegetable(vegetable, goodCompanions, badCompanions);
   }
 
   async remove(id: string) {
