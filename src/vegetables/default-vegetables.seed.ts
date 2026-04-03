@@ -111,6 +111,8 @@ export async function upsertDefaultVegetables(
       }
       if (!vegetable) {
         vegetable = new Vegetable();
+      } else if (vegetable.isCustomized) {
+        continue;
       }
 
       vegetable.name = seed.name;
@@ -178,7 +180,7 @@ export async function upsertDefaultVegetables(
     for (const seed of batch) {
       const slug = toSlug(seed.name);
       const vegetable = await em.findOne(Vegetable, { slug });
-      if (!vegetable) continue;
+      if (!vegetable || vegetable.isCustomized) continue;
 
       const [goodCompanions, badCompanions] = await Promise.all([
         loadByRefs(

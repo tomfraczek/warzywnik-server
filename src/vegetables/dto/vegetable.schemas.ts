@@ -70,7 +70,9 @@ export type CreateVegetableDto = VegetableBaseDto & {
   description: string;
 };
 
-export type UpdateVegetableDto = VegetableBaseDto;
+export type UpdateVegetableDto = VegetableBaseDto & {
+  isCustomized?: boolean;
+};
 
 export type DeleteVegetablesBulkDto = {
   ids: string[];
@@ -225,6 +227,7 @@ const baseVegetableSchema = z
     goodCompanionSlugs: z.array(slugRefSchema).optional(),
     badCompanionSlugs: z.array(slugRefSchema).optional(),
     actionRules: z.array(vegetableActionRuleSchema).optional(),
+    isCustomized: z.boolean().optional(),
   })
   .strict();
 

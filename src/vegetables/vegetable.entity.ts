@@ -187,6 +187,9 @@ export class Vegetable {
   @Property({ type: 'int', default: 1 })
   rulesVersion: number = 1;
 
+  @Property({ type: 'boolean', default: false })
+  isCustomized: boolean = false;
+
   @Property({ type: Date, defaultRaw: 'now()' })
   createdAt: Date = new Date();
 

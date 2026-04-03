@@ -334,6 +334,12 @@ export class VegetablesService {
       vegetable.rulesVersion += 1;
     }
 
+    if (dto.isCustomized !== undefined) {
+      vegetable.isCustomized = dto.isCustomized;
+    } else {
+      vegetable.isCustomized = true;
+    }
+
     await this.em.flush();
 
     await this.em.populate(vegetable, [
@@ -548,6 +554,7 @@ export class VegetablesService {
       goodCompanions: resolvedGoodCompanions,
       badCompanions: resolvedBadCompanions,
       rulesVersion: entity.rulesVersion,
+      isCustomized: entity.isCustomized,
       actionRules: actionRules.map((rule) => {
         return {
           id: rule.id,
