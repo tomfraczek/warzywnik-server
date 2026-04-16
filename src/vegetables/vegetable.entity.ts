@@ -13,7 +13,6 @@ import {
   DemandLevel,
   Month,
   SunExposure,
-  VegetableFamily,
   BotanicalFamily,
   NutrientNeeds,
   RotationGroup,
@@ -27,18 +26,6 @@ import { Pest } from '../pests/pest.entity';
 import { Disease } from '../diseases/disease.entity';
 import { Soil } from '../soils/soil.entity';
 import { VegetableActionRule } from './vegetable-action-rule.entity';
-
-const VEGETABLE_FAMILY_ITEMS: string[] = [
-  'BRASSICACEAE',
-  'SOLANACEAE',
-  'APIACEAE',
-  'FABACEAE',
-  'AMARANTHACEAE',
-  'CUCURBITACEAE',
-  'ASTERACEAE',
-  'ALLIACEAE',
-  'OTHER',
-];
 
 const NUTRIENT_NEEDS_ITEMS: string[] = ['LOW', 'MEDIUM', 'HIGH'];
 
@@ -103,9 +90,6 @@ export class Vegetable {
     inverseJoinColumn: 'soil_id',
   })
   recommendedSoils = new Collection<Soil>(this);
-
-  @Enum({ items: VEGETABLE_FAMILY_ITEMS, default: 'OTHER' })
-  family!: VegetableFamily;
 
   @Enum({ items: NUTRIENT_NEEDS_ITEMS, default: 'MEDIUM' })
   nutrientNeeds!: NutrientNeeds;

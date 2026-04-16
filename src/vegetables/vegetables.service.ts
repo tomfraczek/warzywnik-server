@@ -4,14 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Collection, FilterQuery } from '@mikro-orm/core';
+import { FilterQuery } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Vegetable } from './vegetable.entity';
-import {
-  VegetableFamily,
-  NutrientNeeds,
-  RotationGroup,
-} from '../common/enums/vegetable.enums';
+import { NutrientNeeds, RotationGroup } from '../common/enums/vegetable.enums';
 import { Pest } from '../pests/pest.entity';
 import { Disease } from '../diseases/disease.entity';
 import { Soil } from '../soils/soil.entity';
@@ -75,7 +71,6 @@ export class VegetablesService {
         'latinName',
         'imageUrl',
         'recommendedSoils',
-        'family',
         'botanicalFamily',
         'nutrientNeeds',
         'rotationGroup',
@@ -95,7 +90,7 @@ export class VegetablesService {
         recommendedSoilSlugs: item.recommendedSoils
           .getItems()
           .map((soil) => soil.slug),
-        family: item.family,
+        family: item.botanicalFamily ?? null,
         botanicalFamily: item.botanicalFamily ?? null,
         nutrientNeeds: item.nutrientNeeds,
         rotationGroup: item.rotationGroup,
@@ -178,8 +173,7 @@ export class VegetablesService {
     vegetable.harvestEndMonth = dto.harvestEndMonth ?? null;
     vegetable.harvestSigns = dto.harvestSigns ?? null;
     vegetable.fertilizationStages = dto.fertilizationStages ?? null;
-    vegetable.family = dto.family ?? VegetableFamily.OTHER;
-    vegetable.botanicalFamily = dto.botanicalFamily ?? null;
+    vegetable.botanicalFamily = dto.family ?? null;
     vegetable.nutrientNeeds = dto.nutrientNeeds ?? NutrientNeeds.MEDIUM;
     vegetable.rotationGroup = dto.rotationGroup ?? RotationGroup.OTHER;
     vegetable.minSoilDepthCm = dto.minSoilDepthCm ?? null;
@@ -285,9 +279,7 @@ export class VegetablesService {
       vegetable.harvestSigns = dto.harvestSigns;
     if (dto.fertilizationStages !== undefined)
       vegetable.fertilizationStages = dto.fertilizationStages;
-    if (dto.family !== undefined) vegetable.family = dto.family;
-    if (dto.botanicalFamily !== undefined)
-      vegetable.botanicalFamily = dto.botanicalFamily;
+    if (dto.family !== undefined) vegetable.botanicalFamily = dto.family;
     if (dto.nutrientNeeds !== undefined)
       vegetable.nutrientNeeds = dto.nutrientNeeds;
     if (dto.rotationGroup !== undefined)
@@ -329,7 +321,7 @@ export class VegetablesService {
     }
 
     if (dto.isCustomized !== undefined) {
-      vegetable.isCustomized = dto.isCustomized;
+      vegetable.isCustomized = Boolean(dto.isCustomized);
     } else {
       vegetable.isCustomized = true;
     }
@@ -545,7 +537,7 @@ export class VegetablesService {
         .getItems()
         .map((soil) => soil.slug),
       nutrientDemand: entity.nutrientDemand ?? null,
-      family: entity.family,
+      family: entity.botanicalFamily ?? null,
       botanicalFamily: entity.botanicalFamily ?? null,
       nutrientNeeds: entity.nutrientNeeds,
       rotationGroup: entity.rotationGroup,
@@ -569,7 +561,7 @@ export class VegetablesService {
       goodCompanions: resolvedGoodCompanions,
       badCompanions: resolvedBadCompanions,
       rulesVersion: entity.rulesVersion,
-      isCustomized: entity.isCustomized,
+      isCustomized: Boolean(entity.isCustomized),
       actionRules: actionRules.map((rule) => {
         return {
           id: rule.id,

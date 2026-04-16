@@ -3,12 +3,12 @@ import { PlantingsService } from './plantings.service';
 import { WarningCode, WarningSeverity } from '../common/enums/warning.enums';
 import { PlantingStatus } from '../common/enums/planting.enums';
 import {
+  BotanicalFamily,
   DominantNutrientDemand,
   Month,
   NutrientNeeds,
   RotationGroup,
   SowingMethodType,
-  VegetableFamily,
 } from '../common/enums/vegetable.enums';
 import {
   DemandLevel,
@@ -100,7 +100,7 @@ const makeVegetable = (overrides: Partial<Vegetable> = {}): Vegetable =>
   ({
     id: 'veg-1',
     name: 'Carrot',
-    family: VegetableFamily.OTHER,
+    botanicalFamily: null,
     rotationGroup: RotationGroup.OTHER,
     nutrientNeeds: NutrientNeeds.MEDIUM,
     recommendedSoils: {
@@ -220,13 +220,15 @@ describe('PlantingsService warnings', () => {
 
   it('emits FAMILY_REPETITION when the same family was planted recently', async () => {
     const previous = makePlanting({
-      vegetable: { family: VegetableFamily.SOLANACEAE } as Vegetable,
+      vegetable: { botanicalFamily: BotanicalFamily.SOLANACEAE } as Vegetable,
       plannedStartDate: new Date('2024-01-01T00:00:00.000Z'),
     });
     const { service } = createService([previous]);
 
     const bed = makeBed();
-    const vegetable = makeVegetable({ family: VegetableFamily.SOLANACEAE });
+    const vegetable = makeVegetable({
+      botanicalFamily: BotanicalFamily.SOLANACEAE,
+    });
     const planting = makePlanting({
       plannedStartDate: new Date('2025-01-01T00:00:00.000Z'),
     });

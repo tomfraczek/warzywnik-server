@@ -2,9 +2,9 @@ import { EntityName, FilterQuery } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ActionTemplate } from '../action-templates/action-template.entity';
 import {
+  BotanicalFamily,
   NutrientNeeds,
   RotationGroup,
-  VegetableFamily,
 } from '../common/enums/vegetable.enums';
 import { toSlug } from '../common/utils/slug.util';
 import { Disease } from '../diseases/disease.entity';
@@ -18,7 +18,11 @@ import {
 } from './dto/vegetable.schemas';
 import vegetablesSeedData from './vegetables-seed-data.json';
 
-type SeedRecord = CreateVegetableDto & { name: string; description: string };
+type SeedRecord = CreateVegetableDto & {
+  name: string;
+  description: string;
+  botanicalFamily?: BotanicalFamily | null;
+};
 
 const isString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
@@ -123,7 +127,6 @@ export async function upsertDefaultVegetables(
       vegetable.sunExposure = seed.sunExposure ?? null;
       vegetable.waterDemand = seed.waterDemand ?? null;
       vegetable.nutrientDemand = seed.nutrientDemand ?? null;
-      vegetable.family = seed.family ?? VegetableFamily.OTHER;
       vegetable.botanicalFamily = seed.botanicalFamily ?? null;
       vegetable.nutrientNeeds = seed.nutrientNeeds ?? NutrientNeeds.MEDIUM;
       vegetable.rotationGroup = seed.rotationGroup ?? RotationGroup.OTHER;

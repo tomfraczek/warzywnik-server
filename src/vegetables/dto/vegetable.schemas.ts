@@ -4,7 +4,6 @@ import {
   Month,
   SunExposure,
   SowingMethodType,
-  VegetableFamily,
   BotanicalFamily,
   NutrientNeeds,
   RotationGroup,
@@ -31,8 +30,7 @@ export type VegetableBaseDto = {
   recommendedSoilSlugs?: string[];
 
   nutrientDemand?: DemandLevel | null;
-  family?: VegetableFamily;
-  botanicalFamily?: BotanicalFamily | null;
+  family?: BotanicalFamily | null;
   nutrientNeeds?: NutrientNeeds;
   rotationGroup?: RotationGroup;
   minSoilDepthCm?: number | null;
@@ -93,9 +91,7 @@ const sunExposureSchema = z.nativeEnum(SunExposure);
 const sowingMethodTypeSchema = z.nativeEnum(SowingMethodType);
 
 // ✅ no manual arrays + no "as VegetableFamily" casts
-const vegetableFamilySchema = z
-  .nativeEnum(VegetableFamily)
-  .default(VegetableFamily.OTHER);
+const vegetableFamilySchema = z.nativeEnum(BotanicalFamily).nullable();
 
 const botanicalFamilySchema = z.nativeEnum(BotanicalFamily).nullable();
 

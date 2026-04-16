@@ -15,11 +15,11 @@ export type ArticleBaseDto = {
   seasons?: ArticleSeason[];
   contexts?: ArticleContext[];
   priority?: number;
-  relatedVegetableIds?: string[];
-  relatedSoilIds?: string[];
-  relatedFertilizerIds?: string[];
-  relatedDiseaseIds?: string[];
-  relatedPestIds?: string[];
+  relatedVegetableSlugs?: string[];
+  relatedSoilSlugs?: string[];
+  relatedFertilizerSlugs?: string[];
+  relatedDiseaseSlugs?: string[];
+  relatedPestSlugs?: string[];
   status?: ArticleStatus;
   publishedAt?: Date | null;
 };
@@ -30,6 +30,11 @@ export type CreateArticleDto = ArticleBaseDto & {
   excerpt: string;
   content: string;
   contexts: ArticleContext[];
+  relatedVegetableSlugs: string[];
+  relatedSoilSlugs: string[];
+  relatedFertilizerSlugs: string[];
+  relatedDiseaseSlugs: string[];
+  relatedPestSlugs: string[];
 };
 
 export type UpdateArticleDto = ArticleBaseDto;
@@ -46,11 +51,11 @@ export type ListArticlesQueryDto = {
   month?: number;
   season?: ArticleSeason;
   context?: ArticleContext;
-  vegetableId?: string;
-  soilId?: string;
-  fertilizerId?: string;
-  diseaseId?: string;
-  pestId?: string;
+  vegetableSlug?: string;
+  soilSlug?: string;
+  fertilizerSlug?: string;
+  diseaseSlug?: string;
+  pestSlug?: string;
 };
 
 const slugSchema = z
@@ -88,11 +93,11 @@ const baseArticleSchema = z
     seasons: seasonsSchema.optional(),
     contexts: contextsSchema.optional(),
     priority: prioritySchema.optional(),
-    relatedVegetableIds: slugRefArraySchema.optional(),
-    relatedSoilIds: slugRefArraySchema.optional(),
-    relatedFertilizerIds: slugRefArraySchema.optional(),
-    relatedDiseaseIds: slugRefArraySchema.optional(),
-    relatedPestIds: slugRefArraySchema.optional(),
+    relatedVegetableSlugs: slugRefArraySchema.optional(),
+    relatedSoilSlugs: slugRefArraySchema.optional(),
+    relatedFertilizerSlugs: slugRefArraySchema.optional(),
+    relatedDiseaseSlugs: slugRefArraySchema.optional(),
+    relatedPestSlugs: slugRefArraySchema.optional(),
     status: statusSchema.optional(),
     publishedAt: z.coerce.date().nullable().optional(),
   })
@@ -107,11 +112,11 @@ export const createArticleSchema = baseArticleSchema.extend({
   months: monthsSchema.default([]),
   seasons: seasonsSchema.default([]),
   priority: prioritySchema.default(3),
-  relatedVegetableIds: slugRefArraySchema.default([]),
-  relatedSoilIds: slugRefArraySchema.default([]),
-  relatedFertilizerIds: slugRefArraySchema.default([]),
-  relatedDiseaseIds: slugRefArraySchema.default([]),
-  relatedPestIds: slugRefArraySchema.default([]),
+  relatedVegetableSlugs: slugRefArraySchema.default([]),
+  relatedSoilSlugs: slugRefArraySchema.default([]),
+  relatedFertilizerSlugs: slugRefArraySchema.default([]),
+  relatedDiseaseSlugs: slugRefArraySchema.default([]),
+  relatedPestSlugs: slugRefArraySchema.default([]),
   status: statusSchema.default(ArticleStatus.DRAFT),
 });
 
@@ -132,10 +137,10 @@ export const listArticlesQuerySchema = z
     month: z.coerce.number().int().min(1).max(12).optional(),
     season: seasonSchema.optional(),
     context: contextSchema.optional(),
-    vegetableId: slugRefSchema.optional(),
-    soilId: slugRefSchema.optional(),
-    fertilizerId: slugRefSchema.optional(),
-    diseaseId: slugRefSchema.optional(),
-    pestId: slugRefSchema.optional(),
+    vegetableSlug: slugRefSchema.optional(),
+    soilSlug: slugRefSchema.optional(),
+    fertilizerSlug: slugRefSchema.optional(),
+    diseaseSlug: slugRefSchema.optional(),
+    pestSlug: slugRefSchema.optional(),
   })
   .strict();

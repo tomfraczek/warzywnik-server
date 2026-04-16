@@ -41,11 +41,11 @@ export class ArticlesService {
       month,
       season,
       context,
-      vegetableId,
-      soilId,
-      fertilizerId,
-      diseaseId,
-      pestId,
+      vegetableSlug,
+      soilSlug,
+      fertilizerSlug,
+      diseaseSlug,
+      pestSlug,
     } = query;
 
     const where: Record<string, unknown> = {};
@@ -73,24 +73,24 @@ export class ArticlesService {
       where.contexts = { $contains: [context] };
     }
 
-    if (vegetableId) {
-      where.relatedVegetableIds = { $contains: [vegetableId] };
+    if (vegetableSlug) {
+      where.relatedVegetableSlugs = { $contains: [vegetableSlug] };
     }
 
-    if (soilId) {
-      where.relatedSoilIds = { $contains: [soilId] };
+    if (soilSlug) {
+      where.relatedSoilSlugs = { $contains: [soilSlug] };
     }
 
-    if (fertilizerId) {
-      where.relatedFertilizerIds = { $contains: [fertilizerId] };
+    if (fertilizerSlug) {
+      where.relatedFertilizerSlugs = { $contains: [fertilizerSlug] };
     }
 
-    if (diseaseId) {
-      where.relatedDiseaseIds = { $contains: [diseaseId] };
+    if (diseaseSlug) {
+      where.relatedDiseaseSlugs = { $contains: [diseaseSlug] };
     }
 
-    if (pestId) {
-      where.relatedPestIds = { $contains: [pestId] };
+    if (pestSlug) {
+      where.relatedPestSlugs = { $contains: [pestSlug] };
     }
 
     const [items, total] = await this.em.findAndCount(Article, where, {
@@ -159,11 +159,11 @@ export class ArticlesService {
     article.seasons = dto.seasons ?? [];
     article.contexts = dto.contexts ?? [];
     article.priority = dto.priority ?? 3;
-    article.relatedVegetableIds = dto.relatedVegetableIds ?? [];
-    article.relatedSoilIds = dto.relatedSoilIds ?? [];
-    article.relatedFertilizerIds = dto.relatedFertilizerIds ?? [];
-    article.relatedDiseaseIds = dto.relatedDiseaseIds ?? [];
-    article.relatedPestIds = dto.relatedPestIds ?? [];
+    article.relatedVegetableSlugs = dto.relatedVegetableSlugs ?? [];
+    article.relatedSoilSlugs = dto.relatedSoilSlugs ?? [];
+    article.relatedFertilizerSlugs = dto.relatedFertilizerSlugs ?? [];
+    article.relatedDiseaseSlugs = dto.relatedDiseaseSlugs ?? [];
+    article.relatedPestSlugs = dto.relatedPestSlugs ?? [];
     article.status = dto.status ?? ArticleStatus.DRAFT;
     article.publishedAt = dto.publishedAt ?? null;
 
@@ -199,16 +199,16 @@ export class ArticlesService {
     if (dto.seasons !== undefined) article.seasons = dto.seasons;
     if (dto.contexts !== undefined) article.contexts = dto.contexts;
     if (dto.priority !== undefined) article.priority = dto.priority;
-    if (dto.relatedVegetableIds !== undefined)
-      article.relatedVegetableIds = dto.relatedVegetableIds;
-    if (dto.relatedSoilIds !== undefined)
-      article.relatedSoilIds = dto.relatedSoilIds;
-    if (dto.relatedFertilizerIds !== undefined)
-      article.relatedFertilizerIds = dto.relatedFertilizerIds;
-    if (dto.relatedDiseaseIds !== undefined)
-      article.relatedDiseaseIds = dto.relatedDiseaseIds;
-    if (dto.relatedPestIds !== undefined)
-      article.relatedPestIds = dto.relatedPestIds;
+    if (dto.relatedVegetableSlugs !== undefined)
+      article.relatedVegetableSlugs = dto.relatedVegetableSlugs;
+    if (dto.relatedSoilSlugs !== undefined)
+      article.relatedSoilSlugs = dto.relatedSoilSlugs;
+    if (dto.relatedFertilizerSlugs !== undefined)
+      article.relatedFertilizerSlugs = dto.relatedFertilizerSlugs;
+    if (dto.relatedDiseaseSlugs !== undefined)
+      article.relatedDiseaseSlugs = dto.relatedDiseaseSlugs;
+    if (dto.relatedPestSlugs !== undefined)
+      article.relatedPestSlugs = dto.relatedPestSlugs;
     if (dto.status !== undefined) article.status = dto.status;
     if (dto.publishedAt !== undefined) article.publishedAt = dto.publishedAt;
 
@@ -268,11 +268,11 @@ export class ArticlesService {
       contexts: article.contexts ?? [],
       priority: article.priority,
       publishedAt: article.publishedAt ?? null,
-      relatedVegetableIds: article.relatedVegetableIds ?? [],
-      relatedSoilIds: article.relatedSoilIds ?? [],
-      relatedFertilizerIds: article.relatedFertilizerIds ?? [],
-      relatedDiseaseIds: article.relatedDiseaseIds ?? [],
-      relatedPestIds: article.relatedPestIds ?? [],
+      relatedVegetableSlugs: article.relatedVegetableSlugs ?? [],
+      relatedSoilSlugs: article.relatedSoilSlugs ?? [],
+      relatedFertilizerSlugs: article.relatedFertilizerSlugs ?? [],
+      relatedDiseaseSlugs: article.relatedDiseaseSlugs ?? [],
+      relatedPestSlugs: article.relatedPestSlugs ?? [],
     };
   }
 }

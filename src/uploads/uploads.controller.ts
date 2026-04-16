@@ -108,6 +108,46 @@ export class UploadsController {
     await this.em.flush();
   }
 
+  @Post('articles/cover')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: MAX_FILE_SIZE },
+      fileFilter: (_req, file, cb) => {
+        if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
+          return cb(new BadRequestException('Unsupported file type'), false);
+        }
+        return cb(null, true);
+      },
+    }),
+  )
+  async uploadArticleCoverAnonymous(
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    const ext = mimeToExtension[file.mimetype];
+    if (!ext) {
+      throw new BadRequestException('Unsupported file type');
+    }
+
+    const baseName = file.originalname
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .slice(0, 80);
+    const key = `articles/${baseName}.${ext}`;
+
+    await this.r2Storage.uploadObject({
+      key,
+      body: file.buffer,
+      contentType: file.mimetype,
+    });
+
+    return { url: this.r2Storage.getPublicUrl(key) };
+  }
+
   @Post('articles/:id/cover')
   @UseInterceptors(
     FileInterceptor('file', {

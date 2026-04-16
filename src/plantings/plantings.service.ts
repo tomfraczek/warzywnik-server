@@ -1023,9 +1023,9 @@ export class PlantingsService {
     valuesBase: Record<string, string | number>,
     previousPlantings: Planting[],
   ): WarningCandidate | null {
-    if (!vegetable.family) return null;
+    if (!vegetable.botanicalFamily) return null;
     const hasSameFamily = previousPlantings.some(
-      (item) => item.vegetable.family === vegetable.family,
+      (item) => item.vegetable.botanicalFamily === vegetable.botanicalFamily,
     );
     if (!hasSameFamily) return null;
 
@@ -1033,7 +1033,7 @@ export class PlantingsService {
       code: WarningCode.FAMILY_REPETITION,
       values: {
         ...valuesBase,
-        familyName: vegetable.family,
+        familyName: vegetable.botanicalFamily,
       },
     };
   }
