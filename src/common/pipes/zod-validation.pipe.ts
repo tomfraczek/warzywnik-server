@@ -17,6 +17,13 @@ export class ZodValidationPipe<TOutput> implements PipeTransform {
   }
 
   private formatZodError(error: ZodError) {
-    return error.issues.map((i) => i.message).join(', ') || 'Validation error';
+    return (
+      error.issues
+        .map((i) => {
+          const path = i.path.length ? `${i.path.join('.')}: ` : '';
+          return `${path}${i.message}`;
+        })
+        .join(', ') || 'Validation error'
+    );
   }
 }

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Article } from './article.entity';
+import { toSlug } from '../common/utils/slug.util';
 import {
   CreateArticleDto,
   ListArticlesQueryDto,
@@ -144,13 +145,14 @@ export class ArticlesService {
   }
 
   async create(dto: CreateArticleDto) {
-    const existing = await this.em.findOne(Article, { slug: dto.slug });
+    const slug = dto.slug ?? toSlug(dto.title);
+    const existing = await this.em.findOne(Article, { slug });
     if (existing) {
       throw new ConflictException('Article slug already exists');
     }
 
     const article = new Article();
-    article.slug = dto.slug;
+    article.slug = slug;
     article.title = dto.title;
     article.excerpt = dto.excerpt;
     article.content = dto.content;

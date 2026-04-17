@@ -25,7 +25,6 @@ export type ArticleBaseDto = {
 };
 
 export type CreateArticleDto = ArticleBaseDto & {
-  slug: string;
   title: string;
   excerpt: string;
   content: string;
@@ -82,29 +81,27 @@ const slugRefArraySchema = z.array(slugRefSchema);
 const statusSchema = z.nativeEnum(ArticleStatus);
 const coverImageSchema = z.string().max(255).nullable();
 
-const baseArticleSchema = z
-  .object({
-    slug: slugSchema.optional(),
-    title: titleSchema.optional(),
-    excerpt: excerptSchema.optional(),
-    content: contentSchema.optional(),
-    coverImageUrl: coverImageSchema.optional(),
-    months: monthsSchema.optional(),
-    seasons: seasonsSchema.optional(),
-    contexts: contextsSchema.optional(),
-    priority: prioritySchema.optional(),
-    relatedVegetableSlugs: slugRefArraySchema.optional(),
-    relatedSoilSlugs: slugRefArraySchema.optional(),
-    relatedFertilizerSlugs: slugRefArraySchema.optional(),
-    relatedDiseaseSlugs: slugRefArraySchema.optional(),
-    relatedPestSlugs: slugRefArraySchema.optional(),
-    status: statusSchema.optional(),
-    publishedAt: z.coerce.date().nullable().optional(),
-  })
-  .strict();
+const baseArticleSchema = z.object({
+  slug: slugSchema.optional(),
+  title: titleSchema.optional(),
+  excerpt: excerptSchema.optional(),
+  content: contentSchema.optional(),
+  coverImageUrl: coverImageSchema.optional(),
+  months: monthsSchema.optional(),
+  seasons: seasonsSchema.optional(),
+  contexts: contextsSchema.optional(),
+  priority: prioritySchema.optional(),
+  relatedVegetableSlugs: slugRefArraySchema.optional(),
+  relatedSoilSlugs: slugRefArraySchema.optional(),
+  relatedFertilizerSlugs: slugRefArraySchema.optional(),
+  relatedDiseaseSlugs: slugRefArraySchema.optional(),
+  relatedPestSlugs: slugRefArraySchema.optional(),
+  status: statusSchema.optional(),
+  publishedAt: z.coerce.date().nullable().optional(),
+});
 
 export const createArticleSchema = baseArticleSchema.extend({
-  slug: slugSchema,
+  slug: slugSchema.optional(),
   title: titleSchema,
   excerpt: excerptSchema,
   content: contentSchema,
@@ -122,25 +119,21 @@ export const createArticleSchema = baseArticleSchema.extend({
 
 export const updateArticleSchema = baseArticleSchema;
 
-export const deleteArticlesBulkSchema = z
-  .object({
-    ids: z.array(z.string().uuid()).min(1),
-  })
-  .strict();
+export const deleteArticlesBulkSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1),
+});
 
-export const listArticlesQuerySchema = z
-  .object({
-    page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(20),
-    q: z.string().trim().min(1).optional(),
-    status: statusSchema.optional(),
-    month: z.coerce.number().int().min(1).max(12).optional(),
-    season: seasonSchema.optional(),
-    context: contextSchema.optional(),
-    vegetableSlug: slugRefSchema.optional(),
-    soilSlug: slugRefSchema.optional(),
-    fertilizerSlug: slugRefSchema.optional(),
-    diseaseSlug: slugRefSchema.optional(),
-    pestSlug: slugRefSchema.optional(),
-  })
-  .strict();
+export const listArticlesQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  q: z.string().trim().min(1).optional(),
+  status: statusSchema.optional(),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  season: seasonSchema.optional(),
+  context: contextSchema.optional(),
+  vegetableSlug: slugRefSchema.optional(),
+  soilSlug: slugRefSchema.optional(),
+  fertilizerSlug: slugRefSchema.optional(),
+  diseaseSlug: slugRefSchema.optional(),
+  pestSlug: slugRefSchema.optional(),
+});
