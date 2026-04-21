@@ -106,7 +106,10 @@ export class FavoritesService {
       orderBy: { createdAt: 'desc' },
     });
 
-    const serializedItems = await this.enrichFavorites(items, include === 'details');
+    const serializedItems = await this.enrichFavorites(
+      items,
+      include === 'details',
+    );
 
     return {
       items: serializedItems,
@@ -128,10 +131,7 @@ export class FavoritesService {
       query.include === 'details',
     );
 
-    const grouped: Record<
-      FavoriteTargetType,
-      FavoriteSerializedItem[]
-    > = {
+    const grouped: Record<FavoriteTargetType, FavoriteSerializedItem[]> = {
       [FavoriteTargetType.ARTICLE]: [],
       [FavoriteTargetType.VEGETABLE]: [],
       [FavoriteTargetType.SOIL]: [],
@@ -158,7 +158,9 @@ export class FavoritesService {
     const detailsByType = await this.loadDetailsByType(items);
 
     return items.map((entity) => {
-      const targetDetails = detailsByType[entity.targetType].get(entity.targetSlug);
+      const targetDetails = detailsByType[entity.targetType].get(
+        entity.targetSlug,
+      );
 
       return {
         id: entity.id,
@@ -187,13 +189,21 @@ export class FavoritesService {
     }
 
     const uniqueSlugsByType: Record<FavoriteTargetType, string[]> = {
-      [FavoriteTargetType.ARTICLE]: [...new Set(slugsByType[FavoriteTargetType.ARTICLE])],
+      [FavoriteTargetType.ARTICLE]: [
+        ...new Set(slugsByType[FavoriteTargetType.ARTICLE]),
+      ],
       [FavoriteTargetType.VEGETABLE]: [
         ...new Set(slugsByType[FavoriteTargetType.VEGETABLE]),
       ],
-      [FavoriteTargetType.SOIL]: [...new Set(slugsByType[FavoriteTargetType.SOIL])],
-      [FavoriteTargetType.DISEASE]: [...new Set(slugsByType[FavoriteTargetType.DISEASE])],
-      [FavoriteTargetType.PEST]: [...new Set(slugsByType[FavoriteTargetType.PEST])],
+      [FavoriteTargetType.SOIL]: [
+        ...new Set(slugsByType[FavoriteTargetType.SOIL]),
+      ],
+      [FavoriteTargetType.DISEASE]: [
+        ...new Set(slugsByType[FavoriteTargetType.DISEASE]),
+      ],
+      [FavoriteTargetType.PEST]: [
+        ...new Set(slugsByType[FavoriteTargetType.PEST]),
+      ],
       [FavoriteTargetType.FERTILIZER]: [
         ...new Set(slugsByType[FavoriteTargetType.FERTILIZER]),
       ],
@@ -211,7 +221,9 @@ export class FavoritesService {
         uniqueSlugsByType[FavoriteTargetType.VEGETABLE].length
           ? this.em.find(
               Vegetable,
-              { slug: { $in: uniqueSlugsByType[FavoriteTargetType.VEGETABLE] } },
+              {
+                slug: { $in: uniqueSlugsByType[FavoriteTargetType.VEGETABLE] },
+              },
               { fields: ['id', 'slug', 'name', 'imageUrl'] },
             )
           : Promise.resolve([]),
@@ -249,7 +261,10 @@ export class FavoritesService {
           : Promise.resolve([]),
       ]);
 
-    const result: Record<FavoriteTargetType, Map<string, FavoriteTargetDetails>> = {
+    const result: Record<
+      FavoriteTargetType,
+      Map<string, FavoriteTargetDetails>
+    > = {
       [FavoriteTargetType.ARTICLE]: new Map(
         articles.map((item) => [
           item.slug,

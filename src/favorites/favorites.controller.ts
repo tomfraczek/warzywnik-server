@@ -61,7 +61,8 @@ export class FavoritesController {
     name: 'include',
     required: false,
     enum: ['details'],
-    description: 'Set to details to include name and imageUrl in favorites items',
+    description:
+      'Set to details to include name and imageUrl in favorites items',
   })
   list(
     @Req() req: RequestWithUser,
@@ -76,7 +77,8 @@ export class FavoritesController {
     name: 'include',
     required: false,
     enum: ['details'],
-    description: 'Set to details to include name and imageUrl in favorites items',
+    description:
+      'Set to details to include name and imageUrl in favorites items',
   })
   listGrouped(
     @Req() req: RequestWithUser,
