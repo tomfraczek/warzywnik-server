@@ -3,9 +3,10 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { ArticlesController } from './articles.controller';
 import { ArticlesService } from './articles.service';
 import { Article } from './article.entity';
+import { AnalyticsModule } from '../analytics/analytics.module';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Article])],
+  imports: [MikroOrmModule.forFeature([Article]), AnalyticsModule],
   controllers: [ArticlesController],
   providers: [ArticlesService],
   exports: [ArticlesService],

@@ -12,6 +12,9 @@ import {
   UpdateArticleDto,
 } from './dto/article.schemas';
 import { ArticleStatus } from '../common/enums/article.enums';
+import { AnalyticsService } from '../analytics/analytics.service';
+import { User } from '../users/user.entity';
+import { calculateReadTimeMinutes } from '../common/utils/read-time.util';
 
 const isUuid = (value: string): boolean => /^[0-9a-fA-F-]{36}$/.test(value);
 
@@ -22,16 +25,21 @@ type ArticleListItem = Pick<
   | 'title'
   | 'excerpt'
   | 'coverImageUrl'
+  | 'coverUpdatedAt'
   | 'months'
   | 'seasons'
   | 'contexts'
   | 'priority'
+  | 'readTimeMinutes'
   | 'publishedAt'
 >;
 
 @Injectable()
 export class ArticlesService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly analyticsService: AnalyticsService,
+  ) {}
 
   async listPublic(query: ListArticlesQueryDto) {
     const {
@@ -108,6 +116,7 @@ export class ArticlesService {
         'seasons',
         'contexts',
         'priority',
+        'readTimeMinutes',
         'publishedAt',
       ],
     });
@@ -120,7 +129,7 @@ export class ArticlesService {
     };
   }
 
-  async getPublicByIdOrSlug(idOrSlug: string) {
+  async getPublicByIdOrSlug(idOrSlug: string, user?: User | null) {
     const where: Record<string, unknown> = isUuid(idOrSlug)
       ? { id: idOrSlug }
       : { slug: idOrSlug };
@@ -131,7 +140,16 @@ export class ArticlesService {
       throw new NotFoundException('Article not found');
     }
 
+    await this.analyticsService.recordArticleView({
+      articleSlug: entity.slug,
+      userId: user?.id ?? null,
+    });
+
     return this.serializeDetail(entity);
+  }
+
+  async getPublicBySlug(slug: string, user?: User | null) {
+    return this.getPublicByIdOrSlug(slug, user);
   }
 
   async getById(id: string) {
@@ -172,6 +190,8 @@ export class ArticlesService {
     if (article.status === ArticleStatus.PUBLISHED && !article.publishedAt) {
       article.publishedAt = new Date();
     }
+
+    article.readTimeMinutes = calculateReadTimeMinutes(article.content);
 
     await this.em.persistAndFlush(article);
     return this.serializeDetail(article);
@@ -218,6 +238,8 @@ export class ArticlesService {
       article.publishedAt = new Date();
     }
 
+    article.readTimeMinutes = calculateReadTimeMinutes(article.content);
+
     await this.em.persistAndFlush(article);
     return this.serializeDetail(article);
   }
@@ -249,10 +271,12 @@ export class ArticlesService {
       title: article.title,
       excerpt: article.excerpt,
       coverImageUrl: article.coverImageUrl ?? null,
+      coverUpdatedAt: article.coverUpdatedAt?.toISOString() ?? null,
       months: article.months ?? [],
       seasons: article.seasons ?? [],
       contexts: article.contexts ?? [],
       priority: article.priority,
+      readTimeMinutes: article.readTimeMinutes,
       publishedAt: article.publishedAt ?? null,
     };
   }
@@ -265,10 +289,12 @@ export class ArticlesService {
       excerpt: article.excerpt,
       content: article.content,
       coverImageUrl: article.coverImageUrl ?? null,
+      coverUpdatedAt: article.coverUpdatedAt?.toISOString() ?? null,
       months: article.months ?? [],
       seasons: article.seasons ?? [],
       contexts: article.contexts ?? [],
       priority: article.priority,
+      readTimeMinutes: article.readTimeMinutes,
       publishedAt: article.publishedAt ?? null,
       relatedVegetableSlugs: article.relatedVegetableSlugs ?? [],
       relatedSoilSlugs: article.relatedSoilSlugs ?? [],

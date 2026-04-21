@@ -40,6 +40,7 @@ import { DemandLevel as SoilDemandLevel } from '../common/enums/soil.enums';
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
 import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
 import { PlantingEventType } from '../common/enums/planting-event.enums';
+import { AnalyticsService } from '../analytics/analytics.service';
 
 type WarningResult = WarningOutput;
 
@@ -61,6 +62,7 @@ export class PlantingsService {
     private readonly warningsService: WarningsService,
     private readonly actionAutomationService: ActionAutomationService,
     private readonly plantingInsightsService: PlantingInsightsService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   async list(user: User, query: ListPlantingsQueryDto) {
@@ -213,6 +215,13 @@ export class PlantingsService {
     this.validatePlantingTimeline(planting);
 
     await this.em.persistAndFlush(planting);
+
+    await this.analyticsService.recordVegetableAddedToBed({
+      userId: user.id,
+      vegetableSlug: vegetable.slug,
+      bedId: bed.id,
+      occurredAt: new Date(),
+    });
 
     await this.plantingInsightsService.recordEvent({
       plantingId: planting.id,

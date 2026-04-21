@@ -9,6 +9,7 @@ import { Vegetable } from '../vegetables/vegetable.entity';
 import { WarningRulesModule } from '../warning-rules/warning-rules.module';
 import { ActionTasksModule } from '../action-tasks/action-tasks.module';
 import { PlantingInsightsModule } from '../planting-insights/planting-insights.module';
+import { AnalyticsModule } from '../analytics/analytics.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { PlantingInsightsModule } from '../planting-insights/planting-insights.m
     WarningRulesModule,
     ActionTasksModule,
     PlantingInsightsModule,
+    AnalyticsModule,
   ],
   providers: [PlantingsService],
   controllers: [PlantingsController],

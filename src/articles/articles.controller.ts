@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import {
@@ -22,6 +23,11 @@ import {
   UpdateArticleDto,
 } from './dto/article.schemas';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import { User } from '../users/user.entity';
+
+type RequestWithUser = {
+  userEntity?: User;
+};
 
 @Controller('v1/articles')
 export class ArticlesController {
@@ -35,9 +41,17 @@ export class ArticlesController {
     return this.articlesService.listPublic(query);
   }
 
+  @Get('slug/:slug')
+  getBySlug(@Req() req: RequestWithUser, @Param('slug') slug: string) {
+    return this.articlesService.getPublicBySlug(slug, req.userEntity ?? null);
+  }
+
   @Get(':idOrSlug')
-  get(@Param('idOrSlug') idOrSlug: string) {
-    return this.articlesService.getPublicByIdOrSlug(idOrSlug);
+  get(@Req() req: RequestWithUser, @Param('idOrSlug') idOrSlug: string) {
+    return this.articlesService.getPublicByIdOrSlug(
+      idOrSlug,
+      req.userEntity ?? null,
+    );
   }
 
   @Post()

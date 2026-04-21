@@ -13,6 +13,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { randomUUID } from 'node:crypto';
 import { R2StorageService } from './r2-storage.service';
 import { Vegetable } from '../vegetables/vegetable.entity';
 import { VegetablesService } from '../vegetables/vegetables.service';
@@ -133,11 +134,8 @@ export class UploadsController {
       throw new BadRequestException('Unsupported file type');
     }
 
-    const baseName = file.originalname
-      .replace(/\.[^/.]+$/, '')
-      .replace(/[^a-zA-Z0-9_-]/g, '_')
-      .slice(0, 80);
-    const key = `articles/${baseName}.${ext}`;
+    const baseName = this.sanitizeFileBaseName(file.originalname);
+    const key = this.createUniqueArticleKey({ baseName, ext });
 
     await this.r2Storage.uploadObject({
       key,
@@ -179,7 +177,15 @@ export class UploadsController {
       throw new BadRequestException('Unsupported file type');
     }
 
-    const key = `articles/${id}.${ext}`;
+    const key = this.createUniqueArticleKey({ articleId: id, ext });
+
+    const previousImageUrl = article.coverImageUrl;
+    if (previousImageUrl) {
+      const previousKey = this.extractKeyFromPublicUrl(previousImageUrl);
+      if (previousKey?.startsWith('articles/')) {
+        await this.r2Storage.deleteObject({ key: previousKey });
+      }
+    }
 
     await this.r2Storage.uploadObject({
       key,
@@ -188,6 +194,7 @@ export class UploadsController {
     });
 
     article.coverImageUrl = this.r2Storage.getPublicUrl(key);
+    article.coverUpdatedAt = new Date();
     await this.em.flush();
 
     return this.articlesService.getById(id);
@@ -232,5 +239,30 @@ export class UploadsController {
     } catch {
       return null;
     }
+  }
+
+  private sanitizeFileBaseName(originalName: string): string {
+    const baseName = originalName
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .slice(0, 80);
+
+    return baseName || 'article-cover';
+  }
+
+  private createUniqueArticleKey(params: {
+    ext: string;
+    baseName?: string;
+    articleId?: string;
+  }): string {
+    const uniqueSuffix = `${Date.now()}-${randomUUID().slice(0, 8)}`;
+
+    if (params.articleId) {
+      return `articles/${params.articleId}/${uniqueSuffix}.${params.ext}`;
+    }
+
+    return `articles/${params.baseName ?? 'article-cover'}-${uniqueSuffix}.${params.ext}`;
   }
 }

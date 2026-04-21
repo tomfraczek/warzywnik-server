@@ -33,8 +33,14 @@ export class Article {
   @Property({ type: TextType })
   content!: string;
 
+  @Property({ type: 'int', default: 1 })
+  readTimeMinutes: number = 1;
+
   @Property({ length: 255, nullable: true })
   coverImageUrl?: string | null;
+
+  @Property({ type: Date, nullable: true })
+  coverUpdatedAt?: Date | null;
 
   @Property({ type: 'int[]' })
   months: number[] = [];
