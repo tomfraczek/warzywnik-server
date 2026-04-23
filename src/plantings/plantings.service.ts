@@ -362,26 +362,36 @@ export class PlantingsService {
     const bedId = bed.id;
     const vegetableId = vegetable.id;
 
-    if (dto.sowedAt !== undefined && dto.sowedAt !== null) {
+    if (
+      dto.sowedAt !== undefined &&
+      dto.sowedAt !== null &&
+      planting.sowedAt != null &&
+      planting.sowedAt.getTime() <= now.getTime()
+    ) {
       await this.plantingInsightsService.recordEvent({
         plantingId,
         userId,
         bedId,
         vegetableId,
         eventType: PlantingEventType.PLANTING_SOWED,
-        eventTime: planting.sowedAt ?? now,
+        eventTime: planting.sowedAt,
         payload: { sowedAt: planting.sowedAt?.toISOString() ?? null },
       });
     }
 
-    if (dto.transplantedAt !== undefined && dto.transplantedAt !== null) {
+    if (
+      dto.transplantedAt !== undefined &&
+      dto.transplantedAt !== null &&
+      planting.transplantedAt != null &&
+      planting.transplantedAt.getTime() <= now.getTime()
+    ) {
       await this.plantingInsightsService.recordEvent({
         plantingId,
         userId,
         bedId,
         vegetableId,
         eventType: PlantingEventType.PLANTING_TRANSPLANTED,
-        eventTime: planting.transplantedAt ?? now,
+        eventTime: planting.transplantedAt,
         payload: {
           transplantedAt: planting.transplantedAt?.toISOString() ?? null,
         },
