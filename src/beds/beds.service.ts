@@ -19,6 +19,11 @@ import { CultivationEnvironment } from '../common/enums/bed.enums';
 import { WeatherRecomputeService } from '../weather/weather-recompute.service';
 import { GrowingSpace } from '../growing-spaces/growing-space.entity';
 import { GrowingSpaceType } from '../common/enums/growing-space.enums';
+import { Planting } from '../plantings/planting.entity';
+import { PlantingDisease } from '../planting-diseases/planting-disease.entity';
+import { PestOccurrence } from '../pest-occurrences/pest-occurrence.entity';
+import { Reminder } from '../reminders/reminder.entity';
+import { ReminderStatus } from '../common/enums/reminder.enums';
 
 @Injectable()
 export class BedsService {
@@ -189,21 +194,19 @@ export class BedsService {
   }
 
   async remove(user: User, id: string) {
-    const bed = await this.em.findOne(Bed, { id, user: user.id });
-    if (!bed) {
-      throw new NotFoundException('Bed not found');
-    }
+    await this.em.transactional(async (em) => {
+      const bed = await em.findOne(Bed, { id, user: user.id });
+      if (!bed) {
+        throw new NotFoundException('Bed not found');
+      }
 
-    const previousIsActive = bed.isActive;
-    bed.isActive = false;
-    await this.em.flush();
+      // Keep existing side effects from deactivation before physical delete.
+      await this.handleBedStatusTransition(user, bed.id, true, false, em);
 
-    await this.handleBedStatusTransition(
-      user,
-      bed.id,
-      previousIsActive,
-      bed.isActive,
-    );
+      await this.cleanupBedLinkedOccurrences(em, user.id, bed.id);
+
+      await em.removeAndFlush(bed);
+    });
   }
 
   private async handleBedStatusTransition(
@@ -211,6 +214,7 @@ export class BedsService {
     bedId: string,
     previousIsActive: boolean,
     nextIsActive: boolean,
+    em: EntityManager = this.em,
   ) {
     if (previousIsActive === nextIsActive) {
       return;
@@ -219,7 +223,7 @@ export class BedsService {
     if (!nextIsActive) {
       const now = new Date();
 
-      const warnings = await this.em.find(WarningInstance, {
+      const warnings = await em.find(WarningInstance, {
         user: user.id,
         isActive: true,
         $or: [{ bed: bedId }, { planting: { bed: bedId } }],
@@ -231,7 +235,7 @@ export class BedsService {
         warning.computedAt = now;
       }
 
-      const tasks = await this.em.find(ActionTask, {
+      const tasks = await em.find(ActionTask, {
         user: user.id,
         status: ActionTaskStatus.PENDING,
         $or: [{ bed: bedId }, { planting: { bed: bedId } }],
@@ -241,12 +245,79 @@ export class BedsService {
         task.status = ActionTaskStatus.CANCELED;
       }
 
-      await this.em.flush();
+      await em.flush();
       return;
     }
 
     await this.weatherRecomputeService.recomputeWarnings(user.id);
     await this.weatherRecomputeService.recomputeTasks(user.id);
+  }
+
+  private async cleanupBedLinkedOccurrences(
+    em: EntityManager,
+    userId: string,
+    bedId: string,
+  ) {
+    const plantings = await em.find(
+      Planting,
+      { user: userId, bed: bedId },
+      { fields: ['id'] },
+    );
+    const plantingIds = plantings.map((planting) => planting.id);
+
+    if (plantingIds.length === 0) {
+      return;
+    }
+
+    const [diseaseOccurrences, pestOccurrences] = await Promise.all([
+      em.find(
+        PlantingDisease,
+        { planting: { $in: plantingIds } },
+        { fields: ['id'] },
+      ),
+      em.find(
+        PestOccurrence,
+        { planting: { $in: plantingIds } },
+        { fields: ['id'] },
+      ),
+    ]);
+
+    const diseaseIds = diseaseOccurrences.map((occurrence) => occurrence.id);
+    const pestIds = pestOccurrences.map((occurrence) => occurrence.id);
+
+    if (diseaseIds.length > 0) {
+      await em.nativeUpdate(
+        Reminder,
+        {
+          plantingDiseaseId: { $in: diseaseIds },
+          status: { $in: [ReminderStatus.PENDING, ReminderStatus.PROCESSING] },
+        },
+        {
+          status: ReminderStatus.CANCELED,
+          lockedAt: null,
+          lastError: null,
+        },
+      );
+
+      await em.nativeDelete(PlantingDisease, { id: { $in: diseaseIds } });
+    }
+
+    if (pestIds.length > 0) {
+      await em.nativeUpdate(
+        Reminder,
+        {
+          pestOccurrenceId: { $in: pestIds },
+          status: { $in: [ReminderStatus.PENDING, ReminderStatus.PROCESSING] },
+        },
+        {
+          status: ReminderStatus.CANCELED,
+          lockedAt: null,
+          lastError: null,
+        },
+      );
+
+      await em.nativeDelete(PestOccurrence, { id: { $in: pestIds } });
+    }
   }
 
   private serializeBed(bed: Bed) {
