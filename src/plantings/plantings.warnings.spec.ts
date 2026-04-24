@@ -69,7 +69,7 @@ const makePlanting = (overrides: Partial<Planting> = {}): Planting =>
   ({
     id: 'planting-1',
     plannedStartDate: new Date(),
-    status: PlantingStatus.PLANNED,
+    status: PlantingStatus.NEW,
     ...overrides,
   }) as Planting;
 
@@ -245,7 +245,7 @@ describe('PlantingsService warnings', () => {
     const bed = makeBed();
     const vegetable = makeVegetable({ timeToHarvestDaysMax: 10 });
     const planting = makePlanting({
-      status: PlantingStatus.ACTIVE,
+      status: PlantingStatus.IN_GROUND,
       plannedStartDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
     });
 

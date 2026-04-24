@@ -64,7 +64,7 @@ const buildContext = () => {
   } as unknown as Bed;
   const planting = {
     id: 'planting-1',
-    status: PlantingStatus.PLANNED,
+    status: PlantingStatus.NEW,
     bed,
     vegetable: { name: 'Carrot' },
     plannedStartDate: new Date(),

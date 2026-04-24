@@ -20,6 +20,7 @@ import {
 } from '../common/enums/reminder.enums';
 import { ActionTemplate } from '../action-templates/action-template.entity';
 import { addDays, normalizeDueAt } from '../common/types/date-utils';
+import { PlantingStatus } from '../common/enums/planting.enums';
 
 type DesiredOccurrence = {
   ruleId: string;
@@ -83,6 +84,28 @@ export class ActionAutomationService {
           orderBy: [{ createdAt: 'asc' }, { offsetDays: 'asc' }],
         },
       );
+
+      if (
+        planting.status === PlantingStatus.FAILED ||
+        planting.status === PlantingStatus.CANCELLED ||
+        planting.status === PlantingStatus.CLEARED
+      ) {
+        await this.cleanupStaleGeneratedTasksForPlanting({
+          user: params.user,
+          planting,
+          desired: [],
+          forceOverrideManual: Boolean(params.forceOverrideManual),
+          em,
+        });
+
+        await em.flush();
+
+        return {
+          plantingId: planting.id,
+          reason: params.reason,
+          desiredCount: 0,
+        };
+      }
 
       const generationRules = rules.filter(
         (rule) => rule.trigger !== ActionRuleTrigger.ON_HARVEST_CONFIRMED,

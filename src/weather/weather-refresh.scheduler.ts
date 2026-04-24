@@ -3,8 +3,8 @@ import { Cron } from '@nestjs/schedule';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from '../users/user.entity';
 import { Planting } from '../plantings/planting.entity';
-import { PlantingStatus } from '../common/enums/planting.enums';
 import { WeatherService } from './weather.service';
+import { ACTIVE_PLANTING_STATUSES } from '../plantings/planting-lifecycle';
 
 @Injectable()
 export class WeatherRefreshScheduler {
@@ -60,11 +60,7 @@ export class WeatherRefreshScheduler {
       Planting,
       {
         status: {
-          $in: [
-            PlantingStatus.PLANNED,
-            PlantingStatus.ACTIVE,
-            PlantingStatus.HARVESTING,
-          ],
+          $in: ACTIVE_PLANTING_STATUSES,
         },
       },
       {

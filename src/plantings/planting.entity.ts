@@ -72,8 +72,8 @@ export class Planting {
   @Property({ type: 'int', default: 1 })
   appliedRulesVersion: number = 1;
 
-  @Enum({ items: () => PlantingStatus, default: PlantingStatus.PLANNED })
-  status: PlantingStatus = PlantingStatus.PLANNED;
+  @Enum({ items: () => PlantingStatus, default: PlantingStatus.NEW })
+  status: PlantingStatus = PlantingStatus.NEW;
 
   @Property({ type: Date, nullable: true })
   harvestedAt?: Date | null;

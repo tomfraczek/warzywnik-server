@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PlantingStatus } from '../../../common/enums/planting.enums';
+import {
+  PlantingStartMethod,
+  PlantingStatus,
+} from '../../../common/enums/planting.enums';
 import { WarningCode, WarningScope } from '../../../common/enums/warning.enums';
 import { WeatherWarningConfigService } from '../weather-warning-config.service';
 import {
@@ -35,15 +38,26 @@ export class GerminationTooColdEvaluator implements WeatherWarningEvaluator {
 
     return ctx.plantings
       .filter((planting) => {
-        if (planting.status === PlantingStatus.PLANNED) {
+        if (
+          planting.status === PlantingStatus.NEW ||
+          planting.status === PlantingStatus.SEEDLING_PREPARED ||
+          planting.status === PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT
+        ) {
           return true;
         }
 
-        if (planting.status !== PlantingStatus.ACTIVE) {
+        if (planting.status !== PlantingStatus.IN_GROUND) {
           return false;
         }
 
-        const start = planting.actualStartDate ?? planting.plannedStartDate;
+        const start =
+          planting.startMethod === PlantingStartMethod.DIRECT_SOW
+            ? (planting.sowedAt ??
+              planting.actualStartDate ??
+              planting.plannedStartDate)
+            : (planting.transplantedAt ??
+              planting.actualStartDate ??
+              planting.plannedStartDate);
         if (!start) return false;
         const diffMs = ctx.now.getTime() - start.getTime();
         return diffMs <= ACTIVE_GRACE_DAYS * 24 * 60 * 60 * 1000;

@@ -2,7 +2,6 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Bed } from '../../beds/bed.entity';
 import { Planting } from '../../plantings/planting.entity';
-import { PlantingStatus } from '../../common/enums/planting.enums';
 import { User } from '../../users/user.entity';
 import { WeatherSnapshot } from '../weather-snapshot.entity';
 import { WeatherService } from '../weather.service';
@@ -21,6 +20,7 @@ import { OverwateringRiskEvaluator } from './evaluators/overwatering-risk.evalua
 import { GerminationTooColdEvaluator } from './evaluators/germination-too-cold.evaluator';
 import { OperationalWeatherWarningsEvaluator } from './evaluators/operational-weather-warnings.evaluator';
 import { GreenhouseWeatherWarningsEvaluator } from './evaluators/greenhouse-weather-warnings.evaluator';
+import { ACTIVE_PLANTING_STATUSES } from '../../plantings/planting-lifecycle';
 
 @Injectable()
 export class WeatherWarningOrchestratorService {
@@ -86,11 +86,7 @@ export class WeatherWarningOrchestratorService {
         user: userId,
         bed: { isActive: true },
         status: {
-          $in: [
-            PlantingStatus.PLANNED,
-            PlantingStatus.ACTIVE,
-            PlantingStatus.HARVESTING,
-          ],
+          $in: ACTIVE_PLANTING_STATUSES,
         },
       },
       { populate: ['bed', 'bed.soil', 'vegetable'] },

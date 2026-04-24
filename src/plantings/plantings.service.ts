@@ -41,6 +41,11 @@ import { ActionAutomationService } from '../action-tasks/action-automation.servi
 import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
 import { PlantingEventType } from '../common/enums/planting-event.enums';
 import { AnalyticsService } from '../analytics/analytics.service';
+import {
+  ACTIVE_PLANTING_STATUSES,
+  getAllowedStatusTransitions,
+  isStatusAllowedForStartMethod,
+} from './planting-lifecycle';
 
 type WarningResult = WarningOutput;
 
@@ -209,9 +214,13 @@ export class PlantingsService {
       : null;
     planting.timelineTimezone = dto.timelineTimezone ?? 'Europe/Warsaw';
     planting.appliedRulesVersion = vegetable.rulesVersion;
-    planting.status = dto.status ?? PlantingStatus.PLANNED;
+    planting.status = dto.status ?? PlantingStatus.NEW;
     planting.notes = dto.notes ?? null;
 
+    this.assertStatusCompatibleWithStartMethod(
+      planting.status,
+      planting.startMethod,
+    );
     this.validatePlantingTimeline(planting);
 
     await this.em.persistAndFlush(planting);
@@ -345,6 +354,11 @@ export class PlantingsService {
     const previousStatus = planting.status;
 
     if (dto.status !== undefined) {
+      this.assertStatusTransitionAllowed(
+        previousStatus,
+        dto.status,
+        planting.startMethod,
+      );
       planting.status = dto.status;
     }
 
@@ -352,6 +366,10 @@ export class PlantingsService {
       planting.notes = dto.notes;
     }
 
+    this.assertStatusCompatibleWithStartMethod(
+      planting.status,
+      planting.startMethod,
+    );
     this.validatePlantingTimeline(planting);
 
     await this.em.flush();
@@ -409,10 +427,7 @@ export class PlantingsService {
         payload: { from: previousStatus, to: dto.status },
       });
 
-      if (
-        dto.status === PlantingStatus.FINISHED ||
-        dto.status === PlantingStatus.CANCELLED
-      ) {
+      if (dto.status === PlantingStatus.CLEARED) {
         await this.plantingInsightsService.buildSeasonSummary(plantingId);
       }
     }
@@ -448,11 +463,7 @@ export class PlantingsService {
       {
         user: user.id,
         status: {
-          $in: [
-            PlantingStatus.PLANNED,
-            PlantingStatus.ACTIVE,
-            PlantingStatus.HARVESTING,
-          ],
+          $in: ACTIVE_PLANTING_STATUSES,
         },
       },
       {
@@ -508,9 +519,25 @@ export class PlantingsService {
         eventTime: new Date(),
         payload: { previousStatus },
       });
-
-      await this.plantingInsightsService.buildSeasonSummary(planting.id);
     }
+  }
+
+  async getAvailableStatuses(user: User, id: string) {
+    const planting = await this.em.findOne(Planting, { id, user: user.id });
+
+    if (!planting) {
+      throw new NotFoundException('Planting not found');
+    }
+
+    return {
+      plantingId: planting.id,
+      currentStatus: planting.status,
+      startMethod: planting.startMethod,
+      availableStatuses: getAllowedStatusTransitions(
+        planting.status,
+        planting.startMethod,
+      ),
+    };
   }
 
   async updateHarvestResult(user: User, id: string, dto: HarvestResultDto) {
@@ -1031,7 +1058,7 @@ export class PlantingsService {
         bed: bed.id,
         plannedStartDate: { $gte: cutoff, $lt: planting.plannedStartDate },
         id: { $ne: planting.id },
-        status: { $ne: PlantingStatus.CANCELLED },
+        status: { $nin: [PlantingStatus.CANCELLED, PlantingStatus.FAILED] },
       },
       { populate: ['vegetable'] },
     );
@@ -1109,10 +1136,7 @@ export class PlantingsService {
     vegetable: Vegetable,
     valuesBase: Record<string, string | number>,
   ): WarningCandidate | null {
-    if (
-      planting.status !== PlantingStatus.ACTIVE &&
-      planting.status !== PlantingStatus.HARVESTING
-    ) {
+    if (planting.status !== PlantingStatus.IN_GROUND) {
       return null;
     }
 
@@ -1218,9 +1242,6 @@ export class PlantingsService {
 
   private validatePlantingTimeline(planting: Planting) {
     if (planting.startMethod === PlantingStartMethod.DIRECT_SOW) {
-      if (!planting.sowedAt) {
-        throw new BadRequestException('sowedAt is required for DIRECT_SOW');
-      }
       if (planting.transplantedAt) {
         throw new BadRequestException(
           'transplantedAt must be null for DIRECT_SOW',
@@ -1237,5 +1258,37 @@ export class PlantingsService {
         'harvestWindowStart must be less than or equal to harvestWindowEnd',
       );
     }
+  }
+
+  private assertStatusCompatibleWithStartMethod(
+    status: PlantingStatus,
+    startMethod: PlantingStartMethod,
+  ) {
+    if (isStatusAllowedForStartMethod(status, startMethod)) {
+      return;
+    }
+
+    throw new BadRequestException(
+      `Status ${status} is not allowed for startMethod ${startMethod}`,
+    );
+  }
+
+  private assertStatusTransitionAllowed(
+    previous: PlantingStatus,
+    next: PlantingStatus,
+    startMethod: PlantingStartMethod,
+  ) {
+    if (previous === next) {
+      return;
+    }
+
+    const allowed = getAllowedStatusTransitions(previous, startMethod);
+    if (allowed.includes(next)) {
+      return;
+    }
+
+    throw new BadRequestException(
+      `Status transition from ${previous} to ${next} is not allowed. Allowed statuses: ${allowed.join(', ')}`,
+    );
   }
 }

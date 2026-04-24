@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CultivationEnvironment } from '../../../common/enums/bed.enums';
-import { PlantingStatus } from '../../../common/enums/planting.enums';
+import {
+  PlantingStartMethod,
+  PlantingStatus,
+} from '../../../common/enums/planting.enums';
 import { WarningCode, WarningScope } from '../../../common/enums/warning.enums';
 import { WeatherWarningConfigService } from '../weather-warning-config.service';
 import {
@@ -513,7 +516,11 @@ export class OperationalWeatherWarningsEvaluator
         riskyNightTempC < germinationMinTempC
       ) {
         supportedPlantings.forEach((planting) => {
-          if (planting.status === PlantingStatus.PLANNED) {
+          if (
+            planting.status === PlantingStatus.NEW ||
+            planting.status === PlantingStatus.SEEDLING_PREPARED ||
+            planting.status === PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT
+          ) {
             const code =
               dayIndex === 0
                 ? WarningCode.SOWING_PAUSE_TOO_COLD_TODAY
@@ -536,7 +543,7 @@ export class OperationalWeatherWarningsEvaluator
                 localDate,
                 dayPart: 'NIGHT',
                 dayLabel,
-                plantingState: PlantingStatus.PLANNED,
+                plantingState: planting.status,
                 usedFallback: true,
                 bedId: planting.bed.id,
                 bedName: normalizeBedName(planting.bed.name),
@@ -560,12 +567,18 @@ export class OperationalWeatherWarningsEvaluator
             return;
           }
 
-          if (planting.status !== PlantingStatus.ACTIVE) {
+          if (planting.status !== PlantingStatus.IN_GROUND) {
             return;
           }
 
           const plantingStart =
-            planting.actualStartDate ?? planting.plannedStartDate;
+            planting.startMethod === PlantingStartMethod.DIRECT_SOW
+              ? (planting.sowedAt ??
+                planting.actualStartDate ??
+                planting.plannedStartDate)
+              : (planting.transplantedAt ??
+                planting.actualStartDate ??
+                planting.plannedStartDate);
           if (!plantingStart) {
             return;
           }
@@ -599,7 +612,7 @@ export class OperationalWeatherWarningsEvaluator
               localDate,
               dayPart: 'NIGHT',
               dayLabel,
-              plantingState: PlantingStatus.ACTIVE,
+              plantingState: PlantingStatus.IN_GROUND,
               usedFallback: true,
               bedId: planting.bed.id,
               bedName: normalizeBedName(planting.bed.name),

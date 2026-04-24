@@ -366,7 +366,7 @@ export class PlantingInsightsService {
 
   computeSeasonEnd(planting: Planting): Date | null {
     if (planting.harvestedAt != null) return planting.harvestedAt;
-    if (planting.status === PlantingStatus.CANCELLED) return planting.updatedAt;
+    if (planting.status === PlantingStatus.CLEARED) return planting.updatedAt;
     return null;
   }
 

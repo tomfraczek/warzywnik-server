@@ -37,7 +37,12 @@ export class HarvestPromptsService {
         user: user.id,
         bed: bed.id,
         status: {
-          $nin: [PlantingStatus.CANCELLED, PlantingStatus.FINISHED],
+          $nin: [
+            PlantingStatus.CANCELLED,
+            PlantingStatus.FAILED,
+            PlantingStatus.HARVESTED,
+            PlantingStatus.CLEARED,
+          ],
         },
       },
       {
@@ -138,7 +143,7 @@ export class HarvestPromptsService {
 
         const now = new Date();
         planting.harvestedAt = now;
-        planting.status = PlantingStatus.FINISHED;
+        planting.status = PlantingStatus.HARVESTED;
 
         await em.persistAndFlush([state, planting]);
 
@@ -194,8 +199,10 @@ export class HarvestPromptsService {
 
   private isReadyForHarvest(planting: Planting, today?: Date) {
     if (
+      planting.status === PlantingStatus.FAILED ||
       planting.status === PlantingStatus.CANCELLED ||
-      planting.status === PlantingStatus.FINISHED
+      planting.status === PlantingStatus.HARVESTED ||
+      planting.status === PlantingStatus.CLEARED
     ) {
       return false;
     }

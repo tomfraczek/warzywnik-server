@@ -75,18 +75,8 @@ const validateTimeline = (
   value: z.infer<typeof basePlantingSchema>,
   ctx: z.RefinementCtx,
 ) => {
-  const startMethod = value.startMethod;
-
-  if (startMethod === PlantingStartMethod.DIRECT_SOW && !value.sowedAt) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'sowedAt is required for DIRECT_SOW',
-      path: ['sowedAt'],
-    });
-  }
-
   if (
-    startMethod === PlantingStartMethod.DIRECT_SOW &&
+    value.startMethod === PlantingStartMethod.DIRECT_SOW &&
     value.transplantedAt !== undefined &&
     value.transplantedAt !== null
   ) {

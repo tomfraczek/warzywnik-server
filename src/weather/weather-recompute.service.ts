@@ -2,7 +2,6 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from '../users/user.entity';
 import { Planting } from '../plantings/planting.entity';
-import { PlantingStatus } from '../common/enums/planting.enums';
 import { ActionTask } from '../action-tasks/action-task.entity';
 import {
   ActionTaskSource,
@@ -27,6 +26,7 @@ import { WeatherWarningOrchestratorService } from './warnings/weather-warning-or
 import { WeatherTaskPlannerService } from './warnings/weather-task-planner.service';
 import { WeatherSnapshot } from './weather-snapshot.entity';
 import { Bed } from '../beds/bed.entity';
+import { ACTIVE_PLANTING_STATUSES } from '../plantings/planting-lifecycle';
 
 type TaskStatusFilter = 'pending' | 'done' | 'all';
 
@@ -60,11 +60,7 @@ export class WeatherRecomputeService {
       user: user.id,
       bed: { isActive: true },
       status: {
-        $in: [
-          PlantingStatus.PLANNED,
-          PlantingStatus.ACTIVE,
-          PlantingStatus.HARVESTING,
-        ],
+        $in: ACTIVE_PLANTING_STATUSES,
       },
     });
 

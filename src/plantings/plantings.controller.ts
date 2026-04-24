@@ -60,6 +60,17 @@ export class PlantingsController {
     );
   }
 
+  @Get(':id/available-statuses')
+  getAvailableStatuses(
+    @Req() req: { userEntity?: User },
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.plantingsService.getAvailableStatuses(
+      req.userEntity as User,
+      id,
+    );
+  }
+
   @Post()
   create(
     @Req() req: { userEntity?: User },
