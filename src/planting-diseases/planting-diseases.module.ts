@@ -6,11 +6,13 @@ import { PlantingDiseasesController } from './planting-diseases.controller';
 import { Planting } from '../plantings/planting.entity';
 import { Disease } from '../diseases/disease.entity';
 import { RemindersModule } from '../reminders/reminders.module';
+import { PlantingInsightsModule } from '../planting-insights/planting-insights.module';
 
 @Module({
   imports: [
     MikroOrmModule.forFeature([PlantingDisease, Planting, Disease]),
     RemindersModule,
+    PlantingInsightsModule,
   ],
   providers: [PlantingDiseasesService],
   controllers: [PlantingDiseasesController],

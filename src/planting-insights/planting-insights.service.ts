@@ -197,8 +197,62 @@ export class PlantingInsightsService {
     };
 
     const items: TimelineItem[] = [];
+    const taskCompletionIdsFromEvents = new Set<string>();
+    const pestOccurrenceIdsFromEvents = new Set<string>();
+    const diseaseOccurrenceIdsFromEvents = new Set<string>();
 
     for (const e of events) {
+      const occurrenceId =
+        typeof e.payload?.occurrenceId === 'string'
+          ? e.payload.occurrenceId
+          : null;
+
+      if (
+        occurrenceId &&
+        e.eventType === PlantingEventType.PEST_OCCURRENCE_ADDED
+      ) {
+        pestOccurrenceIdsFromEvents.add(occurrenceId);
+      }
+
+      if (
+        occurrenceId &&
+        e.eventType === PlantingEventType.DISEASE_OCCURRENCE_ADDED
+      ) {
+        diseaseOccurrenceIdsFromEvents.add(occurrenceId);
+      }
+
+      const taskId =
+        typeof e.payload?.taskId === 'string' ? e.payload.taskId : null;
+      const actionTitle =
+        typeof e.payload?.actionTitle === 'string'
+          ? e.payload.actionTitle
+          : null;
+      const actionType =
+        typeof e.payload?.actionType === 'string' ? e.payload.actionType : null;
+      const source =
+        typeof e.payload?.source === 'string' ? e.payload.source : null;
+
+      if (
+        e.eventType === PlantingEventType.PLANTING_ACTION_COMPLETED &&
+        taskId != null
+      ) {
+        taskCompletionIdsFromEvents.add(taskId);
+        items.push({
+          time: e.eventTime,
+          type: 'ACTION_COMPLETED',
+          eventType: e.eventType,
+          taskId,
+          title: actionTitle,
+          actionType,
+          source,
+          label: actionTitle
+            ? `Wykonano zabieg ${actionTitle}`
+            : 'Wykonano zabieg',
+          payload: e.payload,
+        });
+        continue;
+      }
+
       items.push({
         time: e.eventTime,
         type: 'PLANTING_EVENT',
@@ -209,17 +263,28 @@ export class PlantingInsightsService {
 
     for (const task of doneTasks) {
       if (!task.doneAt) continue;
+
+      if (taskCompletionIdsFromEvents.has(task.id)) {
+        continue;
+      }
+
       items.push({
         time: task.doneAt,
         type: 'ACTION_COMPLETED',
         taskId: task.id,
+        eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
         title: task.title,
         actionType: task.actionTemplate?.type ?? null,
         source: task.source,
+        label: `Wykonano zabieg ${task.title}`,
       });
     }
 
     for (const occ of pestOccurrences) {
+      if (pestOccurrenceIdsFromEvents.has(occ.id)) {
+        continue;
+      }
+
       items.push({
         time: occ.createdAt,
         type: 'PEST_OCCURRENCE',
@@ -232,6 +297,10 @@ export class PlantingInsightsService {
     }
 
     for (const dis of plantingDiseases) {
+      if (diseaseOccurrenceIdsFromEvents.has(dis.id)) {
+        continue;
+      }
+
       items.push({
         time: dis.observedAt,
         type: 'DISEASE_OCCURRENCE',

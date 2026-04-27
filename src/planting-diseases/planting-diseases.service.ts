@@ -18,6 +18,8 @@ import { User } from '../users/user.entity';
 import { PlantingDiseaseStatus } from '../common/enums/planting-disease.enums';
 import { RemindersService } from '../reminders/reminders.service';
 import { ActionTemplate } from '../action-templates/action-template.entity';
+import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
+import { PlantingEventType } from '../common/enums/planting-event.enums';
 
 @Injectable()
 export class PlantingDiseasesService {
@@ -26,6 +28,7 @@ export class PlantingDiseasesService {
   constructor(
     private readonly em: EntityManager,
     private readonly remindersService: RemindersService,
+    private readonly plantingInsightsService: PlantingInsightsService,
   ) {}
 
   async list(
@@ -92,6 +95,23 @@ export class PlantingDiseasesService {
       plantingDisease: occurrence,
     });
 
+    await this.plantingInsightsService.recordEvent({
+      plantingId: planting.id,
+      userId: user.id,
+      bedId: planting.bed.id,
+      vegetableId: planting.vegetable.id,
+      eventType: PlantingEventType.DISEASE_OCCURRENCE_ADDED,
+      eventTime: occurrence.createdAt,
+      payload: {
+        occurrenceId: occurrence.id,
+        diseaseId: disease.id,
+        diseaseName: disease.name,
+        status: occurrence.status,
+        severity: occurrence.severity ?? null,
+        notes: occurrence.notes ?? null,
+      },
+    });
+
     this.logger.log(
       `created planting disease occurrence=${occurrence.id} | planting=${planting.id} | disease=${disease.id} | status=${occurrence.status}`,
     );
@@ -107,13 +127,13 @@ export class PlantingDiseasesService {
     dto: UpdatePlantingDiseaseDto,
   ) {
     const occurrence = await this.getOccurrenceOrThrow(user, id, plantingId);
+    const previousStatus = occurrence.status;
 
     if (dto.status !== undefined) {
       if (dto.status !== PlantingDiseaseStatus.RESOLVED) {
         await this.ensureNoActiveDuplicate(occurrence, dto.status);
       }
 
-      const previousStatus = occurrence.status;
       occurrence.status = dto.status;
 
       await this.remindersService.updateForPlantingDiseaseStatusChange({
@@ -138,6 +158,25 @@ export class PlantingDiseasesService {
     }
 
     await this.em.flush();
+
+    if (dto.status !== undefined && dto.status !== previousStatus) {
+      await this.plantingInsightsService.recordEvent({
+        plantingId: occurrence.planting.id,
+        userId: user.id,
+        bedId: occurrence.planting.bed.id,
+        vegetableId: occurrence.planting.vegetable.id,
+        eventType: PlantingEventType.DISEASE_OCCURRENCE_STATUS_CHANGED,
+        eventTime: occurrence.updatedAt,
+        payload: {
+          occurrenceId: occurrence.id,
+          diseaseId: occurrence.disease.id,
+          diseaseName: occurrence.disease.name,
+          previousStatus,
+          status: occurrence.status,
+          severity: occurrence.severity ?? null,
+        },
+      });
+    }
 
     this.logger.log(
       `updated planting disease occurrence=${occurrence.id} | status=${occurrence.status}`,
@@ -148,13 +187,13 @@ export class PlantingDiseasesService {
 
   async updateById(user: User, id: string, dto: UpdatePlantingDiseaseDto) {
     const occurrence = await this.getOccurrenceOrThrow(user, id);
+    const previousStatus = occurrence.status;
 
     if (dto.status !== undefined) {
       if (dto.status !== PlantingDiseaseStatus.RESOLVED) {
         await this.ensureNoActiveDuplicate(occurrence, dto.status);
       }
 
-      const previousStatus = occurrence.status;
       occurrence.status = dto.status;
 
       await this.remindersService.updateForPlantingDiseaseStatusChange({
@@ -179,6 +218,25 @@ export class PlantingDiseasesService {
     }
 
     await this.em.flush();
+
+    if (dto.status !== undefined && dto.status !== previousStatus) {
+      await this.plantingInsightsService.recordEvent({
+        plantingId: occurrence.planting.id,
+        userId: user.id,
+        bedId: occurrence.planting.bed.id,
+        vegetableId: occurrence.planting.vegetable.id,
+        eventType: PlantingEventType.DISEASE_OCCURRENCE_STATUS_CHANGED,
+        eventTime: occurrence.updatedAt,
+        payload: {
+          occurrenceId: occurrence.id,
+          diseaseId: occurrence.disease.id,
+          diseaseName: occurrence.disease.name,
+          previousStatus,
+          status: occurrence.status,
+          severity: occurrence.severity ?? null,
+        },
+      });
+    }
 
     this.logger.log(
       `updated planting disease occurrence=${occurrence.id} | status=${occurrence.status}`,
@@ -241,10 +299,14 @@ export class PlantingDiseasesService {
   }
 
   private async getPlantingOrThrow(user: User, plantingId: string) {
-    const planting = await this.em.findOne(Planting, {
-      id: plantingId,
-      user: user.id,
-    });
+    const planting = await this.em.findOne(
+      Planting,
+      {
+        id: plantingId,
+        user: user.id,
+      },
+      { populate: ['bed', 'vegetable'] },
+    );
 
     if (!planting) {
       throw new NotFoundException('Planting not found');
@@ -267,8 +329,14 @@ export class PlantingDiseasesService {
 
     const occurrence = await this.em.findOne(PlantingDisease, where, {
       populate: includeRecommendedActions
-        ? ['planting', 'disease', 'disease.recommendedActions']
-        : ['planting', 'disease'],
+        ? [
+            'planting',
+            'planting.bed',
+            'planting.vegetable',
+            'disease',
+            'disease.recommendedActions',
+          ]
+        : ['planting', 'planting.bed', 'planting.vegetable', 'disease'],
     });
 
     if (!occurrence || occurrence.planting.user.id !== user.id) {

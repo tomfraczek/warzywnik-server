@@ -193,12 +193,29 @@ export class ActionTasksService {
       bedId: string;
       vegetableId: string;
       taskId: string;
-      actionType: string;
+      actionType: string | null;
+      actionTitle: string;
       source: ActionTaskSource;
       doneAt: Date;
     };
 
+    type ActionRescheduledEventParams = {
+      plantingId: string;
+      userId: string;
+      bedId: string;
+      vegetableId: string;
+      taskId: string;
+      actionType: string | null;
+      actionTitle: string;
+      source: ActionTaskSource;
+      previousDueAt: Date | null;
+      nextDueAt: Date | null;
+      changedAt: Date;
+    };
+
     let actionEventParams: ActionEventParams | null = null;
+    let actionRescheduledEventParams: ActionRescheduledEventParams | null =
+      null;
 
     const result = await this.em.transactional(async (em) => {
       const task = await em.findOne(
@@ -210,6 +227,8 @@ export class ActionTasksService {
       if (!task) {
         throw new NotFoundException('Action task not found');
       }
+
+      const previousDueAt = task.dueAt ? new Date(task.dueAt) : null;
 
       if (dto.status !== undefined) {
         task.status = dto.status;
@@ -242,6 +261,36 @@ export class ActionTasksService {
         await this.remindersService.upsertPendingForActionTask({ task, em });
       }
 
+      // Capture event params for PLANTING_ACTION_RESCHEDULED before transaction ends
+      if (
+        dto.dueAt !== undefined &&
+        task.targetType === ActionTaskTargetType.PLANTING &&
+        task.planting != null
+      ) {
+        await em.populate(task.planting, ['bed', 'vegetable']);
+
+        const nextDueAt = task.dueAt ? new Date(task.dueAt) : null;
+        const hasChangedDueAt =
+          previousDueAt?.getTime() !== nextDueAt?.getTime() ||
+          (previousDueAt == null) !== (nextDueAt == null);
+
+        if (hasChangedDueAt) {
+          actionRescheduledEventParams = {
+            plantingId: task.planting.id,
+            userId: user.id,
+            bedId: task.planting.bed.id,
+            vegetableId: task.planting.vegetable.id,
+            taskId: task.id,
+            actionType: task.actionTemplate?.type ?? null,
+            actionTitle: task.title,
+            source: task.source,
+            previousDueAt,
+            nextDueAt,
+            changedAt: new Date(),
+          };
+        }
+      }
+
       // Capture event params for PLANTING_ACTION_COMPLETED before transaction ends
       if (
         task.status === ActionTaskStatus.DONE &&
@@ -258,6 +307,7 @@ export class ActionTasksService {
           vegetableId: task.planting.vegetable.id,
           taskId: task.id,
           actionType: task.actionTemplate.type,
+          actionTitle: task.title,
           source: task.source,
           doneAt: task.doneAt,
         };
@@ -280,7 +330,28 @@ export class ActionTasksService {
         payload: {
           taskId: p.taskId,
           actionType: p.actionType,
+          actionTitle: p.actionTitle,
           source: p.source,
+        },
+      });
+    }
+
+    if (actionRescheduledEventParams) {
+      const p = actionRescheduledEventParams as ActionRescheduledEventParams;
+      await this.plantingInsightsService.recordEvent({
+        plantingId: p.plantingId,
+        userId: p.userId,
+        bedId: p.bedId,
+        vegetableId: p.vegetableId,
+        eventType: PlantingEventType.PLANTING_ACTION_RESCHEDULED,
+        eventTime: p.changedAt,
+        payload: {
+          taskId: p.taskId,
+          actionType: p.actionType,
+          actionTitle: p.actionTitle,
+          source: p.source,
+          previousDueAt: p.previousDueAt?.toISOString() ?? null,
+          nextDueAt: p.nextDueAt?.toISOString() ?? null,
         },
       });
     }

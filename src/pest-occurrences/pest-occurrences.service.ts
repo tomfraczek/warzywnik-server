@@ -17,6 +17,8 @@ import { User } from '../users/user.entity';
 import { PestOccurrenceStatus } from '../common/enums/pest-occurrence.enums';
 import { RemindersService } from '../reminders/reminders.service';
 import { ActionTemplate } from '../action-templates/action-template.entity';
+import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
+import { PlantingEventType } from '../common/enums/planting-event.enums';
 
 type PestOccurrenceReminderApi = {
   initializeForPestOccurrence(params: {
@@ -43,6 +45,7 @@ export class PestOccurrencesService {
   constructor(
     private readonly em: EntityManager,
     private readonly remindersService: RemindersService,
+    private readonly plantingInsightsService: PlantingInsightsService,
   ) {
     this.remindersApi = remindersService;
   }
@@ -107,6 +110,22 @@ export class PestOccurrencesService {
       pestOccurrence: occurrence,
     });
 
+    await this.plantingInsightsService.recordEvent({
+      plantingId: planting.id,
+      userId: user.id,
+      bedId: planting.bed.id,
+      vegetableId: planting.vegetable.id,
+      eventType: PlantingEventType.PEST_OCCURRENCE_ADDED,
+      eventTime: occurrence.createdAt,
+      payload: {
+        occurrenceId: occurrence.id,
+        pestId: pest.id,
+        pestName: pest.name,
+        status: occurrence.status,
+        notes: occurrence.notes ?? null,
+      },
+    });
+
     await this.em.populate(occurrence, ['pest']);
 
     this.logger.log(
@@ -142,6 +161,24 @@ export class PestOccurrencesService {
     }
 
     await this.em.flush();
+
+    if (dto.status !== undefined && dto.status !== previousStatus) {
+      await this.plantingInsightsService.recordEvent({
+        plantingId: occurrence.planting.id,
+        userId: user.id,
+        bedId: occurrence.planting.bed.id,
+        vegetableId: occurrence.planting.vegetable.id,
+        eventType: PlantingEventType.PEST_OCCURRENCE_STATUS_CHANGED,
+        eventTime: occurrence.updatedAt,
+        payload: {
+          occurrenceId: occurrence.id,
+          pestId: occurrence.pest.id,
+          pestName: occurrence.pest.name,
+          previousStatus,
+          status: occurrence.status,
+        },
+      });
+    }
 
     this.logger.log(
       `updated pest occurrence=${occurrence.id} | status=${occurrence.status}`,
@@ -179,10 +216,14 @@ export class PestOccurrencesService {
   }
 
   private async getPlantingOrThrow(user: User, plantingId: string) {
-    const planting = await this.em.findOne(Planting, {
-      id: plantingId,
-      user: user.id,
-    });
+    const planting = await this.em.findOne(
+      Planting,
+      {
+        id: plantingId,
+        user: user.id,
+      },
+      { populate: ['bed', 'vegetable'] },
+    );
 
     if (!planting) {
       throw new NotFoundException('Planting not found');
@@ -201,8 +242,14 @@ export class PestOccurrencesService {
       { id },
       {
         populate: includeRecommendedActions
-          ? ['planting', 'pest', 'pest.recommendedActions']
-          : ['planting', 'pest'],
+          ? [
+              'planting',
+              'planting.bed',
+              'planting.vegetable',
+              'pest',
+              'pest.recommendedActions',
+            ]
+          : ['planting', 'planting.bed', 'planting.vegetable', 'pest'],
       },
     );
 
