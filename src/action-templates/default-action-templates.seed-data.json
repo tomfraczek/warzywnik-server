@@ -1,0 +1,642 @@
+[
+  {
+    "name": "Analiza NPK gleby",
+    "description": "W praktyce oznacza ocenę dostępności azotu, fosforu i potasu, czyli trzech makroskładników o największym znaczeniu dla wzrostu warzyw. Wynik pomaga odróżnić rzeczywisty niedobór składnika od problemów wynikających z pH, przesuszenia lub uszkodzenia korzeni. Na jego podstawie można dobrać nawożenie bez zgadywania i ograniczyć ryzyko przenawożenia. Zabieg diagnostyczny, którego celem jest zamiana domysłów dotyczących stanu podłoża na dane możliwe do wykorzystania w planowaniu nawożenia, podlewania i doboru roślin. W praktyce ogrodniczej badanie gleby powinno poprzedzać decyzje interwencyjne, ponieważ objawy niedoborów, zasolenia, przesuszenia lub zaburzeń pH bywają do siebie podobne. Wynik takiego zabiegu powinien być traktowany jako podstawa dalszych zaleceń, a nie jako czynność formalna. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_testing",
+    "defaultDueOffsetDays": -14
+  },
+  {
+    "name": "Aplikacja biohumusu",
+    "description": "Biohumus działa łagodnie i wspiera aktywność biologiczną podłoża, dlatego dobrze nadaje się do regularnego, bezpiecznego wzmacniania roślin. Zabieg jest szczególnie wartościowy w uprawach prowadzonych intensywnie, w donicach, skrzyniach oraz po stresie przesadzeniowym. Nie powinien być traktowany jako szybka korekta silnego niedoboru, lecz jako element stabilnej pielęgnacji. Zabieg żywieniowy wykonywany na poziomie rośliny lub konkretnego nasadzenia. Jego celem jest dostarczenie składników pokarmowych w momencie, w którym roślina rzeczywiście może je pobrać i wykorzystać do wzrostu, kwitnienia, zawiązywania owoców lub regeneracji. Nawożenie powinno uwzględniać fazę rozwojową, wilgotność podłoża, tempo wzrostu oraz ryzyko przenawożenia. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Najważniejsze jest dobranie dawki i terminu do realnych potrzeb, ponieważ zarówno niedobór, jak i nadmiar składników mogą pogorszyć kondycję roślin. Warto łączyć ten zabieg z wcześniejszą obserwacją wzrostu albo wynikami badania gleby.",
+    "target": "planting",
+    "environment": "any",
+    "type": "fertilization",
+    "defaultDueOffsetDays": 7
+  },
+  {
+    "name": "Aplikacja kompostu",
+    "description": "Kompost wnosi do gleby materię organiczną, mikroorganizmy i stopniowo uwalniane składniki pokarmowe. Poprawia strukturę gleb piaszczystych przez zwiększenie retencji wody, a gleb ciężkich przez stabilizację agregatów i lepsze napowietrzenie. Jest podstawowym zabiegiem budującym żyzność w warzywniku. Zabieg poprawiający właściwości gleby jako środowiska życia korzeni, mikroorganizmów i fauny glebowej. Nie chodzi wyłącznie o dodanie składników pokarmowych, ale także o poprawę struktury, pojemności wodnej, aktywności biologicznej i stabilności agregatów glebowych. Takie działania mają największy sens wtedy, gdy są wykonywane systematycznie, a nie dopiero w sytuacji kryzysowej. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Najważniejsze jest dobranie dawki i terminu do realnych potrzeb, ponieważ zarówno niedobór, jak i nadmiar składników mogą pogorszyć kondycję roślin. Warto łączyć ten zabieg z wcześniejszą obserwacją wzrostu albo wynikami badania gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_amendment",
+    "defaultDueOffsetDays": -10
+  },
+  {
+    "name": "Aplikacja nawozu mineralnego",
+    "description": "Nawóz mineralny dostarcza składników w formie szybciej dostępnej dla roślin niż większość nawozów organicznych. Zabieg wymaga ostrożności, ponieważ nadmierna dawka może prowadzić do zasolenia, uszkodzenia korzeni i zaburzeń pobierania innych pierwiastków. Powinien być powiązany z analizą gleby lub jasno rozpoznaną potrzebą pokarmową. Zabieg poprawiający właściwości gleby jako środowiska życia korzeni, mikroorganizmów i fauny glebowej. Nie chodzi wyłącznie o dodanie składników pokarmowych, ale także o poprawę struktury, pojemności wodnej, aktywności biologicznej i stabilności agregatów glebowych. Takie działania mają największy sens wtedy, gdy są wykonywane systematycznie, a nie dopiero w sytuacji kryzysowej. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Najważniejsze jest dobranie dawki i terminu do realnych potrzeb, ponieważ zarówno niedobór, jak i nadmiar składników mogą pogorszyć kondycję roślin. Warto łączyć ten zabieg z wcześniejszą obserwacją wzrostu albo wynikami badania gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_amendment",
+    "defaultDueOffsetDays": -10
+  },
+  {
+    "name": "Aplikacja nawozu zielonego",
+    "description": "Nawóz zielony polega na wykorzystaniu roślin poplonowych jako źródła biomasy, ochrony powierzchni gleby i poprawy aktywności biologicznej. Po przyoraniu lub pozostawieniu jako ściółka rośliny te zwiększają ilość materii organicznej i mogą ograniczać erozję oraz zachwaszczenie. Jest to zabieg szczególnie dobry po intensywnie żerujących warzywach. Zabieg poprawiający właściwości gleby jako środowiska życia korzeni, mikroorganizmów i fauny glebowej. Nie chodzi wyłącznie o dodanie składników pokarmowych, ale także o poprawę struktury, pojemności wodnej, aktywności biologicznej i stabilności agregatów glebowych. Takie działania mają największy sens wtedy, gdy są wykonywane systematycznie, a nie dopiero w sytuacji kryzysowej. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Najważniejsze jest dobranie dawki i terminu do realnych potrzeb, ponieważ zarówno niedobór, jak i nadmiar składników mogą pogorszyć kondycję roślin. Warto łączyć ten zabieg z wcześniejszą obserwacją wzrostu albo wynikami badania gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_amendment",
+    "defaultDueOffsetDays": -30
+  },
+  {
+    "name": "Aplikacja obornika",
+    "description": "Obornik jest silnym nawozem organicznym i poprawiaczem gleby, który dostarcza materii organicznej oraz składników pokarmowych w formie stopniowo uwalnianej. Najlepiej stosować go z odpowiednim wyprzedzeniem przed uprawą, aby ograniczyć ryzyko uszkodzenia młodych korzeni oraz strat azotu. Wymaga uwzględnienia gatunków wrażliwych na świeże nawożenie organiczne. Zabieg poprawiający właściwości gleby jako środowiska życia korzeni, mikroorganizmów i fauny glebowej. Nie chodzi wyłącznie o dodanie składników pokarmowych, ale także o poprawę struktury, pojemności wodnej, aktywności biologicznej i stabilności agregatów glebowych. Takie działania mają największy sens wtedy, gdy są wykonywane systematycznie, a nie dopiero w sytuacji kryzysowej. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Najważniejsze jest dobranie dawki i terminu do realnych potrzeb, ponieważ zarówno niedobór, jak i nadmiar składników mogą pogorszyć kondycję roślin. Warto łączyć ten zabieg z wcześniejszą obserwacją wzrostu albo wynikami badania gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_amendment",
+    "defaultDueOffsetDays": -30
+  },
+  {
+    "name": "Awaryjne nawożenie interwencyjne",
+    "description": "Jest to działanie ratunkowe podejmowane wtedy, gdy roślina wykazuje objawy silnego niedoboru lub zahamowania wzrostu, a standardowe nawożenie nie wystarcza. Zabieg powinien być poprzedzony oceną, czy problem nie wynika z przesuszenia, zalania, zbyt niskiej temperatury lub niewłaściwego pH. Interwencja ma sens tylko wtedy, gdy roślina jest zdolna do pobierania składników. Zabieg żywieniowy wykonywany na poziomie rośliny lub konkretnego nasadzenia. Jego celem jest dostarczenie składników pokarmowych w momencie, w którym roślina rzeczywiście może je pobrać i wykorzystać do wzrostu, kwitnienia, zawiązywania owoców lub regeneracji. Nawożenie powinno uwzględniać fazę rozwojową, wilgotność podłoża, tempo wzrostu oraz ryzyko przenawożenia. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Najważniejsze jest dobranie dawki i terminu do realnych potrzeb, ponieważ zarówno niedobór, jak i nadmiar składników mogą pogorszyć kondycję roślin. Warto łączyć ten zabieg z wcześniejszą obserwacją wzrostu albo wynikami badania gleby.",
+    "target": "planting",
+    "environment": "any",
+    "type": "fertilization",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Codzienna kontrola klimatu — szklarnia",
+    "description": "W szklarni należy ocenić temperaturę, wilgotność, kondensację, działanie wietrzników i ogólny stan mikroklimatu. Szczególnie ważne jest wykrycie porannej wilgoci na liściach, przegrzewania w południe oraz braku wymiany powietrza. Zabieg powinien prowadzić do decyzji o wietrzeniu, cieniowaniu lub ograniczeniu podlewania. Zabieg środowiskowy dotyczący całej przestrzeni uprawowej, a nie pojedynczej rośliny czy grządki. W uprawie pod osłonami klimat jest jednym z najważniejszych czynników decydujących o zdrowiu roślin, presji chorób, aktywności szkodników i skuteczności podlewania. Regularna kontrola pozwala szybko reagować na przegrzanie, zbyt wysoką wilgotność, kondensację pary wodnej i niedostateczną wymianę powietrza. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "space",
+    "environment": "greenhouse",
+    "type": "climate_control",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Codzienna kontrola klimatu — tunel",
+    "description": "W tunelu foliowym warunki zmieniają się bardzo szybko, ponieważ folia silnie kumuluje ciepło, a wentylacja często zależy od ręcznego otwierania drzwi lub boków. Kontrola powinna obejmować temperaturę przy roślinach, wilgotność powietrza, kondensację na folii i ryzyko przegrzania. To podstawowe działanie ograniczające stres cieplny i choroby grzybowe. Zabieg środowiskowy dotyczący całej przestrzeni uprawowej, a nie pojedynczej rośliny czy grządki. W uprawie pod osłonami klimat jest jednym z najważniejszych czynników decydujących o zdrowiu roślin, presji chorób, aktywności szkodników i skuteczności podlewania. Regularna kontrola pozwala szybko reagować na przegrzanie, zbyt wysoką wilgotność, kondensację pary wodnej i niedostateczną wymianę powietrza. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "space",
+    "environment": "tunnel",
+    "type": "climate_control",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Czyszczenie przestrzeni uprawowej",
+    "description": "Czynność obejmuje uporządkowanie powierzchni, usunięcie zanieczyszczeń, resztek organicznych, opadłych liści i materiałów, które mogą stanowić siedlisko szkodników. Regularne czyszczenie zmniejsza presję chorób i ułatwia monitoring. W praktyce jest to jeden z najprostszych sposobów ograniczenia problemów fitosanitarnych bez stosowania preparatów. Zabieg higieniczny wykonywany na poziomie przestrzeni uprawowej. Ma ograniczać źródła infekcji, miejsca zimowania szkodników, resztki organiczne oraz powierzchnie, na których mogą utrzymywać się patogeny. W tunelach i szklarniach higiena jest szczególnie ważna, ponieważ zamknięte lub częściowo zamknięte środowisko sprzyja kumulacji problemów między kolejnymi cyklami uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "any",
+    "type": "space_hygiene",
+    "defaultDueOffsetDays": -3
+  },
+  {
+    "name": "Dezynfekcja przestrzeni uprawowej — szklarnia",
+    "description": "W szklarni dezynfekcja ma szczególne znaczenie między cyklami uprawy, ponieważ patogeny mogą utrzymywać się na stołach, ścianach, narzędziach, doniczkach i elementach konstrukcyjnych. Zabieg powinien być wykonany po mechanicznym oczyszczeniu, ponieważ materia organiczna obniża skuteczność wielu środków dezynfekcyjnych. Celem jest ograniczenie źródeł infekcji przed kolejnym sezonem. Zabieg higieniczny wykonywany na poziomie przestrzeni uprawowej. Ma ograniczać źródła infekcji, miejsca zimowania szkodników, resztki organiczne oraz powierzchnie, na których mogą utrzymywać się patogeny. W tunelach i szklarniach higiena jest szczególnie ważna, ponieważ zamknięte lub częściowo zamknięte środowisko sprzyja kumulacji problemów między kolejnymi cyklami uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "greenhouse",
+    "type": "space_hygiene",
+    "defaultDueOffsetDays": -3
+  },
+  {
+    "name": "Dezynfekcja przestrzeni uprawowej — tunel",
+    "description": "W tunelu dezynfekcja pomaga ograniczyć przenoszenie chorób między kolejnymi nasadzeniami, szczególnie gdy w poprzednim sezonie występowały infekcje grzybowe lub bakteryjne. Powinna objąć powierzchnie robocze, elementy konstrukcji, pojemniki i miejsca kontaktu z resztkami roślinnymi. Największą skuteczność daje po wcześniejszym usunięciu resztek i umyciu powierzchni. Zabieg higieniczny wykonywany na poziomie przestrzeni uprawowej. Ma ograniczać źródła infekcji, miejsca zimowania szkodników, resztki organiczne oraz powierzchnie, na których mogą utrzymywać się patogeny. W tunelach i szklarniach higiena jest szczególnie ważna, ponieważ zamknięte lub częściowo zamknięte środowisko sprzyja kumulacji problemów między kolejnymi cyklami uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "tunnel",
+    "type": "space_hygiene",
+    "defaultDueOffsetDays": -3
+  },
+  {
+    "name": "Dosadzanie roślin",
+    "description": "Dosadzanie uzupełnia braki w obsadzie powstałe po słabych wschodach, uszkodzeniach mechanicznych, chorobach lub stratach pogodowych. Zabieg pozwala zachować planowaną produktywność grządki, ale powinien uwzględniać różnicę wieku między roślinami. Nowo dosadzona roślina wymaga dokładniejszego podlewania i krótkiego okresu adaptacji. Zabieg związany ze zmianą miejsca wzrostu rośliny albo regulacją obsady. Jest krytyczny, ponieważ narusza system korzeniowy i może czasowo ograniczyć pobieranie wody oraz składników pokarmowych. Poprawne wykonanie wymaga właściwej wilgotności podłoża, ostrożnego obchodzenia się z bryłą korzeniową i odpowiedniego terminu względem temperatury oraz fazy rozwojowej rośliny. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "transplanting",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Formowanie grządki",
+    "description": "Formowanie nadaje grządce kształt ułatwiający odpływ wody, dostęp do roślin, utrzymanie ściółki i równomierne prowadzenie uprawy. W glebach ciężkich może ograniczyć zastoje wody, a w lekkich poprawić organizację podlewania. Dobrze uformowana grządka stabilizuje warunki korzeniowe i ułatwia późniejsze zabiegi pielęgnacyjne. Zabieg przygotowujący glebę do uprawy. Jego celem jest stworzenie stabilnego, napowietrzonego i możliwie równomiernego środowiska dla kiełkowania, rozwoju korzeni i retencji wody. W dobrze zaprojektowanym systemie ogrodniczym przygotowanie gleby powinno być prowadzone tak, aby nie niszczyć nadmiernie życia glebowego i nie powodować utraty struktury. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg ma charakter fundamentu agrotechnicznego: poprawia warunki, zanim pojawi się problem widoczny na roślinach. Najlepiej działa jako element planu sezonu, wykonywany w odpowiednim momencie i powiązany z typem gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_preparation",
+    "defaultDueOffsetDays": -7
+  },
+  {
+    "name": "Głębokie spulchnianie (broadfork)",
+    "description": "Broadfork pozwala rozluźnić głębsze warstwy gleby bez jej pełnego odwracania. Zabieg poprawia penetrację korzeni, infiltrację wody i wymianę gazową, jednocześnie ograniczając destrukcję warstw glebowych. Najlepiej sprawdza się w glebach zbitych, po wieloletnim użytkowaniu albo tam, gdzie występuje podeszwa uprawowa. Zabieg przygotowujący glebę do uprawy. Jego celem jest stworzenie stabilnego, napowietrzonego i możliwie równomiernego środowiska dla kiełkowania, rozwoju korzeni i retencji wody. W dobrze zaprojektowanym systemie ogrodniczym przygotowanie gleby powinno być prowadzone tak, aby nie niszczyć nadmiernie życia glebowego i nie powodować utraty struktury. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg ma charakter fundamentu agrotechnicznego: poprawia warunki, zanim pojawi się problem widoczny na roślinach. Najlepiej działa jako element planu sezonu, wykonywany w odpowiednim momencie i powiązany z typem gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_preparation",
+    "defaultDueOffsetDays": -7
+  },
+  {
+    "name": "Instalacja cieniowania — szklarnia",
+    "description": "W szklarni cieniowanie ogranicza nadmierne promieniowanie i temperaturę, które mogą powodować więdnięcie, zrzucanie kwiatów, poparzenia liści i pogorszenie zapylania. Instalacja powinna umożliwiać regulację, ponieważ potrzeby roślin różnią się między chłodną wiosną a upalnym latem. Cieniowanie musi współpracować z wentylacją, a nie ją zastępować. Zabieg ograniczający nadmierne promieniowanie słoneczne i przegrzewanie przestrzeni uprawowej. W tunelu i szklarni cieniowanie nie jest wyłącznie kwestią komfortu roślin, ale elementem zarządzania transpiracją, temperaturą liści, ryzykiem poparzeń oraz stabilnością mikroklimatu. Powinno być stosowane elastycznie, w zależności od pogody, fazy wzrostu i wrażliwości uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "greenhouse",
+    "type": "shading",
+    "defaultDueOffsetDays": -7
+  },
+  {
+    "name": "Instalacja cieniowania — tunel",
+    "description": "W tunelu cieniowanie jest szczególnie ważne w okresach intensywnego nasłonecznienia, gdy temperatura pod folią może gwałtownie przekraczać optymalny zakres dla warzyw. Dobrze zaprojektowane cieniowanie zmniejsza stres cieplny, ogranicza nadmierną transpirację i pomaga utrzymać bardziej stabilny mikroklimat. Nie powinno jednak nadmiernie ograniczać światła w okresach pochmurnych. Zabieg ograniczający nadmierne promieniowanie słoneczne i przegrzewanie przestrzeni uprawowej. W tunelu i szklarni cieniowanie nie jest wyłącznie kwestią komfortu roślin, ale elementem zarządzania transpiracją, temperaturą liści, ryzykiem poparzeń oraz stabilnością mikroklimatu. Powinno być stosowane elastycznie, w zależności od pogody, fazy wzrostu i wrażliwości uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "tunnel",
+    "type": "shading",
+    "defaultDueOffsetDays": -7
+  },
+  {
+    "name": "Instalacja pułapek na szkodniki",
+    "description": "Pułapki powinny być rozmieszczone w miejscach reprezentatywnych dla grządki lub przestrzeni uprawowej, a nie przypadkowo. Ich główną funkcją jest wczesne wykrycie pojawu szkodnika i ocena dynamiki jego liczebności. Wyniki obserwacji powinny być interpretowane razem ze stanem roślin, ponieważ sama obecność szkodnika nie zawsze oznacza konieczność interwencji. Zabieg monitorująco-ochronny polegający na rozmieszczeniu pułapek w taki sposób, aby umożliwiały wczesne wykrycie szkodników lub częściowe ograniczenie ich liczebności. Pułapki nie zastępują obserwacji roślin, ale są bardzo dobrym narzędziem do wykrywania trendu: czy populacja szkodnika rośnie, utrzymuje się, czy spada po podjętych działaniach. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonywany wtedy, gdy wynika z aktualnego stanu uprawy, sezonu albo planu prac. Jego celem jest poprawa przewidywalności prowadzenia warzywnika i ograniczenie działań przypadkowych.",
+    "target": "bed",
+    "environment": "any",
+    "type": "trap_setup",
+    "defaultDueOffsetDays": -1
+  },
+  {
+    "name": "Instalacja siatek ochronnych",
+    "description": "Siatki stanowią barierę przed owadami, ptakami lub większymi szkodnikami, a jednocześnie pozwalają ograniczyć stosowanie środków interwencyjnych. Kluczowe jest szczelne zamocowanie brzegów, ponieważ niewielkie przerwy mogą unieważnić ochronę. Zabieg najlepiej wykonać profilaktycznie, zanim szkodnik złoży jaja lub wejdzie w uprawę. Zabieg ochronny oparty na barierach fizycznych lub zmianie mikrośrodowiska wokół rośliny. Jego przewaga polega na tym, że często ogranicza problem zanim dojdzie do dużej presji chorób lub szkodników. Takie działania są szczególnie wartościowe w ogrodnictwie amatorskim, ponieważ zmniejszają potrzebę stosowania środków interwencyjnych. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonywany wtedy, gdy wynika z aktualnego stanu uprawy, sezonu albo planu prac. Jego celem jest poprawa przewidywalności prowadzenia warzywnika i ograniczenie działań przypadkowych.",
+    "target": "bed",
+    "environment": "any",
+    "type": "physical_protection",
+    "defaultDueOffsetDays": -1
+  },
+  {
+    "name": "Instalacja systemu nawadniania",
+    "description": "System nawadniania powinien dostarczać wodę w sposób równomierny i przewidywalny, najlepiej bez moczenia liści, jeśli uprawa jest podatna na choroby grzybowe. Instalacja wymaga uwzględnienia typu gleby, rozstawu roślin i dostępnego ciśnienia wody. Dobrze zaprojektowany system zmniejsza stres wodny i ułatwia prowadzenie ogrodu podczas upałów. Zabieg związany z organizacją gospodarki wodnej w grządce lub przestrzeni uprawowej. Odpowiednie przygotowanie nawadniania wpływa nie tylko na dostępność wody, ale również na choroby odglebowe, zasolenie, pobieranie składników pokarmowych i stabilność plonowania. System powinien dostarczać wodę możliwie równomiernie, bez zalewania gleby i bez długotrwałego moczenia części nadziemnych. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg ma charakter fundamentu agrotechnicznego: poprawia warunki, zanim pojawi się problem widoczny na roślinach. Najlepiej działa jako element planu sezonu, wykonywany w odpowiednim momencie i powiązany z typem gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "irrigation_setup",
+    "defaultDueOffsetDays": -14
+  },
+  {
+    "name": "Kontrola chorób",
+    "description": "Kontrola powinna obejmować ocenę liści, łodyg, owoców, podstawy rośliny oraz warunków środowiskowych sprzyjających infekcjom. Należy zwracać uwagę na plamy, naloty, więdnięcie, zgnilizny, nekrozy i nietypowe deformacje. Celem jest rozpoznanie problemu na tyle wcześnie, aby wystarczyły działania higieniczne, poprawa mikroklimatu lub usunięcie ogniska choroby. Zabieg ochronny ukierunkowany na ograniczenie chorób roślin. W praktyce powinien łączyć obserwację objawów, usuwanie źródeł infekcji, poprawę warunków uprawowych oraz działania interwencyjne. Najważniejsze jest odróżnienie przyczyny chorobowej od błędów wodnych, nawozowych lub stresu środowiskowego, ponieważ podobne objawy mogą mieć różne źródła. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Przed wykonaniem zabiegu należy potwierdzić przyczynę problemu przez obserwację objawów i ocenę warunków uprawowych. W aplikacji taki szablon powinien być traktowany jako działanie świadome, uruchamiane po diagnozie, a nie rutynowe zadanie wykonywane bez powodu.",
+    "target": "planting",
+    "environment": "any",
+    "type": "disease_control",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Kontrola konstrukcji szklarni",
+    "description": "Przegląd szklarni powinien objąć szyby lub panele, drzwi, wietrzniki, uszczelnienia, elementy nośne oraz miejsca, w których może gromadzić się woda. Nawet drobne nieszczelności zmieniają mikroklimat i zwiększają ryzyko chorób. Kontrola ma szczególne znaczenie przed silnym wiatrem, mrozem i rozpoczęciem intensywnego sezonu. Zabieg kontrolny dotyczący elementów konstrukcyjnych tunelu lub szklarni. Stabilność konstrukcji wpływa bezpośrednio na bezpieczeństwo uprawy, możliwość wietrzenia, ochronę przed deszczem i utrzymanie mikroklimatu. Regularny przegląd pozwala wykryć uszkodzenia zanim doprowadzą do awarii, strat ciepła, nadmiernego zawilgocenia albo uszkodzenia roślin. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "greenhouse",
+    "type": "structure_inspection",
+    "defaultDueOffsetDays": -7
+  },
+  {
+    "name": "Kontrola konstrukcji tunelu",
+    "description": "W tunelu należy sprawdzić napięcie folii, mocowania, pałąki, drzwi, boki wentylacyjne i miejsca narażone na przetarcia. Uszkodzona folia pogarsza ochronę przed opadami, zwiększa straty ciepła i może doprowadzić do gwałtownego uszkodzenia całej konstrukcji podczas wiatru. Regularna kontrola jest tańsza i skuteczniejsza niż naprawa po awarii. Zabieg kontrolny dotyczący elementów konstrukcyjnych tunelu lub szklarni. Stabilność konstrukcji wpływa bezpośrednio na bezpieczeństwo uprawy, możliwość wietrzenia, ochronę przed deszczem i utrzymanie mikroklimatu. Regularny przegląd pozwala wykryć uszkodzenia zanim doprowadzą do awarii, strat ciepła, nadmiernego zawilgocenia albo uszkodzenia roślin. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "tunnel",
+    "type": "structure_inspection",
+    "defaultDueOffsetDays": -7
+  },
+  {
+    "name": "Kontrola szkodników",
+    "description": "Kontrola obejmuje oglądanie spodniej strony liści, młodych pędów, wierzchołków wzrostu, kwiatów oraz gleby wokół roślin. Wczesne wykrycie pojedynczych kolonii mszyc, przędziorków, wciornastków lub gąsienic pozwala zastosować metody mechaniczne i biologiczne przed eskalacją problemu. Warto dokumentować obserwacje, aby odróżnić incydent od narastającej presji. Zabieg ochronny ukierunkowany na wykrywanie i ograniczanie szkodników. Jego wartość wynika z regularności: pojedyncza obserwacja często nie pokazuje skali problemu, ale cykliczny monitoring pozwala rozpoznać moment, w którym populacja zaczyna zagrażać roślinom. Zabieg powinien preferować metody mechaniczne, biologiczne i profilaktyczne przed działaniami chemicznymi. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Przed wykonaniem zabiegu należy potwierdzić przyczynę problemu przez obserwację objawów i ocenę warunków uprawowych. W aplikacji taki szablon powinien być traktowany jako działanie świadome, uruchamiane po diagnozie, a nie rutynowe zadanie wykonywane bez powodu.",
+    "target": "planting",
+    "environment": "any",
+    "type": "pest_control",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Kontrola wilgotności gleby",
+    "description": "Pomiar lub obserwacja wilgotności przy roślinie pozwala ocenić, czy woda jest dostępna w strefie korzeniowej, a nie tylko na powierzchni. Zabieg ogranicza dwa częste błędy: podlewanie zbyt płytkie oraz podlewanie roślin, które faktycznie mają już nadmiar wilgoci. Jest szczególnie ważny w uprawach pojemnikowych, w tunelu i na glebach skrajnie lekkich lub ciężkich. Zabieg obserwacyjny, który służy zebraniu informacji o stanie roślin, gleby lub przestrzeni uprawowej. Monitoring nie jest biernym oglądaniem uprawy, lecz świadomą diagnostyką: użytkownik powinien sprawdzić konkretne wskaźniki, zanotować odchylenia i dopiero na tej podstawie podjąć decyzję o podlewaniu, nawożeniu, ochronie lub zmianie warunków. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "planting",
+    "environment": "any",
+    "type": "monitoring",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Kontrola wilgotności gleby (grządka)",
+    "description": "Na poziomie grządki kontrola wilgotności służy ocenie całego stanowiska, a nie pojedynczej rośliny. Pozwala wykryć nierównomierne podlewanie, przesuszone strefy, zastoje wody i problemy wynikające z różnic w strukturze gleby. Wynik powinien wpływać na decyzję o regulacji nawadniania, ściółkowaniu lub poprawie struktury podłoża. Zabieg obserwacyjny, który służy zebraniu informacji o stanie roślin, gleby lub przestrzeni uprawowej. Monitoring nie jest biernym oglądaniem uprawy, lecz świadomą diagnostyką: użytkownik powinien sprawdzić konkretne wskaźniki, zanotować odchylenia i dopiero na tej podstawie podjąć decyzję o podlewaniu, nawożeniu, ochronie lub zmianie warunków. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "bed",
+    "environment": "any",
+    "type": "monitoring",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Monitoring kwitnienia",
+    "description": "Obserwacja kwitnienia pozwala ocenić, czy roślina wchodzi prawidłowo w fazę generatywną i czy warunki środowiskowe sprzyjają zawiązywaniu plonów. Brak kwiatów, zrzucanie kwiatów lub słabe zapylenie mogą wskazywać na stres cieplny, niedobory, zbyt wysoką wilgotność albo niewłaściwe prowadzenie roślin. Monitoring jest szczególnie ważny u pomidorów, papryki, ogórków i roślin dyniowatych. Zabieg obserwacyjny, który służy zebraniu informacji o stanie roślin, gleby lub przestrzeni uprawowej. Monitoring nie jest biernym oglądaniem uprawy, lecz świadomą diagnostyką: użytkownik powinien sprawdzić konkretne wskaźniki, zanotować odchylenia i dopiero na tej podstawie podjąć decyzję o podlewaniu, nawożeniu, ochronie lub zmianie warunków. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "planting",
+    "environment": "any",
+    "type": "monitoring",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Monitoring szkodników (pułapki)",
+    "description": "Odczyt pułapek pozwala ocenić, jakie szkodniki są obecne i czy ich liczebność rośnie. W tunelu i szklarni jest to jedno z najważniejszych narzędzi wczesnego ostrzegania, ponieważ populacje mączlików, wciornastków i przędziorków mogą rozwijać się bardzo szybko. Monitoring powinien być powtarzalny i wykonywany według stałego schematu. Zabieg obserwacyjny, który służy zebraniu informacji o stanie roślin, gleby lub przestrzeni uprawowej. Monitoring nie jest biernym oglądaniem uprawy, lecz świadomą diagnostyką: użytkownik powinien sprawdzić konkretne wskaźniki, zanotować odchylenia i dopiero na tej podstawie podjąć decyzję o podlewaniu, nawożeniu, ochronie lub zmianie warunków. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "space",
+    "environment": "any",
+    "type": "monitoring",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Monitoring temperatury",
+    "description": "Regularny pomiar temperatury pozwala wykryć okresy przegrzewania, chłodu nocnego lub dużych wahań dobowych. Temperatura wpływa na kiełkowanie, wzrost, zapylanie, pobieranie składników oraz rozwój chorób i szkodników. Warto mierzyć ją w miejscu rzeczywistego wzrostu roślin, a nie tylko przy wejściu do tunelu lub szklarni. Zabieg obserwacyjny, który służy zebraniu informacji o stanie roślin, gleby lub przestrzeni uprawowej. Monitoring nie jest biernym oglądaniem uprawy, lecz świadomą diagnostyką: użytkownik powinien sprawdzić konkretne wskaźniki, zanotować odchylenia i dopiero na tej podstawie podjąć decyzję o podlewaniu, nawożeniu, ochronie lub zmianie warunków. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "space",
+    "environment": "any",
+    "type": "monitoring",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Monitoring wilgotności powietrza",
+    "description": "Wilgotność powietrza decyduje o transpiracji, presji chorób grzybowych i kondensacji na liściach oraz konstrukcji. Zbyt wysoka wilgotność w szklarni zwiększa ryzyko infekcji, natomiast zbyt niska sprzyja przędziorkom i stresowi wodnemu. Monitoring powinien prowadzić do decyzji o wentylacji, podlewaniu i cieniowaniu. Zabieg obserwacyjny, który służy zebraniu informacji o stanie roślin, gleby lub przestrzeni uprawowej. Monitoring nie jest biernym oglądaniem uprawy, lecz świadomą diagnostyką: użytkownik powinien sprawdzić konkretne wskaźniki, zanotować odchylenia i dopiero na tej podstawie podjąć decyzję o podlewaniu, nawożeniu, ochronie lub zmianie warunków. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "space",
+    "environment": "greenhouse",
+    "type": "monitoring",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Monitoring wzrostu",
+    "description": "Monitoring wzrostu obejmuje ocenę tempa przyrostu, koloru liści, pokroju rośliny, długości międzywęźli i ogólnej kondycji. Pozwala odróżnić prawidłowy rozwój od niedoborów, stresu wodnego, problemów z temperaturą lub zbyt dużego zagęszczenia. Regularne obserwacje tworzą kontekst dla kolejnych decyzji pielęgnacyjnych. Zabieg obserwacyjny, który służy zebraniu informacji o stanie roślin, gleby lub przestrzeni uprawowej. Monitoring nie jest biernym oglądaniem uprawy, lecz świadomą diagnostyką: użytkownik powinien sprawdzić konkretne wskaźniki, zanotować odchylenia i dopiero na tej podstawie podjąć decyzję o podlewaniu, nawożeniu, ochronie lub zmianie warunków. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "planting",
+    "environment": "any",
+    "type": "monitoring",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Mulczowanie grządki",
+    "description": "Mulczowanie grządki stabilizuje warunki glebowe na całej powierzchni uprawowej. Ogranicza parowanie, zmniejsza erozję, utrudnia kiełkowanie chwastów i chroni życie glebowe przed skrajnymi wahaniami temperatury. W dłuższej perspektywie ściółka organiczna zwiększa zawartość próchnicy i poprawia strukturę gleby. Zabieg polegający na przykryciu powierzchni gleby warstwą materiału organicznego lub innego dopuszczalnego okrycia. Ściółka ogranicza parowanie wody, zmniejsza wahania temperatury gleby, utrudnia kiełkowanie chwastów i stopniowo poprawia strukturę podłoża. Jest to jedna z najważniejszych praktyk stabilizujących warunki w warzywniku. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg ma charakter fundamentu agrotechnicznego: poprawia warunki, zanim pojawi się problem widoczny na roślinach. Najlepiej działa jako element planu sezonu, wykonywany w odpowiednim momencie i powiązany z typem gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "mulching",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Mycie konstrukcji szklarni",
+    "description": "Mycie usuwa kurz, osady, glony i pozostałości organiczne z powierzchni szklarni. Poprawia dostęp światła, ogranicza miejsca utrzymywania się patogenów i przygotowuje powierzchnie do ewentualnej dezynfekcji. Zabieg ma największy sens przed sezonem lub po zakończeniu cyklu uprawowego. Zabieg higieniczny wykonywany na poziomie przestrzeni uprawowej. Ma ograniczać źródła infekcji, miejsca zimowania szkodników, resztki organiczne oraz powierzchnie, na których mogą utrzymywać się patogeny. W tunelach i szklarniach higiena jest szczególnie ważna, ponieważ zamknięte lub częściowo zamknięte środowisko sprzyja kumulacji problemów między kolejnymi cyklami uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "greenhouse",
+    "type": "space_hygiene",
+    "defaultDueOffsetDays": -3
+  },
+  {
+    "name": "Mycie konstrukcji tunelu",
+    "description": "W tunelu mycie konstrukcji i folii pomaga usunąć osady ograniczające przepuszczalność światła oraz zanieczyszczenia mogące sprzyjać patogenom. Szczególnie ważne jest delikatne czyszczenie folii, aby jej nie uszkodzić. Zabieg warto połączyć z kontrolą przetarć, naciągu i mocowań. Zabieg higieniczny wykonywany na poziomie przestrzeni uprawowej. Ma ograniczać źródła infekcji, miejsca zimowania szkodników, resztki organiczne oraz powierzchnie, na których mogą utrzymywać się patogeny. W tunelach i szklarniach higiena jest szczególnie ważna, ponieważ zamknięte lub częściowo zamknięte środowisko sprzyja kumulacji problemów między kolejnymi cyklami uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "tunnel",
+    "type": "space_hygiene",
+    "defaultDueOffsetDays": -3
+  },
+  {
+    "name": "Naprawa folii tunelu",
+    "description": "Naprawa folii powinna być wykonana zanim drobne rozdarcie powiększy się pod wpływem wiatru lub naprężenia. Uszkodzenia folii prowadzą do utraty ciepła, przecieków, gorszej kontroli wilgotności i większego ryzyka wnikania szkodników. Szybka naprawa stabilizuje mikroklimat i chroni konstrukcję. Zabieg naprawczy dotyczący elementów konstrukcyjnych tunelu lub szklarni. Ma charakter prewencyjno-interwencyjny: nawet niewielkie uszkodzenie folii, szyby, drzwi lub mechanizmu wietrzenia może prowadzić do niekontrolowanej wymiany powietrza, strat ciepła, zalewania uprawy albo wnikania szkodników. Naprawa powinna być wykonana możliwie szybko po wykryciu problemu. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "tunnel",
+    "type": "structure_repair",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Naprawa szyb szklarni",
+    "description": "Uszkodzone szyby lub panele szklarni zwiększają ryzyko przeciągów, strat ciepła, zalewania roślin i skaleczeń podczas pracy. Naprawa ma znaczenie zarówno dla bezpieczeństwa użytkownika, jak i dla stabilności warunków uprawowych. Po naprawie warto ponownie sprawdzić szczelność oraz działanie wietrzenia. Zabieg naprawczy dotyczący elementów konstrukcyjnych tunelu lub szklarni. Ma charakter prewencyjno-interwencyjny: nawet niewielkie uszkodzenie folii, szyby, drzwi lub mechanizmu wietrzenia może prowadzić do niekontrolowanej wymiany powietrza, strat ciepła, zalewania uprawy albo wnikania szkodników. Naprawa powinna być wykonana możliwie szybko po wykryciu problemu. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "greenhouse",
+    "type": "structure_repair",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Nawożenie dolistne",
+    "description": "Nawożenie dolistne dostarcza wybrane składniki przez powierzchnię liści i może być użyteczne przy szybkich korektach niedoborów. Nie zastępuje jednak prawidłowej żyzności gleby, ponieważ większość odżywiania roślin odbywa się przez korzenie. Zabieg wymaga odpowiednich warunków, aby nie spowodować poparzeń ani słabej skuteczności. Zabieg żywieniowy wykonywany na poziomie rośliny lub konkretnego nasadzenia. Jego celem jest dostarczenie składników pokarmowych w momencie, w którym roślina rzeczywiście może je pobrać i wykorzystać do wzrostu, kwitnienia, zawiązywania owoców lub regeneracji. Nawożenie powinno uwzględniać fazę rozwojową, wilgotność podłoża, tempo wzrostu oraz ryzyko przenawożenia. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Najważniejsze jest dobranie dawki i terminu do realnych potrzeb, ponieważ zarówno niedobór, jak i nadmiar składników mogą pogorszyć kondycję roślin. Warto łączyć ten zabieg z wcześniejszą obserwacją wzrostu albo wynikami badania gleby.",
+    "target": "planting",
+    "environment": "any",
+    "type": "fertilization",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Nawożenie mineralne",
+    "description": "Nawożenie mineralne na poziomie rośliny powinno odpowiadać fazie rozwoju: inne potrzeby ma rozsada, inne roślina intensywnie budująca liście, a inne roślina owocująca. Zbyt silne nawożenie może zwiększać podatność na choroby, zasolenie i nadmierny wzrost wegetatywny. Dlatego zabieg powinien być powiązany z obserwacją i dawkowaniem. Zabieg żywieniowy wykonywany na poziomie rośliny lub konkretnego nasadzenia. Jego celem jest dostarczenie składników pokarmowych w momencie, w którym roślina rzeczywiście może je pobrać i wykorzystać do wzrostu, kwitnienia, zawiązywania owoców lub regeneracji. Nawożenie powinno uwzględniać fazę rozwojową, wilgotność podłoża, tempo wzrostu oraz ryzyko przenawożenia. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Najważniejsze jest dobranie dawki i terminu do realnych potrzeb, ponieważ zarówno niedobór, jak i nadmiar składników mogą pogorszyć kondycję roślin. Warto łączyć ten zabieg z wcześniejszą obserwacją wzrostu albo wynikami badania gleby.",
+    "target": "planting",
+    "environment": "any",
+    "type": "fertilization",
+    "defaultDueOffsetDays": 7
+  },
+  {
+    "name": "Nawożenie organiczne",
+    "description": "Nawożenie organiczne działa wolniej, ale wspiera glebę i mikrobiologię podłoża. Dostarcza składników w sposób bardziej rozłożony w czasie i poprawia właściwości fizyczne gleby. Jest szczególnie wartościowe w systemie ogrodniczym nastawionym na długofalową żyzność, a nie jednorazowe pobudzenie wzrostu. Zabieg żywieniowy wykonywany na poziomie rośliny lub konkretnego nasadzenia. Jego celem jest dostarczenie składników pokarmowych w momencie, w którym roślina rzeczywiście może je pobrać i wykorzystać do wzrostu, kwitnienia, zawiązywania owoców lub regeneracji. Nawożenie powinno uwzględniać fazę rozwojową, wilgotność podłoża, tempo wzrostu oraz ryzyko przenawożenia. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Najważniejsze jest dobranie dawki i terminu do realnych potrzeb, ponieważ zarówno niedobór, jak i nadmiar składników mogą pogorszyć kondycję roślin. Warto łączyć ten zabieg z wcześniejszą obserwacją wzrostu albo wynikami badania gleby.",
+    "target": "planting",
+    "environment": "any",
+    "type": "fertilization",
+    "defaultDueOffsetDays": 7
+  },
+  {
+    "name": "Oprysk biologiczny",
+    "description": "Oprysk biologiczny wykorzystuje preparaty oparte na organizmach, metabolitach lub substancjach pochodzenia naturalnego. Jego skuteczność często zależy od właściwego momentu, temperatury, wilgotności i dokładnego pokrycia roślin. W systemie integrowanej ochrony powinien być stosowany po rozpoznaniu problemu i połączony z monitoringiem efektów. Zabieg aplikacyjny polegający na naniesieniu preparatu na roślinę w celu ograniczenia szkodników, chorób lub stresu biologicznego. Oprysk powinien być wykonywany wyłącznie wtedy, gdy istnieje uzasadnienie diagnostyczne, a warunki pogodowe i faza rozwojowa rośliny umożliwiają skuteczne oraz bezpieczne działanie. Kluczowe jest przestrzeganie dawkowania i unikanie rutynowego stosowania bez obserwacji objawów. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Przed wykonaniem zabiegu należy potwierdzić przyczynę problemu przez obserwację objawów i ocenę warunków uprawowych. W aplikacji taki szablon powinien być traktowany jako działanie świadome, uruchamiane po diagnozie, a nie rutynowe zadanie wykonywane bez powodu.",
+    "target": "planting",
+    "environment": "any",
+    "type": "spraying",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Oprysk chemiczny",
+    "description": "Oprysk chemiczny jest działaniem interwencyjnym, które powinno być wykonywane wyłącznie przy uzasadnionej potrzebie i zgodnie z etykietą środka. Wymaga uwzględnienia okresu karencji, fazy rozwojowej roślin, pogody oraz bezpieczeństwa użytkownika i organizmów pożytecznych. Nie powinien zastępować profilaktyki, higieny i monitoringu. Zabieg aplikacyjny polegający na naniesieniu preparatu na roślinę w celu ograniczenia szkodników, chorób lub stresu biologicznego. Oprysk powinien być wykonywany wyłącznie wtedy, gdy istnieje uzasadnienie diagnostyczne, a warunki pogodowe i faza rozwojowa rośliny umożliwiają skuteczne oraz bezpieczne działanie. Kluczowe jest przestrzeganie dawkowania i unikanie rutynowego stosowania bez obserwacji objawów. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Przed wykonaniem zabiegu należy potwierdzić przyczynę problemu przez obserwację objawów i ocenę warunków uprawowych. W aplikacji taki szablon powinien być traktowany jako działanie świadome, uruchamiane po diagnozie, a nie rutynowe zadanie wykonywane bez powodu.",
+    "target": "planting",
+    "environment": "any",
+    "type": "spraying",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Pikowanie siewek",
+    "description": "Pikowanie polega na przesadzeniu młodych siewek do większej przestrzeni, aby ograniczyć konkurencję i umożliwić rozwój silniejszego systemu korzeniowego. Zabieg powinien być wykonany w odpowiedniej fazie, najczęściej po pojawieniu się liści właściwych. Zbyt wczesne lub zbyt późne pikowanie zwiększa stres i ryzyko zahamowania wzrostu. Zabieg związany ze zmianą miejsca wzrostu rośliny albo regulacją obsady. Jest krytyczny, ponieważ narusza system korzeniowy i może czasowo ograniczyć pobieranie wody oraz składników pokarmowych. Poprawne wykonanie wymaga właściwej wilgotności podłoża, ostrożnego obchodzenia się z bryłą korzeniową i odpowiedniego terminu względem temperatury oraz fazy rozwojowej rośliny. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "transplanting",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Planowanie płodozmianu",
+    "description": "Planowanie płodozmianu polega na takim rozmieszczeniu rodzin warzyw w kolejnych sezonach, aby ograniczyć kumulację chorób, szkodników i jednostronne wyczerpywanie składników. Szczególnie ważne jest unikanie wieloletniej uprawy roślin z tej samej rodziny na tej samej grządce. Zabieg ma charakter strategiczny i powinien być wykonywany przed planowaniem nasadzeń. Zabieg planistyczny dotyczący następstwa roślin na grządce. Płodozmian ogranicza kumulację patogenów i szkodników specyficznych dla danej rodziny roślin, stabilizuje wykorzystanie składników pokarmowych i pomaga utrzymać żyzność gleby. To działanie ma znaczenie strategiczne, ponieważ wpływa na zdrowie upraw w kolejnych sezonach. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonywany wtedy, gdy wynika z aktualnego stanu uprawy, sezonu albo planu prac. Jego celem jest poprawa przewidywalności prowadzenia warzywnika i ograniczenie działań przypadkowych.",
+    "target": "bed",
+    "environment": "any",
+    "type": "rotation_planning",
+    "defaultDueOffsetDays": -60
+  },
+  {
+    "name": "Płukanie gleby (redukcja zasolenia)",
+    "description": "Płukanie gleby ma na celu obniżenie nadmiernego stężenia soli w strefie korzeniowej, szczególnie w tunelach, gdzie deszcz nie wypłukuje naturalnie nagromadzonych składników. Zabieg powinien być poprzedzony pomiarem EC, ponieważ nieuzasadnione płukanie może wypłukać również pożądane składniki. Wymaga dobrego drenażu, aby sole faktycznie opuściły profil korzeniowy. Zabieg związany z organizacją gospodarki wodnej w grządce lub przestrzeni uprawowej. Odpowiednie przygotowanie nawadniania wpływa nie tylko na dostępność wody, ale również na choroby odglebowe, zasolenie, pobieranie składników pokarmowych i stabilność plonowania. System powinien dostarczać wodę możliwie równomiernie, bez zalewania gleby i bez długotrwałego moczenia części nadziemnych. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. Zabieg ma charakter fundamentu agrotechnicznego: poprawia warunki, zanim pojawi się problem widoczny na roślinach. Najlepiej działa jako element planu sezonu, wykonywany w odpowiednim momencie i powiązany z typem gleby.",
+    "target": "bed",
+    "environment": "tunnel",
+    "type": "irrigation_setup",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Podlewanie roślin",
+    "description": "Podlewanie roślin powinno dostarczać wodę do aktywnej strefy korzeniowej, a nie jedynie zwilżać powierzchnię gleby. Częstotliwość i ilość wody zależą od gatunku, fazy wzrostu, typu gleby, ściółki i pogody. Prawidłowe podlewanie ogranicza stres, poprawia pobieranie składników i zmniejsza ryzyko zaburzeń fizjologicznych. Zabieg wodny wykonywany na poziomie rośliny lub nasadzenia. Jego celem jest dostarczenie wody do strefy korzeniowej w ilości odpowiadającej fazie rozwoju, typowi gleby i aktualnym warunkom pogodowym. Prawidłowe podlewanie powinno unikać zarówno przesuszenia, jak i długotrwałego zalania, ponieważ oba stany prowadzą do stresu fizjologicznego. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "watering",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Podwiązywanie roślin",
+    "description": "Podwiązywanie stabilizuje rośliny wysokie lub obciążone owocami. Ogranicza łamanie pędów, poprawia dostęp światła i zwiększa przewiewność, co ma znaczenie profilaktyczne wobec chorób. Wiązanie powinno być elastyczne i nie może wrzynać się w rosnącą łodygę. Zabieg polegający na mechanicznym podparciu, podwiązaniu lub uporządkowaniu wzrostu roślin. Jest szczególnie ważny u gatunków wysokich, płożących lub obficie owocujących, ponieważ ogranicza łamanie pędów, kontakt owoców z ziemią i nadmierne zagęszczenie łanu. Poprawne prowadzenie roślin sprzyja również lepszej wentylacji. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "staking",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Pomiar pH gleby",
+    "description": "Pomiar pH określa kwasowość lub zasadowość gleby, co bezpośrednio wpływa na dostępność składników pokarmowych. Ten sam typ gleby może mieć różne pH w różnych ogrodach, dlatego rzeczywisty pomiar jest ważniejszy niż ogólne założenia. Wynik powinien być interpretowany w odniesieniu do wymagań konkretnych roślin. Zabieg diagnostyczny, którego celem jest zamiana domysłów dotyczących stanu podłoża na dane możliwe do wykorzystania w planowaniu nawożenia, podlewania i doboru roślin. W praktyce ogrodniczej badanie gleby powinno poprzedzać decyzje interwencyjne, ponieważ objawy niedoborów, zasolenia, przesuszenia lub zaburzeń pH bywają do siebie podobne. Wynik takiego zabiegu powinien być traktowany jako podstawa dalszych zaleceń, a nie jako czynność formalna. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_testing",
+    "defaultDueOffsetDays": -14
+  },
+  {
+    "name": "Pomiar zasolenia gleby (EC)",
+    "description": "Pomiar EC pozwala ocenić stężenie soli rozpuszczalnych w podłożu. Jest szczególnie ważny w tunelach i szklarniach, gdzie brak naturalnego opadu może prowadzić do kumulacji nawozów i soli. Wysokie EC utrudnia pobieranie wody przez korzenie i może powodować objawy podobne do suszy mimo wilgotnej gleby. Zabieg diagnostyczny, którego celem jest zamiana domysłów dotyczących stanu podłoża na dane możliwe do wykorzystania w planowaniu nawożenia, podlewania i doboru roślin. W praktyce ogrodniczej badanie gleby powinno poprzedzać decyzje interwencyjne, ponieważ objawy niedoborów, zasolenia, przesuszenia lub zaburzeń pH bywają do siebie podobne. Wynik takiego zabiegu powinien być traktowany jako podstawa dalszych zaleceń, a nie jako czynność formalna. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
+    "target": "bed",
+    "environment": "tunnel",
+    "type": "soil_testing",
+    "defaultDueOffsetDays": -14
+  },
+  {
+    "name": "Przesadzanie roślin",
+    "description": "Przesadzanie przenosi roślinę do nowego miejsca lub większej objętości podłoża. Zabieg powinien minimalizować uszkodzenie korzeni i zapewnić szybki kontakt bryły korzeniowej z wilgotną glebą. Po przesadzeniu roślina zwykle potrzebuje krótkiego okresu stabilizacji, w którym szczególnie ważne są woda, cień i ochrona przed skrajnymi warunkami. Zabieg związany ze zmianą miejsca wzrostu rośliny albo regulacją obsady. Jest krytyczny, ponieważ narusza system korzeniowy i może czasowo ograniczyć pobieranie wody oraz składników pokarmowych. Poprawne wykonanie wymaga właściwej wilgotności podłoża, ostrożnego obchodzenia się z bryłą korzeniową i odpowiedniego terminu względem temperatury oraz fazy rozwojowej rośliny. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "transplanting",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Przycinanie roślin",
+    "description": "Przycinanie służy regulacji wzrostu, poprawie przewiewności i usunięciu części nieproduktywnych lub chorych. W warzywniku zabieg musi być wykonywany ostrożnie, ponieważ liście są źródłem asymilatów potrzebnych do plonowania. Nadmierne przycinanie może osłabić roślinę i zwiększyć podatność na stres. Zabieg regulujący architekturę rośliny przez usunięcie wybranych liści, pędów lub fragmentów nadziemnych. Może poprawiać przewiewność, doświetlenie i kierowanie zasobów do owoców, ale wykonany zbyt agresywnie osłabia roślinę. Wymaga znajomości gatunku, fazy wzrostu oraz celu zabiegu. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "pruning",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Przygotowanie do zimy",
+    "description": "Przygotowanie do zimy obejmuje zabezpieczenie przestrzeni, konstrukcji i gleby przed mrozem, wiatrem, śniegiem i nadmierną wilgocią. Zabieg zmniejsza ryzyko uszkodzeń infrastruktury oraz ułatwia szybki start wiosną. Powinien obejmować także porządkowanie resztek roślinnych i kontrolę elementów narażonych na obciążenie śniegiem. Zabieg sezonowy przygotowujący przestrzeń, grządkę lub konstrukcję do kolejnego etapu użytkowania. Obejmuje działania organizacyjne, higieniczne i techniczne, które zmniejszają ryzyko awarii, chorób oraz chaosu prac w szczycie sezonu. Dobrze zaplanowane przygotowanie sezonowe znacząco poprawia stabilność uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "any",
+    "type": "seasonal_preparation",
+    "defaultDueOffsetDays": -21
+  },
+  {
+    "name": "Przygotowanie grządki po sezonie",
+    "description": "Zabieg porządkuje grządkę po zakończeniu uprawy i przygotowuje ją do regeneracji lub kolejnego sezonu. Obejmuje usunięcie resztek, ocenę struktury, ewentualne uzupełnienie materii organicznej i zabezpieczenie powierzchni przed erozją. To moment, w którym można ograniczyć wiele przyszłych problemów fitosanitarnych. Zabieg porządkujący status grządki po zakończeniu lub przed rozpoczęciem cyklu uprawowego. Ma znaczenie organizacyjne i agronomiczne, ponieważ oddziela etap użytkowania grządki od etapu regeneracji, przygotowania albo ponownego obsadzenia. Dzięki temu system może lepiej planować kolejne działania. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonywany wtedy, gdy wynika z aktualnego stanu uprawy, sezonu albo planu prac. Jego celem jest poprawa przewidywalności prowadzenia warzywnika i ograniczenie działań przypadkowych.",
+    "target": "bed",
+    "environment": "any",
+    "type": "bed_ready",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Przygotowanie grządki przed sezonem",
+    "description": "Przygotowanie przed sezonem polega na ocenie stanu gleby, wyrównaniu powierzchni, uzupełnieniu materii organicznej i stworzeniu warunków do siewu lub sadzenia. Zabieg powinien być dostosowany do wilgotności gleby; praca na zbyt mokrym podłożu może pogorszyć strukturę. Dobrze przygotowana grządka skraca czas adaptacji roślin. Zabieg przygotowujący glebę do uprawy. Jego celem jest stworzenie stabilnego, napowietrzonego i możliwie równomiernego środowiska dla kiełkowania, rozwoju korzeni i retencji wody. W dobrze zaprojektowanym systemie ogrodniczym przygotowanie gleby powinno być prowadzone tak, aby nie niszczyć nadmiernie życia glebowego i nie powodować utraty struktury. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg ma charakter fundamentu agrotechnicznego: poprawia warunki, zanim pojawi się problem widoczny na roślinach. Najlepiej działa jako element planu sezonu, wykonywany w odpowiednim momencie i powiązany z typem gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_preparation",
+    "defaultDueOffsetDays": -14
+  },
+  {
+    "name": "Przygotowanie szklarni do sezonu",
+    "description": "Przygotowanie szklarni obejmuje kontrolę konstrukcji, mycie powierzchni, ocenę wietrzenia, uporządkowanie wyposażenia i przygotowanie stanowisk. Celem jest rozpoczęcie sezonu w czystym, sprawnym i przewidywalnym środowisku. Zabieg ogranicza ryzyko przeniesienia problemów z poprzedniego cyklu uprawowego. Zabieg sezonowy przygotowujący przestrzeń, grządkę lub konstrukcję do kolejnego etapu użytkowania. Obejmuje działania organizacyjne, higieniczne i techniczne, które zmniejszają ryzyko awarii, chorób oraz chaosu prac w szczycie sezonu. Dobrze zaplanowane przygotowanie sezonowe znacząco poprawia stabilność uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "greenhouse",
+    "type": "seasonal_preparation",
+    "defaultDueOffsetDays": -21
+  },
+  {
+    "name": "Przygotowanie tunelu do sezonu",
+    "description": "Przygotowanie tunelu powinno obejmować kontrolę folii, mocowań, drzwi, możliwości wietrzenia oraz stanu grządek wewnątrz. Tunel przed sezonem musi być gotowy zarówno na szybkie nagrzewanie w dzień, jak i na spadki temperatury nocą. Dobre przygotowanie ułatwia bezpieczne rozpoczęcie wcześniejszych upraw. Zabieg sezonowy przygotowujący przestrzeń, grządkę lub konstrukcję do kolejnego etapu użytkowania. Obejmuje działania organizacyjne, higieniczne i techniczne, które zmniejszają ryzyko awarii, chorób oraz chaosu prac w szczycie sezonu. Dobrze zaplanowane przygotowanie sezonowe znacząco poprawia stabilność uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "tunnel",
+    "type": "seasonal_preparation",
+    "defaultDueOffsetDays": -21
+  },
+  {
+    "name": "Przykrycie gleby (agrowłóknina)",
+    "description": "Agrowłóknina chroni glebę przed nadmiernym wychłodzeniem, parowaniem, erozją i częściowo przed chwastami. Może przyspieszać ogrzewanie gleby oraz tworzyć korzystniejsze warunki dla młodych roślin. Zabieg wymaga właściwego zamocowania i okresowej kontroli, aby materiał nie ograniczał wzrostu ani wymiany powietrza. Zabieg regeneracyjny mający przywrócić lub poprawić funkcje gleby po intensywnej uprawie, stresie środowiskowym albo problemach fitosanitarnych. Regeneracja obejmuje poprawę struktury, aktywności biologicznej, retencji wody i ograniczenie presji patogenów. To działanie długofalowe, którego efekty często narastają przez kilka tygodni lub sezonów. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg ma charakter fundamentu agrotechnicznego: poprawia warunki, zanim pojawi się problem widoczny na roślinach. Najlepiej działa jako element planu sezonu, wykonywany w odpowiednim momencie i powiązany z typem gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_regeneration",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Redukcja wilgotności — szklarnia",
+    "description": "W szklarni redukcja wilgotności jest podstawowym elementem profilaktyki chorób grzybowych. Zabieg może obejmować wietrzenie, ograniczenie podlewania wieczorem, poprawę cyrkulacji powietrza i usunięcie nadmiaru mokrych resztek. Celem jest skrócenie czasu zwilżenia liści i ograniczenie kondensacji. Zabieg środowiskowy polegający na ograniczaniu nadmiernej wilgotności powietrza i kondensacji pary wodnej. W szklarni i tunelu zbyt wysoka wilgotność sprzyja chorobom grzybowym, pogarsza transpirację i może prowadzić do długotrwałego zwilżenia liści. Redukcja wilgotności powinna być realizowana przez wentylację, kontrolę podlewania i właściwe zarządzanie temperaturą. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "greenhouse",
+    "type": "humidity_reduction",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Redukcja wilgotności — tunel",
+    "description": "W tunelu wysoka wilgotność często wynika z kondensacji na folii, zbyt słabego przewietrzania i dużej różnicy temperatur między dniem a nocą. Redukcja wilgotności wymaga właściwego otwierania tunelu, unikania nadmiernego podlewania i kontroli zagęszczenia roślin. Zabieg ogranicza presję chorób oraz poprawia warunki transpiracji. Zabieg środowiskowy polegający na ograniczaniu nadmiernej wilgotności powietrza i kondensacji pary wodnej. W szklarni i tunelu zbyt wysoka wilgotność sprzyja chorobom grzybowym, pogarsza transpirację i może prowadzić do długotrwałego zwilżenia liści. Redukcja wilgotności powinna być realizowana przez wentylację, kontrolę podlewania i właściwe zarządzanie temperaturą. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "tunnel",
+    "type": "humidity_reduction",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Regulacja cieniowania — szklarnia",
+    "description": "Regulacja cieniowania polega na dostosowaniu stopnia osłony do aktualnej pogody i wrażliwości upraw. Zbyt słabe cieniowanie prowadzi do przegrzania, a zbyt silne może ograniczyć fotosyntezę i osłabić plonowanie. W szklarni należy łączyć je z kontrolą wentylacji i temperatury. Zabieg ograniczający nadmierne promieniowanie słoneczne i przegrzewanie przestrzeni uprawowej. W tunelu i szklarni cieniowanie nie jest wyłącznie kwestią komfortu roślin, ale elementem zarządzania transpiracją, temperaturą liści, ryzykiem poparzeń oraz stabilnością mikroklimatu. Powinno być stosowane elastycznie, w zależności od pogody, fazy wzrostu i wrażliwości uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "greenhouse",
+    "type": "shading",
+    "defaultDueOffsetDays": -3
+  },
+  {
+    "name": "Regulacja cieniowania — tunel",
+    "description": "W tunelu regulacja cieniowania pozwala reagować na szybkie zmiany temperatury i nasłonecznienia. Cieniowanie powinno łagodzić stres cieplny bez niepotrzebnego ograniczania światła w dni pochmurne. Zabieg ma szczególne znaczenie dla sałat, rozsad i roślin w okresie kwitnienia. Zabieg ograniczający nadmierne promieniowanie słoneczne i przegrzewanie przestrzeni uprawowej. W tunelu i szklarni cieniowanie nie jest wyłącznie kwestią komfortu roślin, ale elementem zarządzania transpiracją, temperaturą liści, ryzykiem poparzeń oraz stabilnością mikroklimatu. Powinno być stosowane elastycznie, w zależności od pogody, fazy wzrostu i wrażliwości uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "tunnel",
+    "type": "shading",
+    "defaultDueOffsetDays": -3
+  },
+  {
+    "name": "Sadzenie rozsady",
+    "description": "Sadzenie rozsady przenosi roślinę z kontrolowanych warunków produkcji do docelowej grządki, tunelu lub szklarni. Sukces zależy od zahartowania roślin, temperatury gleby, wilgotności i prawidłowej głębokości sadzenia. Po posadzeniu roślina powinna mieć zapewnioną stabilną wilgotność oraz ochronę przed nagłym stresem. Zabieg związany ze zmianą miejsca wzrostu rośliny albo regulacją obsady. Jest krytyczny, ponieważ narusza system korzeniowy i może czasowo ograniczyć pobieranie wody oraz składników pokarmowych. Poprawne wykonanie wymaga właściwej wilgotności podłoża, ostrożnego obchodzenia się z bryłą korzeniową i odpowiedniego terminu względem temperatury oraz fazy rozwojowej rośliny. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "transplanting",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Ściółkowanie wokół roślin",
+    "description": "Ściółkowanie bezpośrednio wokół roślin stabilizuje mikroklimat strefy korzeniowej, ogranicza zachwaszczenie i zmniejsza zabrudzenie liści oraz owoców cząstkami gleby. Może także ograniczać rozprzestrzenianie patogenów przenoszonych przez rozbryzgi wody. Materiał ściółkujący powinien być dobrany do gatunku i warunków wilgotnościowych. Zabieg ochronny oparty na barierach fizycznych lub zmianie mikrośrodowiska wokół rośliny. Jego przewaga polega na tym, że często ogranicza problem zanim dojdzie do dużej presji chorób lub szkodników. Takie działania są szczególnie wartościowe w ogrodnictwie amatorskim, ponieważ zmniejszają potrzebę stosowania środków interwencyjnych. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonywany wtedy, gdy wynika z aktualnego stanu uprawy, sezonu albo planu prac. Jego celem jest poprawa przewidywalności prowadzenia warzywnika i ograniczenie działań przypadkowych.",
+    "target": "planting",
+    "environment": "any",
+    "type": "physical_protection",
+    "defaultDueOffsetDays": -1
+  },
+  {
+    "name": "Siew nasion",
+    "description": "Siew nasion wymaga dobrania głębokości, rozstawu i wilgotności podłoża do biologii danego gatunku. Zbyt głęboki siew opóźnia lub uniemożliwia wschody, a zbyt płytki zwiększa ryzyko przesuszenia. Równomierny siew tworzy podstawę dla zdrowej obsady i ogranicza późniejszą konieczność korekt. Zabieg rozpoczynający cykl życia uprawy przez umieszczenie nasion w odpowiednim podłożu, głębokości i rozstawie. Skuteczność siewu zależy od wilgotności, temperatury, jakości nasion oraz struktury gleby. Błędy na tym etapie często skutkują nierównymi wschodami, osłabieniem siewek lub koniecznością dosiewania. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "sowing",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Solarizacja gleby",
+    "description": "Solarizacja wykorzystuje energię słoneczną do podniesienia temperatury gleby pod przezroczystą osłoną. Może ograniczać część patogenów, nasion chwastów i szkodników glebowych, szczególnie w ciepłych okresach. Zabieg wymaga odpowiedniego czasu, wilgotności i szczelnego przykrycia, dlatego powinien być planowany jako działanie sezonowe. Zabieg regeneracyjny mający przywrócić lub poprawić funkcje gleby po intensywnej uprawie, stresie środowiskowym albo problemach fitosanitarnych. Regeneracja obejmuje poprawę struktury, aktywności biologicznej, retencji wody i ograniczenie presji patogenów. To działanie długofalowe, którego efekty często narastają przez kilka tygodni lub sezonów. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Dotyczy przede wszystkim upraw zewnętrznych, gdzie rośliny są bezpośrednio narażone na opady, wiatr, promieniowanie słoneczne i naturalne wahania temperatury. Zabieg ma charakter fundamentu agrotechnicznego: poprawia warunki, zanim pojawi się problem widoczny na roślinach. Najlepiej działa jako element planu sezonu, wykonywany w odpowiednim momencie i powiązany z typem gleby.",
+    "target": "bed",
+    "environment": "outdoor",
+    "type": "soil_regeneration",
+    "defaultDueOffsetDays": -14
+  },
+  {
+    "name": "Spulchnianie gleby",
+    "description": "Spulchnianie poprawia dostęp powietrza do gleby, ułatwia infiltrację wody i tworzy lepsze warunki dla młodych korzeni. Zabieg powinien być wykonywany z wyczuciem, aby nie niszczyć nadmiernie struktury i nie przesuszać gleby. Największą wartość ma wtedy, gdy odpowiada na rzeczywiste zagęszczenie podłoża. Zabieg przygotowujący glebę do uprawy. Jego celem jest stworzenie stabilnego, napowietrzonego i możliwie równomiernego środowiska dla kiełkowania, rozwoju korzeni i retencji wody. W dobrze zaprojektowanym systemie ogrodniczym przygotowanie gleby powinno być prowadzone tak, aby nie niszczyć nadmiernie życia glebowego i nie powodować utraty struktury. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg ma charakter fundamentu agrotechnicznego: poprawia warunki, zanim pojawi się problem widoczny na roślinach. Najlepiej działa jako element planu sezonu, wykonywany w odpowiednim momencie i powiązany z typem gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_preparation",
+    "defaultDueOffsetDays": -7
+  },
+  {
+    "name": "Uprawa roślin poplonowych",
+    "description": "Rośliny poplonowe chronią glebę po zbiorach, ograniczają erozję, wiążą składniki pokarmowe i dostarczają biomasy. Niektóre gatunki poprawiają strukturę korzeniami, inne wspierają życie biologiczne lub ograniczają zachwaszczenie. To zabieg strategiczny, który poprawia grządkę między głównymi cyklami uprawy. Zabieg regeneracyjny mający przywrócić lub poprawić funkcje gleby po intensywnej uprawie, stresie środowiskowym albo problemach fitosanitarnych. Regeneracja obejmuje poprawę struktury, aktywności biologicznej, retencji wody i ograniczenie presji patogenów. To działanie długofalowe, którego efekty często narastają przez kilka tygodni lub sezonów. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg ma charakter fundamentu agrotechnicznego: poprawia warunki, zanim pojawi się problem widoczny na roślinach. Najlepiej działa jako element planu sezonu, wykonywany w odpowiednim momencie i powiązany z typem gleby.",
+    "target": "bed",
+    "environment": "any",
+    "type": "soil_regeneration",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Usunięcie całej rośliny (silna choroba)",
+    "description": "Usunięcie całej rośliny jest działaniem radykalnym, ale uzasadnionym przy silnym porażeniu, gdy roślina staje się źródłem infekcji dla pozostałej uprawy. Zabieg powinien być wykonany ostrożnie, bez rozsypywania porażonych tkanek po grządce. Materiał roślinny należy usunąć zgodnie z zasadami higieny ogrodniczej. Zabieg ochronny ukierunkowany na ograniczenie chorób roślin. W praktyce powinien łączyć obserwację objawów, usuwanie źródeł infekcji, poprawę warunków uprawowych oraz działania interwencyjne. Najważniejsze jest odróżnienie przyczyny chorobowej od błędów wodnych, nawozowych lub stresu środowiskowego, ponieważ podobne objawy mogą mieć różne źródła. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Przed wykonaniem zabiegu należy potwierdzić przyczynę problemu przez obserwację objawów i ocenę warunków uprawowych. W aplikacji taki szablon powinien być traktowany jako działanie świadome, uruchamiane po diagnozie, a nie rutynowe zadanie wykonywane bez powodu.",
+    "target": "planting",
+    "environment": "any",
+    "type": "disease_control",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Usunięcie roślin po sezonie",
+    "description": "Usunięcie roślin kończy cykl uprawowy i ogranicza pozostawianie resztek, które mogą być siedliskiem chorób lub szkodników. Zabieg pozwala ocenić stan korzeni, gleby i ewentualne problemy, które wystąpiły w sezonie. Jest też punktem wyjścia do regeneracji grządki lub przygotowania kolejnego nasadzenia. Zabieg kończący określony etap produkcyjny rośliny lub całej uprawy. Odpowiedni termin zbioru wpływa na smak, trwałość przechowalniczą, zawartość suchej masy i ogólną jakość plonu. Zbyt wczesny lub zbyt późny zbiór może obniżyć wartość użytkową warzyw oraz utrudnić planowanie kolejnych prac. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "harvest",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Usuwanie chwastów przy roślinach",
+    "description": "Usuwanie chwastów przy roślinach wymaga ostrożności, aby nie uszkodzić płytkich korzeni warzyw. Zabieg zmniejsza konkurencję o wodę, światło i składniki pokarmowe, szczególnie w początkowych fazach wzrostu. Regularność jest ważniejsza niż intensywne, rzadkie odchwaszczanie. Zabieg ograniczający konkurencję chwastów o wodę, światło, przestrzeń i składniki pokarmowe. Chwasty mogą również tworzyć mikroklimat sprzyjający chorobom i stanowić schronienie dla szkodników. Regularne usuwanie chwastów jest szczególnie ważne na wczesnym etapie wzrostu warzyw, gdy ich system korzeniowy jest jeszcze słabo rozwinięty. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "weeding",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Usuwanie chwastów z grządki",
+    "description": "Odchwaszczanie całej grządki utrzymuje porządek uprawy i ogranicza rezerwuary szkodników oraz chorób. Chwasty pozostawione do zakwitnięcia zwiększają bank nasion w glebie i utrudniają kolejne sezony. Zabieg warto łączyć ze ściółkowaniem oraz poprawą zagęszczenia właściwych roślin. Zabieg ograniczający konkurencję chwastów o wodę, światło, przestrzeń i składniki pokarmowe. Chwasty mogą również tworzyć mikroklimat sprzyjający chorobom i stanowić schronienie dla szkodników. Regularne usuwanie chwastów jest szczególnie ważne na wczesnym etapie wzrostu warzyw, gdy ich system korzeniowy jest jeszcze słabo rozwinięty. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "bed",
+    "environment": "any",
+    "type": "weeding",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Usuwanie liści",
+    "description": "Usuwanie liści powinno być wykonywane selektywnie, z jasnym celem: poprawa przewiewności, usunięcie liści starych, chorych lub dotykających gleby. Nadmierne usunięcie zdrowych liści ogranicza fotosyntezę i może pogorszyć plonowanie. Zabieg jest szczególnie ważny w uprawie pod osłonami, gdzie wilgotność sprzyja chorobom. Zabieg regulujący architekturę rośliny przez usunięcie wybranych liści, pędów lub fragmentów nadziemnych. Może poprawiać przewiewność, doświetlenie i kierowanie zasobów do owoców, ale wykonany zbyt agresywnie osłabia roślinę. Wymaga znajomości gatunku, fazy wzrostu oraz celu zabiegu. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "pruning",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Usuwanie pędów bocznych",
+    "description": "Usuwanie pędów bocznych reguluje pokrój roślin, zwłaszcza u pomidorów prowadzonych na jeden lub kilka pędów. Zabieg kieruje energię rośliny w wybrany sposób wzrostu i może poprawiać przewiewność. Wymaga regularności, ponieważ starsze pędy są trudniejsze do usunięcia i ich wyłamywanie bardziej rani roślinę. Zabieg regulujący architekturę rośliny przez usunięcie wybranych liści, pędów lub fragmentów nadziemnych. Może poprawiać przewiewność, doświetlenie i kierowanie zasobów do owoców, ale wykonany zbyt agresywnie osłabia roślinę. Wymaga znajomości gatunku, fazy wzrostu oraz celu zabiegu. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "pruning",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Usuwanie porażonych części",
+    "description": "Usunięcie porażonych części ogranicza źródło infekcji lub miejsce żerowania szkodników bez konieczności usuwania całej rośliny. Zabieg powinien obejmować tylko tkanki z objawami oraz niewielki margines bezpieczeństwa. Narzędzia po kontakcie z chorymi tkankami warto zdezynfekować, aby nie przenieść problemu. Zabieg ochronny ukierunkowany na ograniczenie chorób roślin. W praktyce powinien łączyć obserwację objawów, usuwanie źródeł infekcji, poprawę warunków uprawowych oraz działania interwencyjne. Najważniejsze jest odróżnienie przyczyny chorobowej od błędów wodnych, nawozowych lub stresu środowiskowego, ponieważ podobne objawy mogą mieć różne źródła. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Przed wykonaniem zabiegu należy potwierdzić przyczynę problemu przez obserwację objawów i ocenę warunków uprawowych. W aplikacji taki szablon powinien być traktowany jako działanie świadome, uruchamiane po diagnozie, a nie rutynowe zadanie wykonywane bez powodu.",
+    "target": "planting",
+    "environment": "any",
+    "type": "disease_control",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Usuwanie resztek roślinnych",
+    "description": "Resztki roślinne pozostawione w tunelu, szklarni lub na grządce mogą przechowywać patogeny, jaja szkodników i materiał infekcyjny na kolejny sezon. Ich usunięcie jest jednym z fundamentów higieny ogrodniczej. Zdrowy materiał można przeznaczyć na kompost, ale porażony powinien być usunięty ostrożniej. Zabieg higieniczny wykonywany na poziomie przestrzeni uprawowej. Ma ograniczać źródła infekcji, miejsca zimowania szkodników, resztki organiczne oraz powierzchnie, na których mogą utrzymywać się patogeny. W tunelach i szklarniach higiena jest szczególnie ważna, ponieważ zamknięte lub częściowo zamknięte środowisko sprzyja kumulacji problemów między kolejnymi cyklami uprawy. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "any",
+    "type": "space_hygiene",
+    "defaultDueOffsetDays": -3
+  },
+  {
+    "name": "Wentylacja szklarni",
+    "description": "Wentylacja szklarni reguluje temperaturę, wilgotność i wymianę gazową. Powinna być prowadzona tak, aby ograniczać kondensację oraz przegrzewanie, ale bez gwałtownego wychłodzenia roślin w chłodne dni. Dobrze działająca wentylacja jest jednym z najważniejszych elementów profilaktyki chorób grzybowych. Zabieg polegający na wymianie powietrza w tunelu lub szklarni. Wentylacja reguluje temperaturę, wilgotność, stężenie dwutlenku węgla i ryzyko kondensacji. W uprawach pod osłonami jest jednym z podstawowych narzędzi profilaktyki chorób oraz ochrony przed przegrzaniem. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "greenhouse",
+    "type": "ventilation",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Wentylacja tunelu",
+    "description": "Wentylacja tunelu polega najczęściej na otwieraniu drzwi, boków lub innych elementów umożliwiających przepływ powietrza. Tunel może bardzo szybko się nagrzewać, dlatego brak wietrzenia prowadzi do stresu cieplnego, słabszego kwitnienia i wzrostu wilgotności. Zabieg powinien być dostosowany do pogody i fazy rozwoju roślin. Zabieg polegający na wymianie powietrza w tunelu lub szklarni. Wentylacja reguluje temperaturę, wilgotność, stężenie dwutlenku węgla i ryzyko kondensacji. W uprawach pod osłonami jest jednym z podstawowych narzędzi profilaktyki chorób oraz ochrony przed przegrzaniem. Ten szablon jest przeznaczony dla przestrzeni uprawowej, takiej jak tunel, szklarnia albo ogólna strefa ogrodu, ponieważ działanie obejmuje warunki środowiskowe lub infrastrukturę. Dotyczy tunelu foliowego, gdzie warunki są częściowo kontrolowane, ale nadal silnie zależą od pogody i ręcznej obsługi wentylacji. W przypadku przestrzeni pod osłonami szczególnie ważna jest regularność, ponieważ niewielkie zaniedbania szybko wpływają na mikroklimat całej uprawy. Działanie powinno ograniczać ryzyko problemów systemowych, a nie tylko reagować na pojedynczy objaw.",
+    "target": "space",
+    "environment": "tunnel",
+    "type": "ventilation",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Zapylanie ręczne",
+    "description": "Zapylanie ręczne wspiera zawiązywanie owoców tam, gdzie brakuje owadów zapylających, ruchu powietrza lub odpowiednich warunków do naturalnego zapylenia. W szklarni ma szczególne znaczenie u roślin, które wymagają wibracji kwiatów albo skutecznego przeniesienia pyłku. Zabieg powinien być wykonywany delikatnie i w porze sprzyjającej aktywności pyłku. Zabieg wykonywany ręcznie i wymagający decyzji użytkownika, ponieważ jego potrzeba zależy od gatunku, warunków uprawy i obserwacji roślin. W tym przypadku najważniejsze jest precyzyjne wykonanie oraz powiązanie działania z realnym stanem uprawy, a nie automatyczne powtarzanie czynności bez diagnozy. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Dotyczy szklarni, czyli przestrzeni o większym stopniu kontroli mikroklimatu, ale również większym ryzyku kumulacji wilgoci, chorób i szkodników pod osłonami. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "greenhouse",
+    "type": "manual_custom",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Zbiór nasion",
+    "description": "Zbiór nasion wymaga pozostawienia wybranych roślin lub owoców do pełnego dojrzenia. Zabieg powinien uwzględniać zdrowotność rośliny matecznej, czystość odmianową i sposób dosuszenia materiału. Prawidłowy zbiór nasion pozwala zachować wartościowy materiał siewny na kolejne sezony. Zabieg kończący określony etap produkcyjny rośliny lub całej uprawy. Odpowiedni termin zbioru wpływa na smak, trwałość przechowalniczą, zawartość suchej masy i ogólną jakość plonu. Zbyt wczesny lub zbyt późny zbiór może obniżyć wartość użytkową warzyw oraz utrudnić planowanie kolejnych prac. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "harvest",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Zbiór plonów",
+    "description": "Zbiór plonów powinien być wykonany w fazie optymalnej dla smaku, wartości użytkowej i trwałości przechowalniczej. Termin zależy od gatunku: inne kryteria stosuje się dla liści, korzeni, owoców i nasion. Regularny zbiór u wielu roślin pobudza dalsze plonowanie i ogranicza przeciążenie roślin. Zabieg kończący określony etap produkcyjny rośliny lub całej uprawy. Odpowiedni termin zbioru wpływa na smak, trwałość przechowalniczą, zawartość suchej masy i ogólną jakość plonu. Zbyt wczesny lub zbyt późny zbiór może obniżyć wartość użytkową warzyw oraz utrudnić planowanie kolejnych prac. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
+    "target": "planting",
+    "environment": "any",
+    "type": "harvest",
+    "defaultDueOffsetDays": 0
+  },
+  {
+    "name": "Zmiana uprawy w grządce",
+    "description": "Zmiana uprawy oznacza decyzję o wprowadzeniu innego gatunku lub rodziny roślin w danej grządce. Powinna wynikać z płodozmianu, stanu gleby, historii chorób i planu sezonu. Dobrze zaplanowana zmiana ogranicza powtarzanie tych samych problemów i lepiej wykorzystuje zasoby gleby. Zabieg planistyczny dotyczący następstwa roślin na grządce. Płodozmian ogranicza kumulację patogenów i szkodników specyficznych dla danej rodziny roślin, stabilizuje wykorzystanie składników pokarmowych i pomaga utrzymać żyzność gleby. To działanie ma znaczenie strategiczne, ponieważ wpływa na zdrowie upraw w kolejnych sezonach. Ten szablon jest przeznaczony dla grządki, dlatego powinien być generowany wtedy, gdy decyzja dotyczy całego stanowiska glebowego, a nie pojedynczej rośliny. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonywany wtedy, gdy wynika z aktualnego stanu uprawy, sezonu albo planu prac. Jego celem jest poprawa przewidywalności prowadzenia warzywnika i ograniczenie działań przypadkowych.",
+    "target": "bed",
+    "environment": "any",
+    "type": "rotation_planning",
+    "defaultDueOffsetDays": -14
+  }
+]

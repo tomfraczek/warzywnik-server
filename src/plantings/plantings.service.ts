@@ -192,29 +192,18 @@ export class PlantingsService {
     planting.user = user;
     planting.bed = bed;
     planting.vegetable = vegetable;
-    planting.plannedStartDate = this.parseDate(
-      dto.plannedStartDate,
-      'plannedStartDate',
-    );
-    planting.actualStartDate = dto.actualStartDate
-      ? this.parseDate(dto.actualStartDate, 'actualStartDate')
-      : null;
+    planting.plannedStartDate = dto.plannedStartDate
+      ? this.parseDate(dto.plannedStartDate, 'plannedStartDate')
+      : new Date();
+    planting.actualStartDate = null;
     planting.startMethod = dto.startMethod ?? PlantingStartMethod.DIRECT_SOW;
-    planting.sowedAt = dto.sowedAt
-      ? this.parseDate(dto.sowedAt, 'sowedAt')
-      : null;
-    planting.transplantedAt = dto.transplantedAt
-      ? this.parseDate(dto.transplantedAt, 'transplantedAt')
-      : null;
-    planting.harvestWindowStart = dto.harvestWindowStart
-      ? this.parseDate(dto.harvestWindowStart, 'harvestWindowStart')
-      : null;
-    planting.harvestWindowEnd = dto.harvestWindowEnd
-      ? this.parseDate(dto.harvestWindowEnd, 'harvestWindowEnd')
-      : null;
+    planting.sowedAt = null;
+    planting.transplantedAt = null;
+    planting.harvestWindowStart = null;
+    planting.harvestWindowEnd = null;
     planting.timelineTimezone = dto.timelineTimezone ?? 'Europe/Warsaw';
     planting.appliedRulesVersion = vegetable.rulesVersion;
-    planting.status = dto.status ?? PlantingStatus.NEW;
+    planting.status = PlantingStatus.NEW;
     planting.notes = dto.notes ?? null;
 
     this.assertStatusCompatibleWithStartMethod(
@@ -352,6 +341,7 @@ export class PlantingsService {
     }
 
     const previousStatus = planting.status;
+    let timelineInitializedFromStatusChange = false;
 
     if (dto.status !== undefined) {
       this.assertStatusTransitionAllowed(
@@ -360,6 +350,13 @@ export class PlantingsService {
         planting.startMethod,
       );
       planting.status = dto.status;
+      timelineInitializedFromStatusChange =
+        this.initializeTimelineFromStatusChange(
+          planting,
+          previousStatus,
+          dto.status,
+          vegetable,
+        );
     }
 
     if (dto.notes !== undefined) {
@@ -383,6 +380,20 @@ export class PlantingsService {
     if (
       dto.sowedAt !== undefined &&
       dto.sowedAt !== null &&
+      planting.sowedAt != null &&
+      planting.sowedAt.getTime() <= now.getTime()
+    ) {
+      await this.plantingInsightsService.recordEvent({
+        plantingId,
+        userId,
+        bedId,
+        vegetableId,
+        eventType: PlantingEventType.PLANTING_SOWED,
+        eventTime: planting.sowedAt,
+        payload: { sowedAt: planting.sowedAt?.toISOString() ?? null },
+      });
+    } else if (
+      timelineInitializedFromStatusChange &&
       planting.sowedAt != null &&
       planting.sowedAt.getTime() <= now.getTime()
     ) {
@@ -797,10 +808,10 @@ export class PlantingsService {
     },
   ) {
     const base = this.serializePlanting(planting);
-    const harvestWindow = this.computeHarvestWindow(
-      vegetable,
-      planting.plannedStartDate,
-    );
+    const cultivationStartDate = this.resolveCultivationStartDate(planting);
+    const harvestWindow = cultivationStartDate
+      ? this.computeHarvestWindow(vegetable, cultivationStartDate)
+      : null;
     const result: Record<string, unknown> = {
       ...base,
       harvestStartDate: harvestWindow?.start ?? null,
@@ -956,7 +967,10 @@ export class PlantingsService {
     // TODO: DRAINAGE_MISMATCH requires vegetable drainage preference, which is not modeled yet.
     // Once Vegetable exposes drainage demand, compute mismatch here and emit warning.
 
-    const previousPlantings = await this.getPreviousPlantings(planting, bed);
+    const cultivationStartDate = this.resolveCultivationStartDate(planting);
+    const previousPlantings = cultivationStartDate
+      ? await this.getPreviousPlantings(bed, planting.id, cultivationStartDate)
+      : [];
 
     const familyRepetitionCandidate = this.buildFamilyRepetitionCandidate(
       vegetable,
@@ -975,6 +989,7 @@ export class PlantingsService {
     const harvestWindowMissedCandidate = this.buildHarvestWindowMissedCandidate(
       planting,
       vegetable,
+      cultivationStartDate,
       valuesBase,
     );
     if (harvestWindowMissedCandidate)
@@ -983,6 +998,7 @@ export class PlantingsService {
     const suboptimalSowingCandidate = this.buildSuboptimalSowingCandidate(
       planting,
       vegetable,
+      cultivationStartDate,
       valuesBase,
     );
     if (suboptimalSowingCandidate) candidates.push(suboptimalSowingCandidate);
@@ -1050,14 +1066,18 @@ export class PlantingsService {
     return bed.measuredK ?? null;
   }
 
-  private async getPreviousPlantings(planting: Planting, bed: Bed) {
-    const cutoff = this.addDays(planting.plannedStartDate, -365);
+  private async getPreviousPlantings(
+    bed: Bed,
+    plantingId: string,
+    cultivationStartDate: Date,
+  ) {
+    const cutoff = this.addDays(cultivationStartDate, -365);
     return this.em.find(
       Planting,
       {
         bed: bed.id,
-        plannedStartDate: { $gte: cutoff, $lt: planting.plannedStartDate },
-        id: { $ne: planting.id },
+        plannedStartDate: { $gte: cutoff, $lt: cultivationStartDate },
+        id: { $ne: plantingId },
         status: { $nin: [PlantingStatus.CANCELLED, PlantingStatus.FAILED] },
       },
       { populate: ['vegetable'] },
@@ -1134,16 +1154,21 @@ export class PlantingsService {
   private buildHarvestWindowMissedCandidate(
     planting: Planting,
     vegetable: Vegetable,
+    cultivationStartDate: Date | null,
     valuesBase: Record<string, string | number>,
   ): WarningCandidate | null {
     if (planting.status !== PlantingStatus.IN_GROUND) {
       return null;
     }
 
+    if (!cultivationStartDate) {
+      return null;
+    }
+
     if (vegetable.timeToHarvestDaysMax == null) return null;
 
     const harvestEndDate = this.addDays(
-      planting.plannedStartDate,
+      cultivationStartDate,
       vegetable.timeToHarvestDaysMax,
     );
 
@@ -1161,12 +1186,17 @@ export class PlantingsService {
   private buildSuboptimalSowingCandidate(
     planting: Planting,
     vegetable: Vegetable,
+    cultivationStartDate: Date | null,
     valuesBase: Record<string, string | number>,
   ): WarningCandidate | null {
+    if (!cultivationStartDate) {
+      return null;
+    }
+
     const sowingMethods = vegetable.sowingMethods ?? [];
     if (sowingMethods.length === 0) return null;
 
-    const plannedMonth = this.getMonthEnumFromDate(planting.plannedStartDate);
+    const plannedMonth = this.getMonthEnumFromDate(cultivationStartDate);
     const inAnyWindow = sowingMethods.some((method) =>
       this.isMonthInRange(plannedMonth, method.startMonth, method.endMonth),
     );
@@ -1178,11 +1208,74 @@ export class PlantingsService {
       code: WarningCode.SUBOPTIMAL_SOWING_TIME,
       values: {
         ...valuesBase,
-        plannedStartDate: planting.plannedStartDate.toISOString(),
+        plannedStartDate: cultivationStartDate.toISOString(),
         sowingStartMonth: reference.startMonth,
         sowingEndMonth: reference.endMonth,
       },
     };
+  }
+
+  private initializeTimelineFromStatusChange(
+    planting: Planting,
+    previousStatus: PlantingStatus,
+    nextStatus: PlantingStatus,
+    vegetable: Vegetable,
+  ): boolean {
+    const shouldInitialize =
+      previousStatus === PlantingStatus.NEW &&
+      ((planting.startMethod === PlantingStartMethod.DIRECT_SOW &&
+        nextStatus === PlantingStatus.IN_GROUND) ||
+        (planting.startMethod === PlantingStartMethod.TRANSPLANT &&
+          nextStatus === PlantingStatus.SEEDLING_PREPARED));
+
+    if (!shouldInitialize) {
+      return false;
+    }
+
+    const now = new Date();
+    planting.actualStartDate = now;
+    planting.plannedStartDate = now;
+    planting.sowedAt = planting.sowedAt ?? now;
+
+    const harvestWindow = this.computeHarvestWindow(vegetable, now);
+    planting.harvestWindowStart = harvestWindow?.start ?? null;
+    planting.harvestWindowEnd = harvestWindow?.end ?? null;
+
+    return true;
+  }
+
+  private resolveCultivationStartDate(planting: Planting): Date | null {
+    const startedStatusesForDirectSow = new Set<PlantingStatus>([
+      PlantingStatus.IN_GROUND,
+      PlantingStatus.READY_FOR_FINAL_HARVEST,
+      PlantingStatus.HARVESTED,
+      PlantingStatus.CLEARED,
+    ]);
+
+    const startedStatusesForTransplant = new Set<PlantingStatus>([
+      PlantingStatus.SEEDLING_PREPARED,
+      PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT,
+      PlantingStatus.IN_GROUND,
+      PlantingStatus.READY_FOR_FINAL_HARVEST,
+      PlantingStatus.HARVESTED,
+      PlantingStatus.CLEARED,
+    ]);
+
+    const started =
+      planting.startMethod === PlantingStartMethod.DIRECT_SOW
+        ? startedStatusesForDirectSow.has(planting.status)
+        : startedStatusesForTransplant.has(planting.status);
+
+    if (!started) {
+      return null;
+    }
+
+    return (
+      planting.actualStartDate ??
+      planting.sowedAt ??
+      planting.transplantedAt ??
+      planting.plannedStartDate
+    );
   }
 
   private getMonthEnumFromDate(date: Date): Month {

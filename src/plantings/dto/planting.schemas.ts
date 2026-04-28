@@ -22,7 +22,7 @@ export type PlantingBaseDto = {
 export type CreatePlantingDto = PlantingBaseDto & {
   bedId: string;
   vegetableId: string;
-  plannedStartDate: string;
+  plannedStartDate?: string;
 };
 
 export type UpdatePlantingDto = PlantingBaseDto;
@@ -66,7 +66,6 @@ const basePlantingSchema = z.object({
 export const createPlantingSchema = basePlantingSchema.extend({
   bedId: basePlantingSchema.shape.bedId.unwrap(),
   vegetableId: basePlantingSchema.shape.vegetableId.unwrap(),
-  plannedStartDate: basePlantingSchema.shape.plannedStartDate.unwrap(),
 });
 
 export const updatePlantingSchema = basePlantingSchema;
