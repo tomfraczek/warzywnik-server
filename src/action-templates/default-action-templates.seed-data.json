@@ -5,7 +5,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_testing",
-    "defaultDueOffsetDays": -14
+    "defaultDueOffsetDays": -14,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 90,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Aplikacja biohumusu",
@@ -13,7 +18,12 @@
     "target": "planting",
     "environment": "any",
     "type": "fertilization",
-    "defaultDueOffsetDays": 7
+    "defaultDueOffsetDays": 7,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 3,
+    "minDaysBetweenOccurrences": 14,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Aplikacja kompostu",
@@ -21,7 +31,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_amendment",
-    "defaultDueOffsetDays": -10
+    "defaultDueOffsetDays": -10,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 60,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Aplikacja nawozu mineralnego",
@@ -29,7 +44,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_amendment",
-    "defaultDueOffsetDays": -10
+    "defaultDueOffsetDays": -10,
+    "generationMode": "SUGGESTION",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Aplikacja nawozu zielonego",
@@ -37,7 +57,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_amendment",
-    "defaultDueOffsetDays": -30
+    "defaultDueOffsetDays": -30,
+    "generationMode": "POST_HARVEST_PROMPT",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 60,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Aplikacja obornika",
@@ -45,7 +70,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_amendment",
-    "defaultDueOffsetDays": -30
+    "defaultDueOffsetDays": -30,
+    "generationMode": "SEASONAL",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 180,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Awaryjne nawożenie interwencyjne",
@@ -53,7 +83,12 @@
     "target": "planting",
     "environment": "any",
     "type": "fertilization",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SUGGESTION",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": 14,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Codzienna kontrola klimatu — szklarnia",
@@ -61,7 +96,12 @@
     "target": "space",
     "environment": "greenhouse",
     "type": "climate_control",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 1,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Codzienna kontrola klimatu — tunel",
@@ -69,7 +109,12 @@
     "target": "space",
     "environment": "tunnel",
     "type": "climate_control",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 1,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Czyszczenie przestrzeni uprawowej",
@@ -77,7 +122,12 @@
     "target": "space",
     "environment": "any",
     "type": "space_hygiene",
-    "defaultDueOffsetDays": -3
+    "defaultDueOffsetDays": -3,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Dezynfekcja przestrzeni uprawowej — szklarnia",
@@ -85,7 +135,12 @@
     "target": "space",
     "environment": "greenhouse",
     "type": "space_hygiene",
-    "defaultDueOffsetDays": -3
+    "defaultDueOffsetDays": -3,
+    "generationMode": "SEASONAL",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 90,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Dezynfekcja przestrzeni uprawowej — tunel",
@@ -93,7 +148,12 @@
     "target": "space",
     "environment": "tunnel",
     "type": "space_hygiene",
-    "defaultDueOffsetDays": -3
+    "defaultDueOffsetDays": -3,
+    "generationMode": "SEASONAL",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 90,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Dosadzanie roślin",
@@ -101,7 +161,12 @@
     "target": "planting",
     "environment": "any",
     "type": "transplanting",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "MANUAL_ONLY",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": null,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Formowanie grządki",
@@ -109,7 +174,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_preparation",
-    "defaultDueOffsetDays": -7
+    "defaultDueOffsetDays": -7,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Głębokie spulchnianie (broadfork)",
@@ -117,7 +187,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_preparation",
-    "defaultDueOffsetDays": -7
+    "defaultDueOffsetDays": -7,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 60,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Instalacja cieniowania — szklarnia",
@@ -125,7 +200,12 @@
     "target": "space",
     "environment": "greenhouse",
     "type": "shading",
-    "defaultDueOffsetDays": -7
+    "defaultDueOffsetDays": -7,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 90,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Instalacja cieniowania — tunel",
@@ -133,7 +213,12 @@
     "target": "space",
     "environment": "tunnel",
     "type": "shading",
-    "defaultDueOffsetDays": -7
+    "defaultDueOffsetDays": -7,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 90,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Instalacja pułapek na szkodniki",
@@ -141,7 +226,12 @@
     "target": "bed",
     "environment": "any",
     "type": "trap_setup",
-    "defaultDueOffsetDays": -1
+    "defaultDueOffsetDays": -1,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Instalacja siatek ochronnych",
@@ -149,7 +239,12 @@
     "target": "bed",
     "environment": "any",
     "type": "physical_protection",
-    "defaultDueOffsetDays": -1
+    "defaultDueOffsetDays": -1,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Instalacja systemu nawadniania",
@@ -157,7 +252,12 @@
     "target": "bed",
     "environment": "any",
     "type": "irrigation_setup",
-    "defaultDueOffsetDays": -14
+    "defaultDueOffsetDays": -14,
+    "generationMode": "SEASONAL",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 180,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Kontrola chorób",
@@ -165,7 +265,12 @@
     "target": "planting",
     "environment": "any",
     "type": "disease_control",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SUGGESTION",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Kontrola konstrukcji szklarni",
@@ -173,7 +278,12 @@
     "target": "space",
     "environment": "greenhouse",
     "type": "structure_inspection",
-    "defaultDueOffsetDays": -7
+    "defaultDueOffsetDays": -7,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Kontrola konstrukcji tunelu",
@@ -181,7 +291,12 @@
     "target": "space",
     "environment": "tunnel",
     "type": "structure_inspection",
-    "defaultDueOffsetDays": -7
+    "defaultDueOffsetDays": -7,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Kontrola szkodników",
@@ -189,7 +304,12 @@
     "target": "planting",
     "environment": "any",
     "type": "pest_control",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 4,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Kontrola wilgotności gleby",
@@ -197,7 +317,12 @@
     "target": "planting",
     "environment": "any",
     "type": "monitoring",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 6,
+    "minDaysBetweenOccurrences": 3,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Kontrola wilgotności gleby (grządka)",
@@ -205,7 +330,12 @@
     "target": "bed",
     "environment": "any",
     "type": "monitoring",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 3,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Monitoring kwitnienia",
@@ -213,7 +343,12 @@
     "target": "planting",
     "environment": "any",
     "type": "monitoring",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 4,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Monitoring szkodników (pułapki)",
@@ -221,7 +356,12 @@
     "target": "space",
     "environment": "any",
     "type": "monitoring",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Monitoring temperatury",
@@ -229,7 +369,12 @@
     "target": "space",
     "environment": "any",
     "type": "monitoring",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 1,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Monitoring wilgotności powietrza",
@@ -237,7 +382,12 @@
     "target": "space",
     "environment": "greenhouse",
     "type": "monitoring",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 1,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Monitoring wzrostu",
@@ -245,7 +395,12 @@
     "target": "planting",
     "environment": "any",
     "type": "monitoring",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 6,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Mulczowanie grządki",
@@ -253,7 +408,12 @@
     "target": "bed",
     "environment": "any",
     "type": "mulching",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Mycie konstrukcji szklarni",
@@ -261,7 +421,12 @@
     "target": "space",
     "environment": "greenhouse",
     "type": "space_hygiene",
-    "defaultDueOffsetDays": -3
+    "defaultDueOffsetDays": -3,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 90,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Mycie konstrukcji tunelu",
@@ -269,7 +434,12 @@
     "target": "space",
     "environment": "tunnel",
     "type": "space_hygiene",
-    "defaultDueOffsetDays": -3
+    "defaultDueOffsetDays": -3,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 90,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Naprawa folii tunelu",
@@ -277,7 +447,12 @@
     "target": "space",
     "environment": "tunnel",
     "type": "structure_repair",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SUGGESTION",
+    "priority": "critical",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Naprawa szyb szklarni",
@@ -285,7 +460,12 @@
     "target": "space",
     "environment": "greenhouse",
     "type": "structure_repair",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SUGGESTION",
+    "priority": "critical",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Nawożenie dolistne",
@@ -293,7 +473,12 @@
     "target": "planting",
     "environment": "any",
     "type": "fertilization",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SUGGESTION",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": 14,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Nawożenie mineralne",
@@ -301,7 +486,12 @@
     "target": "planting",
     "environment": "any",
     "type": "fertilization",
-    "defaultDueOffsetDays": 7
+    "defaultDueOffsetDays": 7,
+    "generationMode": "SUGGESTION",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 2,
+    "minDaysBetweenOccurrences": 21,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Nawożenie organiczne",
@@ -309,7 +499,12 @@
     "target": "planting",
     "environment": "any",
     "type": "fertilization",
-    "defaultDueOffsetDays": 7
+    "defaultDueOffsetDays": 7,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 3,
+    "minDaysBetweenOccurrences": 14,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Oprysk biologiczny",
@@ -317,7 +512,12 @@
     "target": "planting",
     "environment": "any",
     "type": "spraying",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SUGGESTION",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Oprysk chemiczny",
@@ -325,7 +525,12 @@
     "target": "planting",
     "environment": "any",
     "type": "spraying",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SUGGESTION",
+    "priority": "critical",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": 14,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Pikowanie siewek",
@@ -333,7 +538,12 @@
     "target": "planting",
     "environment": "any",
     "type": "transplanting",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "AUTO",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": null,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Planowanie płodozmianu",
@@ -341,7 +551,12 @@
     "target": "bed",
     "environment": "any",
     "type": "rotation_planning",
-    "defaultDueOffsetDays": -60
+    "defaultDueOffsetDays": -60,
+    "generationMode": "SEASONAL",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 180,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Płukanie gleby (redukcja zasolenia)",
@@ -349,7 +564,12 @@
     "target": "bed",
     "environment": "tunnel",
     "type": "irrigation_setup",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SUGGESTION",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Podlewanie roślin",
@@ -357,7 +577,12 @@
     "target": "planting",
     "environment": "any",
     "type": "watering",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "WEATHER_TRIGGERED",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 3,
+    "minDaysBetweenOccurrences": 1,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Podwiązywanie roślin",
@@ -365,7 +590,12 @@
     "target": "planting",
     "environment": "any",
     "type": "staking",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "AUTO",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": 14,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Pomiar pH gleby",
@@ -373,7 +603,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_testing",
-    "defaultDueOffsetDays": -14
+    "defaultDueOffsetDays": -14,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 180,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Pomiar zasolenia gleby (EC)",
@@ -381,7 +616,12 @@
     "target": "bed",
     "environment": "tunnel",
     "type": "soil_testing",
-    "defaultDueOffsetDays": -14
+    "defaultDueOffsetDays": -14,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 60,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Przesadzanie roślin",
@@ -389,7 +629,12 @@
     "target": "planting",
     "environment": "any",
     "type": "transplanting",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "MANUAL_ONLY",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": null,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Przycinanie roślin",
@@ -397,7 +642,12 @@
     "target": "planting",
     "environment": "any",
     "type": "pruning",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 3,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Przygotowanie do zimy",
@@ -405,7 +655,12 @@
     "target": "space",
     "environment": "any",
     "type": "seasonal_preparation",
-    "defaultDueOffsetDays": -21
+    "defaultDueOffsetDays": -21,
+    "generationMode": "SEASONAL",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 180,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Przygotowanie grządki po sezonie",
@@ -413,7 +668,12 @@
     "target": "bed",
     "environment": "any",
     "type": "bed_ready",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "POST_HARVEST_PROMPT",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Przygotowanie grządki przed sezonem",
@@ -421,7 +681,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_preparation",
-    "defaultDueOffsetDays": -14
+    "defaultDueOffsetDays": -14,
+    "generationMode": "SEASONAL",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 180,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Przygotowanie szklarni do sezonu",
@@ -429,7 +694,12 @@
     "target": "space",
     "environment": "greenhouse",
     "type": "seasonal_preparation",
-    "defaultDueOffsetDays": -21
+    "defaultDueOffsetDays": -21,
+    "generationMode": "SEASONAL",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 180,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Przygotowanie tunelu do sezonu",
@@ -437,7 +707,12 @@
     "target": "space",
     "environment": "tunnel",
     "type": "seasonal_preparation",
-    "defaultDueOffsetDays": -21
+    "defaultDueOffsetDays": -21,
+    "generationMode": "SEASONAL",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 180,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Przykrycie gleby (agrowłóknina)",
@@ -445,7 +720,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_regeneration",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Redukcja wilgotności — szklarnia",
@@ -453,7 +733,12 @@
     "target": "space",
     "environment": "greenhouse",
     "type": "humidity_reduction",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "WEATHER_TRIGGERED",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 1,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Redukcja wilgotności — tunel",
@@ -461,7 +746,12 @@
     "target": "space",
     "environment": "tunnel",
     "type": "humidity_reduction",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "WEATHER_TRIGGERED",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 1,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Regulacja cieniowania — szklarnia",
@@ -469,7 +759,12 @@
     "target": "space",
     "environment": "greenhouse",
     "type": "shading",
-    "defaultDueOffsetDays": -3
+    "defaultDueOffsetDays": -3,
+    "generationMode": "WEATHER_TRIGGERED",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 1,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Regulacja cieniowania — tunel",
@@ -477,7 +772,12 @@
     "target": "space",
     "environment": "tunnel",
     "type": "shading",
-    "defaultDueOffsetDays": -3
+    "defaultDueOffsetDays": -3,
+    "generationMode": "WEATHER_TRIGGERED",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 1,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Sadzenie rozsady",
@@ -485,7 +785,12 @@
     "target": "planting",
     "environment": "any",
     "type": "transplanting",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "AUTO",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": null,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Ściółkowanie wokół roślin",
@@ -493,7 +798,12 @@
     "target": "planting",
     "environment": "any",
     "type": "physical_protection",
-    "defaultDueOffsetDays": -1
+    "defaultDueOffsetDays": -1,
+    "generationMode": "AUTO",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Siew nasion",
@@ -501,7 +811,12 @@
     "target": "planting",
     "environment": "any",
     "type": "sowing",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "AUTO",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": null,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Solarizacja gleby",
@@ -509,7 +824,12 @@
     "target": "bed",
     "environment": "outdoor",
     "type": "soil_regeneration",
-    "defaultDueOffsetDays": -14
+    "defaultDueOffsetDays": -14,
+    "generationMode": "SEASONAL",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 180,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Spulchnianie gleby",
@@ -517,7 +837,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_preparation",
-    "defaultDueOffsetDays": -7
+    "defaultDueOffsetDays": -7,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Uprawa roślin poplonowych",
@@ -525,7 +850,12 @@
     "target": "bed",
     "environment": "any",
     "type": "soil_regeneration",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "POST_HARVEST_PROMPT",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Usunięcie całej rośliny (silna choroba)",
@@ -533,7 +863,12 @@
     "target": "planting",
     "environment": "any",
     "type": "disease_control",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SUGGESTION",
+    "priority": "critical",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Usunięcie roślin po sezonie",
@@ -541,7 +876,12 @@
     "target": "planting",
     "environment": "any",
     "type": "harvest",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "POST_HARVEST_PROMPT",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Usuwanie chwastów przy roślinach",
@@ -549,7 +889,12 @@
     "target": "planting",
     "environment": "any",
     "type": "weeding",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 6,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Usuwanie chwastów z grządki",
@@ -557,7 +902,12 @@
     "target": "bed",
     "environment": "any",
     "type": "weeding",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Usuwanie liści",
@@ -565,7 +915,12 @@
     "target": "planting",
     "environment": "any",
     "type": "pruning",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 4,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Usuwanie pędów bocznych",
@@ -573,7 +928,12 @@
     "target": "planting",
     "environment": "any",
     "type": "pruning",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "ROUTINE",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 6,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Usuwanie porażonych części",
@@ -581,7 +941,12 @@
     "target": "planting",
     "environment": "any",
     "type": "disease_control",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SUGGESTION",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": 7,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Usuwanie resztek roślinnych",
@@ -589,7 +954,12 @@
     "target": "space",
     "environment": "any",
     "type": "space_hygiene",
-    "defaultDueOffsetDays": -3
+    "defaultDueOffsetDays": -3,
+    "generationMode": "POST_HARVEST_PROMPT",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 30,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Wentylacja szklarni",
@@ -597,7 +967,12 @@
     "target": "space",
     "environment": "greenhouse",
     "type": "ventilation",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "WEATHER_TRIGGERED",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 1,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Wentylacja tunelu",
@@ -605,7 +980,12 @@
     "target": "space",
     "environment": "tunnel",
     "type": "ventilation",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "WEATHER_TRIGGERED",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 1,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Zapylanie ręczne",
@@ -613,7 +993,12 @@
     "target": "planting",
     "environment": "greenhouse",
     "type": "manual_custom",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "SUGGESTION",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 3,
+    "minDaysBetweenOccurrences": 2,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Zbiór nasion",
@@ -621,7 +1006,12 @@
     "target": "planting",
     "environment": "any",
     "type": "harvest",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "MANUAL_ONLY",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": null,
+    "requiresUserConfirmation": true
   },
   {
     "name": "Zbiór plonów",
@@ -629,7 +1019,12 @@
     "target": "planting",
     "environment": "any",
     "type": "harvest",
-    "defaultDueOffsetDays": 0
+    "defaultDueOffsetDays": 0,
+    "generationMode": "AUTO",
+    "priority": "high",
+    "maxAutoOccurrencesPerPlanting": 1,
+    "minDaysBetweenOccurrences": null,
+    "requiresUserConfirmation": false
   },
   {
     "name": "Zmiana uprawy w grządce",
@@ -637,6 +1032,11 @@
     "target": "bed",
     "environment": "any",
     "type": "rotation_planning",
-    "defaultDueOffsetDays": -14
+    "defaultDueOffsetDays": -14,
+    "generationMode": "SEASONAL",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": null,
+    "minDaysBetweenOccurrences": 90,
+    "requiresUserConfirmation": false
   }
 ]
