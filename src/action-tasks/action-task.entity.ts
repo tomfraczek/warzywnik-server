@@ -10,6 +10,7 @@ import {
 } from '@mikro-orm/core';
 import {
   ActionTaskSource,
+  ActionTaskSourceType,
   ActionTaskStatus,
   ActionTaskTargetType,
 } from '../common/enums/action.enums';
@@ -28,6 +29,7 @@ import { GrowingSpace } from '../growing-spaces/growing-space.entity';
 @Index({ properties: ['status'] })
 @Index({ properties: ['sourceRefId'] })
 @Index({ properties: ['dedupeKey'] })
+@Index({ properties: ['sourceKey'] })
 @Unique({
   properties: ['user', 'source', 'sourceRefId', 'dueAt', 'cycleIndex'],
 })
@@ -56,11 +58,17 @@ export class ActionTask {
   @Enum({ items: () => ActionTaskSource })
   source: ActionTaskSource = ActionTaskSource.MANUAL;
 
+  @Enum({ items: () => ActionTaskSourceType })
+  sourceType: ActionTaskSourceType = ActionTaskSourceType.MANUAL;
+
   @Property({ type: 'uuid', nullable: true })
   sourceRefId?: string | null;
 
   @Property({ type: TextType, nullable: true })
   dedupeKey?: string | null;
+
+  @Property({ type: TextType, nullable: true })
+  sourceKey?: string | null;
 
   @Property({ type: 'int', default: 0 })
   cycleIndex: number = 0;
@@ -70,6 +78,12 @@ export class ActionTask {
 
   @Property({ type: 'boolean', default: false })
   isManuallyRescheduled: boolean = false;
+
+  @Property({ type: 'boolean', default: false })
+  isUserModified: boolean = false;
+
+  @Property({ type: Date, nullable: true })
+  suppressedAt?: Date | null;
 
   @Property({ type: Date, nullable: true })
   generatedAt?: Date | null;

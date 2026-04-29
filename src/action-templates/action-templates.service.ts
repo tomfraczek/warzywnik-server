@@ -5,7 +5,11 @@ import {
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ActionTemplate } from './action-template.entity';
-import { ActionTemplateEnvironment } from '../common/enums/action.enums';
+import {
+  ActionTemplateEnvironment,
+  ActionTemplateGenerationMode,
+  ActionTemplatePriority,
+} from '../common/enums/action.enums';
 import { toSlug } from '../common/utils/slug.util';
 import {
   CreateActionTemplateDto,
@@ -68,6 +72,13 @@ export class ActionTemplatesService {
     template.target = dto.target;
     template.environment = dto.environment ?? ActionTemplateEnvironment.ANY;
     template.type = dto.type;
+    template.generationMode =
+      dto.generationMode ?? ActionTemplateGenerationMode.AUTO;
+    template.priority = dto.priority ?? ActionTemplatePriority.MEDIUM;
+    template.maxAutoOccurrencesPerPlanting =
+      dto.maxAutoOccurrencesPerPlanting ?? null;
+    template.minDaysBetweenOccurrences = dto.minDaysBetweenOccurrences ?? null;
+    template.requiresUserConfirmation = dto.requiresUserConfirmation ?? false;
     template.defaultDueOffsetDays = dto.defaultDueOffsetDays ?? null;
 
     await this.em.persistAndFlush(template);
@@ -113,6 +124,27 @@ export class ActionTemplatesService {
       template.type = dto.type;
     }
 
+    if (dto.generationMode !== undefined) {
+      template.generationMode = dto.generationMode;
+    }
+
+    if (dto.priority !== undefined) {
+      template.priority = dto.priority;
+    }
+
+    if (dto.maxAutoOccurrencesPerPlanting !== undefined) {
+      template.maxAutoOccurrencesPerPlanting =
+        dto.maxAutoOccurrencesPerPlanting;
+    }
+
+    if (dto.minDaysBetweenOccurrences !== undefined) {
+      template.minDaysBetweenOccurrences = dto.minDaysBetweenOccurrences;
+    }
+
+    if (dto.requiresUserConfirmation !== undefined) {
+      template.requiresUserConfirmation = dto.requiresUserConfirmation;
+    }
+
     if (dto.defaultDueOffsetDays !== undefined) {
       template.defaultDueOffsetDays = dto.defaultDueOffsetDays;
     }
@@ -153,6 +185,12 @@ export class ActionTemplatesService {
       target: entity.target,
       environment: entity.environment,
       type: entity.type,
+      generationMode: entity.generationMode,
+      priority: entity.priority,
+      maxAutoOccurrencesPerPlanting:
+        entity.maxAutoOccurrencesPerPlanting ?? null,
+      minDaysBetweenOccurrences: entity.minDaysBetweenOccurrences ?? null,
+      requiresUserConfirmation: entity.requiresUserConfirmation,
       defaultDueOffsetDays: entity.defaultDueOffsetDays,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,

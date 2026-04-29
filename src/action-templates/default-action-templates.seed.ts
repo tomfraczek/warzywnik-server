@@ -3,6 +3,8 @@ import { ActionTemplate } from './action-template.entity';
 import actionTemplatesSeedData from './default-action-templates.seed-data.json';
 import {
   ActionTemplateEnvironment,
+  ActionTemplateGenerationMode,
+  ActionTemplatePriority,
   ActionTemplateTarget,
   ActionTemplateType,
 } from '../common/enums/action.enums';
@@ -14,6 +16,11 @@ type ActionTemplateSeedRecord = {
   target: ActionTemplateTarget;
   environment: ActionTemplateEnvironment;
   type: ActionTemplateType;
+  generationMode?: ActionTemplateGenerationMode;
+  priority?: ActionTemplatePriority;
+  maxAutoOccurrencesPerPlanting?: number | null;
+  minDaysBetweenOccurrences?: number | null;
+  requiresUserConfirmation?: boolean;
   defaultDueOffsetDays: number | null;
 };
 
@@ -32,6 +39,15 @@ export const upsertDefaultActionTemplates = async (
       existingBySlug.target = item.target;
       existingBySlug.environment = item.environment;
       existingBySlug.type = item.type;
+      existingBySlug.generationMode =
+        item.generationMode ?? ActionTemplateGenerationMode.AUTO;
+      existingBySlug.priority = item.priority ?? ActionTemplatePriority.MEDIUM;
+      existingBySlug.maxAutoOccurrencesPerPlanting =
+        item.maxAutoOccurrencesPerPlanting ?? null;
+      existingBySlug.minDaysBetweenOccurrences =
+        item.minDaysBetweenOccurrences ?? null;
+      existingBySlug.requiresUserConfirmation =
+        item.requiresUserConfirmation ?? false;
       existingBySlug.defaultDueOffsetDays = item.defaultDueOffsetDays;
       continue;
     }
@@ -47,6 +63,15 @@ export const upsertDefaultActionTemplates = async (
       existingExact.slug = slug;
       existingExact.name = item.name;
       existingExact.description = item.description;
+      existingExact.generationMode =
+        item.generationMode ?? ActionTemplateGenerationMode.AUTO;
+      existingExact.priority = item.priority ?? ActionTemplatePriority.MEDIUM;
+      existingExact.maxAutoOccurrencesPerPlanting =
+        item.maxAutoOccurrencesPerPlanting ?? null;
+      existingExact.minDaysBetweenOccurrences =
+        item.minDaysBetweenOccurrences ?? null;
+      existingExact.requiresUserConfirmation =
+        item.requiresUserConfirmation ?? false;
       existingExact.defaultDueOffsetDays = item.defaultDueOffsetDays;
       continue;
     }
@@ -61,6 +86,15 @@ export const upsertDefaultActionTemplates = async (
       existingByName.target = item.target;
       existingByName.environment = item.environment;
       existingByName.type = item.type;
+      existingByName.generationMode =
+        item.generationMode ?? ActionTemplateGenerationMode.AUTO;
+      existingByName.priority = item.priority ?? ActionTemplatePriority.MEDIUM;
+      existingByName.maxAutoOccurrencesPerPlanting =
+        item.maxAutoOccurrencesPerPlanting ?? null;
+      existingByName.minDaysBetweenOccurrences =
+        item.minDaysBetweenOccurrences ?? null;
+      existingByName.requiresUserConfirmation =
+        item.requiresUserConfirmation ?? false;
       existingByName.description = item.description;
       existingByName.defaultDueOffsetDays = item.defaultDueOffsetDays;
       continue;
@@ -73,6 +107,13 @@ export const upsertDefaultActionTemplates = async (
     template.target = item.target;
     template.environment = item.environment;
     template.type = item.type;
+    template.generationMode =
+      item.generationMode ?? ActionTemplateGenerationMode.AUTO;
+    template.priority = item.priority ?? ActionTemplatePriority.MEDIUM;
+    template.maxAutoOccurrencesPerPlanting =
+      item.maxAutoOccurrencesPerPlanting ?? null;
+    template.minDaysBetweenOccurrences = item.minDaysBetweenOccurrences ?? null;
+    template.requiresUserConfirmation = item.requiresUserConfirmation ?? false;
     template.defaultDueOffsetDays = item.defaultDueOffsetDays;
 
     em.persist(template);

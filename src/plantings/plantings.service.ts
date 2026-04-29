@@ -468,6 +468,10 @@ export class PlantingsService {
     });
   }
 
+  async getTaskGenerationPreview(user: User, plantingId: string) {
+    return this.actionAutomationService.previewForPlanting(user, plantingId);
+  }
+
   async listWarningsForUser(user: User): Promise<WarningOutput[]> {
     const plantings = await this.em.find(
       Planting,

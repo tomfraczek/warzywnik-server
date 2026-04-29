@@ -11,6 +11,23 @@ export enum ActionTemplateEnvironment {
   GREENHOUSE = 'greenhouse',
 }
 
+export enum ActionTemplateGenerationMode {
+  AUTO = 'AUTO',
+  ROUTINE = 'ROUTINE',
+  SUGGESTION = 'SUGGESTION',
+  MANUAL_ONLY = 'MANUAL_ONLY',
+  POST_HARVEST_PROMPT = 'POST_HARVEST_PROMPT',
+  WEATHER_TRIGGERED = 'WEATHER_TRIGGERED',
+  SEASONAL = 'SEASONAL',
+}
+
+export enum ActionTemplatePriority {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
 export enum ActionTemplateType {
   SOWING = 'sowing',
   TRANSPLANTING = 'transplanting',
@@ -64,6 +81,25 @@ export enum ActionTaskSource {
   MANUAL = 'MANUAL',
   VEGETABLE_RULE = 'VEGETABLE_RULE',
   WEATHER_WARNING = 'WEATHER_WARNING',
+}
+
+export enum ActionTaskSourceType {
+  MANUAL = 'MANUAL',
+  AUTOMATION = 'AUTOMATION',
+  SUGGESTION = 'SUGGESTION',
+}
+
+export enum ActionRecommendationSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+export enum ActionRecommendationStatus {
+  ACTIVE = 'ACTIVE',
+  ACCEPTED = 'ACCEPTED',
+  DISMISSED = 'DISMISSED',
 }
 
 export enum ActionRuleTrigger {

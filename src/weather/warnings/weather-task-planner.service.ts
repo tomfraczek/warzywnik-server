@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   ActionTaskSource,
+  ActionTaskSourceType,
   ActionTaskStatus,
   ActionTaskTargetType,
 } from '../../common/enums/action.enums';
@@ -162,6 +163,7 @@ export class WeatherTaskPlannerService {
         task.user = user;
         task.status = ActionTaskStatus.PENDING;
         task.source = ActionTaskSource.WEATHER_WARNING;
+        task.sourceType = ActionTaskSourceType.AUTOMATION;
         task.title = proposal.title;
         task.description = proposal.description ?? null;
         task.dueAt = proposal.dueAt;

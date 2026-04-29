@@ -104,6 +104,17 @@ export class PlantingsController {
     );
   }
 
+  @Get(':id/task-generation-preview')
+  getTaskGenerationPreview(
+    @Req() req: { userEntity?: User },
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.plantingsService.getTaskGenerationPreview(
+      req.userEntity as User,
+      id,
+    );
+  }
+
   @Delete(':id')
   @HttpCode(204)
   async remove(

@@ -14,6 +14,7 @@ import {
 } from './dto/action-task.schemas';
 import {
   ActionTaskSource,
+  ActionTaskSourceType,
   ActionTaskStatus,
   ActionTaskTargetType,
   ActionTemplateTarget,
@@ -49,11 +50,15 @@ export class ActionTasksService {
       task.planting = planting;
       task.bed = null;
       task.source = ActionTaskSource.MANUAL;
+      task.sourceType = ActionTaskSourceType.MANUAL;
       task.sourceRefId = null;
+      task.sourceKey = null;
       task.cycleIndex = 0;
       task.originalDueAt = null;
       task.generatedAt = null;
       task.isManuallyRescheduled = false;
+      task.isUserModified = false;
+      task.suppressedAt = null;
 
       if (dto.actionTemplateId) {
         const template = await em.findOne(ActionTemplate, {
@@ -233,6 +238,9 @@ export class ActionTasksService {
       if (dto.status !== undefined) {
         task.status = dto.status;
         task.doneAt = dto.status === ActionTaskStatus.DONE ? new Date() : null;
+        if (task.source !== ActionTaskSource.MANUAL) {
+          task.isUserModified = true;
+        }
       }
 
       if (dto.dueAt !== undefined) {
@@ -240,14 +248,23 @@ export class ActionTasksService {
           ? this.normalizeTaskDueAt(this.parseDate(dto.dueAt, 'dueAt'))
           : this.normalizeTaskDueAt(new Date());
         task.isManuallyRescheduled = true;
+        if (task.source !== ActionTaskSource.MANUAL) {
+          task.isUserModified = true;
+        }
       }
 
       if (dto.title !== undefined) {
         task.title = dto.title;
+        if (task.source !== ActionTaskSource.MANUAL) {
+          task.isUserModified = true;
+        }
       }
 
       if (dto.description !== undefined) {
         task.description = dto.description;
+        if (task.source !== ActionTaskSource.MANUAL) {
+          task.isUserModified = true;
+        }
       }
 
       await em.flush();
@@ -368,7 +385,16 @@ export class ActionTasksService {
       }
 
       await this.remindersService.cancelPendingForActionTask(task.id, em);
-      await em.removeAndFlush(task);
+
+      if (task.source === ActionTaskSource.MANUAL) {
+        await em.removeAndFlush(task);
+        return;
+      }
+
+      task.status = ActionTaskStatus.CANCELED;
+      task.suppressedAt = new Date();
+      task.isUserModified = true;
+      await em.flush();
     });
   }
 
@@ -518,11 +544,15 @@ export class ActionTasksService {
         : this.resolveTemplateDueAt(now, template.defaultDueOffsetDays);
       task.status = ActionTaskStatus.PENDING;
       task.source = ActionTaskSource.MANUAL;
+      task.sourceType = ActionTaskSourceType.MANUAL;
       task.sourceRefId = null;
+      task.sourceKey = null;
       task.cycleIndex = 0;
       task.originalDueAt = null;
       task.generatedAt = null;
       task.isManuallyRescheduled = false;
+      task.isUserModified = false;
+      task.suppressedAt = null;
 
       return task;
     });
@@ -552,10 +582,14 @@ export class ActionTasksService {
       bedId: entity.bed?.id ?? null,
       status: entity.status,
       source: entity.source,
+      sourceType: entity.sourceType,
       sourceRefId: entity.sourceRefId ?? null,
+      sourceKey: entity.sourceKey ?? null,
       cycleIndex: entity.cycleIndex,
       originalDueAt: entity.originalDueAt ?? null,
       isManuallyRescheduled: entity.isManuallyRescheduled,
+      isUserModified: entity.isUserModified,
+      suppressedAt: entity.suppressedAt ?? null,
       generatedAt: entity.generatedAt ?? null,
       dueAt: entity.dueAt,
       title: entity.title,

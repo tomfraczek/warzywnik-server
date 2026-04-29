@@ -10,6 +10,8 @@ import { RemindersModule } from '../reminders/reminders.module';
 import { ActionAutomationService } from './action-automation.service';
 import { VegetableActionRule } from '../vegetables/vegetable-action-rule.entity';
 import { PlantingInsightsModule } from '../planting-insights/planting-insights.module';
+import { ActionAutomationController } from './action-automation.controller';
+import { ActionRecommendation } from './action-recommendation.entity';
 
 @Module({
   imports: [
@@ -19,12 +21,13 @@ import { PlantingInsightsModule } from '../planting-insights/planting-insights.m
       Planting,
       Bed,
       VegetableActionRule,
+      ActionRecommendation,
     ]),
     RemindersModule,
     PlantingInsightsModule,
   ],
   providers: [ActionTasksService, ActionAutomationService],
-  controllers: [ActionTasksController],
+  controllers: [ActionTasksController, ActionAutomationController],
   exports: [ActionTasksService, ActionAutomationService],
 })
 export class ActionTasksModule {}

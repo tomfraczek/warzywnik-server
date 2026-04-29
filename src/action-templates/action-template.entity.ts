@@ -9,6 +9,8 @@ import {
 } from '@mikro-orm/core';
 import {
   ActionTemplateEnvironment,
+  ActionTemplateGenerationMode,
+  ActionTemplatePriority,
   ActionTemplateTarget,
   ActionTemplateType,
 } from '../common/enums/action.enums';
@@ -37,6 +39,22 @@ export class ActionTemplate {
 
   @Enum({ items: () => ActionTemplateType })
   type: ActionTemplateType = ActionTemplateType.MANUAL_CUSTOM;
+
+  @Enum({ items: () => ActionTemplateGenerationMode })
+  generationMode: ActionTemplateGenerationMode =
+    ActionTemplateGenerationMode.AUTO;
+
+  @Enum({ items: () => ActionTemplatePriority })
+  priority: ActionTemplatePriority = ActionTemplatePriority.MEDIUM;
+
+  @Property({ type: 'int', nullable: true })
+  maxAutoOccurrencesPerPlanting?: number | null;
+
+  @Property({ type: 'int', nullable: true })
+  minDaysBetweenOccurrences?: number | null;
+
+  @Property({ type: 'boolean', default: false })
+  requiresUserConfirmation: boolean = false;
 
   @Property({ type: 'int', nullable: true })
   defaultDueOffsetDays: number | null = null;

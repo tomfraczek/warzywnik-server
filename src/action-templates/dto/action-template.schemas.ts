@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import {
   ActionTemplateEnvironment,
+  ActionTemplateGenerationMode,
+  ActionTemplatePriority,
   ActionTemplateTarget,
   ActionTemplateType,
 } from '../../common/enums/action.enums';
@@ -11,6 +13,11 @@ export type ActionTemplateBaseDto = {
   target?: ActionTemplateTarget;
   environment?: ActionTemplateEnvironment;
   type?: ActionTemplateType;
+  generationMode?: ActionTemplateGenerationMode;
+  priority?: ActionTemplatePriority;
+  maxAutoOccurrencesPerPlanting?: number | null;
+  minDaysBetweenOccurrences?: number | null;
+  requiresUserConfirmation?: boolean;
   defaultDueOffsetDays?: number | null;
 };
 
@@ -39,6 +46,15 @@ const baseActionTemplateSchema = z.object({
   target: z.nativeEnum(ActionTemplateTarget).optional(),
   environment: z.nativeEnum(ActionTemplateEnvironment).optional(),
   type: z.nativeEnum(ActionTemplateType).optional(),
+  generationMode: z.nativeEnum(ActionTemplateGenerationMode).optional(),
+  priority: z.nativeEnum(ActionTemplatePriority).optional(),
+  maxAutoOccurrencesPerPlanting: z
+    .union([z.coerce.number().int().min(1), z.null()])
+    .optional(),
+  minDaysBetweenOccurrences: z
+    .union([z.coerce.number().int().min(1), z.null()])
+    .optional(),
+  requiresUserConfirmation: z.coerce.boolean().optional(),
   defaultDueOffsetDays: z.union([z.coerce.number().int(), z.null()]).optional(),
 });
 
