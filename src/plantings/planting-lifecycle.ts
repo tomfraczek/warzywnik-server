@@ -57,10 +57,21 @@ export const getAllowedStatusTransitions = (
   const next: PlantingStatus[] = path[index + 1] ? [path[index + 1]] : [];
   const previous: PlantingStatus[] = path[index - 1] ? [path[index - 1]] : [];
 
+  const transplantFastForwardToInGround: PlantingStatus[] =
+    startMethod === PlantingStartMethod.TRANSPLANT &&
+    [
+      PlantingStatus.NEW,
+      PlantingStatus.SEEDLING_PREPARED,
+      PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT,
+    ].includes(current)
+      ? [PlantingStatus.IN_GROUND]
+      : [];
+
   return [
     ...new Set<PlantingStatus>([
       ...next,
       ...previous,
+      ...transplantFastForwardToInGround,
       PlantingStatus.FAILED,
       PlantingStatus.CANCELLED,
     ]),

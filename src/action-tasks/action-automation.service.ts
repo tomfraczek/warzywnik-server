@@ -20,7 +20,11 @@ import {
   ReminderType,
 } from '../common/enums/reminder.enums';
 import { ActionTemplate } from '../action-templates/action-template.entity';
-import { addDays, normalizeDueAt } from '../common/types/date-utils';
+import {
+  addDays,
+  normalizeDueAt,
+  toDateOnlyInTimezone,
+} from '../common/types/date-utils';
 import { PlantingStatus } from '../common/enums/planting.enums';
 import { PlantingLifecycleTaskGenerator } from './generators/planting-lifecycle-task.generator';
 import { RoutineCareTaskGenerator } from './generators/routine-care-task.generator';
@@ -638,9 +642,15 @@ export class ActionAutomationService {
       },
     );
 
-    return [...lifecycleCandidates, ...routineCandidates].sort(
-      (a, b) => a.dueAt.getTime() - b.dueAt.getTime(),
-    );
+    const todayInTz = toDateOnlyInTimezone(new Date(), planting.timelineTimezone);
+
+    return [...lifecycleCandidates, ...routineCandidates]
+      .filter(
+        (candidate) =>
+          toDateOnlyInTimezone(candidate.dueAt, planting.timelineTimezone).getTime() ===
+          todayInTz.getTime(),
+      )
+      .sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime());
   }
 
   private async applyAntiFloodLimits(params: {

@@ -195,15 +195,51 @@ export class PlantingsService {
     planting.plannedStartDate = dto.plannedStartDate
       ? this.parseDate(dto.plannedStartDate, 'plannedStartDate')
       : new Date();
-    planting.actualStartDate = null;
+    planting.actualStartDate =
+      dto.actualStartDate !== undefined
+        ? dto.actualStartDate
+          ? this.parseDate(dto.actualStartDate, 'actualStartDate')
+          : null
+        : null;
     planting.startMethod = dto.startMethod ?? PlantingStartMethod.DIRECT_SOW;
-    planting.sowedAt = null;
-    planting.transplantedAt = null;
+    planting.sowedAt =
+      dto.sowedAt !== undefined
+        ? dto.sowedAt
+          ? this.parseDate(dto.sowedAt, 'sowedAt')
+          : null
+        : null;
+    planting.status = dto.status ?? PlantingStatus.NEW;
+    const shouldAutoSetSowedAtOnCreate =
+      dto.sowedAt === undefined &&
+      planting.startMethod === PlantingStartMethod.DIRECT_SOW &&
+      planting.status === PlantingStatus.IN_GROUND;
+    const shouldAutoSetTransplantedAtOnCreate =
+      dto.transplantedAt === undefined &&
+      planting.startMethod === PlantingStartMethod.TRANSPLANT &&
+      planting.status === PlantingStatus.IN_GROUND;
+
+    if (shouldAutoSetSowedAtOnCreate) {
+      planting.sowedAt = new Date();
+    }
+
+    planting.transplantedAt = shouldAutoSetTransplantedAtOnCreate
+      ? new Date()
+      : dto.transplantedAt !== undefined
+        ? dto.transplantedAt
+          ? this.parseDate(dto.transplantedAt, 'transplantedAt')
+          : null
+        : null;
+
+    if (
+      (shouldAutoSetSowedAtOnCreate || shouldAutoSetTransplantedAtOnCreate) &&
+      planting.actualStartDate == null
+    ) {
+      planting.actualStartDate = planting.sowedAt ?? planting.transplantedAt;
+    }
     planting.harvestWindowStart = null;
     planting.harvestWindowEnd = null;
     planting.timelineTimezone = dto.timelineTimezone ?? 'Europe/Warsaw';
     planting.appliedRulesVersion = vegetable.rulesVersion;
-    planting.status = PlantingStatus.NEW;
     planting.notes = dto.notes ?? null;
 
     this.assertStatusCompatibleWithStartMethod(
@@ -342,6 +378,8 @@ export class PlantingsService {
 
     const previousStatus = planting.status;
     let timelineInitializedFromStatusChange = false;
+    let sowedAtInitializedFromFinalState = false;
+    let transplantedAtInitializedFromFinalState = false;
 
     if (dto.status !== undefined) {
       this.assertStatusTransitionAllowed(
@@ -357,6 +395,34 @@ export class PlantingsService {
           dto.status,
           vegetable,
         );
+    }
+
+    if (
+      dto.sowedAt === undefined &&
+      planting.status === PlantingStatus.IN_GROUND &&
+      planting.startMethod === PlantingStartMethod.DIRECT_SOW &&
+      planting.sowedAt == null
+    ) {
+      planting.sowedAt = new Date();
+      sowedAtInitializedFromFinalState = true;
+    }
+
+    if (
+      dto.transplantedAt === undefined &&
+      planting.status === PlantingStatus.IN_GROUND &&
+      planting.startMethod === PlantingStartMethod.TRANSPLANT &&
+      planting.transplantedAt == null
+    ) {
+      planting.transplantedAt = new Date();
+      transplantedAtInitializedFromFinalState = true;
+    }
+
+    if (
+      (sowedAtInitializedFromFinalState ||
+        transplantedAtInitializedFromFinalState) &&
+      planting.actualStartDate == null
+    ) {
+      planting.actualStartDate = planting.sowedAt ?? planting.transplantedAt;
     }
 
     if (dto.notes !== undefined) {
@@ -406,11 +472,41 @@ export class PlantingsService {
         eventTime: planting.sowedAt,
         payload: { sowedAt: planting.sowedAt?.toISOString() ?? null },
       });
+    } else if (
+      sowedAtInitializedFromFinalState &&
+      planting.sowedAt != null &&
+      planting.sowedAt.getTime() <= now.getTime()
+    ) {
+      await this.plantingInsightsService.recordEvent({
+        plantingId,
+        userId,
+        bedId,
+        vegetableId,
+        eventType: PlantingEventType.PLANTING_SOWED,
+        eventTime: planting.sowedAt,
+        payload: { sowedAt: planting.sowedAt?.toISOString() ?? null },
+      });
     }
 
     if (
       dto.transplantedAt !== undefined &&
       dto.transplantedAt !== null &&
+      planting.transplantedAt != null &&
+      planting.transplantedAt.getTime() <= now.getTime()
+    ) {
+      await this.plantingInsightsService.recordEvent({
+        plantingId,
+        userId,
+        bedId,
+        vegetableId,
+        eventType: PlantingEventType.PLANTING_TRANSPLANTED,
+        eventTime: planting.transplantedAt,
+        payload: {
+          transplantedAt: planting.transplantedAt?.toISOString() ?? null,
+        },
+      });
+    } else if (
+      transplantedAtInitializedFromFinalState &&
       planting.transplantedAt != null &&
       planting.transplantedAt.getTime() <= now.getTime()
     ) {
