@@ -25,11 +25,15 @@ import {
   normalizeDueAt,
   toDateOnlyInTimezone,
 } from '../common/types/date-utils';
-import { PlantingStatus } from '../common/enums/planting.enums';
+import {
+  PlantingStartMethod,
+  PlantingStatus,
+} from '../common/enums/planting.enums';
 import { PlantingLifecycleTaskGenerator } from './generators/planting-lifecycle-task.generator';
 import { RoutineCareTaskGenerator } from './generators/routine-care-task.generator';
 import { PostHarvestPromptGenerator } from './generators/post-harvest-prompt.generator';
 import { GeneratedTaskCandidate } from './generators/task-generation.types';
+import { Vegetable } from '../vegetables/vegetable.entity';
 
 type DesiredOccurrence = {
   sourceKey: string;
@@ -40,6 +44,8 @@ type DesiredOccurrence = {
 
 const MAX_ACTIVE_TASKS_PER_PLANTING = 6;
 const MAX_NEW_TASKS_PER_WEEK = 3;
+const HARD_MIN_RULES_PER_START_METHOD = 1;
+const SOFT_TARGET_RULES_PER_START_METHOD = 2;
 
 @Injectable()
 export class ActionAutomationService {
@@ -260,11 +266,123 @@ export class ActionAutomationService {
     );
 
     const rules = await this.em.count(VegetableActionRule, { isEnabled: true });
+    const vegetables = await this.em.find(Vegetable, {});
+    const enabledRules = await this.em.find(
+      VegetableActionRule,
+      { isEnabled: true },
+      { populate: ['vegetable'] },
+    );
+
+    const rulesByVegetableId = new Map<string, VegetableActionRule[]>();
+    for (const rule of enabledRules) {
+      const vegetableId = rule.vegetable.id;
+      const bucket = rulesByVegetableId.get(vegetableId) ?? [];
+      bucket.push(rule);
+      rulesByVegetableId.set(vegetableId, bucket);
+    }
+
+    const startMethods = [
+      PlantingStartMethod.DIRECT_SOW,
+      PlantingStartMethod.TRANSPLANT,
+    ] as const;
+
+    const coverageByVegetable = vegetables.map((vegetable) => {
+      const vegetableRules = rulesByVegetableId.get(vegetable.id) ?? [];
+
+      const perStartMethod = startMethods.map((startMethod) => {
+        const applicableRules = vegetableRules.filter((rule) => {
+          if (rule.trigger === ActionRuleTrigger.ON_HARVEST_CONFIRMED) {
+            return false;
+          }
+
+          if (
+            rule.applyIfStartMethod &&
+            rule.applyIfStartMethod.length > 0 &&
+            !rule.applyIfStartMethod.includes(startMethod)
+          ) {
+            return false;
+          }
+
+          return true;
+        });
+
+        const count = applicableRules.length;
+        const status =
+          count < HARD_MIN_RULES_PER_START_METHOD
+            ? 'below_hard'
+            : count < SOFT_TARGET_RULES_PER_START_METHOD
+              ? 'meets_hard_only'
+              : 'meets_soft';
+
+        return {
+          startMethod,
+          enabledApplicableRules: count,
+          status,
+        };
+      });
+
+      const worstStatus = perStartMethod.some(
+        (entry) => entry.status === 'below_hard',
+      )
+        ? 'below_hard'
+        : perStartMethod.some((entry) => entry.status === 'meets_hard_only')
+          ? 'meets_hard_only'
+          : 'meets_soft';
+
+      return {
+        vegetableId: vegetable.id,
+        vegetableName: vegetable.name,
+        perStartMethod,
+        status: worstStatus,
+      };
+    });
+
+    const totalPairs = coverageByVegetable.length * startMethods.length;
+    const pairsMeetingHard = coverageByVegetable.reduce(
+      (acc, vegetable) =>
+        acc +
+        vegetable.perStartMethod.filter(
+          (entry) => entry.status !== 'below_hard',
+        ).length,
+      0,
+    );
+    const pairsMeetingSoft = coverageByVegetable.reduce(
+      (acc, vegetable) =>
+        acc +
+        vegetable.perStartMethod.filter(
+          (entry) => entry.status === 'meets_soft',
+        ).length,
+      0,
+    );
+
+    const hardMinimumCoverageRatio =
+      totalPairs > 0 ? pairsMeetingHard / totalPairs : 1;
+    const softTargetCoverageRatio =
+      totalPairs > 0 ? pairsMeetingSoft / totalPairs : 1;
+
+    const status =
+      hardMinimumCoverageRatio < 1
+        ? 'below_hard'
+        : softTargetCoverageRatio < 1
+          ? 'meets_hard_only'
+          : 'meets_soft';
 
     return {
       templatesTotal: templates.length,
       enabledRulesTotal: rules,
       byGenerationMode,
+      coverage: {
+        hardMinimumRulesPerStartMethod: HARD_MIN_RULES_PER_START_METHOD,
+        softTargetRulesPerStartMethod: SOFT_TARGET_RULES_PER_START_METHOD,
+        totalVegetables: vegetables.length,
+        totalMethodPairs: totalPairs,
+        pairsMeetingHardMinimum: pairsMeetingHard,
+        pairsMeetingSoftTarget: pairsMeetingSoft,
+        hardMinimumCoverageRatio,
+        softTargetCoverageRatio,
+        status,
+        byVegetable: coverageByVegetable,
+      },
       antiFloodLimits: {
         maxActiveTasksPerPlanting: MAX_ACTIVE_TASKS_PER_PLANTING,
         maxNewTasksPerWeek: MAX_NEW_TASKS_PER_WEEK,
@@ -409,6 +527,7 @@ export class ActionAutomationService {
     em: EntityManager;
   }) {
     const desiredKeys = new Set(params.desired.map((item) => item.sourceKey));
+    const plantingSourceKeyPrefix = `${params.planting.id}:`;
 
     const generated = await params.em.find(
       ActionTask,
@@ -428,6 +547,15 @@ export class ActionAutomationService {
 
     for (const task of generated) {
       if (task.status === ActionTaskStatus.DONE) {
+        continue;
+      }
+      if (
+        !this.isCleanupCandidateOwnedByPlanting(
+          task,
+          params.planting.id,
+          plantingSourceKeyPrefix,
+        )
+      ) {
         continue;
       }
       if (
@@ -457,6 +585,22 @@ export class ActionAutomationService {
         },
       );
     }
+  }
+
+  private isCleanupCandidateOwnedByPlanting(
+    task: ActionTask,
+    plantingId: string,
+    sourceKeyPrefix: string,
+  ) {
+    if (task.sourceKey && task.sourceKey.startsWith(sourceKeyPrefix)) {
+      return true;
+    }
+
+    if (task.planting?.id === plantingId) {
+      return true;
+    }
+
+    return false;
   }
 
   private resolveRuleBaseDueAt(

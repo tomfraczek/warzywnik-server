@@ -70,5 +70,12 @@ describe('ActionAutomationService direct sow routines', () => {
     expect(
       normalizeDueAt(withSowedAt[0].dueAt, 'Europe/Warsaw').getTime(),
     ).toBe(normalizeDueAt(new Date(), 'Europe/Warsaw').getTime());
+
+    const sowedAtForTomorrowDue = normalizeDueAt(new Date(), 'Europe/Warsaw');
+    const tomorrowCandidates = target.buildCandidatesForPlanting(
+      makePlanting(sowedAtForTomorrowDue),
+      [rule],
+    );
+    expect(tomorrowCandidates).toHaveLength(0);
   });
 });
