@@ -642,13 +642,18 @@ export class ActionAutomationService {
       },
     );
 
-    const todayInTz = toDateOnlyInTimezone(new Date(), planting.timelineTimezone);
+    const todayInTz = toDateOnlyInTimezone(
+      new Date(),
+      planting.timelineTimezone,
+    );
 
     return [...lifecycleCandidates, ...routineCandidates]
       .filter(
         (candidate) =>
-          toDateOnlyInTimezone(candidate.dueAt, planting.timelineTimezone).getTime() ===
-          todayInTz.getTime(),
+          toDateOnlyInTimezone(
+            candidate.dueAt,
+            planting.timelineTimezone,
+          ).getTime() === todayInTz.getTime(),
       )
       .sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime());
   }

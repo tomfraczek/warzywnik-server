@@ -67,8 +67,8 @@ describe('ActionAutomationService direct sow routines', () => {
     );
     expect(withSowedAt.length).toBeGreaterThan(0);
     expect(withSowedAt[0]?.trigger).toBe(ActionRuleTrigger.AFTER_SOWING_DAYS);
-    expect(normalizeDueAt(withSowedAt[0].dueAt, 'Europe/Warsaw').getTime()).toBe(
-      normalizeDueAt(new Date(), 'Europe/Warsaw').getTime(),
-    );
+    expect(
+      normalizeDueAt(withSowedAt[0].dueAt, 'Europe/Warsaw').getTime(),
+    ).toBe(normalizeDueAt(new Date(), 'Europe/Warsaw').getTime());
   });
 });

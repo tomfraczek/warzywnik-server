@@ -193,9 +193,7 @@ describe('PlantingsService transplant lifecycle', () => {
     expect((persisted.transplantedAt as Date).getTime()).toBeLessThanOrEqual(
       after,
     );
-    expect(
-      actionAutomationService.recomputeForPlanting,
-    ).toHaveBeenCalledWith({
+    expect(actionAutomationService.recomputeForPlanting).toHaveBeenCalledWith({
       user,
       plantingId: persisted.id,
       reason: 'PLANTING_CREATED',
@@ -231,9 +229,7 @@ describe('PlantingsService transplant lifecycle', () => {
       before,
     );
     expect((persisted.sowedAt as Date).getTime()).toBeLessThanOrEqual(after);
-    expect(
-      actionAutomationService.recomputeForPlanting,
-    ).toHaveBeenCalledWith({
+    expect(actionAutomationService.recomputeForPlanting).toHaveBeenCalledWith({
       user,
       plantingId: persisted.id,
       reason: 'PLANTING_CREATED',
