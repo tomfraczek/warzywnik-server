@@ -34,10 +34,19 @@ import { RoutineCareTaskGenerator } from './generators/routine-care-task.generat
 import { PostHarvestPromptGenerator } from './generators/post-harvest-prompt.generator';
 import { GeneratedTaskCandidate } from './generators/task-generation.types';
 import { Vegetable } from '../vegetables/vegetable.entity';
+import { GardenDecisionEngine } from './decision-engine/garden-decision-engine.service';
+import { PlantingDecisionContextBuilder } from './decision-engine/planting-decision-context-builder.service';
+import { DecisionToTaskMapper } from './decision-engine/decision-to-task.mapper';
+import { DecisionType } from './decision-engine/decision.types';
+import { mapActionTemplateTypeToDecisionType } from './decision-engine/decision-kind.util';
 
 type DesiredOccurrence = {
   sourceKey: string;
-  ruleId: string;
+  ruleId?: string;
+  templateId?: string;
+  decisionType?: DecisionType;
+  reason?: string;
+  confidence?: 'low' | 'medium' | 'high';
   cycleIndex: number;
   dueAt: Date;
 };
@@ -54,6 +63,10 @@ export class ActionAutomationService {
   private readonly routineGenerator = new RoutineCareTaskGenerator();
   private readonly postHarvestPromptGenerator =
     new PostHarvestPromptGenerator();
+  private readonly decisionEngine = new GardenDecisionEngine();
+  private readonly decisionContextBuilder =
+    new PlantingDecisionContextBuilder();
+  private readonly decisionToTaskMapper = new DecisionToTaskMapper();
 
   constructor(private readonly em: EntityManager) {}
 
@@ -114,11 +127,9 @@ export class ActionAutomationService {
         planting.status === PlantingStatus.HARVESTED ||
         planting.status === PlantingStatus.CLEARED
       ) {
-        await this.cleanupStaleGeneratedTasksForPlanting({
+        await this.resetGeneratedTasksForPlanting({
           user: params.user,
           planting,
-          desired: [],
-          forceOverrideManual: Boolean(params.forceOverrideManual),
           em,
         });
 
@@ -140,26 +151,91 @@ export class ActionAutomationService {
         candidates,
       });
 
-      const desired: DesiredOccurrence[] = floodFiltered.accepted.map(
+      await this.resetGeneratedTasksForPlanting({
+        user: params.user,
+        planting,
+        em,
+      });
+
+      const desiredRoutine: DesiredOccurrence[] = floodFiltered.accepted.map(
         (candidate) => ({
           sourceKey: candidate.sourceKey,
           ruleId: candidate.rule.id,
+          templateId: candidate.rule.actionTemplate.id,
+          decisionType:
+            this.resolveDecisionTypeFromTemplate(candidate.rule) ?? undefined,
           cycleIndex: candidate.cycleIndex,
           dueAt: candidate.dueAt,
         }),
       );
 
-      for (const occurrence of desired) {
-        const rule = rulesById.get(occurrence.ruleId);
-        if (!rule) continue;
+      const decisionCandidates = await this.buildDecisionCandidates({
+        em,
+        planting,
+      });
 
-        await this.upsertGeneratedTaskAndReminder({
+      const routineDecisionTypes = new Set(
+        desiredRoutine
+          .map((item) => item.decisionType)
+          .filter((value): value is DecisionType => Boolean(value)),
+      );
+
+      const desiredDecisions: DesiredOccurrence[] = [];
+
+      for (const candidate of decisionCandidates) {
+        if (routineDecisionTypes.has(candidate.decisionType)) {
+          continue;
+        }
+
+        desiredDecisions.push({
+          sourceKey: candidate.sourceKey,
+          templateId: undefined,
+          decisionType: candidate.decisionType,
+          reason: candidate.reason,
+          confidence: candidate.confidence,
+          cycleIndex: 0,
+          dueAt: candidate.dueAt,
+        });
+      }
+
+      const desired: DesiredOccurrence[] = [
+        ...desiredRoutine,
+        ...desiredDecisions,
+      ];
+
+      for (const occurrence of desired) {
+        if (occurrence.ruleId) {
+          const rule = rulesById.get(occurrence.ruleId);
+          if (!rule) continue;
+
+          await this.upsertGeneratedTaskAndReminder({
+            user: params.user,
+            planting,
+            rule,
+            dueAt: occurrence.dueAt,
+            cycleIndex: occurrence.cycleIndex,
+            sourceKey: occurrence.sourceKey,
+            decisionType:
+              occurrence.decisionType ??
+              this.resolveDecisionTypeFromTemplate(rule),
+            forceOverrideManual: Boolean(params.forceOverrideManual),
+            em,
+          });
+          continue;
+        }
+
+        if (!occurrence.decisionType) {
+          continue;
+        }
+
+        await this.upsertDecisionTaskAndReminder({
           user: params.user,
           planting,
-          rule,
+          decisionType: occurrence.decisionType,
           dueAt: occurrence.dueAt,
-          cycleIndex: occurrence.cycleIndex,
           sourceKey: occurrence.sourceKey,
+          reason: occurrence.reason ?? 'Context-based operational decision',
+          confidence: occurrence.confidence ?? 'medium',
           forceOverrideManual: Boolean(params.forceOverrideManual),
           em,
         });
@@ -397,16 +473,31 @@ export class ActionAutomationService {
     dueAt: Date;
     cycleIndex: number;
     sourceKey: string;
+    decisionType: DecisionType | null;
     forceOverrideManual: boolean;
     em: EntityManager;
   }) {
-    const existing = await params.em.findOne(ActionTask, {
+    const existingBySourceKey = await params.em.findOne(ActionTask, {
       user: params.user.id,
       source: ActionTaskSource.VEGETABLE_RULE,
       sourceKey: params.sourceKey,
     });
 
+    const existingByUniqueSlot = await params.em.findOne(ActionTask, {
+      user: params.user.id,
+      source: ActionTaskSource.VEGETABLE_RULE,
+      sourceRefId: params.rule.id,
+      dueAt: params.dueAt,
+      cycleIndex: params.cycleIndex,
+    });
+
+    const existing = existingBySourceKey ?? existingByUniqueSlot;
+
     if (existing) {
+      if (existing.sourceType !== ActionTaskSourceType.AUTOMATION) {
+        return;
+      }
+
       if (existing.status === ActionTaskStatus.DONE) {
         return;
       }
@@ -421,6 +512,26 @@ export class ActionAutomationService {
       ) {
         return;
       }
+
+      existing.status = ActionTaskStatus.PENDING;
+      existing.suppressedAt = null;
+      existing.sourceType = ActionTaskSourceType.AUTOMATION;
+      existing.sourceRefId = params.rule.id;
+      existing.sourceKey = params.sourceKey;
+      existing.dedupeKey = params.sourceKey;
+      existing.cycleIndex = params.cycleIndex;
+      existing.dueAt = params.dueAt;
+      existing.originalDueAt = params.dueAt;
+      existing.generatedAt = new Date();
+      existing.title = params.rule.actionTemplate.name;
+      existing.description = params.rule.actionTemplate.description ?? null;
+      existing.metadata = {
+        ...(existing.metadata ?? {}),
+        decisionType: params.decisionType,
+        actionKind: params.decisionType,
+        sourceKey: params.sourceKey,
+        sourceMode: 'ROUTINE_RULE',
+      };
 
       await this.upsertReminderForTask(
         params.em,
@@ -448,6 +559,13 @@ export class ActionAutomationService {
     task.isUserModified = false;
     task.suppressedAt = null;
     task.generatedAt = new Date();
+    task.metadata = {
+      ...(task.metadata ?? {}),
+      decisionType: params.decisionType,
+      actionKind: params.decisionType,
+      sourceKey: params.sourceKey,
+      sourceMode: 'ROUTINE_RULE',
+    };
 
     if (params.rule.actionTemplate.target === ActionTemplateTarget.BED) {
       task.targetType = ActionTaskTargetType.BED;
@@ -534,7 +652,6 @@ export class ActionAutomationService {
       {
         user: params.user.id,
         source: ActionTaskSource.VEGETABLE_RULE,
-        sourceType: ActionTaskSourceType.AUTOMATION,
         status: ActionTaskStatus.PENDING,
         $or: [
           { planting: params.planting.id },
@@ -567,6 +684,56 @@ export class ActionAutomationService {
 
       const key = task.sourceKey ?? '';
       if (desiredKeys.has(key)) {
+        continue;
+      }
+
+      task.status = ActionTaskStatus.CANCELED;
+
+      await params.em.nativeUpdate(
+        Reminder,
+        {
+          actionTaskId: task.id,
+          status: { $in: [ReminderStatus.PENDING, ReminderStatus.PROCESSING] },
+        },
+        {
+          status: ReminderStatus.CANCELED,
+          lockedAt: null,
+          lastError: null,
+        },
+      );
+    }
+  }
+
+  private async resetGeneratedTasksForPlanting(params: {
+    user: User;
+    planting: Planting;
+    em: EntityManager;
+  }) {
+    const plantingSourceKeyPrefix = `${params.planting.id}:`;
+
+    const generated = await params.em.find(
+      ActionTask,
+      {
+        user: params.user.id,
+        source: ActionTaskSource.VEGETABLE_RULE,
+        status: ActionTaskStatus.PENDING,
+        $or: [
+          { planting: params.planting.id },
+          { bed: params.planting.bed.id },
+          { growingSpace: params.planting.bed.growingSpace.id },
+        ],
+      },
+      { populate: ['planting', 'bed', 'growingSpace'] },
+    );
+
+    for (const task of generated) {
+      if (
+        !this.isCleanupCandidateOwnedByPlanting(
+          task,
+          params.planting.id,
+          plantingSourceKeyPrefix,
+        )
+      ) {
         continue;
       }
 
@@ -816,7 +983,6 @@ export class ActionAutomationService {
     const existingTasks = await params.em.find(ActionTask, {
       user: params.user.id,
       source: ActionTaskSource.VEGETABLE_RULE,
-      sourceType: ActionTaskSourceType.AUTOMATION,
       sourceKey: {
         $in: params.candidates.map((candidate) => candidate.sourceKey),
       },
@@ -830,7 +996,6 @@ export class ActionAutomationService {
     let activeTasks = await params.em.count(ActionTask, {
       user: params.user.id,
       source: ActionTaskSource.VEGETABLE_RULE,
-      sourceType: ActionTaskSourceType.AUTOMATION,
       status: ActionTaskStatus.PENDING,
       ...plantingScope,
     });
@@ -839,7 +1004,6 @@ export class ActionAutomationService {
     let newTasksThisWeek = await params.em.count(ActionTask, {
       user: params.user.id,
       source: ActionTaskSource.VEGETABLE_RULE,
-      sourceType: ActionTaskSourceType.AUTOMATION,
       createdAt: { $gte: weekStart },
       ...plantingScope,
     });
@@ -872,6 +1036,151 @@ export class ActionAutomationService {
     }
 
     return { accepted, skipped };
+  }
+
+  private async buildDecisionCandidates(params: {
+    em: EntityManager;
+    planting: Planting;
+  }) {
+    const context = await this.decisionContextBuilder.build({
+      em: params.em,
+      planting: params.planting,
+    });
+
+    const candidates = this.decisionEngine.evaluate(context);
+    const dateKey = normalizeDueAt(new Date(), params.planting.timelineTimezone)
+      .toISOString()
+      .slice(0, 10);
+
+    return candidates.map((candidate) => ({
+      ...candidate,
+      sourceKey: `${params.planting.id}:${candidate.sourceKey}:${dateKey}`,
+    }));
+  }
+
+  private async upsertDecisionTaskAndReminder(params: {
+    user: User;
+    planting: Planting;
+    decisionType: DecisionType;
+    dueAt: Date;
+    sourceKey: string;
+    reason: string;
+    confidence: 'low' | 'medium' | 'high';
+    forceOverrideManual: boolean;
+    em: EntityManager;
+  }) {
+    const existing = await params.em.findOne(ActionTask, {
+      user: params.user.id,
+      source: ActionTaskSource.VEGETABLE_RULE,
+      sourceKey: params.sourceKey,
+    });
+
+    const templates = await params.em.find(ActionTemplate, {});
+    const template = this.decisionToTaskMapper.pickTemplate(
+      {
+        decisionType: params.decisionType,
+        targetType: 'planting',
+        plantingId: params.planting.id,
+        bedId: params.planting.bed.id,
+        priority: 'medium',
+        dueAt: params.dueAt,
+        reason: params.reason,
+        confidence: params.confidence,
+        sourceKey: params.sourceKey,
+        actionTemplateSlug: '',
+        shouldCreateTask: true,
+      },
+      templates,
+    );
+
+    if (!template) {
+      return;
+    }
+
+    if (existing) {
+      if (existing.status === ActionTaskStatus.DONE) {
+        return;
+      }
+
+      if (existing.suppressedAt && !params.forceOverrideManual) {
+        return;
+      }
+
+      if (
+        (existing.isManuallyRescheduled || existing.isUserModified) &&
+        !params.forceOverrideManual
+      ) {
+        return;
+      }
+
+      existing.status = ActionTaskStatus.PENDING;
+      existing.suppressedAt = null;
+      existing.sourceType = ActionTaskSourceType.AUTOMATION;
+      existing.sourceRefId = null;
+      existing.sourceKey = params.sourceKey;
+      existing.dedupeKey = params.sourceKey;
+      existing.cycleIndex = 0;
+      existing.dueAt = params.dueAt;
+      existing.originalDueAt = params.dueAt;
+      existing.generatedAt = new Date();
+      existing.actionTemplate = template;
+      existing.title = template.name;
+      existing.description = template.description ?? params.reason;
+      existing.metadata = {
+        ...(existing.metadata ?? {}),
+        decisionType: params.decisionType,
+        actionKind: params.decisionType,
+        sourceMode: 'DECISION_ENGINE',
+        sourceKey: params.sourceKey,
+        confidence: params.confidence,
+        reason: params.reason,
+      };
+
+      await this.upsertReminderForTask(params.em, existing, template);
+      return;
+    }
+
+    const task = new ActionTask();
+    task.user = params.user;
+    task.actionTemplate = template;
+    task.title = template.name;
+    task.description = template.description ?? params.reason;
+    task.status = ActionTaskStatus.PENDING;
+    task.source = ActionTaskSource.VEGETABLE_RULE;
+    task.sourceType = ActionTaskSourceType.AUTOMATION;
+    task.sourceRefId = null;
+    task.sourceKey = params.sourceKey;
+    task.dedupeKey = params.sourceKey;
+    task.cycleIndex = 0;
+    task.dueAt = params.dueAt;
+    task.originalDueAt = params.dueAt;
+    task.isManuallyRescheduled = false;
+    task.isUserModified = false;
+    task.suppressedAt = null;
+    task.generatedAt = new Date();
+    task.targetType = ActionTaskTargetType.PLANTING;
+    task.planting = params.planting;
+    task.bed = null;
+    task.growingSpace = null;
+    task.metadata = {
+      decisionType: params.decisionType,
+      actionKind: params.decisionType,
+      sourceMode: 'DECISION_ENGINE',
+      sourceKey: params.sourceKey,
+      confidence: params.confidence,
+      reason: params.reason,
+    };
+
+    params.em.persist(task);
+    await params.em.flush();
+
+    await this.upsertReminderForTask(params.em, task, template);
+  }
+
+  private resolveDecisionTypeFromTemplate(
+    rule: VegetableActionRule,
+  ): DecisionType | null {
+    return mapActionTemplateTypeToDecisionType(rule.actionTemplate.type);
   }
 
   private getPlantingScopeWhere(planting: Planting) {

@@ -507,6 +507,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -708,6 +756,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -909,6 +1005,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -1110,6 +1254,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -1311,6 +1503,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -1519,6 +1759,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -1727,6 +2015,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -1935,6 +2271,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -2143,6 +2527,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -2363,6 +2795,66 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "przycinanie-roslin"
       }
     ]
   },
@@ -2535,6 +3027,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -2707,6 +3247,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -2879,6 +3467,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -3051,6 +3687,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -3603,6 +4287,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -7860,6 +8592,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -8031,6 +8775,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -8771,6 +9563,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -9045,6 +9849,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -9319,6 +10135,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -9593,6 +10421,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -9867,6 +10707,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -12074,6 +12926,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -12348,6 +13212,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -12622,6 +13498,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -12896,6 +13784,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -13170,6 +14070,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -13444,6 +14356,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -13718,6 +14642,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -13992,6 +14928,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -14266,6 +15214,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -14540,6 +15500,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -14814,6 +15786,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -19915,6 +20899,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -20129,6 +21161,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -20403,6 +21483,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -20677,6 +21769,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -20951,6 +22055,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -21165,6 +22281,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -21379,6 +22543,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -21593,6 +22805,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -21807,6 +23067,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -22021,6 +23329,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -22235,6 +23591,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -22449,6 +23853,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -22663,6 +24115,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -22877,6 +24377,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -23091,6 +24639,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -23305,6 +24901,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -23519,6 +25163,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -23733,6 +25425,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -23947,6 +25687,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -24161,6 +25949,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -24375,6 +26211,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -24589,6 +26473,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -24803,6 +26735,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -25017,6 +26997,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -25165,6 +27193,42 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -25313,6 +27377,42 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -25461,6 +27561,42 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -25727,6 +27863,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -28139,6 +30287,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -29716,6 +31876,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -29917,6 +32125,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -30118,6 +32374,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -30319,6 +32623,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -30520,6 +32872,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -30739,6 +33139,66 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-pedow-bocznych"
       }
     ]
   },
@@ -31298,6 +33758,42 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -31431,6 +33927,42 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -31564,6 +34096,42 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -31877,6 +34445,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -32190,6 +34770,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -32503,6 +35095,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -32816,6 +35420,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -33129,6 +35745,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -33442,6 +36070,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -33755,6 +36395,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -34092,6 +36744,30 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "przycinanie-roslin"
       }
     ]
   },
@@ -34429,6 +37105,30 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "przycinanie-roslin"
       }
     ]
   },
@@ -34634,6 +37334,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -34839,6 +37551,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -35044,6 +37768,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -35679,6 +38415,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -35888,6 +38672,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -36097,6 +38929,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -36306,6 +39186,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -36515,6 +39443,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -36724,6 +39700,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -36933,6 +39957,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -37142,6 +40214,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -37351,6 +40471,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -37560,6 +40728,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -37769,6 +40985,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -37978,6 +41242,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -38187,6 +41499,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -38607,6 +41967,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -38881,6 +42253,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -39155,6 +42539,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -39429,6 +42825,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -39624,6 +43032,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -40591,6 +44047,66 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-pedow-bocznych"
       }
     ]
   },
@@ -40816,6 +44332,66 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-pedow-bocznych"
       }
     ]
   },
@@ -41041,6 +44617,66 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-pedow-bocznych"
       }
     ]
   },
@@ -41266,6 +44902,66 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-pedow-bocznych"
       }
     ]
   },
@@ -41491,6 +45187,66 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-pedow-bocznych"
       }
     ]
   },
@@ -41716,6 +45472,66 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-pedow-bocznych"
       }
     ]
   },
@@ -41941,6 +45757,66 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-pedow-bocznych"
       }
     ]
   },
@@ -42166,6 +46042,66 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-pedow-bocznych"
       }
     ]
   },
@@ -42391,6 +46327,66 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 21,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-pedow-bocznych"
       }
     ]
   },
@@ -43849,6 +47845,42 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -43992,6 +48024,42 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -47649,6 +51717,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -47838,6 +51954,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -48027,6 +52191,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -48216,6 +52428,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -48405,6 +52665,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -48594,6 +52902,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 6,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -51684,6 +56040,42 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -51827,6 +56219,42 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -51970,6 +56398,42 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -53296,6 +57760,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -53491,6 +58003,54 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 2,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 10,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-szkodnikow"
       }
     ]
   },
@@ -53610,6 +58170,30 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
       }
     ]
   },
@@ -53729,6 +58313,30 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 3,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 7,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "kontrola-wilgotnosci-gleby"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 14,
+        "occurrencesLimit": 4,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "usuwanie-chwastow-przy-roslinach"
       }
     ]
   },
@@ -54115,6 +58723,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },
@@ -54381,6 +59001,18 @@
         "applyIfStartMethod": null,
         "isEnabled": true,
         "actionTemplateSlug": "usuniecie-roslin-po-sezonie"
+      },
+      {
+        "trigger": "AFTER_SOWING_DAYS",
+        "offsetDays": 14,
+        "schedule": "EVERY_N_DAYS",
+        "everyNDays": 21,
+        "occurrencesLimit": 3,
+        "applyIfStartMethod": [
+          "DIRECT_SOW"
+        ],
+        "isEnabled": true,
+        "actionTemplateSlug": "nawozenie-organiczne"
       }
     ]
   },

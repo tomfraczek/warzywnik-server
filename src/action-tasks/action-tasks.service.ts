@@ -199,6 +199,8 @@ export class ActionTasksService {
       vegetableId: string;
       taskId: string;
       actionType: string | null;
+      decisionType: string | null;
+      actionKind: string | null;
       actionTitle: string;
       source: ActionTaskSource;
       doneAt: Date;
@@ -211,6 +213,8 @@ export class ActionTasksService {
       vegetableId: string;
       taskId: string;
       actionType: string | null;
+      decisionType: string | null;
+      actionKind: string | null;
       actionTitle: string;
       source: ActionTaskSource;
       previousDueAt: Date | null;
@@ -299,6 +303,14 @@ export class ActionTasksService {
             vegetableId: task.planting.vegetable.id,
             taskId: task.id,
             actionType: task.actionTemplate?.type ?? null,
+            decisionType:
+              typeof task.metadata?.decisionType === 'string'
+                ? task.metadata.decisionType
+                : null,
+            actionKind:
+              typeof task.metadata?.actionKind === 'string'
+                ? task.metadata.actionKind
+                : null,
             actionTitle: task.title,
             source: task.source,
             previousDueAt,
@@ -324,6 +336,14 @@ export class ActionTasksService {
           vegetableId: task.planting.vegetable.id,
           taskId: task.id,
           actionType: task.actionTemplate.type,
+          decisionType:
+            typeof task.metadata?.decisionType === 'string'
+              ? task.metadata.decisionType
+              : null,
+          actionKind:
+            typeof task.metadata?.actionKind === 'string'
+              ? task.metadata.actionKind
+              : null,
           actionTitle: task.title,
           source: task.source,
           doneAt: task.doneAt,
@@ -347,6 +367,8 @@ export class ActionTasksService {
         payload: {
           taskId: p.taskId,
           actionType: p.actionType,
+          decisionType: p.decisionType,
+          actionKind: p.actionKind,
           actionTitle: p.actionTitle,
           source: p.source,
         },
@@ -365,6 +387,8 @@ export class ActionTasksService {
         payload: {
           taskId: p.taskId,
           actionType: p.actionType,
+          decisionType: p.decisionType,
+          actionKind: p.actionKind,
           actionTitle: p.actionTitle,
           source: p.source,
           previousDueAt: p.previousDueAt?.toISOString() ?? null,

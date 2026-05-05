@@ -6,6 +6,8 @@ import { WarningCode, WarningScope } from '../../common/enums/warning.enums';
 import { ActionTask } from '../../action-tasks/action-task.entity';
 import { WarningInstance } from './warning-instance.entity';
 import { WeatherTaskPlannerService } from './weather-task-planner.service';
+import { PlantingEventType } from '../../common/enums/planting-event.enums';
+import { PlantingEvent } from '../../planting-insights/planting-event.entity';
 
 describe('WeatherTaskPlannerService', () => {
   it('creates tasks only from operational warnings for today/tomorrow', async () => {
@@ -138,5 +140,68 @@ describe('WeatherTaskPlannerService', () => {
     expect(canceled?.status).toBe(ActionTaskStatus.CANCELED);
     expect(wateringTomorrow).toBeDefined();
     expect(farFutureTask).toBeUndefined();
+  });
+
+  it('does not duplicate weather task when similar action was completed recently', async () => {
+    const now = new Date('2026-05-05T08:00:00.000Z');
+    jest.useFakeTimers().setSystemTime(now);
+
+    const today = now.toISOString().slice(0, 10);
+    const tasks: ActionTask[] = [];
+
+    const warnings: WarningInstance[] = [
+      {
+        id: 'w-1',
+        user: { id: 'user-1' } as never,
+        scope: WarningScope.PLANTING,
+        code: WarningCode.WATERING_NEEDED_TODAY,
+        dedupeKey: `user:user-1:code:WATERING_NEEDED_TODAY:date:${today}:planting:p-1`,
+        values: {},
+        details: { localDate: today },
+        validFrom: now,
+        validTo: new Date(now.getTime() + 4 * 60 * 60 * 1000),
+        isActive: true,
+        planting: { id: 'p-1' } as never,
+      } as unknown as WarningInstance,
+    ];
+
+    const events: PlantingEvent[] = [
+      {
+        eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+        eventTime: new Date('2026-05-05T06:00:00.000Z'),
+        planting: { id: 'p-1' } as never,
+        payload: { decisionType: 'WATERING' },
+      } as never,
+    ];
+
+    const em = {
+      findOne: jest.fn((_entity: unknown, where: Record<string, unknown>) => {
+        if (where.id === 'user-1') return { id: 'user-1' };
+        return null;
+      }),
+      find: jest.fn((entity: unknown) => {
+        const name = (entity as { name?: string }).name;
+        if (name === 'WarningInstance') return warnings;
+        if (name === 'ActionTask') return tasks;
+        if (name === 'PlantingEvent') return events;
+        return [];
+      }),
+      transactional: jest.fn((cb: (arg: unknown) => Promise<void>) => cb(em)),
+      getReference: jest.fn((cls: unknown, id: string) => ({ id })),
+      persist: jest.fn((entity: ActionTask) => {
+        tasks.push(entity);
+      }),
+      flush: jest.fn(() => Promise.resolve(undefined)),
+      fork: jest.fn(function (this: unknown) {
+        return this;
+      }),
+    };
+
+    const service = new WeatherTaskPlannerService(em as never);
+    await service.recomputeWeatherTasksForUser('user-1');
+
+    expect(tasks).toHaveLength(0);
+
+    jest.useRealTimers();
   });
 });

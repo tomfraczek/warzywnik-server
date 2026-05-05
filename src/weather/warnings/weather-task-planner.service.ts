@@ -13,9 +13,16 @@ import { WarningInstance } from './warning-instance.entity';
 import { Bed } from '../../beds/bed.entity';
 import { Planting } from '../../plantings/planting.entity';
 import { getLocalDate, localDatePlusDays } from './weather-warning.types';
+import { PlantingEvent } from '../../planting-insights/planting-event.entity';
+import { PlantingEventType } from '../../common/enums/planting-event.enums';
 
 type TaskProposal = {
   dedupeKey: string;
+  decisionType:
+    | 'WATERING'
+    | 'MOISTURE_CHECK'
+    | 'FROST_PROTECTION'
+    | 'GENERAL_MONITORING';
   title: string;
   description?: string | null;
   dueAt: Date;
@@ -92,7 +99,29 @@ export class WeatherTaskPlannerService {
       { populate: ['bed', 'planting', 'planting.vegetable'] },
     );
 
-    const proposals = this.buildProposalsFromWarnings(warnings, now, userId);
+    const proposalsDraft = this.buildProposalsFromWarnings(
+      warnings,
+      now,
+      userId,
+    );
+    const recentCompletedEvents = await em.find(PlantingEvent, {
+      userId,
+      eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+      eventTime: { $gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
+    });
+    const recentlyCanceledWeatherTasks = await em.find(ActionTask, {
+      user: userId,
+      source: ActionTaskSource.WEATHER_WARNING,
+      status: ActionTaskStatus.CANCELED,
+      updatedAt: { $gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
+    });
+
+    const proposals = this.filterProposalsByHistory(
+      proposalsDraft,
+      recentCompletedEvents,
+      recentlyCanceledWeatherTasks,
+      now,
+    );
 
     this.logger.debug(
       `planner db-fetch user=${userId} total=${warnings.length} codes=${warnings
@@ -155,7 +184,12 @@ export class WeatherTaskPlannerService {
             ? txEm.getReference(Planting, proposal.plantingId)
             : null;
           current.growingSpace = null;
-          current.metadata = proposal.metadata ?? null;
+          current.metadata = {
+            ...(proposal.metadata ?? {}),
+            decisionType: proposal.decisionType,
+            actionKind: proposal.decisionType,
+            sourceKey: proposal.dedupeKey,
+          };
           continue;
         }
 
@@ -169,7 +203,12 @@ export class WeatherTaskPlannerService {
         task.dueAt = proposal.dueAt;
         task.targetType = proposal.targetType;
         task.dedupeKey = proposal.dedupeKey;
-        task.metadata = proposal.metadata ?? null;
+        task.metadata = {
+          ...(proposal.metadata ?? {}),
+          decisionType: proposal.decisionType,
+          actionKind: proposal.decisionType,
+          sourceKey: proposal.dedupeKey,
+        };
         task.isManuallyRescheduled = false;
         task.generatedAt = now;
         task.growingSpace = null;
@@ -245,6 +284,7 @@ export class WeatherTaskPlannerService {
 
       const base: Omit<TaskProposal, 'title' | 'description'> = {
         dedupeKey,
+        decisionType: 'GENERAL_MONITORING',
         dueAt: this.resolveTaskDueAt(warning),
         targetType: warning.planting?.id
           ? ActionTaskTargetType.PLANTING
@@ -261,9 +301,16 @@ export class WeatherTaskPlannerService {
         case WarningCode.WATERING_NEEDED_TOMORROW:
           proposals.set(dedupeKey, {
             ...base,
+            decisionType: 'WATERING',
             targetType: ActionTaskTargetType.USER,
             title: 'Podlej uprawy',
             description: 'Podlewanie operacyjne zaplanowane na dziś/jutro.',
+            metadata: {
+              ...base.metadata,
+              decisionType: 'WATERING',
+              actionKind: 'WATERING',
+              sourceKey: dedupeKey,
+            },
           });
           break;
 
@@ -271,9 +318,16 @@ export class WeatherTaskPlannerService {
         case WarningCode.OVERWATERING_PREPARE_TOMORROW:
           proposals.set(dedupeKey, {
             ...base,
+            decisionType: 'MOISTURE_CHECK',
             targetType: ActionTaskTargetType.BED,
             title: 'Przygotuj drenaż przed opadami',
             description: 'Sprawdź odpływ i zabezpiecz grządkę.',
+            metadata: {
+              ...base.metadata,
+              decisionType: 'MOISTURE_CHECK',
+              actionKind: 'MOISTURE_CHECK',
+              sourceKey: dedupeKey,
+            },
           });
           break;
 
@@ -281,10 +335,17 @@ export class WeatherTaskPlannerService {
         case WarningCode.OVERWATERING_CHECK_TOMORROW:
           proposals.set(dedupeKey, {
             ...base,
+            decisionType: 'MOISTURE_CHECK',
             targetType: ActionTaskTargetType.BED,
             dueAt: warning.validTo,
             title: 'Sprawdź zastoiska po opadach',
             description: 'Skontroluj zastoje wody i korzenie.',
+            metadata: {
+              ...base.metadata,
+              decisionType: 'MOISTURE_CHECK',
+              actionKind: 'MOISTURE_CHECK',
+              sourceKey: dedupeKey,
+            },
           });
           break;
 
@@ -302,9 +363,16 @@ export class WeatherTaskPlannerService {
         case WarningCode.GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT:
           proposals.set(dedupeKey, {
             ...base,
+            decisionType: 'FROST_PROTECTION',
             targetType: ActionTaskTargetType.PLANTING,
             title: 'Osłoń młode siewki na noc',
             description: 'Nocą prognozowane jest ryzyko zimna.',
+            metadata: {
+              ...base.metadata,
+              decisionType: 'FROST_PROTECTION',
+              actionKind: 'FROST_PROTECTION',
+              sourceKey: dedupeKey,
+            },
           });
           break;
 
@@ -333,6 +401,13 @@ export class WeatherTaskPlannerService {
         default:
           proposals.set(dedupeKey, {
             ...base,
+            decisionType:
+              warning.code === WarningCode.FROST_RISK_TODAY_NIGHT ||
+              warning.code === WarningCode.FROST_RISK_TOMORROW_NIGHT ||
+              warning.code === WarningCode.HARD_FROST_RISK_TODAY_NIGHT ||
+              warning.code === WarningCode.HARD_FROST_RISK_TOMORROW_NIGHT
+                ? 'FROST_PROTECTION'
+                : 'GENERAL_MONITORING',
             title:
               warning.code === WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TODAY ||
               warning.code === WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TOMORROW
@@ -359,6 +434,24 @@ export class WeatherTaskPlannerService {
                     ? 'Zabezpiecz podpory i osłony'
                     : 'Zabezpiecz rośliny na noc',
             description: 'Operacyjne działanie pogodowe na dziś/jutro.',
+            metadata: {
+              ...base.metadata,
+              decisionType:
+                warning.code === WarningCode.FROST_RISK_TODAY_NIGHT ||
+                warning.code === WarningCode.FROST_RISK_TOMORROW_NIGHT ||
+                warning.code === WarningCode.HARD_FROST_RISK_TODAY_NIGHT ||
+                warning.code === WarningCode.HARD_FROST_RISK_TOMORROW_NIGHT
+                  ? 'FROST_PROTECTION'
+                  : 'GENERAL_MONITORING',
+              actionKind:
+                warning.code === WarningCode.FROST_RISK_TODAY_NIGHT ||
+                warning.code === WarningCode.FROST_RISK_TOMORROW_NIGHT ||
+                warning.code === WarningCode.HARD_FROST_RISK_TODAY_NIGHT ||
+                warning.code === WarningCode.HARD_FROST_RISK_TOMORROW_NIGHT
+                  ? 'FROST_PROTECTION'
+                  : 'GENERAL_MONITORING',
+              sourceKey: dedupeKey,
+            },
           });
       }
     }
@@ -383,6 +476,63 @@ export class WeatherTaskPlannerService {
     );
 
     return Array.from(proposals.values());
+  }
+
+  private filterProposalsByHistory(
+    proposals: TaskProposal[],
+    recentCompletedEvents: PlantingEvent[],
+    recentlyCanceledTasks: ActionTask[],
+    now: Date,
+  ): TaskProposal[] {
+    const completedKeys = new Set(
+      recentCompletedEvents
+        .map((event) => {
+          const decisionType = event.payload?.decisionType;
+          if (typeof decisionType !== 'string') return null;
+          return `${decisionType}:${event.planting.id}`;
+        })
+        .filter((value): value is string => Boolean(value)),
+    );
+
+    const canceledKeys = new Set(
+      recentlyCanceledTasks
+        .map((task) => {
+          const decisionType = task.metadata?.decisionType;
+          if (typeof decisionType !== 'string') return null;
+          const plantingId = task.planting?.id ?? 'none';
+          const bedId = task.bed?.id ?? 'none';
+          return `${decisionType}:${plantingId}:${bedId}`;
+        })
+        .filter((value): value is string => Boolean(value)),
+    );
+
+    const deduped = new Map<string, TaskProposal>();
+
+    for (const proposal of proposals) {
+      const plantingId = proposal.plantingId ?? 'none';
+      const bedId = proposal.bedId ?? 'none';
+      const decisionType = proposal.decisionType;
+
+      if (completedKeys.has(`${decisionType}:${plantingId}`)) {
+        continue;
+      }
+
+      if (canceledKeys.has(`${decisionType}:${plantingId}:${bedId}`)) {
+        continue;
+      }
+
+      const localDate =
+        typeof proposal.metadata?.localDate === 'string'
+          ? proposal.metadata.localDate
+          : now.toISOString().slice(0, 10);
+      const fingerprint = `${decisionType}:${proposal.targetType}:${plantingId}:${bedId}:${localDate}`;
+
+      if (!deduped.has(fingerprint)) {
+        deduped.set(fingerprint, proposal);
+      }
+    }
+
+    return Array.from(deduped.values());
   }
 
   private resolveLocalDate(warning: WarningInstance): string | null {
