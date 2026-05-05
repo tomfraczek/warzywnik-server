@@ -1,5 +1,8 @@
 import { z } from 'zod';
-import { ActionTaskStatus } from '../../common/enums/action.enums';
+import {
+  ActionTaskStatus,
+  BedActionTasksScope,
+} from '../../common/enums/action.enums';
 
 export type CreateActionTaskDto = {
   actionTemplateId?: string;
@@ -12,6 +15,10 @@ export type ListActionTasksQueryDto = {
   status: 'pending' | 'done' | 'all';
   from?: string;
   to?: string;
+};
+
+export type ListBedActionTasksQueryDto = ListActionTasksQueryDto & {
+  scope: BedActionTasksScope;
 };
 
 export type PatchActionTaskDto = {
@@ -64,6 +71,12 @@ export const listActionTasksQuerySchema = z.object({
   status: z.enum(['pending', 'done', 'all']).default('all'),
   from: isoDateSchema.optional(),
   to: isoDateSchema.optional(),
+});
+
+export const listBedActionTasksQuerySchema = listActionTasksQuerySchema.extend({
+  scope: z
+    .nativeEnum(BedActionTasksScope)
+    .default(BedActionTasksScope.INCLUDING_CHILDREN),
 });
 
 export const patchActionTaskSchema = z

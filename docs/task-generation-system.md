@@ -111,6 +111,12 @@ DTO i walidacja: [src/action-tasks/dto/action-task.schemas.ts](src/action-tasks/
 
 Logika serwisowa: [src/action-tasks/action-tasks.service.ts](src/action-tasks/action-tasks.service.ts)
 
+Parametry `GET /v1/beds/:bedId/action-tasks`:
+
+- `scope=own` -> tylko taski bezpośrednio grządkowe (`targetType=bed`, `bedId=:bedId`), rekomendowane dla ekranu grządki,
+- `scope=includingChildren` -> taski grządki + taski upraw należących do tej grządki (zachowanie historyczne),
+- domyślnie: `scope=includingChildren` (backward compatibility).
+
 ## 4.2 Recompute warzywny
 
 - `POST /v1/plantings/:id/recompute-actions`

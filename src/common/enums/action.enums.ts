@@ -78,6 +78,11 @@ export enum ActionTaskTargetType {
   SPACE = 'space',
 }
 
+export enum BedActionTasksScope {
+  OWN = 'own',
+  INCLUDING_CHILDREN = 'includingChildren',
+}
+
 export enum ActionTaskStatus {
   PENDING = 'pending',
   DONE = 'done',

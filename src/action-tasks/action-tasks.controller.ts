@@ -18,9 +18,11 @@ import {
   createPlantingActionTasksBulkSchema,
   CreatePlantingActionTasksBulkDto,
   createActionTaskSchema,
+  listBedActionTasksQuerySchema,
   listActionTasksQuerySchema,
   patchActionTaskSchema,
   CreateActionTaskDto,
+  ListBedActionTasksQueryDto,
   ListActionTasksQueryDto,
   PatchActionTaskDto,
 } from './dto/action-task.schemas';
@@ -67,8 +69,8 @@ export class ActionTasksController {
   listForBed(
     @Req() req: RequestWithUser,
     @Param('bedId', new ParseUUIDPipe()) bedId: string,
-    @Query(new ZodValidationPipe(listActionTasksQuerySchema))
-    query: ListActionTasksQueryDto,
+    @Query(new ZodValidationPipe(listBedActionTasksQuerySchema))
+    query: ListBedActionTasksQueryDto,
   ) {
     return this.actionTasksService.listForBed(
       req.userEntity as User,

@@ -9,6 +9,7 @@ import {
   CreateBedActionTasksBulkDto,
   CreateActionTaskDto,
   CreatePlantingActionTasksBulkDto,
+  ListBedActionTasksQueryDto,
   ListActionTasksQueryDto,
   PatchActionTaskDto,
 } from './dto/action-task.schemas';
@@ -18,6 +19,7 @@ import {
   ActionTaskStatus,
   ActionTaskTargetType,
   ActionTemplateTarget,
+  BedActionTasksScope,
 } from '../common/enums/action.enums';
 import { User } from '../users/user.entity';
 import { Planting } from '../plantings/planting.entity';
@@ -105,7 +107,12 @@ export class ActionTasksService {
       });
       await em.flush();
 
-      await em.populate(task, ['actionTemplate', 'planting', 'bed']);
+      await em.populate(task, [
+        'actionTemplate',
+        'planting',
+        'planting.vegetable',
+        'bed',
+      ]);
 
       return this.serialize(task);
     });
@@ -123,21 +130,32 @@ export class ActionTasksService {
 
     const items = await this.em.find(ActionTask, where, {
       orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }],
-      populate: ['actionTemplate', 'planting', 'bed'],
+      populate: ['actionTemplate', 'planting', 'planting.vegetable', 'bed'],
     });
 
     return items.map((item) => this.serialize(item));
   }
 
-  async listForBed(user: User, bedId: string, query: ListActionTasksQueryDto) {
+  async listForBed(
+    user: User,
+    bedId: string,
+    query: ListBedActionTasksQueryDto,
+  ) {
     await this.getBedOrThrow(user, bedId);
 
     const where = this.buildListWhere(user, query);
-    where.$or = [{ bed: bedId }, { planting: { bed: bedId } }];
+    const scope = query.scope ?? BedActionTasksScope.INCLUDING_CHILDREN;
+
+    if (scope === BedActionTasksScope.OWN) {
+      where.bed = bedId;
+      where.targetType = ActionTaskTargetType.BED;
+    } else {
+      where.$or = [{ bed: bedId }, { planting: { bed: bedId } }];
+    }
 
     const items = await this.em.find(ActionTask, where, {
       orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }],
-      populate: ['actionTemplate', 'planting', 'bed'],
+      populate: ['actionTemplate', 'planting', 'planting.vegetable', 'bed'],
     });
 
     return items.map((item) => this.serialize(item));
@@ -230,7 +248,9 @@ export class ActionTasksService {
       const task = await em.findOne(
         ActionTask,
         { id, user: user.id },
-        { populate: ['actionTemplate', 'planting', 'bed'] },
+        {
+          populate: ['actionTemplate', 'planting', 'planting.vegetable', 'bed'],
+        },
       );
 
       if (!task) {
@@ -592,7 +612,12 @@ export class ActionTasksService {
     }
 
     await params.em.flush();
-    await params.em.populate(created, ['actionTemplate', 'planting', 'bed']);
+    await params.em.populate(created, [
+      'actionTemplate',
+      'planting',
+      'planting.vegetable',
+      'bed',
+    ]);
 
     return created;
   }
@@ -603,7 +628,9 @@ export class ActionTasksService {
       userId: entity.user.id,
       targetType: entity.targetType,
       plantingId: entity.planting?.id ?? null,
+      vegetableName: entity.planting?.vegetable?.name ?? null,
       bedId: entity.bed?.id ?? null,
+      bedName: entity.bed?.name ?? null,
       status: entity.status,
       source: entity.source,
       sourceType: entity.sourceType,
@@ -618,6 +645,7 @@ export class ActionTasksService {
       dueAt: entity.dueAt,
       title: entity.title,
       description: entity.description ?? null,
+      metadata: entity.metadata ?? null,
       actionTemplate: entity.actionTemplate
         ? {
             id: entity.actionTemplate.id,
