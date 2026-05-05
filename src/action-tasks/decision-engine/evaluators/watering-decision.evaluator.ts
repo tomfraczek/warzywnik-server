@@ -1,6 +1,10 @@
 import { DemandLevel } from '../../../common/enums/vegetable.enums';
 import { DecisionEvaluator } from '../decision-evaluator.interface';
-import { DecisionCandidate, PlantingDecisionContext } from '../decision.types';
+import {
+  DecisionCandidate,
+  DecisionEvaluationTrace,
+  PlantingDecisionContext,
+} from '../decision.types';
 import {
   hasCompletedDecisionToday,
   hasCompletedDecisionYesterday,
@@ -18,22 +22,52 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 export class WateringDecisionEvaluator implements DecisionEvaluator {
   evaluate(context: PlantingDecisionContext): DecisionCandidate[] {
+    const trace = this.evaluateWithTrace(context, false);
+    return trace.result === 'CREATED' && trace.candidate
+      ? [trace.candidate]
+      : [];
+  }
+
+  evaluateWithTrace(
+    context: PlantingDecisionContext,
+    verbose = false,
+  ): DecisionEvaluationTrace {
     if (hasPendingDecisionTask(context, 'WATERING')) {
-      return [];
+      return {
+        evaluator: 'WateringDecisionEvaluator',
+        decisionType: 'WATERING',
+        result: 'SKIPPED',
+        reason: 'skipped: existing pending task',
+      };
     }
 
     if (hasCompletedDecisionToday(context, 'WATERING')) {
-      return [];
+      return {
+        evaluator: 'WateringDecisionEvaluator',
+        decisionType: 'WATERING',
+        result: 'SKIPPED',
+        reason: 'skipped: watered today',
+      };
     }
 
     const highHeat = (context.forecastMaxTemp24h ?? 0) >= 30;
 
     if (hasCompletedDecisionYesterday(context, 'WATERING') && !highHeat) {
-      return [];
+      return {
+        evaluator: 'WateringDecisionEvaluator',
+        decisionType: 'WATERING',
+        result: 'SKIPPED',
+        reason: 'skipped: watered yesterday and no high heat',
+      };
     }
 
     if (hasRecentCanceledDecisionTask(context, 'WATERING', 2)) {
-      return [];
+      return {
+        evaluator: 'WateringDecisionEvaluator',
+        decisionType: 'WATERING',
+        result: 'SKIPPED',
+        reason: 'skipped: recently canceled by user',
+      };
     }
 
     const waterDemand = context.planting.vegetable.waterDemand;
@@ -59,7 +93,12 @@ export class WateringDecisionEvaluator implements DecisionEvaluator {
       !highHeat;
 
     if (uncertainWatering) {
-      return [];
+      return {
+        evaluator: 'WateringDecisionEvaluator',
+        decisionType: 'WATERING',
+        result: 'SKIPPED',
+        reason: 'skipped: uncertain watering, prefer moisture check',
+      };
     }
 
     const lastWateringAt = lastCompletedDecisionAt(context, 'WATERING');
@@ -77,24 +116,61 @@ export class WateringDecisionEvaluator implements DecisionEvaluator {
       drainagePenalty;
 
     if (drynessScore < 4) {
-      return [];
+      return {
+        evaluator: 'WateringDecisionEvaluator',
+        decisionType: 'WATERING',
+        result: 'SKIPPED',
+        reason: 'skipped: not enough drought evidence',
+        details: verbose
+          ? {
+              drynessScore,
+              waterDemand,
+              retention,
+              drainage,
+              recentPrecipMm24h: context.recentPrecipMm24h,
+              recentPrecipMm72h: context.recentPrecipMm72h,
+              forecastPrecipMm48h: context.forecastPrecipMm48h,
+              forecastMaxTemp24h: context.forecastMaxTemp24h,
+              daysSinceWatering,
+            }
+          : undefined,
+      };
     }
 
-    return [
-      {
-        decisionType: 'WATERING',
-        targetType: 'planting',
-        plantingId: context.planting.id,
-        bedId: context.planting.bed.id,
-        priority: drynessScore >= 7 ? 'high' : 'medium',
-        dueAt: normalizeDueAt(context.now, context.planting.timelineTimezone),
-        reason:
-          'Wysokie zapotrzebowanie wodne i warunki suszowe bez istotnych opadów.',
-        confidence: drynessScore >= 7 ? 'high' : 'medium',
-        sourceKey: `decision:watering:${context.planting.id}`,
-        actionTemplateSlug: 'podlewanie',
-        shouldCreateTask: true,
-      },
-    ];
+    const candidate: DecisionCandidate = {
+      decisionType: 'WATERING',
+      targetType: 'planting',
+      plantingId: context.planting.id,
+      bedId: context.planting.bed.id,
+      priority: drynessScore >= 7 ? 'high' : 'medium',
+      dueAt: normalizeDueAt(context.now, context.planting.timelineTimezone),
+      reason:
+        'Wysokie zapotrzebowanie wodne i warunki suszowe bez istotnych opadów.',
+      confidence: drynessScore >= 7 ? 'high' : 'medium',
+      sourceKey: `decision:watering:${context.planting.id}`,
+      actionTemplateSlug: 'podlewanie',
+      shouldCreateTask: true,
+    };
+
+    return {
+      evaluator: 'WateringDecisionEvaluator',
+      decisionType: 'WATERING',
+      result: 'CREATED',
+      reason: 'created: high water demand + no rain + watering overdue',
+      details: verbose
+        ? {
+            drynessScore,
+            waterDemand,
+            retention,
+            drainage,
+            recentPrecipMm24h: context.recentPrecipMm24h,
+            recentPrecipMm72h: context.recentPrecipMm72h,
+            forecastPrecipMm48h: context.forecastPrecipMm48h,
+            forecastMaxTemp24h: context.forecastMaxTemp24h,
+            daysSinceWatering,
+          }
+        : undefined,
+      candidate,
+    };
   }
 }

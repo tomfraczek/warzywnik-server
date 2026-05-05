@@ -1,7 +1,11 @@
 import { DemandLevel } from '../../../common/enums/vegetable.enums';
 import { normalizeDueAt } from '../../../common/types/date-utils';
 import { DecisionEvaluator } from '../decision-evaluator.interface';
-import { DecisionCandidate, PlantingDecisionContext } from '../decision.types';
+import {
+  DecisionCandidate,
+  DecisionEvaluationTrace,
+  PlantingDecisionContext,
+} from '../decision.types';
 import {
   hasCompletedDecisionToday,
   hasPendingDecisionTask,
@@ -11,12 +15,32 @@ import { WarningCode } from '../../../common/enums/warning.enums';
 
 export class MoistureCheckDecisionEvaluator implements DecisionEvaluator {
   evaluate(context: PlantingDecisionContext): DecisionCandidate[] {
+    const trace = this.evaluateWithTrace(context, false);
+    return trace.result === 'CREATED' && trace.candidate
+      ? [trace.candidate]
+      : [];
+  }
+
+  evaluateWithTrace(
+    context: PlantingDecisionContext,
+    verbose = false,
+  ): DecisionEvaluationTrace {
     if (hasPendingDecisionTask(context, 'MOISTURE_CHECK')) {
-      return [];
+      return {
+        evaluator: 'MoistureCheckDecisionEvaluator',
+        decisionType: 'MOISTURE_CHECK',
+        result: 'SKIPPED',
+        reason: 'skipped: existing pending task',
+      };
     }
 
     if (hasCompletedDecisionToday(context, 'MOISTURE_CHECK')) {
-      return [];
+      return {
+        evaluator: 'MoistureCheckDecisionEvaluator',
+        decisionType: 'MOISTURE_CHECK',
+        result: 'SKIPPED',
+        reason: 'skipped: moisture checked today',
+      };
     }
 
     const waterDemand = context.planting.vegetable.waterDemand;
@@ -56,24 +80,58 @@ export class MoistureCheckDecisionEvaluator implements DecisionEvaluator {
     ].filter(Boolean).length;
 
     if (reasonSignals < 2) {
-      return [];
+      return {
+        evaluator: 'MoistureCheckDecisionEvaluator',
+        decisionType: 'MOISTURE_CHECK',
+        result: 'SKIPPED',
+        reason: 'skipped: insufficient signals for moisture check',
+        details: verbose
+          ? {
+              reasonSignals,
+              youngPlanting,
+              highTemp,
+              droughtRiskWarning,
+              uncertainWatering,
+              noWateringHistory,
+              waterDemand,
+            }
+          : undefined,
+      };
     }
 
-    return [
-      {
-        decisionType: 'MOISTURE_CHECK',
-        targetType: 'planting',
-        plantingId: context.planting.id,
-        bedId: context.planting.bed.id,
-        priority: reasonSignals >= 4 ? 'high' : 'medium',
-        dueAt: normalizeDueAt(context.now, context.planting.timelineTimezone),
-        reason:
-          'Występują przesłanki do diagnostycznej kontroli wilgotności przed podlewaniem.',
-        confidence: uncertainWatering ? 'high' : 'medium',
-        sourceKey: `decision:moisture-check:${context.planting.id}`,
-        actionTemplateSlug: 'kontrola-wilgotnosci-gleby',
-        shouldCreateTask: true,
-      },
-    ];
+    const candidate: DecisionCandidate = {
+      decisionType: 'MOISTURE_CHECK',
+      targetType: 'planting',
+      plantingId: context.planting.id,
+      bedId: context.planting.bed.id,
+      priority: reasonSignals >= 4 ? 'high' : 'medium',
+      dueAt: normalizeDueAt(context.now, context.planting.timelineTimezone),
+      reason:
+        'Występują przesłanki do diagnostycznej kontroli wilgotności przed podlewaniem.',
+      confidence: uncertainWatering ? 'high' : 'medium',
+      sourceKey: `decision:moisture-check:${context.planting.id}`,
+      actionTemplateSlug: 'kontrola-wilgotnosci-gleby',
+      shouldCreateTask: true,
+    };
+
+    return {
+      evaluator: 'MoistureCheckDecisionEvaluator',
+      decisionType: 'MOISTURE_CHECK',
+      result: 'CREATED',
+      reason:
+        'created: uncertainty requires moisture diagnosis before watering',
+      details: verbose
+        ? {
+            reasonSignals,
+            youngPlanting,
+            highTemp,
+            droughtRiskWarning,
+            uncertainWatering,
+            noWateringHistory,
+            waterDemand,
+          }
+        : undefined,
+      candidate,
+    };
   }
 }

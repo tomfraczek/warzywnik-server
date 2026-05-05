@@ -20,6 +20,8 @@ import {
   listPlantingsQuerySchema,
   recomputePlantingActionsSchema,
   RecomputePlantingActionsDto,
+  taskDecisionsDebugQuerySchema,
+  TaskDecisionsDebugQueryDto,
   updateHarvestResultSchema,
   updatePlantingTimelineSchema,
   CreateHarvestResultDto,
@@ -112,6 +114,20 @@ export class PlantingsController {
     return this.plantingsService.getTaskGenerationPreview(
       req.userEntity as User,
       id,
+    );
+  }
+
+  @Get(':id/task-decisions/debug')
+  getTaskDecisionsDebug(
+    @Req() req: { userEntity?: User },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Query(new ZodValidationPipe(taskDecisionsDebugQuerySchema))
+    query: TaskDecisionsDebugQueryDto,
+  ) {
+    return this.plantingsService.getTaskDecisionsDebug(
+      req.userEntity as User,
+      id,
+      Boolean(query.verbose),
     );
   }
 

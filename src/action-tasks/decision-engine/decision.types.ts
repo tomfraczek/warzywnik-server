@@ -35,6 +35,15 @@ export type DecisionCandidate = {
   shouldCreateTask: boolean;
 };
 
+export type DecisionEvaluationTrace = {
+  evaluator: string;
+  decisionType: DecisionType;
+  result: 'CREATED' | 'SKIPPED';
+  reason: string;
+  details?: Record<string, unknown>;
+  candidate?: DecisionCandidate;
+};
+
 export type PlantingDecisionContext = {
   now: Date;
   planting: Planting;

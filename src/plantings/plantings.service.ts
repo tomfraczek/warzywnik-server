@@ -568,6 +568,14 @@ export class PlantingsService {
     return this.actionAutomationService.previewForPlanting(user, plantingId);
   }
 
+  async getTaskDecisionsDebug(user: User, plantingId: string, verbose = false) {
+    return this.actionAutomationService.debugTaskDecisionsForPlanting({
+      user,
+      plantingId,
+      verbose,
+    });
+  }
+
   async listWarningsForUser(user: User): Promise<WarningOutput[]> {
     const plantings = await this.em.find(
       Planting,

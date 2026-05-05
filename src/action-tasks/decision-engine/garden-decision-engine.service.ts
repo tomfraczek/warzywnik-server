@@ -1,5 +1,9 @@
 import { DecisionEvaluator } from './decision-evaluator.interface';
-import { DecisionCandidate, PlantingDecisionContext } from './decision.types';
+import {
+  DecisionCandidate,
+  DecisionEvaluationTrace,
+  PlantingDecisionContext,
+} from './decision.types';
 import { WateringDecisionEvaluator } from './evaluators/watering-decision.evaluator';
 import { MoistureCheckDecisionEvaluator } from './evaluators/moisture-check-decision.evaluator';
 import { PestCheckDecisionEvaluator } from './evaluators/pest-check-decision.evaluator';
@@ -21,6 +25,22 @@ export class GardenDecisionEngine {
   }
 
   evaluate(context: PlantingDecisionContext): DecisionCandidate[] {
+    const traces = this.evaluateWithTrace(context, false);
+    return traces
+      .filter(
+        (
+          trace,
+        ): trace is DecisionEvaluationTrace & {
+          candidate: DecisionCandidate;
+        } => trace.result === 'CREATED' && Boolean(trace.candidate),
+      )
+      .map((trace) => trace.candidate);
+  }
+
+  evaluateWithTrace(
+    context: PlantingDecisionContext,
+    verbose = false,
+  ): DecisionEvaluationTrace[] {
     if (
       context.planting.status === PlantingStatus.HARVESTED ||
       context.planting.status === PlantingStatus.CLEARED ||
@@ -28,31 +48,69 @@ export class GardenDecisionEngine {
       context.planting.status === PlantingStatus.CANCELLED ||
       context.planting.status === PlantingStatus.NEW
     ) {
-      return [];
+      return this.evaluators.map((evaluator) => ({
+        evaluator: evaluator.constructor.name,
+        decisionType: 'GENERAL_MONITORING',
+        result: 'SKIPPED' as const,
+        reason: `skipped: lifecycle status ${context.planting.status}`,
+      }));
     }
 
-    const byKey = new Map<string, DecisionCandidate>();
+    const byKey = new Map<string, DecisionEvaluationTrace>();
 
     for (const evaluator of this.evaluators) {
-      const decisions = evaluator.evaluate(context);
+      const trace = evaluator.evaluateWithTrace(context, verbose);
 
-      for (const decision of decisions) {
-        if (!decision.shouldCreateTask) continue;
-        if (!decision.sourceKey) continue;
-        if (!byKey.has(decision.sourceKey)) {
-          byKey.set(decision.sourceKey, decision);
-        }
+      if (trace.result !== 'CREATED' || !trace.candidate) {
+        byKey.set(`${trace.evaluator}:${trace.decisionType}`, trace);
+        continue;
+      }
+
+      if (!trace.candidate.shouldCreateTask || !trace.candidate.sourceKey) {
+        byKey.set(`${trace.evaluator}:${trace.decisionType}`, {
+          ...trace,
+          result: 'SKIPPED',
+          reason: 'skipped: shouldCreateTask=false or empty sourceKey',
+        });
+        continue;
+      }
+
+      if (!byKey.has(trace.candidate.sourceKey)) {
+        byKey.set(trace.candidate.sourceKey, trace);
+      } else {
+        byKey.set(`${trace.evaluator}:${trace.decisionType}`, {
+          evaluator: trace.evaluator,
+          decisionType: trace.decisionType,
+          result: 'SKIPPED',
+          reason: 'skipped: duplicate sourceKey already accepted',
+          details: verbose
+            ? { sourceKey: trace.candidate.sourceKey }
+            : undefined,
+        });
       }
     }
 
-    const decisions = Array.from(byKey.values());
+    const traces = Array.from(byKey.values());
 
     if (context.planting.status === PlantingStatus.READY_FOR_FINAL_HARVEST) {
-      return decisions.filter(
-        (decision) => decision.decisionType === 'HARVEST_CHECK',
-      );
+      return traces.map((trace) => {
+        if (
+          trace.result === 'CREATED' &&
+          trace.candidate?.decisionType !== 'HARVEST_CHECK'
+        ) {
+          return {
+            evaluator: trace.evaluator,
+            decisionType: trace.decisionType,
+            result: 'SKIPPED' as const,
+            reason:
+              'skipped: READY_FOR_FINAL_HARVEST allows only HARVEST_CHECK',
+            details: verbose ? trace.details : undefined,
+          };
+        }
+        return trace;
+      });
     }
 
-    return decisions;
+    return traces;
   }
 }

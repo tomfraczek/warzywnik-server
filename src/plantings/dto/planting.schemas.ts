@@ -46,6 +46,10 @@ export type RecomputePlantingActionsDto = {
   useLatestRules?: boolean;
 };
 
+export type TaskDecisionsDebugQueryDto = {
+  verbose?: boolean;
+};
+
 const isoDateSchema = z.string().datetime();
 
 const basePlantingSchema = z.object({
@@ -122,6 +126,10 @@ export const getPlantingQuerySchema = z.object({
 export const recomputePlantingActionsSchema = z.object({
   forceOverrideManual: z.coerce.boolean().optional().default(false),
   useLatestRules: z.coerce.boolean().optional().default(false),
+});
+
+export const taskDecisionsDebugQuerySchema = z.object({
+  verbose: z.coerce.boolean().optional().default(false),
 });
 
 export const harvestResultSchema = z.object({

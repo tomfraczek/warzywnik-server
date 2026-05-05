@@ -37,8 +37,19 @@ import { Vegetable } from '../vegetables/vegetable.entity';
 import { GardenDecisionEngine } from './decision-engine/garden-decision-engine.service';
 import { PlantingDecisionContextBuilder } from './decision-engine/planting-decision-context-builder.service';
 import { DecisionToTaskMapper } from './decision-engine/decision-to-task.mapper';
-import { DecisionType } from './decision-engine/decision.types';
+import {
+  DecisionCandidate,
+  DecisionEvaluationTrace,
+  DecisionType,
+  PlantingDecisionContext,
+} from './decision-engine/decision.types';
 import { mapActionTemplateTypeToDecisionType } from './decision-engine/decision-kind.util';
+import { TaskDecisionsDebugDto } from '../plantings/dto/task-decisions-debug.dto';
+import { WarningCode } from '../common/enums/warning.enums';
+import {
+  getLocalDate,
+  localDatePlusDays,
+} from '../weather/warnings/weather-warning.types';
 
 type DesiredOccurrence = {
   sourceKey: string;
@@ -55,6 +66,48 @@ const MAX_ACTIVE_TASKS_PER_PLANTING = 6;
 const MAX_NEW_TASKS_PER_WEEK = 3;
 const HARD_MIN_RULES_PER_START_METHOD = 1;
 const SOFT_TARGET_RULES_PER_START_METHOD = 2;
+const OPERATIONAL_WARNING_CODES = new Set<WarningCode>([
+  WarningCode.FROST_RISK_TODAY_NIGHT,
+  WarningCode.FROST_RISK_TOMORROW_NIGHT,
+  WarningCode.HARD_FROST_RISK_TODAY_NIGHT,
+  WarningCode.HARD_FROST_RISK_TOMORROW_NIGHT,
+  WarningCode.HEAVY_RAIN_TODAY_DAY,
+  WarningCode.HEAVY_RAIN_TODAY_NIGHT,
+  WarningCode.HEAVY_RAIN_TOMORROW_DAY,
+  WarningCode.HEAVY_RAIN_TOMORROW_NIGHT,
+  WarningCode.WIND_DAMAGE_TODAY_DAY,
+  WarningCode.WIND_DAMAGE_TODAY_NIGHT,
+  WarningCode.WIND_DAMAGE_TOMORROW_DAY,
+  WarningCode.WIND_DAMAGE_TOMORROW_NIGHT,
+  WarningCode.WATERING_NEEDED_TODAY,
+  WarningCode.WATERING_NEEDED_TOMORROW,
+  WarningCode.SOWING_PAUSE_TOO_COLD_TODAY,
+  WarningCode.SOWING_PAUSE_TOO_COLD_TOMORROW,
+  WarningCode.GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT,
+  WarningCode.GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT,
+  WarningCode.OVERWATERING_PREPARE_TODAY,
+  WarningCode.OVERWATERING_PREPARE_TOMORROW,
+  WarningCode.OVERWATERING_CHECK_TODAY,
+  WarningCode.OVERWATERING_CHECK_TOMORROW,
+  WarningCode.GREENHOUSE_FROST_RISK_TODAY_NIGHT,
+  WarningCode.GREENHOUSE_FROST_RISK_TOMORROW_NIGHT,
+  WarningCode.GREENHOUSE_HARD_FROST_RISK_TODAY_NIGHT,
+  WarningCode.GREENHOUSE_HARD_FROST_RISK_TOMORROW_NIGHT,
+  WarningCode.GREENHOUSE_HEAT_WAVE_TODAY_DAY,
+  WarningCode.GREENHOUSE_HEAT_WAVE_TOMORROW_DAY,
+  WarningCode.GREENHOUSE_STRONG_WIND_TODAY_DAY,
+  WarningCode.GREENHOUSE_STRONG_WIND_TOMORROW_DAY,
+  WarningCode.GREENHOUSE_STORM_TODAY_DAY,
+  WarningCode.GREENHOUSE_STORM_TOMORROW_DAY,
+  WarningCode.GREENHOUSE_HEAVY_RAIN_TODAY_DAY,
+  WarningCode.GREENHOUSE_HEAVY_RAIN_TOMORROW_DAY,
+  WarningCode.GREENHOUSE_SNOW_LOAD_TODAY,
+  WarningCode.GREENHOUSE_SNOW_LOAD_TOMORROW,
+  WarningCode.GREENHOUSE_WET_SNOW_TODAY,
+  WarningCode.GREENHOUSE_WET_SNOW_TOMORROW,
+  WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TODAY,
+  WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TOMORROW,
+]);
 
 @Injectable()
 export class ActionAutomationService {
@@ -63,7 +116,8 @@ export class ActionAutomationService {
   private readonly routineGenerator = new RoutineCareTaskGenerator();
   private readonly postHarvestPromptGenerator =
     new PostHarvestPromptGenerator();
-  private readonly decisionEngine = new GardenDecisionEngine();
+  private readonly decisionEngine: GardenDecisionEngine =
+    new GardenDecisionEngine();
   private readonly decisionContextBuilder =
     new PlantingDecisionContextBuilder();
   private readonly decisionToTaskMapper = new DecisionToTaskMapper();
@@ -81,7 +135,16 @@ export class ActionAutomationService {
       const planting = await em.findOne(
         Planting,
         { id: params.plantingId, user: params.user.id },
-        { populate: ['bed', 'bed.growingSpace', 'vegetable'] },
+        {
+          populate: [
+            'bed',
+            'bed.growingSpace',
+            'bed.soil',
+            'vegetable',
+            'vegetable.commonPests',
+            'vegetable.commonDiseases',
+          ],
+        },
       );
 
       if (!planting) {
@@ -169,13 +232,24 @@ export class ActionAutomationService {
         }),
       );
 
-      const decisionCandidates = await this.buildDecisionCandidates({
+      const decisionEvaluation = await this.buildDecisionEvaluation({
         em,
         planting,
       });
+      const decisionCandidates = decisionEvaluation.candidates;
+      const shouldBlockRoutineWatering = decisionEvaluation.traces.some(
+        (trace) =>
+          trace.decisionType === 'WATERING' &&
+          trace.result === 'SKIPPED' &&
+          this.isWateringBlockedReason(trace.reason),
+      );
+
+      const guardedRoutine = shouldBlockRoutineWatering
+        ? desiredRoutine.filter((item) => item.decisionType !== 'WATERING')
+        : desiredRoutine;
 
       const routineDecisionTypes = new Set(
-        desiredRoutine
+        guardedRoutine
           .map((item) => item.decisionType)
           .filter((value): value is DecisionType => Boolean(value)),
       );
@@ -199,7 +273,7 @@ export class ActionAutomationService {
       }
 
       const desired: DesiredOccurrence[] = [
-        ...desiredRoutine,
+        ...guardedRoutine,
         ...desiredDecisions,
       ];
 
@@ -327,6 +401,389 @@ export class ActionAutomationService {
         },
       })),
       skippedByFloodLimits: floodFiltered.skipped,
+    };
+  }
+
+  async debugTaskDecisionsForPlanting(params: {
+    user: User;
+    plantingId: string;
+    verbose?: boolean;
+  }): Promise<TaskDecisionsDebugDto> {
+    const planting = await this.em.findOne(
+      Planting,
+      { id: params.plantingId, user: params.user.id },
+      {
+        populate: [
+          'bed',
+          'bed.growingSpace',
+          'bed.soil',
+          'vegetable',
+          'vegetable.commonPests',
+          'vegetable.commonDiseases',
+        ],
+      },
+    );
+
+    if (!planting) {
+      throw new NotFoundException('Planting not found');
+    }
+
+    const rules = await this.em.find(
+      VegetableActionRule,
+      {
+        vegetable: planting.vegetable.id,
+        isEnabled: true,
+      },
+      {
+        populate: ['actionTemplate'],
+        orderBy: [{ createdAt: 'asc' }, { offsetDays: 'asc' }],
+      },
+    );
+
+    const candidates = this.buildCandidatesForPlanting(planting, rules);
+    const floodFiltered = await this.applyAntiFloodLimits({
+      em: this.em,
+      user: params.user,
+      planting,
+      candidates,
+    });
+
+    const acceptedKeys = new Set(
+      floodFiltered.accepted.map((candidate) => candidate.sourceKey),
+    );
+    const skippedByKey = new Map(
+      floodFiltered.skipped.map((item) => [item.sourceKey, item.reason]),
+    );
+
+    const today = toDateOnlyInTimezone(new Date(), planting.timelineTimezone);
+
+    const routineCandidates = rules.map((rule) => {
+      const baseDueAt = this.resolveRuleBaseDueAt(planting, rule);
+      if (!baseDueAt) {
+        return {
+          ruleId: rule.id,
+          trigger: rule.trigger,
+          schedule: rule.schedule,
+          dueAt: null,
+          accepted: false,
+          rejectReason: 'lifecycle mismatch: missing base date for trigger',
+        };
+      }
+
+      const occurrences = this.buildOccurrences(planting, rule, baseDueAt, {
+        routineOnly: true,
+      });
+
+      const todayOccurrence = occurrences.find(
+        (occurrence) =>
+          toDateOnlyInTimezone(
+            occurrence.dueAt,
+            planting.timelineTimezone,
+          ).getTime() === today.getTime(),
+      );
+
+      if (!todayOccurrence) {
+        return {
+          ruleId: rule.id,
+          trigger: rule.trigger,
+          schedule: rule.schedule,
+          dueAt: occurrences[0]?.dueAt ?? baseDueAt,
+          accepted: false,
+          rejectReason: 'outside today window',
+        };
+      }
+
+      const candidate = candidates.find(
+        (item) =>
+          item.rule.id === rule.id &&
+          item.cycleIndex === todayOccurrence.cycleIndex &&
+          item.dueAt.getTime() === todayOccurrence.dueAt.getTime(),
+      );
+
+      if (!candidate) {
+        return {
+          ruleId: rule.id,
+          trigger: rule.trigger,
+          schedule: rule.schedule,
+          dueAt: todayOccurrence.dueAt,
+          accepted: false,
+          rejectReason: 'rejected by routine candidate filtering',
+        };
+      }
+
+      if (acceptedKeys.has(candidate.sourceKey)) {
+        return {
+          ruleId: rule.id,
+          trigger: rule.trigger,
+          schedule: rule.schedule,
+          dueAt: todayOccurrence.dueAt,
+          accepted: true,
+        };
+      }
+
+      return {
+        ruleId: rule.id,
+        trigger: rule.trigger,
+        schedule: rule.schedule,
+        dueAt: todayOccurrence.dueAt,
+        accepted: false,
+        rejectReason:
+          skippedByKey.get(candidate.sourceKey) ??
+          'skipped: anti-flood/duplicate limit reached',
+      };
+    });
+
+    const decisionContext = await this.decisionContextBuilder.build({
+      em: this.em,
+      planting,
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const decisionTraces = this.decisionEngine.evaluateWithTrace(
+      decisionContext,
+      Boolean(params.verbose),
+    ) as DecisionEvaluationTrace[];
+
+    const weatherDebug: TaskDecisionsDebugDto['weather']['warnings'] =
+      this.debugWeatherWarnings(decisionContext, Boolean(params.verbose));
+
+    const createdTasks: TaskDecisionsDebugDto['final']['createdTasks'] = [];
+    const skippedDecisionEngineTypes = new Set(
+      decisionTraces
+        .filter((trace) => trace.result === 'SKIPPED')
+        .map((trace) => trace.decisionType),
+    );
+
+    for (const item of routineCandidates) {
+      if (!item.accepted || !item.dueAt) continue;
+      const rule = rules.find((ruleItem) => ruleItem.id === item.ruleId);
+      if (!rule) continue;
+
+      const actionTemplateSlug =
+        typeof (rule.actionTemplate as { slug?: string }).slug === 'string'
+          ? (rule.actionTemplate as { slug?: string }).slug
+          : undefined;
+
+      createdTasks.push({
+        decisionType:
+          this.resolveDecisionTypeFromTemplate(rule) ?? 'GENERAL_MONITORING',
+        title: rule.actionTemplate.name,
+        dueAt: item.dueAt,
+        source: 'VEGETABLE_RULE',
+        origin: 'ROUTINE_RULE',
+        ruleId: rule.id,
+        actionTemplateSlug,
+        trigger: rule.trigger,
+        schedule: rule.schedule,
+        reason: 'created: accepted routine rule candidate',
+      });
+    }
+
+    for (const trace of decisionTraces) {
+      if (trace.result !== 'CREATED' || !trace.candidate) continue;
+      if (skippedDecisionEngineTypes.has(trace.candidate.decisionType)) {
+        continue;
+      }
+
+      createdTasks.push({
+        decisionType: trace.candidate.decisionType,
+        title: trace.candidate.actionTemplateSlug,
+        dueAt: trace.candidate.dueAt,
+        source: 'DECISION_ENGINE',
+        origin: 'DECISION_ENGINE',
+        evaluator: trace.evaluator,
+        reason: trace.reason,
+      });
+    }
+
+    for (const warning of weatherDebug) {
+      if (warning.result !== 'CREATED' || !warning.taskTitle) continue;
+      createdTasks.push({
+        decisionType: warning.decisionType ?? 'GENERAL_MONITORING',
+        title: warning.taskTitle,
+        dueAt:
+          warning.details?.dueAt instanceof Date
+            ? warning.details.dueAt
+            : new Date(),
+        source: 'WEATHER_WARNING',
+        origin: 'WEATHER_WARNING',
+        reason: warning.reason,
+        warningCode: warning.code,
+      });
+    }
+
+    const skippedDecisions: TaskDecisionsDebugDto['final']['skippedDecisions'] =
+      [
+        ...routineCandidates
+          .filter((item) => !item.accepted)
+          .map((item) => {
+            const matchedRule = rules.find((rule) => rule.id === item.ruleId);
+            return {
+              decisionType:
+                (matchedRule
+                  ? this.resolveDecisionTypeFromTemplate(matchedRule)
+                  : null) ?? 'GENERAL_MONITORING',
+              reason: item.rejectReason ?? 'skipped',
+              origin: 'ROUTINE_RULE' as const,
+              evaluator: 'RoutineCareTaskGenerator',
+            };
+          }),
+        ...decisionTraces
+          .filter((trace) => trace.result === 'SKIPPED')
+          .map((trace) => ({
+            decisionType: trace.decisionType,
+            reason: trace.reason,
+            origin: 'DECISION_ENGINE' as const,
+            evaluator: trace.evaluator,
+          })),
+        ...weatherDebug
+          .filter((item) => item.result === 'SKIPPED')
+          .map((item) => ({
+            decisionType: item.decisionType ?? 'GENERAL_MONITORING',
+            reason: item.reason,
+            origin: 'WEATHER_WARNING' as const,
+            evaluator: 'WeatherTaskPlannerService',
+          })),
+      ];
+
+    const createdOriginsByDecisionType = new Map<
+      string,
+      Set<'ROUTINE_RULE' | 'DECISION_ENGINE' | 'WEATHER_WARNING'>
+    >();
+    for (const created of createdTasks) {
+      const bucket =
+        createdOriginsByDecisionType.get(created.decisionType) ??
+        new Set<'ROUTINE_RULE' | 'DECISION_ENGINE' | 'WEATHER_WARNING'>();
+      bucket.add(created.origin);
+      createdOriginsByDecisionType.set(created.decisionType, bucket);
+    }
+
+    const skippedOriginsByDecisionType = new Map<
+      string,
+      Set<'ROUTINE_RULE' | 'DECISION_ENGINE' | 'WEATHER_WARNING'>
+    >();
+    for (const skipped of skippedDecisions) {
+      const bucket =
+        skippedOriginsByDecisionType.get(skipped.decisionType) ??
+        new Set<'ROUTINE_RULE' | 'DECISION_ENGINE' | 'WEATHER_WARNING'>();
+      bucket.add(skipped.origin);
+      skippedOriginsByDecisionType.set(skipped.decisionType, bucket);
+    }
+
+    const conflicts: NonNullable<TaskDecisionsDebugDto['final']['conflicts']> =
+      [];
+    for (const [
+      decisionType,
+      createdOriginsSet,
+    ] of createdOriginsByDecisionType) {
+      const skippedOriginsSet = skippedOriginsByDecisionType.get(decisionType);
+      if (!skippedOriginsSet || skippedOriginsSet.size === 0) {
+        continue;
+      }
+
+      conflicts.push({
+        decisionType,
+        createdOrigins: Array.from(createdOriginsSet.values()),
+        skippedOrigins: Array.from(skippedOriginsSet.values()),
+        note: 'same decisionType appears in created and skipped from different origins',
+      });
+    }
+
+    const resolveTaskDecisionType = (task: ActionTask) => {
+      const fromMetadata = task.metadata?.decisionType;
+      if (typeof fromMetadata === 'string') {
+        return fromMetadata;
+      }
+      return mapActionTemplateTypeToDecisionType(task.actionTemplate?.type);
+    };
+
+    const resolveEventDecisionType = (
+      eventPayload: Record<string, unknown>,
+    ) => {
+      const decisionType = eventPayload.decisionType;
+      if (typeof decisionType === 'string') {
+        return decisionType;
+      }
+      const actionType = eventPayload.actionType;
+      if (typeof actionType === 'string') {
+        return mapActionTemplateTypeToDecisionType(actionType);
+      }
+      return 'GENERAL_MONITORING';
+    };
+
+    const hasRainRecently = decisionContext.recentPrecipMm24h >= 2;
+    const rainForecastNext24h = decisionContext.forecastPrecipMm24h >= 2;
+    const temperatureLevel =
+      (decisionContext.forecastMaxTemp24h ?? 0) >= 30
+        ? 'high'
+        : (decisionContext.forecastMaxTemp24h ?? 0) >= 20
+          ? 'medium'
+          : 'low';
+    const droughtRisk = decisionContext.activeWarnings.some(
+      (warning) =>
+        warning.code === WarningCode.DROUGHT_RISK_NEXT_7_DAYS ||
+        warning.code === WarningCode.WATERING_NEEDED_TODAY ||
+        warning.code === WarningCode.WATERING_NEEDED_TOMORROW,
+    );
+
+    return {
+      plantingId: planting.id,
+      vegetable: planting.vegetable.name,
+      status: planting.status,
+      context: {
+        weatherSummary: {
+          hasRainRecently,
+          rainForecastNext24h,
+          temperatureLevel,
+          droughtRisk,
+        },
+        soil: {
+          waterRetention: planting.bed.soil?.waterRetention ?? 'unknown',
+          drainage: planting.bed.soil?.drainage ?? 'unknown',
+          fertilityLevel: planting.bed.soil?.fertilityLevel ?? 'unknown',
+        },
+        recentActions: decisionContext.recentCompletedActionEvents.map(
+          (event) => ({
+            decisionType:
+              resolveEventDecisionType(event.payload) ?? 'GENERAL_MONITORING',
+            completedAt: event.eventTime,
+          }),
+        ),
+        pendingTasks: decisionContext.pendingTasks.map((task) => ({
+          decisionType: resolveTaskDecisionType(task) ?? 'GENERAL_MONITORING',
+          dueAt: task.dueAt ?? new Date(),
+        })),
+        canceledTasks: decisionContext.recentlyCanceledTasks.map((task) => ({
+          decisionType: resolveTaskDecisionType(task) ?? 'GENERAL_MONITORING',
+          canceledAt: task.updatedAt,
+        })),
+        activeWarnings: decisionContext.activeWarnings.map((warning) => ({
+          code: warning.code,
+          severity:
+            typeof warning.details?.severity === 'string'
+              ? warning.details.severity
+              : 'unknown',
+        })),
+      },
+      routine: {
+        candidates: routineCandidates,
+      },
+      decisions: {
+        evaluators: decisionTraces.map((trace) => ({
+          evaluator: trace.evaluator,
+          decisionType: trace.decisionType,
+          result: trace.result,
+          reason: trace.reason,
+          details: params.verbose ? trace.details : undefined,
+        })),
+      },
+      weather: {
+        warnings: weatherDebug,
+      },
+      final: {
+        createdTasks,
+        skippedDecisions,
+        conflicts: conflicts.length > 0 ? conflicts : undefined,
+      },
     };
   }
 
@@ -1042,12 +1499,8 @@ export class ActionAutomationService {
     em: EntityManager;
     planting: Planting;
   }) {
-    const context = await this.decisionContextBuilder.build({
-      em: params.em,
-      planting: params.planting,
-    });
-
-    const candidates = this.decisionEngine.evaluate(context);
+    const evaluation = await this.buildDecisionEvaluation(params);
+    const candidates = evaluation.candidates;
     const dateKey = normalizeDueAt(new Date(), params.planting.timelineTimezone)
       .toISOString()
       .slice(0, 10);
@@ -1056,6 +1509,43 @@ export class ActionAutomationService {
       ...candidate,
       sourceKey: `${params.planting.id}:${candidate.sourceKey}:${dateKey}`,
     }));
+  }
+
+  private async buildDecisionEvaluation(params: {
+    em: EntityManager;
+    planting: Planting;
+  }): Promise<{
+    context: PlantingDecisionContext;
+    traces: DecisionEvaluationTrace[];
+    candidates: DecisionCandidate[];
+  }> {
+    const context = await this.decisionContextBuilder.build({
+      em: params.em,
+      planting: params.planting,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const traces = this.decisionEngine.evaluateWithTrace(
+      context,
+      false,
+    ) as DecisionEvaluationTrace[];
+    const candidates: DecisionCandidate[] = [];
+    for (const trace of traces) {
+      if (trace.result === 'CREATED' && trace.candidate) {
+        candidates.push(trace.candidate);
+      }
+    }
+
+    return { context, traces, candidates };
+  }
+
+  private isWateringBlockedReason(reason: string) {
+    const normalized = reason.toLowerCase();
+    return (
+      normalized.includes('forecast rain') ||
+      normalized.includes('recent rain') ||
+      normalized.includes('no watering signal')
+    );
   }
 
   private async upsertDecisionTaskAndReminder(params: {
@@ -1181,6 +1671,161 @@ export class ActionAutomationService {
     rule: VegetableActionRule,
   ): DecisionType | null {
     return mapActionTemplateTypeToDecisionType(rule.actionTemplate.type);
+  }
+
+  private debugWeatherWarnings(
+    context: PlantingDecisionContext,
+    verbose: boolean,
+  ): TaskDecisionsDebugDto['weather']['warnings'] {
+    const recentCompletedKeys = new Set(
+      context.recentCompletedActionEvents
+        .map((event) => {
+          const decisionType = event.payload?.decisionType;
+          if (typeof decisionType !== 'string') return null;
+          return `${decisionType}:${event.planting.id}`;
+        })
+        .filter((value): value is string => Boolean(value)),
+    );
+
+    const recentCanceledKeys = new Set(
+      context.recentlyCanceledTasks
+        .map((task) => {
+          const decisionType = task.metadata?.decisionType;
+          if (typeof decisionType !== 'string') return null;
+          const plantingId = task.planting?.id ?? 'none';
+          const bedId = task.bed?.id ?? 'none';
+          return `${decisionType}:${plantingId}:${bedId}`;
+        })
+        .filter((value): value is string => Boolean(value)),
+    );
+
+    const dedupedFingerprints = new Set<string>();
+    const result: TaskDecisionsDebugDto['weather']['warnings'] = [];
+
+    for (const warning of context.activeWarnings) {
+      if (!OPERATIONAL_WARNING_CODES.has(warning.code)) {
+        result.push({
+          code: warning.code,
+          result: 'SKIPPED',
+          reason: 'skipped: warning code not operational for task planner',
+        });
+        continue;
+      }
+
+      const localDateRaw = warning.details?.localDate;
+      const localDate =
+        typeof localDateRaw === 'string'
+          ? localDateRaw
+          : warning.validFrom.toISOString().slice(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(localDate)) {
+        result.push({
+          code: warning.code,
+          result: 'SKIPPED',
+          reason: 'skipped: missing localDate on warning',
+        });
+        continue;
+      }
+
+      const timezone =
+        typeof warning.details?.timezone === 'string' &&
+        warning.details.timezone.length > 0
+          ? warning.details.timezone
+          : 'UTC';
+      const today = getLocalDate(context.now, timezone);
+      const tomorrow = localDatePlusDays(today, 1);
+      if (localDate !== today && localDate !== tomorrow) {
+        result.push({
+          code: warning.code,
+          result: 'SKIPPED',
+          reason: 'skipped: outside today/tomorrow weather window',
+        });
+        continue;
+      }
+
+      const decisionType =
+        warning.code === WarningCode.WATERING_NEEDED_TODAY ||
+        warning.code === WarningCode.WATERING_NEEDED_TOMORROW
+          ? 'WATERING'
+          : warning.code ===
+                WarningCode.GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT ||
+              warning.code ===
+                WarningCode.GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT ||
+              warning.code === WarningCode.FROST_RISK_TODAY_NIGHT ||
+              warning.code === WarningCode.FROST_RISK_TOMORROW_NIGHT ||
+              warning.code === WarningCode.HARD_FROST_RISK_TODAY_NIGHT ||
+              warning.code === WarningCode.HARD_FROST_RISK_TOMORROW_NIGHT
+            ? 'FROST_PROTECTION'
+            : warning.code === WarningCode.OVERWATERING_PREPARE_TODAY ||
+                warning.code === WarningCode.OVERWATERING_PREPARE_TOMORROW ||
+                warning.code === WarningCode.OVERWATERING_CHECK_TODAY ||
+                warning.code === WarningCode.OVERWATERING_CHECK_TOMORROW
+              ? 'MOISTURE_CHECK'
+              : 'GENERAL_MONITORING';
+
+      const plantingId = warning.planting?.id ?? context.planting.id;
+      const bedId = warning.bed?.id ?? context.planting.bed.id;
+      const completedKey = `${decisionType}:${plantingId}`;
+      if (recentCompletedKeys.has(completedKey)) {
+        result.push({
+          code: warning.code,
+          result: 'SKIPPED',
+          decisionType,
+          reason: 'skipped: similar action completed recently',
+        });
+        continue;
+      }
+
+      const canceledKey = `${decisionType}:${plantingId}:${bedId}`;
+      if (recentCanceledKeys.has(canceledKey)) {
+        result.push({
+          code: warning.code,
+          result: 'SKIPPED',
+          decisionType,
+          reason: 'skipped: similar weather task canceled recently',
+        });
+        continue;
+      }
+
+      const fingerprint = `${decisionType}:${plantingId}:${bedId}:${localDate}`;
+      if (dedupedFingerprints.has(fingerprint)) {
+        result.push({
+          code: warning.code,
+          result: 'SKIPPED',
+          decisionType,
+          reason: 'skipped: duplicate warning fingerprint',
+        });
+        continue;
+      }
+      dedupedFingerprints.add(fingerprint);
+
+      const taskTitle =
+        decisionType === 'WATERING'
+          ? 'Podlej uprawy'
+          : decisionType === 'MOISTURE_CHECK'
+            ? 'Sprawdź zastoiska po opadach'
+            : decisionType === 'FROST_PROTECTION'
+              ? 'Osłoń rośliny przed przymrozkiem'
+              : 'Operacyjne działanie pogodowe';
+
+      result.push({
+        code: warning.code,
+        result: 'CREATED',
+        reason: 'created: warning produced an operational weather task',
+        taskTitle,
+        decisionType,
+        details: verbose
+          ? {
+              localDate,
+              timezone,
+              dueAt: warning.validFrom,
+              plantingId,
+              bedId,
+            }
+          : undefined,
+      });
+    }
+
+    return result;
   }
 
   private getPlantingScopeWhere(planting: Planting) {
