@@ -10,7 +10,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 90,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Aplikacja biohumusu",
@@ -23,7 +24,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 3,
     "minDaysBetweenOccurrences": 14,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Aplikacja kompostu",
@@ -36,7 +38,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 60,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Aplikacja nawozu mineralnego",
@@ -49,7 +52,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Aplikacja nawozu zielonego",
@@ -62,7 +66,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 60,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Aplikacja obornika",
@@ -75,7 +80,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 180,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Awaryjne nawożenie interwencyjne",
@@ -88,7 +94,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 14,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Codzienna kontrola klimatu — szklarnia",
@@ -101,7 +108,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 1,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Codzienna kontrola klimatu — tunel",
@@ -114,7 +122,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 1,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Czyszczenie przestrzeni uprawowej",
@@ -127,7 +136,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Dezynfekcja przestrzeni uprawowej — szklarnia",
@@ -140,7 +150,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 90,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Dezynfekcja przestrzeni uprawowej — tunel",
@@ -153,7 +164,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 90,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Dosadzanie roślin",
@@ -166,7 +178,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": null,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Formowanie grządki",
@@ -179,7 +192,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Głębokie spulchnianie (broadfork)",
@@ -192,7 +206,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 60,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Instalacja cieniowania — szklarnia",
@@ -205,7 +220,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 90,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Instalacja cieniowania — tunel",
@@ -218,7 +234,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 90,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Instalacja pułapek na szkodniki",
@@ -231,7 +248,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Instalacja siatek ochronnych",
@@ -244,7 +262,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Instalacja systemu nawadniania",
@@ -257,7 +276,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 180,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Kontrola chorób",
@@ -270,7 +290,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Kontrola konstrukcji szklarni",
@@ -283,7 +304,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Kontrola konstrukcji tunelu",
@@ -296,7 +318,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Kontrola szkodników",
@@ -309,7 +332,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 4,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "bed"
   },
   {
     "name": "Kontrola wilgotności gleby",
@@ -322,7 +346,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 6,
     "minDaysBetweenOccurrences": 3,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "bed"
   },
   {
     "name": "Kontrola wilgotności gleby (grządka)",
@@ -335,7 +360,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 3,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Monitoring kwitnienia",
@@ -348,7 +374,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 4,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Monitoring szkodników (pułapki)",
@@ -361,7 +388,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Monitoring temperatury",
@@ -374,7 +402,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 1,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Monitoring wilgotności powietrza",
@@ -387,7 +416,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 1,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Monitoring wzrostu",
@@ -400,7 +430,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 6,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Mulczowanie grządki",
@@ -413,7 +444,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Mycie konstrukcji szklarni",
@@ -426,7 +458,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 90,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Mycie konstrukcji tunelu",
@@ -439,7 +472,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 90,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Naprawa folii tunelu",
@@ -452,7 +486,8 @@
     "priority": "critical",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Naprawa szyb szklarni",
@@ -465,7 +500,8 @@
     "priority": "critical",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Nawożenie dolistne",
@@ -478,7 +514,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 14,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Nawożenie mineralne",
@@ -491,7 +528,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 2,
     "minDaysBetweenOccurrences": 21,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Nawożenie organiczne",
@@ -504,7 +542,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 3,
     "minDaysBetweenOccurrences": 14,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Oprysk biologiczny",
@@ -517,7 +556,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Oprysk chemiczny",
@@ -530,7 +570,8 @@
     "priority": "critical",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 14,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Pikowanie siewek",
@@ -543,7 +584,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": null,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Planowanie płodozmianu",
@@ -556,7 +598,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 180,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Płukanie gleby (redukcja zasolenia)",
@@ -569,7 +612,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Podlewanie roślin",
@@ -582,7 +626,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 3,
     "minDaysBetweenOccurrences": 1,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "bed"
   },
   {
     "name": "Podwiązywanie roślin",
@@ -595,7 +640,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 14,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Pomiar pH gleby",
@@ -608,7 +654,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 180,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Pomiar zasolenia gleby (EC)",
@@ -621,7 +668,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 60,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Przesadzanie roślin",
@@ -634,7 +682,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": null,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Przycinanie roślin",
@@ -647,7 +696,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 3,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Przygotowanie do zimy",
@@ -660,7 +710,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 180,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Przygotowanie grządki po sezonie",
@@ -673,7 +724,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Przygotowanie grządki przed sezonem",
@@ -686,7 +738,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 180,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Przygotowanie szklarni do sezonu",
@@ -699,7 +752,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 180,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Przygotowanie tunelu do sezonu",
@@ -712,7 +766,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 180,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Przykrycie gleby (agrowłóknina)",
@@ -725,7 +780,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Redukcja wilgotności — szklarnia",
@@ -738,7 +794,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 1,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Redukcja wilgotności — tunel",
@@ -751,7 +808,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 1,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Regulacja cieniowania — szklarnia",
@@ -764,7 +822,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 1,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Regulacja cieniowania — tunel",
@@ -777,7 +836,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 1,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Sadzenie rozsady",
@@ -790,7 +850,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": null,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Ściółkowanie wokół roślin",
@@ -803,7 +864,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "bed"
   },
   {
     "name": "Siew nasion",
@@ -816,7 +878,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": null,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Solarizacja gleby",
@@ -829,7 +892,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 180,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Spulchnianie gleby",
@@ -842,7 +906,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Uprawa roślin poplonowych",
@@ -855,7 +920,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Usunięcie całej rośliny (silna choroba)",
@@ -868,7 +934,8 @@
     "priority": "critical",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Usunięcie roślin po sezonie",
@@ -881,7 +948,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Usuwanie chwastów przy roślinach",
@@ -894,7 +962,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 6,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "bed"
   },
   {
     "name": "Usuwanie chwastów z grządki",
@@ -907,7 +976,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Usuwanie liści",
@@ -920,7 +990,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 4,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Usuwanie pędów bocznych",
@@ -933,7 +1004,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 6,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Usuwanie porażonych części",
@@ -946,7 +1018,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 7,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Usuwanie resztek roślinnych",
@@ -959,7 +1032,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 30,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Wentylacja szklarni",
@@ -972,7 +1046,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 1,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Wentylacja tunelu",
@@ -985,7 +1060,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 1,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Zapylanie ręczne",
@@ -998,7 +1074,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": 3,
     "minDaysBetweenOccurrences": 2,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Zbiór nasion",
@@ -1011,7 +1088,8 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": null,
-    "requiresUserConfirmation": true
+    "requiresUserConfirmation": true,
+    "aggregationScope": "none"
   },
   {
     "name": "Zbiór plonów",
@@ -1024,7 +1102,8 @@
     "priority": "high",
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": null,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   },
   {
     "name": "Zmiana uprawy w grządce",
@@ -1037,6 +1116,7 @@
     "priority": "medium",
     "maxAutoOccurrencesPerPlanting": null,
     "minDaysBetweenOccurrences": 90,
-    "requiresUserConfirmation": false
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none"
   }
 ]

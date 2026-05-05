@@ -358,4 +358,60 @@ describe('ActionAutomationService debugTaskDecisionsForPlanting', () => {
       ),
     ).toBe(true);
   });
+
+  it('includes aggregation groups in debug output', async () => {
+    const dueAt = new Date();
+    const rule = {
+      id: 'rule-agg-1',
+      trigger: ActionRuleTrigger.ON_SOWED,
+      schedule: ActionRuleSchedule.EVERY_N_DAYS,
+      actionTemplate: {
+        id: 'tpl-agg-1',
+        name: 'Kontrola wilgotności gleby',
+        type: 'monitoring',
+        aggregationScope: 'bed',
+        requiresUserConfirmation: false,
+      },
+    } as never;
+
+    const service = createService({
+      rules: [rule],
+      candidates: [
+        {
+          rule,
+          sourceKey: 'routine:agg:1',
+          cycleIndex: 0,
+          dueAt,
+        },
+      ],
+      accepted: [
+        {
+          rule,
+          sourceKey: 'routine:agg:1',
+          cycleIndex: 0,
+          dueAt,
+        },
+      ],
+      decisionTraces: [],
+    });
+
+    (
+      service as unknown as { resolveRuleBaseDueAt: () => Date }
+    ).resolveRuleBaseDueAt = () => dueAt;
+    (
+      service as unknown as {
+        buildOccurrences: () => Array<{ cycleIndex: number; dueAt: Date }>;
+      }
+    ).buildOccurrences = () => [{ cycleIndex: 0, dueAt }];
+
+    const result = await service.debugTaskDecisionsForPlanting({
+      user: user as never,
+      plantingId,
+    });
+
+    expect(Array.isArray(result.aggregation.groups)).toBe(true);
+    expect(
+      result.aggregation.groups.some((group) => group.scope === 'bed'),
+    ).toBe(true);
+  });
 });

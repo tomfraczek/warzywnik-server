@@ -12,15 +12,27 @@ import { Planting } from './planting.entity';
 import { Bed } from '../beds/bed.entity';
 import { Vegetable } from '../vegetables/vegetable.entity';
 import { PlantingEventType } from '../common/enums/planting-event.enums';
+import { User } from '../users/user.entity';
 
 describe('PlantingsService transplant lifecycle', () => {
+  type EmMock = {
+    findOne: jest.Mock<Promise<unknown>, [unknown, unknown?]>;
+    persistAndFlush: jest.Mock<Promise<void>, [Planting]>;
+    flush: jest.Mock<Promise<void>, []>;
+    populate: jest.Mock<Promise<void>, [unknown, unknown?]>;
+  };
+
   const createDeps = () => {
-    const em = {
-      findOne: jest.fn(),
-      persistAndFlush: jest.fn().mockResolvedValue(undefined),
-      flush: jest.fn().mockResolvedValue(undefined),
-      populate: jest.fn().mockResolvedValue(undefined),
-    } as unknown as EntityManager;
+    const em: EmMock = {
+      findOne: jest.fn<Promise<unknown>, [unknown, unknown?]>(),
+      persistAndFlush: jest
+        .fn<Promise<void>, [Planting]>()
+        .mockResolvedValue(undefined),
+      flush: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+      populate: jest
+        .fn<Promise<void>, [unknown, unknown?]>()
+        .mockResolvedValue(undefined),
+    };
 
     const warningsService = {
       getRulesMap: jest.fn().mockResolvedValue(new Map()),
@@ -41,7 +53,7 @@ describe('PlantingsService transplant lifecycle', () => {
     } as unknown as AnalyticsService;
 
     const service = new PlantingsService(
-      em,
+      em as unknown as EntityManager,
       warningsService,
       actionAutomationService,
       plantingInsightsService,
@@ -50,19 +62,16 @@ describe('PlantingsService transplant lifecycle', () => {
 
     jest
       .spyOn(
-        service as unknown as { serializeWithComputed: () => Promise<{}> },
+        service as unknown as {
+          serializeWithComputed: () => Promise<Record<string, unknown>>;
+        },
         'serializeWithComputed',
       )
       .mockResolvedValue({});
 
     return {
       service,
-      em: em as unknown as {
-        findOne: jest.Mock;
-        persistAndFlush: jest.Mock;
-        flush: jest.Mock;
-        populate: jest.Mock;
-      },
+      em,
       actionAutomationService: actionAutomationService as unknown as {
         recomputeForPlanting: jest.Mock;
       },
@@ -72,7 +81,7 @@ describe('PlantingsService transplant lifecycle', () => {
     };
   };
 
-  const user = { id: 'user-1' } as any;
+  const user = { id: 'user-1' } as User;
 
   const makeBed = (): Bed =>
     ({
@@ -183,8 +192,11 @@ describe('PlantingsService transplant lifecycle', () => {
     });
     const after = Date.now();
 
-    const persisted = em.persistAndFlush.mock.calls[0]?.[0] as Planting;
+    const persisted = em.persistAndFlush.mock.calls[0]?.[0];
     expect(persisted).toBeDefined();
+    if (!persisted) {
+      throw new Error('Persisted planting was not captured');
+    }
     expect(persisted.transplantedAt).toBeInstanceOf(Date);
     expect(persisted.actualStartDate).toBeInstanceOf(Date);
     expect((persisted.transplantedAt as Date).getTime()).toBeGreaterThanOrEqual(
@@ -221,8 +233,11 @@ describe('PlantingsService transplant lifecycle', () => {
     });
     const after = Date.now();
 
-    const persisted = em.persistAndFlush.mock.calls[0]?.[0] as Planting;
+    const persisted = em.persistAndFlush.mock.calls[0]?.[0];
     expect(persisted).toBeDefined();
+    if (!persisted) {
+      throw new Error('Persisted planting was not captured');
+    }
     expect(persisted.sowedAt).toBeInstanceOf(Date);
     expect(persisted.actualStartDate).toBeInstanceOf(Date);
     expect((persisted.sowedAt as Date).getTime()).toBeGreaterThanOrEqual(

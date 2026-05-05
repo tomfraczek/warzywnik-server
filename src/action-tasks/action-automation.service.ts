@@ -9,6 +9,7 @@ import {
   ActionTaskSourceType,
   ActionTaskStatus,
   ActionTaskTargetType,
+  ActionTemplateAggregationScope,
   ActionTemplateTarget,
 } from '../common/enums/action.enums';
 import { VegetableActionRule } from '../vegetables/vegetable-action-rule.entity';
@@ -55,11 +56,31 @@ type DesiredOccurrence = {
   sourceKey: string;
   ruleId?: string;
   templateId?: string;
+  actionTemplateSlug?: string;
   decisionType?: DecisionType;
   reason?: string;
   confidence?: 'low' | 'medium' | 'high';
+  sourceMode: 'ROUTINE_RULE' | 'DECISION_ENGINE';
+  aggregationScope: ActionTemplateAggregationScope;
+  plantingIds: string[];
+  vegetableNames: string[];
   cycleIndex: number;
   dueAt: Date;
+};
+
+type AggregationGroupDebug = {
+  scope: ActionTemplateAggregationScope;
+  groupKey: string;
+  sourceKeys: string[];
+  sourceMode: 'ROUTINE_RULE' | 'DECISION_ENGINE';
+  decisionType: string;
+  templateId?: string;
+  dueDate: string;
+  result: 'AGGREGATED' | 'SKIPPED';
+  reason: string;
+  aggregatedSourceKey?: string;
+  candidateCount: number;
+  affectedPlantingIds: string[];
 };
 
 const MAX_ACTIVE_TASKS_PER_PLANTING = 6;
@@ -225,8 +246,19 @@ export class ActionAutomationService {
           sourceKey: candidate.sourceKey,
           ruleId: candidate.rule.id,
           templateId: candidate.rule.actionTemplate.id,
+          actionTemplateSlug:
+            typeof (candidate.rule.actionTemplate as { slug?: string }).slug ===
+            'string'
+              ? (candidate.rule.actionTemplate as { slug?: string }).slug
+              : undefined,
           decisionType:
             this.resolveDecisionTypeFromTemplate(candidate.rule) ?? undefined,
+          sourceMode: 'ROUTINE_RULE',
+          aggregationScope:
+            candidate.rule.actionTemplate.aggregationScope ??
+            ActionTemplateAggregationScope.NONE,
+          plantingIds: [planting.id],
+          vegetableNames: [planting.vegetable.name],
           cycleIndex: candidate.cycleIndex,
           dueAt: candidate.dueAt,
         }),
@@ -255,29 +287,89 @@ export class ActionAutomationService {
       );
 
       const desiredDecisions: DesiredOccurrence[] = [];
+      const allTemplates = await em.find(ActionTemplate, {});
+      const decisionTemplatesById = new Map<string, ActionTemplate>();
 
       for (const candidate of decisionCandidates) {
         if (routineDecisionTypes.has(candidate.decisionType)) {
           continue;
         }
 
+        const mappedTemplate = this.decisionToTaskMapper.pickTemplate(
+          candidate,
+          allTemplates,
+        );
+
+        if (mappedTemplate) {
+          decisionTemplatesById.set(mappedTemplate.id, mappedTemplate);
+        }
+
         desiredDecisions.push({
           sourceKey: candidate.sourceKey,
-          templateId: undefined,
+          templateId: mappedTemplate?.id,
+          actionTemplateSlug:
+            mappedTemplate?.slug ?? candidate.actionTemplateSlug,
           decisionType: candidate.decisionType,
           reason: candidate.reason,
           confidence: candidate.confidence,
+          sourceMode: 'DECISION_ENGINE',
+          aggregationScope:
+            mappedTemplate?.aggregationScope ??
+            ActionTemplateAggregationScope.NONE,
+          plantingIds: [planting.id],
+          vegetableNames: [planting.vegetable.name],
           cycleIndex: 0,
           dueAt: candidate.dueAt,
         });
       }
 
-      const desired: DesiredOccurrence[] = [
+      const desiredBeforeAggregation: DesiredOccurrence[] = [
         ...guardedRoutine,
         ...desiredDecisions,
       ];
 
+      const templatesById = new Map<string, ActionTemplate>();
+      for (const rule of rules) {
+        templatesById.set(rule.actionTemplate.id, rule.actionTemplate);
+      }
+      for (const [templateId, template] of decisionTemplatesById.entries()) {
+        templatesById.set(templateId, template);
+      }
+
+      const aggregationResult = this.aggregateDesiredOccurrences({
+        user: params.user,
+        planting,
+        desired: desiredBeforeAggregation,
+        templatesById,
+      });
+
+      const desired: DesiredOccurrence[] = aggregationResult.desired;
+
       for (const occurrence of desired) {
+        if (
+          occurrence.aggregationScope !== ActionTemplateAggregationScope.NONE &&
+          occurrence.templateId
+        ) {
+          const template = templatesById.get(occurrence.templateId);
+          if (template) {
+            await this.upsertAggregatedGeneratedTaskAndReminder({
+              user: params.user,
+              planting,
+              template,
+              decisionType: occurrence.decisionType ?? null,
+              dueAt: occurrence.dueAt,
+              sourceKey: occurrence.sourceKey,
+              sourceMode: occurrence.sourceMode,
+              aggregationScope: occurrence.aggregationScope,
+              plantingIds: occurrence.plantingIds,
+              vegetableNames: occurrence.vegetableNames,
+              forceOverrideManual: Boolean(params.forceOverrideManual),
+              em,
+            });
+            continue;
+          }
+        }
+
         if (occurrence.ruleId) {
           const rule = rulesById.get(occurrence.ruleId);
           if (!rule) continue;
@@ -533,15 +625,46 @@ export class ActionAutomationService {
       };
     });
 
+    const desiredRoutineForAggregation: DesiredOccurrence[] =
+      floodFiltered.accepted.map((candidate) => ({
+        sourceKey: candidate.sourceKey,
+        ruleId: candidate.rule.id,
+        templateId: candidate.rule.actionTemplate.id,
+        actionTemplateSlug:
+          typeof (candidate.rule.actionTemplate as { slug?: string }).slug ===
+          'string'
+            ? (candidate.rule.actionTemplate as { slug?: string }).slug
+            : undefined,
+        decisionType:
+          this.resolveDecisionTypeFromTemplate(candidate.rule) ?? undefined,
+        sourceMode: 'ROUTINE_RULE',
+        aggregationScope:
+          candidate.rule.actionTemplate.aggregationScope ??
+          ActionTemplateAggregationScope.NONE,
+        plantingIds: [planting.id],
+        vegetableNames: [planting.vegetable.name],
+        cycleIndex: candidate.cycleIndex,
+        dueAt: candidate.dueAt,
+      }));
+
+    const aggregationDebug = this.aggregateDesiredOccurrences({
+      user: params.user,
+      planting,
+      desired: desiredRoutineForAggregation,
+      templatesById: new Map(
+        rules.map((rule) => [rule.actionTemplate.id, rule.actionTemplate]),
+      ),
+    }).debugGroups;
+
     const decisionContext = await this.decisionContextBuilder.build({
       em: this.em,
       planting,
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
     const decisionTraces = this.decisionEngine.evaluateWithTrace(
       decisionContext,
       Boolean(params.verbose),
-    ) as DecisionEvaluationTrace[];
+    );
 
     const weatherDebug: TaskDecisionsDebugDto['weather']['warnings'] =
       this.debugWeatherWarnings(decisionContext, Boolean(params.verbose));
@@ -778,6 +901,9 @@ export class ActionAutomationService {
       },
       weather: {
         warnings: weatherDebug,
+      },
+      aggregation: {
+        groups: aggregationDebug,
       },
       final: {
         createdTasks,
@@ -1051,6 +1177,378 @@ export class ActionAutomationService {
       task,
       params.rule.actionTemplate,
     );
+  }
+
+  private aggregateDesiredOccurrences(params: {
+    user: User;
+    planting: Planting;
+    desired: DesiredOccurrence[];
+    templatesById: Map<string, ActionTemplate>;
+  }): {
+    desired: DesiredOccurrence[];
+    debugGroups: AggregationGroupDebug[];
+  } {
+    const passthrough: DesiredOccurrence[] = [];
+    const aggregatableGroups = new Map<string, DesiredOccurrence[]>();
+    const debugGroups: AggregationGroupDebug[] = [];
+
+    for (const occurrence of params.desired) {
+      if (!occurrence.templateId) {
+        passthrough.push(occurrence);
+        continue;
+      }
+
+      const template = params.templatesById.get(occurrence.templateId);
+      if (!template) {
+        passthrough.push(occurrence);
+        continue;
+      }
+
+      const scope =
+        template.aggregationScope ?? ActionTemplateAggregationScope.NONE;
+
+      if (scope === ActionTemplateAggregationScope.NONE) {
+        debugGroups.push({
+          scope,
+          groupKey: occurrence.sourceKey,
+          sourceKeys: [occurrence.sourceKey],
+          sourceMode: occurrence.sourceMode,
+          decisionType: occurrence.decisionType ?? 'GENERAL_MONITORING',
+          templateId: template.id,
+          dueDate: occurrence.dueAt.toISOString().slice(0, 10),
+          result: 'SKIPPED',
+          reason: 'aggregation disabled on template',
+          candidateCount: 1,
+          affectedPlantingIds: occurrence.plantingIds,
+        });
+        passthrough.push(occurrence);
+        continue;
+      }
+
+      if (template.requiresUserConfirmation) {
+        debugGroups.push({
+          scope,
+          groupKey: occurrence.sourceKey,
+          sourceKeys: [occurrence.sourceKey],
+          sourceMode: occurrence.sourceMode,
+          decisionType: occurrence.decisionType ?? 'GENERAL_MONITORING',
+          templateId: template.id,
+          dueDate: occurrence.dueAt.toISOString().slice(0, 10),
+          result: 'SKIPPED',
+          reason: 'requiresUserConfirmation=true is not aggregated',
+          candidateCount: 1,
+          affectedPlantingIds: occurrence.plantingIds,
+        });
+        passthrough.push(occurrence);
+        continue;
+      }
+
+      const dateOnly = occurrence.dueAt.toISOString().slice(0, 10);
+      const decisionType = occurrence.decisionType ?? 'GENERAL_MONITORING';
+      const origin = occurrence.sourceMode;
+      const source = ActionTaskSource.VEGETABLE_RULE;
+
+      if (scope === ActionTemplateAggregationScope.BED) {
+        const bedId = params.planting.bed.id;
+        const groupKey = [
+          params.user.id,
+          bedId,
+          dateOnly,
+          template.id,
+          decisionType,
+          source,
+          origin,
+          'AGGREGATE_BED_GROUP',
+        ].join(':');
+        const existing = aggregatableGroups.get(groupKey) ?? [];
+        existing.push({
+          ...occurrence,
+          aggregationScope: ActionTemplateAggregationScope.BED,
+        });
+        aggregatableGroups.set(groupKey, existing);
+        continue;
+      }
+
+      if (scope === ActionTemplateAggregationScope.SPACE) {
+        const growingSpaceId = params.planting.bed.growingSpace.id;
+        const groupKey = [
+          params.user.id,
+          growingSpaceId,
+          dateOnly,
+          template.id,
+          decisionType,
+          source,
+          origin,
+          'AGGREGATE_SPACE_GROUP',
+        ].join(':');
+        const existing = aggregatableGroups.get(groupKey) ?? [];
+        existing.push({
+          ...occurrence,
+          aggregationScope: ActionTemplateAggregationScope.SPACE,
+        });
+        aggregatableGroups.set(groupKey, existing);
+        continue;
+      }
+
+      const groupKey = [
+        params.user.id,
+        dateOnly,
+        template.id,
+        decisionType,
+        source,
+        origin,
+        'AGGREGATE_USER_GROUP',
+      ].join(':');
+      const existing = aggregatableGroups.get(groupKey) ?? [];
+      existing.push({
+        ...occurrence,
+        aggregationScope: ActionTemplateAggregationScope.USER,
+      });
+      aggregatableGroups.set(groupKey, existing);
+    }
+
+    const aggregated: DesiredOccurrence[] = [];
+
+    for (const [groupKey, group] of aggregatableGroups.entries()) {
+      const first = group[0];
+      if (!first) continue;
+      const dateOnly = first.dueAt.toISOString().slice(0, 10);
+      const decisionType = first.decisionType ?? 'GENERAL_MONITORING';
+      const templateId = first.templateId;
+      const sourceMode = first.sourceMode;
+
+      if (!templateId) {
+        passthrough.push(...group);
+        continue;
+      }
+
+      let aggregatedSourceKey = first.sourceKey;
+      if (first.aggregationScope === ActionTemplateAggregationScope.BED) {
+        aggregatedSourceKey = [
+          params.user.id,
+          params.planting.bed.id,
+          dateOnly,
+          templateId,
+          decisionType,
+          sourceMode,
+          'AGGREGATED_BED',
+        ].join(':');
+      } else if (
+        first.aggregationScope === ActionTemplateAggregationScope.SPACE
+      ) {
+        aggregatedSourceKey = [
+          params.user.id,
+          params.planting.bed.growingSpace.id,
+          dateOnly,
+          templateId,
+          decisionType,
+          sourceMode,
+          'AGGREGATED_SPACE',
+        ].join(':');
+      } else if (
+        first.aggregationScope === ActionTemplateAggregationScope.USER
+      ) {
+        aggregatedSourceKey = [
+          params.user.id,
+          dateOnly,
+          templateId,
+          decisionType,
+          sourceMode,
+          'AGGREGATED_USER',
+        ].join(':');
+      }
+
+      const plantingIds = Array.from(
+        new Set(group.flatMap((item) => item.plantingIds)),
+      );
+      const vegetableNames = Array.from(
+        new Set(group.flatMap((item) => item.vegetableNames)),
+      );
+
+      aggregated.push({
+        ...first,
+        sourceKey: aggregatedSourceKey,
+        aggregationScope: first.aggregationScope,
+        plantingIds,
+        vegetableNames,
+        cycleIndex: 0,
+      });
+
+      debugGroups.push({
+        scope: first.aggregationScope,
+        groupKey,
+        sourceKeys: group.map((item) => item.sourceKey),
+        sourceMode,
+        decisionType,
+        templateId,
+        dueDate: dateOnly,
+        result: 'AGGREGATED',
+        reason:
+          group.length > 1
+            ? `aggregated ${group.length} candidates into one task`
+            : 'single candidate normalized as aggregated scope',
+        aggregatedSourceKey,
+        candidateCount: group.length,
+        affectedPlantingIds: plantingIds,
+      });
+    }
+
+    return {
+      desired: [...passthrough, ...aggregated],
+      debugGroups,
+    };
+  }
+
+  private async upsertAggregatedGeneratedTaskAndReminder(params: {
+    user: User;
+    planting: Planting;
+    template: ActionTemplate;
+    decisionType: DecisionType | null;
+    dueAt: Date;
+    sourceKey: string;
+    sourceMode: 'ROUTINE_RULE' | 'DECISION_ENGINE';
+    aggregationScope: ActionTemplateAggregationScope;
+    plantingIds: string[];
+    vegetableNames: string[];
+    forceOverrideManual: boolean;
+    em: EntityManager;
+  }) {
+    const existing = await params.em.findOne(ActionTask, {
+      user: params.user.id,
+      source: ActionTaskSource.VEGETABLE_RULE,
+      sourceKey: params.sourceKey,
+    });
+
+    if (existing) {
+      if (existing.sourceType !== ActionTaskSourceType.AUTOMATION) {
+        return;
+      }
+
+      if (existing.status === ActionTaskStatus.DONE) {
+        return;
+      }
+
+      if (existing.suppressedAt && !params.forceOverrideManual) {
+        return;
+      }
+
+      if (
+        (existing.isManuallyRescheduled || existing.isUserModified) &&
+        !params.forceOverrideManual
+      ) {
+        return;
+      }
+
+      const metadata = existing.metadata ?? {};
+      const existingPlantingIds = Array.isArray(metadata.affectedPlantingIds)
+        ? metadata.affectedPlantingIds.filter(
+            (item): item is string => typeof item === 'string',
+          )
+        : [];
+      const existingVegetables = Array.isArray(metadata.affectedVegetables)
+        ? metadata.affectedVegetables.filter(
+            (item): item is string => typeof item === 'string',
+          )
+        : [];
+
+      const affectedPlantingIds = Array.from(
+        new Set([...existingPlantingIds, ...params.plantingIds]),
+      );
+      const affectedVegetables = Array.from(
+        new Set([...existingVegetables, ...params.vegetableNames]),
+      );
+
+      existing.status = ActionTaskStatus.PENDING;
+      existing.sourceType = ActionTaskSourceType.AUTOMATION;
+      existing.sourceRefId = null;
+      existing.sourceKey = params.sourceKey;
+      existing.dedupeKey = params.sourceKey;
+      existing.cycleIndex = 0;
+      existing.dueAt = params.dueAt;
+      existing.originalDueAt = params.dueAt;
+      existing.generatedAt = new Date();
+      existing.actionTemplate = params.template;
+      existing.title = params.template.name;
+      existing.description = params.template.description ?? null;
+      existing.targetType =
+        params.aggregationScope === ActionTemplateAggregationScope.BED
+          ? ActionTaskTargetType.BED
+          : params.aggregationScope === ActionTemplateAggregationScope.SPACE
+            ? ActionTaskTargetType.SPACE
+            : ActionTaskTargetType.USER;
+      existing.planting = null;
+      existing.bed =
+        params.aggregationScope === ActionTemplateAggregationScope.BED
+          ? params.planting.bed
+          : null;
+      existing.growingSpace =
+        params.aggregationScope === ActionTemplateAggregationScope.SPACE
+          ? params.planting.bed.growingSpace
+          : null;
+      existing.metadata = {
+        ...metadata,
+        decisionType: params.decisionType,
+        actionKind: params.decisionType,
+        sourceKey: params.sourceKey,
+        sourceMode: params.sourceMode,
+        aggregationScope: params.aggregationScope,
+        affectedPlantingIds,
+        affectedVegetables,
+        originPlantingTaskCount: affectedPlantingIds.length,
+      };
+
+      await this.upsertReminderForTask(params.em, existing, params.template);
+      return;
+    }
+
+    const task = new ActionTask();
+    task.user = params.user;
+    task.actionTemplate = params.template;
+    task.title = params.template.name;
+    task.description = params.template.description ?? null;
+    task.status = ActionTaskStatus.PENDING;
+    task.source = ActionTaskSource.VEGETABLE_RULE;
+    task.sourceType = ActionTaskSourceType.AUTOMATION;
+    task.sourceRefId = null;
+    task.sourceKey = params.sourceKey;
+    task.dedupeKey = params.sourceKey;
+    task.cycleIndex = 0;
+    task.dueAt = params.dueAt;
+    task.originalDueAt = params.dueAt;
+    task.isManuallyRescheduled = false;
+    task.isUserModified = false;
+    task.suppressedAt = null;
+    task.generatedAt = new Date();
+    task.targetType =
+      params.aggregationScope === ActionTemplateAggregationScope.BED
+        ? ActionTaskTargetType.BED
+        : params.aggregationScope === ActionTemplateAggregationScope.SPACE
+          ? ActionTaskTargetType.SPACE
+          : ActionTaskTargetType.USER;
+    task.planting = null;
+    task.bed =
+      params.aggregationScope === ActionTemplateAggregationScope.BED
+        ? params.planting.bed
+        : null;
+    task.growingSpace =
+      params.aggregationScope === ActionTemplateAggregationScope.SPACE
+        ? params.planting.bed.growingSpace
+        : null;
+    task.metadata = {
+      decisionType: params.decisionType,
+      actionKind: params.decisionType,
+      sourceKey: params.sourceKey,
+      sourceMode: params.sourceMode,
+      aggregationScope: params.aggregationScope,
+      affectedPlantingIds: Array.from(new Set(params.plantingIds)),
+      affectedVegetables: Array.from(new Set(params.vegetableNames)),
+      originPlantingTaskCount: Array.from(new Set(params.plantingIds)).length,
+    };
+
+    params.em.persist(task);
+    await params.em.flush();
+
+    await this.upsertReminderForTask(params.em, task, params.template);
   }
 
   private async upsertReminderForTask(
@@ -1524,11 +2022,7 @@ export class ActionAutomationService {
       planting: params.planting,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const traces = this.decisionEngine.evaluateWithTrace(
-      context,
-      false,
-    ) as DecisionEvaluationTrace[];
+    const traces = this.decisionEngine.evaluateWithTrace(context, false);
     const candidates: DecisionCandidate[] = [];
     for (const trace of traces) {
       if (trace.result === 'CREATED' && trace.candidate) {

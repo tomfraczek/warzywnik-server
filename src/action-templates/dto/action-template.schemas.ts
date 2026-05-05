@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  ActionTemplateAggregationScope,
   ActionTemplateEnvironment,
   ActionTemplateGenerationMode,
   ActionTemplatePriority,
@@ -15,6 +16,7 @@ export type ActionTemplateBaseDto = {
   type?: ActionTemplateType;
   generationMode?: ActionTemplateGenerationMode;
   priority?: ActionTemplatePriority;
+  aggregationScope?: ActionTemplateAggregationScope;
   maxAutoOccurrencesPerPlanting?: number | null;
   minDaysBetweenOccurrences?: number | null;
   requiresUserConfirmation?: boolean;
@@ -48,6 +50,7 @@ const baseActionTemplateSchema = z.object({
   type: z.nativeEnum(ActionTemplateType).optional(),
   generationMode: z.nativeEnum(ActionTemplateGenerationMode).optional(),
   priority: z.nativeEnum(ActionTemplatePriority).optional(),
+  aggregationScope: z.nativeEnum(ActionTemplateAggregationScope).optional(),
   maxAutoOccurrencesPerPlanting: z
     .union([z.coerce.number().int().min(1), z.null()])
     .optional(),
@@ -63,6 +66,9 @@ export const createActionTemplateSchema = baseActionTemplateSchema.extend({
   target: baseActionTemplateSchema.shape.target.unwrap(),
   environment: baseActionTemplateSchema.shape.environment.default(
     ActionTemplateEnvironment.ANY,
+  ),
+  aggregationScope: baseActionTemplateSchema.shape.aggregationScope.default(
+    ActionTemplateAggregationScope.NONE,
   ),
   type: baseActionTemplateSchema.shape.type.unwrap(),
 });

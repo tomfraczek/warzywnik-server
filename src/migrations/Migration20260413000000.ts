@@ -1,7 +1,7 @@
 import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20260413000000 extends Migration {
-  async up(): Promise<void> {
+  up(): void {
     // Add new slug columns
     this.addSql(`
       ALTER TABLE "articles"
@@ -69,7 +69,7 @@ export class Migration20260413000000 extends Migration {
     `);
   }
 
-  async down(): Promise<void> {
+  down(): void {
     this.addSql(`
       ALTER TABLE "articles"
         ADD COLUMN IF NOT EXISTS "related_vegetable_ids"   text[] NOT NULL DEFAULT '{}',

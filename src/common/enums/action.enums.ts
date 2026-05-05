@@ -28,6 +28,13 @@ export enum ActionTemplatePriority {
   CRITICAL = 'critical',
 }
 
+export enum ActionTemplateAggregationScope {
+  NONE = 'none',
+  BED = 'bed',
+  SPACE = 'space',
+  USER = 'user',
+}
+
 export enum ActionTemplateType {
   SOWING = 'sowing',
   TRANSPLANTING = 'transplanting',

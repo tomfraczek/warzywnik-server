@@ -2,6 +2,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { ActionTemplate } from './action-template.entity';
 import actionTemplatesSeedData from './default-action-templates.seed-data.json';
 import {
+  ActionTemplateAggregationScope,
   ActionTemplateEnvironment,
   ActionTemplateGenerationMode,
   ActionTemplatePriority,
@@ -18,6 +19,7 @@ type ActionTemplateSeedRecord = {
   type: ActionTemplateType;
   generationMode?: ActionTemplateGenerationMode;
   priority?: ActionTemplatePriority;
+  aggregationScope?: ActionTemplateAggregationScope;
   maxAutoOccurrencesPerPlanting?: number | null;
   minDaysBetweenOccurrences?: number | null;
   requiresUserConfirmation?: boolean;
@@ -42,6 +44,8 @@ export const upsertDefaultActionTemplates = async (
       existingBySlug.generationMode =
         item.generationMode ?? ActionTemplateGenerationMode.AUTO;
       existingBySlug.priority = item.priority ?? ActionTemplatePriority.MEDIUM;
+      existingBySlug.aggregationScope =
+        item.aggregationScope ?? ActionTemplateAggregationScope.NONE;
       existingBySlug.maxAutoOccurrencesPerPlanting =
         item.maxAutoOccurrencesPerPlanting ?? null;
       existingBySlug.minDaysBetweenOccurrences =
@@ -66,6 +70,8 @@ export const upsertDefaultActionTemplates = async (
       existingExact.generationMode =
         item.generationMode ?? ActionTemplateGenerationMode.AUTO;
       existingExact.priority = item.priority ?? ActionTemplatePriority.MEDIUM;
+      existingExact.aggregationScope =
+        item.aggregationScope ?? ActionTemplateAggregationScope.NONE;
       existingExact.maxAutoOccurrencesPerPlanting =
         item.maxAutoOccurrencesPerPlanting ?? null;
       existingExact.minDaysBetweenOccurrences =
@@ -89,6 +95,8 @@ export const upsertDefaultActionTemplates = async (
       existingByName.generationMode =
         item.generationMode ?? ActionTemplateGenerationMode.AUTO;
       existingByName.priority = item.priority ?? ActionTemplatePriority.MEDIUM;
+      existingByName.aggregationScope =
+        item.aggregationScope ?? ActionTemplateAggregationScope.NONE;
       existingByName.maxAutoOccurrencesPerPlanting =
         item.maxAutoOccurrencesPerPlanting ?? null;
       existingByName.minDaysBetweenOccurrences =
@@ -110,6 +118,8 @@ export const upsertDefaultActionTemplates = async (
     template.generationMode =
       item.generationMode ?? ActionTemplateGenerationMode.AUTO;
     template.priority = item.priority ?? ActionTemplatePriority.MEDIUM;
+    template.aggregationScope =
+      item.aggregationScope ?? ActionTemplateAggregationScope.NONE;
     template.maxAutoOccurrencesPerPlanting =
       item.maxAutoOccurrencesPerPlanting ?? null;
     template.minDaysBetweenOccurrences = item.minDaysBetweenOccurrences ?? null;

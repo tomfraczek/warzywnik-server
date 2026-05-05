@@ -1,6 +1,5 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ActionAutomationService } from './action-automation.service';
-import { User } from '../users/user.entity';
 
 @Controller('v1/action-automation')
 export class ActionAutomationController {
@@ -9,7 +8,7 @@ export class ActionAutomationController {
   ) {}
 
   @Get('coverage')
-  getCoverage(@Req() _req: { userEntity?: User }) {
+  getCoverage() {
     return this.actionAutomationService.getCoverage();
   }
 }

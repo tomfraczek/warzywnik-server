@@ -64,6 +64,22 @@ export type TaskDecisionsDebugDto = {
       details?: Record<string, unknown>;
     }>;
   };
+  aggregation: {
+    groups: Array<{
+      scope: 'none' | 'bed' | 'space' | 'user';
+      groupKey: string;
+      sourceKeys: string[];
+      sourceMode: 'ROUTINE_RULE' | 'DECISION_ENGINE';
+      decisionType: string;
+      templateId?: string;
+      dueDate: string;
+      result: 'AGGREGATED' | 'SKIPPED';
+      reason: string;
+      aggregatedSourceKey?: string;
+      candidateCount: number;
+      affectedPlantingIds: string[];
+    }>;
+  };
   final: {
     createdTasks: Array<{
       decisionType: string;

@@ -1,7 +1,7 @@
 import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20260420010000 extends Migration {
-  async up(): Promise<void> {
+  up(): void {
     this.addSql(
       `create table "favorites" (
         "id" uuid not null default gen_random_uuid(),
@@ -86,7 +86,7 @@ export class Migration20260420010000 extends Migration {
     );
   }
 
-  async down(): Promise<void> {
+  down(): void {
     this.addSql(`drop table if exists "vegetable_popularity" cascade;`);
     this.addSql(`drop table if exists "article_metrics" cascade;`);
     this.addSql(`drop table if exists "analytics_events" cascade;`);

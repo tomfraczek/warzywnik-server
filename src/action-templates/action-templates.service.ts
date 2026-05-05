@@ -6,6 +6,7 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ActionTemplate } from './action-template.entity';
 import {
+  ActionTemplateAggregationScope,
   ActionTemplateEnvironment,
   ActionTemplateGenerationMode,
   ActionTemplatePriority,
@@ -75,6 +76,8 @@ export class ActionTemplatesService {
     template.generationMode =
       dto.generationMode ?? ActionTemplateGenerationMode.AUTO;
     template.priority = dto.priority ?? ActionTemplatePriority.MEDIUM;
+    template.aggregationScope =
+      dto.aggregationScope ?? ActionTemplateAggregationScope.NONE;
     template.maxAutoOccurrencesPerPlanting =
       dto.maxAutoOccurrencesPerPlanting ?? null;
     template.minDaysBetweenOccurrences = dto.minDaysBetweenOccurrences ?? null;
@@ -132,6 +135,10 @@ export class ActionTemplatesService {
       template.priority = dto.priority;
     }
 
+    if (dto.aggregationScope !== undefined) {
+      template.aggregationScope = dto.aggregationScope;
+    }
+
     if (dto.maxAutoOccurrencesPerPlanting !== undefined) {
       template.maxAutoOccurrencesPerPlanting =
         dto.maxAutoOccurrencesPerPlanting;
@@ -187,6 +194,7 @@ export class ActionTemplatesService {
       type: entity.type,
       generationMode: entity.generationMode,
       priority: entity.priority,
+      aggregationScope: entity.aggregationScope,
       maxAutoOccurrencesPerPlanting:
         entity.maxAutoOccurrencesPerPlanting ?? null,
       minDaysBetweenOccurrences: entity.minDaysBetweenOccurrences ?? null,

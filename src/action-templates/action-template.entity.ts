@@ -8,6 +8,7 @@ import {
   TextType,
 } from '@mikro-orm/core';
 import {
+  ActionTemplateAggregationScope,
   ActionTemplateEnvironment,
   ActionTemplateGenerationMode,
   ActionTemplatePriority,
@@ -46,6 +47,10 @@ export class ActionTemplate {
 
   @Enum({ items: () => ActionTemplatePriority })
   priority: ActionTemplatePriority = ActionTemplatePriority.MEDIUM;
+
+  @Enum({ items: () => ActionTemplateAggregationScope })
+  aggregationScope: ActionTemplateAggregationScope =
+    ActionTemplateAggregationScope.NONE;
 
   @Property({ type: 'int', nullable: true })
   maxAutoOccurrencesPerPlanting?: number | null;
