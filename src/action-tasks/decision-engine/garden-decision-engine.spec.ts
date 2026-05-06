@@ -151,6 +151,94 @@ describe('GardenDecisionEngine', () => {
     );
   });
 
+  it('blocks watering when recent moisture check is wet', () => {
+    const engine = new GardenDecisionEngine();
+    const context = makeContext({
+      planting: {
+        ...makeContext().planting,
+        vegetable: { waterDemand: 'high', commonPests: [], commonDiseases: [] },
+      } as never,
+      recentCompletedActionEvents: [
+        {
+          eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+          eventTime: now,
+          payload: {
+            decisionType: 'MOISTURE_CHECK',
+            metadata: { moistureLevel: 'wet' },
+          },
+        } as never,
+      ],
+      recentPrecipMm24h: 0,
+      recentPrecipMm72h: 0,
+      forecastPrecipMm48h: 0,
+      forecastMaxTemp24h: 33,
+    });
+
+    const decisions = engine.evaluate(context);
+    expect(decisions.some((item) => item.decisionType === 'WATERING')).toBe(
+      false,
+    );
+  });
+
+  it('allows watering when recent moisture check is dry', () => {
+    const engine = new GardenDecisionEngine();
+    const context = makeContext({
+      planting: {
+        ...makeContext().planting,
+        vegetable: { waterDemand: 'high', commonPests: [], commonDiseases: [] },
+      } as never,
+      recentCompletedActionEvents: [
+        {
+          eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+          eventTime: now,
+          payload: {
+            decisionType: 'MOISTURE_CHECK',
+            metadata: { moistureLevel: 'dry' },
+          },
+        } as never,
+      ],
+      recentPrecipMm24h: 1,
+      recentPrecipMm72h: 6,
+      forecastPrecipMm48h: 1,
+      forecastMaxTemp24h: 27,
+    });
+
+    const decisions = engine.evaluate(context);
+    expect(decisions.some((item) => item.decisionType === 'WATERING')).toBe(
+      true,
+    );
+  });
+
+  it('bed-scope watering quick action blocks watering for planting', () => {
+    const engine = new GardenDecisionEngine();
+    const context = makeContext({
+      planting: {
+        ...makeContext().planting,
+        vegetable: { waterDemand: 'high', commonPests: [], commonDiseases: [] },
+      } as never,
+      recentCompletedActionEvents: [
+        {
+          eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+          eventTime: now,
+          payload: {
+            actionKind: 'WATERING',
+            scope: 'bed',
+            decisionType: 'WATERING',
+          },
+        } as never,
+      ],
+      recentPrecipMm24h: 0,
+      recentPrecipMm72h: 0,
+      forecastPrecipMm48h: 0,
+      forecastMaxTemp24h: 32,
+    });
+
+    const decisions = engine.evaluate(context);
+    expect(decisions.some((item) => item.decisionType === 'WATERING')).toBe(
+      false,
+    );
+  });
+
   it('READY_FOR_FINAL_HARVEST returns harvest check without baseline moisture task', () => {
     const engine = new GardenDecisionEngine();
     const context = makeContext({

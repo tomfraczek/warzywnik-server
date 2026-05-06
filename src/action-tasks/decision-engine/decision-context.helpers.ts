@@ -4,6 +4,7 @@ import { PlantingEventType } from '../../common/enums/planting-event.enums';
 import { DecisionType, PlantingDecisionContext } from './decision.types';
 import { mapActionTemplateTypeToDecisionType } from './decision-kind.util';
 import { toDateOnlyInTimezone } from '../../common/types/date-utils';
+import { mapQuickActionKindToDecisionType } from '../../common/enums/quick-action.enums';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -22,9 +23,40 @@ const eventDecisionType = (event: PlantingEvent): DecisionType | null => {
     return payloadDecisionType as DecisionType;
   }
 
+  const actionKind = event.payload?.actionKind;
+  if (typeof actionKind === 'string') {
+    return mapQuickActionKindToDecisionType(actionKind) as DecisionType | null;
+  }
+
   const actionType = event.payload?.actionType;
   if (typeof actionType === 'string') {
     return mapActionTemplateTypeToDecisionType(actionType);
+  }
+
+  return null;
+};
+
+export const latestMoistureLevel = (
+  context: PlantingDecisionContext,
+): 'dry' | 'ok' | 'wet' | null => {
+  const latest = context.recentCompletedActionEvents
+    .filter(
+      (event) =>
+        event.eventType === PlantingEventType.PLANTING_ACTION_COMPLETED &&
+        eventDecisionType(event) === 'MOISTURE_CHECK',
+    )
+    .sort((a, b) => b.eventTime.getTime() - a.eventTime.getTime())[0];
+
+  const metadata = latest?.payload?.metadata as
+    | Record<string, unknown>
+    | undefined;
+  const moistureLevel = metadata?.moistureLevel;
+  if (
+    moistureLevel === 'dry' ||
+    moistureLevel === 'ok' ||
+    moistureLevel === 'wet'
+  ) {
+    return moistureLevel;
   }
 
   return null;

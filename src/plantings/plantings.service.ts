@@ -9,6 +9,7 @@ import { HarvestResult } from './harvest-result.entity';
 import { Bed } from '../beds/bed.entity';
 import { Vegetable } from '../vegetables/vegetable.entity';
 import {
+  CreatePlantingQuickActionDto,
   CreateHarvestResultDto,
   CreatePlantingDto,
   HarvestResultDto,
@@ -41,11 +42,17 @@ import { ActionAutomationService } from '../action-tasks/action-automation.servi
 import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
 import { PlantingEventType } from '../common/enums/planting-event.enums';
 import { AnalyticsService } from '../analytics/analytics.service';
+import { PlantingEvent } from '../planting-insights/planting-event.entity';
 import {
   ACTIVE_PLANTING_STATUSES,
   getAllowedStatusTransitions,
   isStatusAllowedForStartMethod,
 } from './planting-lifecycle';
+import {
+  mapQuickActionKindToActionType,
+  mapQuickActionKindToDecisionType,
+  QuickActionScope,
+} from '../common/enums/quick-action.enums';
 
 type WarningResult = WarningOutput;
 
@@ -685,6 +692,119 @@ export class PlantingsService {
     await this.em.flush();
 
     return this.serializePlanting(planting);
+  }
+
+  async createQuickAction(
+    user: User,
+    plantingId: string,
+    dto: CreatePlantingQuickActionDto,
+  ) {
+    const planting = await this.em.findOne(
+      Planting,
+      { id: plantingId, user: user.id },
+      { populate: ['bed', 'vegetable'] },
+    );
+
+    if (!planting) {
+      throw new NotFoundException('Planting not found');
+    }
+
+    const occurredAt = dto.occurredAt
+      ? this.parseDate(dto.occurredAt, 'occurredAt')
+      : new Date();
+
+    const metadata: Record<string, unknown> = {
+      note: dto.note,
+    };
+
+    const decisionType = mapQuickActionKindToDecisionType(dto.actionKind);
+    const actionType = mapQuickActionKindToActionType(dto.actionKind);
+
+    await this.plantingInsightsService.recordEvent({
+      plantingId: planting.id,
+      userId: user.id,
+      bedId: planting.bed.id,
+      vegetableId: planting.vegetable.id,
+      eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+      eventTime: occurredAt,
+      payload: {
+        actionKind: dto.actionKind,
+        scope: QuickActionScope.PLANTING,
+        decisionType,
+        actionType,
+        metadata,
+      },
+    });
+
+    await this.actionAutomationService.recomputeForPlanting({
+      user,
+      plantingId: planting.id,
+      reason: 'PLANTING_QUICK_ACTION_NOTE',
+    });
+
+    return {
+      plantingId: planting.id,
+      actionKind: dto.actionKind,
+      occurredAt,
+      lifecycleStatus: planting.status,
+    };
+  }
+
+  async getQuickActionNotes(user: User, plantingId: string) {
+    const planting = await this.em.findOne(Planting, {
+      id: plantingId,
+      user: user.id,
+    });
+
+    if (!planting) {
+      throw new NotFoundException('Planting not found');
+    }
+
+    const events = await this.em.find(
+      PlantingEvent,
+      {
+        planting: planting.id,
+        userId: user.id,
+        eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+      },
+      { orderBy: { eventTime: 'desc' } },
+    );
+
+    const items = events
+      .map((event) => {
+        const actionKind = event.payload?.actionKind;
+        const scope = event.payload?.scope;
+        const metadata = event.payload?.metadata as
+          | Record<string, unknown>
+          | undefined;
+        const note = metadata?.note;
+
+        if (actionKind !== 'NOTE') {
+          return null;
+        }
+
+        if (scope !== QuickActionScope.PLANTING) {
+          return null;
+        }
+
+        if (typeof note !== 'string' || note.trim().length === 0) {
+          return null;
+        }
+
+        return {
+          id: event.id,
+          occurredAt: event.eventTime,
+          note,
+          scope,
+          actionKind,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+
+    return {
+      plantingId: planting.id,
+      items,
+    };
   }
 
   async createHarvestResult(

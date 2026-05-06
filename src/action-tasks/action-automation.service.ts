@@ -51,6 +51,7 @@ import {
   getLocalDate,
   localDatePlusDays,
 } from '../weather/warnings/weather-warning.types';
+import { hasCompletedDecisionToday } from './decision-engine/decision-context.helpers';
 
 type DesiredOccurrence = {
   sourceKey: string;
@@ -280,8 +281,19 @@ export class ActionAutomationService {
         ? desiredRoutine.filter((item) => item.decisionType !== 'WATERING')
         : desiredRoutine;
 
+      const dedupedRoutine = guardedRoutine.filter((item) => {
+        if (!item.decisionType) {
+          return true;
+        }
+
+        return !hasCompletedDecisionToday(
+          decisionEvaluation.context,
+          item.decisionType,
+        );
+      });
+
       const routineDecisionTypes = new Set(
-        guardedRoutine
+        dedupedRoutine
           .map((item) => item.decisionType)
           .filter((value): value is DecisionType => Boolean(value)),
       );
@@ -324,7 +336,7 @@ export class ActionAutomationService {
       }
 
       const desiredBeforeAggregation: DesiredOccurrence[] = [
-        ...guardedRoutine,
+        ...dedupedRoutine,
         ...desiredDecisions,
       ];
 

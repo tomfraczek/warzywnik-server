@@ -10,6 +10,7 @@ import { WarningInstance } from '../weather/warnings/warning-instance.entity';
 import { ActionTask } from '../action-tasks/action-task.entity';
 import { ActionTaskStatus } from '../common/enums/action.enums';
 import {
+  CreateBedQuickActionDto,
   CreateBedDto,
   ListBedsQueryDto,
   UpdateBedDto,
@@ -24,13 +25,172 @@ import { PlantingDisease } from '../planting-diseases/planting-disease.entity';
 import { PestOccurrence } from '../pest-occurrences/pest-occurrence.entity';
 import { Reminder } from '../reminders/reminder.entity';
 import { ReminderStatus } from '../common/enums/reminder.enums';
+import {
+  mapQuickActionKindToActionType,
+  mapQuickActionKindToDecisionType,
+  QuickActionScope,
+} from '../common/enums/quick-action.enums';
+import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
+import { PlantingEventType } from '../common/enums/planting-event.enums';
+import { ActionAutomationService } from '../action-tasks/action-automation.service';
+import { PlantingEvent } from '../planting-insights/planting-event.entity';
 
 @Injectable()
 export class BedsService {
   constructor(
     private readonly em: EntityManager,
     private readonly weatherRecomputeService: WeatherRecomputeService,
+    private readonly plantingInsightsService: PlantingInsightsService,
+    private readonly actionAutomationService: ActionAutomationService,
   ) {}
+
+  async createQuickAction(
+    user: User,
+    bedId: string,
+    dto: CreateBedQuickActionDto,
+  ) {
+    const bed = await this.em.findOne(Bed, { id: bedId, user: user.id });
+
+    if (!bed) {
+      throw new NotFoundException('Bed not found');
+    }
+
+    const occurredAt = dto.occurredAt
+      ? this.parseDate(dto.occurredAt, 'occurredAt')
+      : new Date();
+
+    const plantings = await this.em.find(
+      Planting,
+      {
+        user: user.id,
+        bed: bed.id,
+      },
+      { populate: ['vegetable'] },
+    );
+
+    const decisionType = mapQuickActionKindToDecisionType(dto.actionKind);
+    const actionType = mapQuickActionKindToActionType(dto.actionKind);
+
+    const metadata: Record<string, unknown> = {};
+    if (dto.moistureLevel !== undefined)
+      metadata.moistureLevel = dto.moistureLevel;
+    if (dto.note !== undefined) metadata.note = dto.note;
+
+    for (const planting of plantings) {
+      await this.plantingInsightsService.recordEvent({
+        plantingId: planting.id,
+        userId: user.id,
+        bedId: bed.id,
+        vegetableId: planting.vegetable.id,
+        eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+        eventTime: occurredAt,
+        payload: {
+          actionKind: dto.actionKind,
+          scope: QuickActionScope.BED,
+          decisionType,
+          actionType,
+          metadata,
+        },
+      });
+    }
+
+    for (const planting of plantings) {
+      await this.actionAutomationService.recomputeForPlanting({
+        user,
+        plantingId: planting.id,
+        reason: `BED_QUICK_ACTION_${dto.actionKind}`,
+      });
+    }
+
+    return {
+      bedId: bed.id,
+      actionKind: dto.actionKind,
+      occurredAt,
+      eventsRecorded: plantings.length,
+      recomputedPlantingIds: plantings.map((planting) => planting.id),
+    };
+  }
+
+  async getQuickActionNotes(user: User, bedId: string) {
+    const bed = await this.em.findOne(Bed, { id: bedId, user: user.id });
+
+    if (!bed) {
+      throw new NotFoundException('Bed not found');
+    }
+
+    const events = await this.em.find(
+      PlantingEvent,
+      {
+        userId: user.id,
+        bedId: bed.id,
+        eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+      },
+      {
+        populate: ['planting'],
+        orderBy: { eventTime: 'desc' },
+      },
+    );
+
+    const grouped = new Map<
+      string,
+      {
+        id: string;
+        occurredAt: Date;
+        note: string;
+        scope: QuickActionScope.BED;
+        actionKind: 'NOTE';
+        plantingIds: Set<string>;
+      }
+    >();
+
+    for (const event of events) {
+      const actionKind = event.payload?.actionKind;
+      const scope = event.payload?.scope;
+      const metadata = event.payload?.metadata as
+        | Record<string, unknown>
+        | undefined;
+      const note = metadata?.note;
+
+      if (actionKind !== 'NOTE' || scope !== QuickActionScope.BED) {
+        continue;
+      }
+
+      if (typeof note !== 'string' || note.trim().length === 0) {
+        continue;
+      }
+
+      const groupKey = `${event.eventTime.toISOString()}::${note}`;
+      const existing = grouped.get(groupKey);
+
+      if (!existing) {
+        grouped.set(groupKey, {
+          id: event.id,
+          occurredAt: event.eventTime,
+          note,
+          scope: QuickActionScope.BED,
+          actionKind: 'NOTE',
+          plantingIds: new Set(event.planting?.id ? [event.planting.id] : []),
+        });
+        continue;
+      }
+
+      if (event.planting?.id) {
+        existing.plantingIds.add(event.planting.id);
+      }
+    }
+
+    return {
+      bedId: bed.id,
+      items: Array.from(grouped.values()).map((item) => ({
+        id: item.id,
+        occurredAt: item.occurredAt,
+        note: item.note,
+        scope: item.scope,
+        actionKind: item.actionKind,
+        plantingIds: Array.from(item.plantingIds),
+      })),
+    };
+  }
 
   async list(user: User, query: ListBedsQueryDto) {
     const { page, limit, q, isActive } = query;
@@ -382,5 +542,13 @@ export class BedsService {
     await this.em.flush();
 
     return createdDefault;
+  }
+
+  private parseDate(value: string, field: string) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      throw new BadRequestException(`${field} must be a valid ISO date`);
+    }
+    return date;
   }
 }

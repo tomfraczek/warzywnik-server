@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import { CultivationEnvironment } from '../../common/enums/bed.enums';
+import {
+  BedQuickActionKind,
+  QuickActionMoistureLevel,
+} from '../../common/enums/quick-action.enums';
 
 export type BedBaseDto = {
   name?: string;
@@ -31,6 +35,13 @@ export type ListBedsQueryDto = {
   limit: number;
   q?: string;
   isActive?: boolean;
+};
+
+export type CreateBedQuickActionDto = {
+  actionKind: BedQuickActionKind;
+  occurredAt?: string;
+  note?: string;
+  moistureLevel?: QuickActionMoistureLevel;
 };
 
 const nameSchema = z.string().min(1).max(120);
@@ -70,4 +81,11 @@ export const listBedsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   q: z.string().min(1).optional(),
   isActive: z.coerce.boolean().optional(),
+});
+
+export const createBedQuickActionSchema = z.object({
+  actionKind: z.nativeEnum(BedQuickActionKind),
+  occurredAt: z.string().datetime().optional(),
+  note: z.string().trim().min(1).optional(),
+  moistureLevel: z.nativeEnum(QuickActionMoistureLevel).optional(),
 });

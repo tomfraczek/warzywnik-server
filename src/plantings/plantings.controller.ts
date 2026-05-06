@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { PlantingsService } from './plantings.service';
 import {
+  createPlantingQuickActionSchema,
   createHarvestResultSchema,
   createPlantingTimelineSchema,
   getPlantingQuerySchema,
@@ -25,6 +26,7 @@ import {
   updateHarvestResultSchema,
   updatePlantingTimelineSchema,
   CreateHarvestResultDto,
+  CreatePlantingQuickActionDto,
   CreatePlantingDto,
   GetPlantingQueryDto,
   HarvestResultDto,
@@ -150,6 +152,31 @@ export class PlantingsController {
       req.userEntity as User,
       id,
       body,
+    );
+  }
+
+  @Post(':id/quick-actions')
+  createQuickAction(
+    @Req() req: { userEntity?: User },
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body(new ZodValidationPipe(createPlantingQuickActionSchema))
+    body: CreatePlantingQuickActionDto,
+  ) {
+    return this.plantingsService.createQuickAction(
+      req.userEntity as User,
+      id,
+      body,
+    );
+  }
+
+  @Get(':id/quick-actions/notes')
+  getQuickActionNotes(
+    @Req() req: { userEntity?: User },
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    return this.plantingsService.getQuickActionNotes(
+      req.userEntity as User,
+      id,
     );
   }
 

@@ -129,6 +129,28 @@ Parametry `GET /v1/beds/:bedId/action-tasks`:
 - kontroler: [src/weather/weather.controller.ts](src/weather/weather.controller.ts)
 - agregacja: [src/weather/weather-recompute.service.ts](src/weather/weather-recompute.service.ts)
 
+## 4.4 Quick actions (source of truth, bez tworzenia tasków)
+
+Quick actions zapisują zdarzenia użytkownika w timeline (`PLANTING_ACTION_COMPLETED`) i uruchamiają recompute, ale:
+
+- nie tworzą action tasków,
+- nie oznaczają istniejących tasków jako `DONE`,
+- nie zastępują flow dodawania rekordów zbioru.
+
+Endpointy quick actions:
+
+- `POST /v1/beds/:bedId/quick-actions`
+  - `WATERING`, `WEEDING`, `MOISTURE_CHECK`, `NOTE`
+- `POST /v1/plantings/:plantingId/quick-actions`
+  - tylko `NOTE`
+
+Dodawanie zbiorów/plonów pozostaje w istniejącym systemie harvest records:
+
+- `POST /v1/plantings/:id/harvest-results`
+- `PATCH /v1/plantings/:id/harvest-results/:recordId`
+- `DELETE /v1/plantings/:id/harvest-results/:recordId`
+- (legacy) `PATCH /v1/plantings/:id/harvest-result`
+
 ---
 
 ## 5. Kiedy uruchamia się generowanie

@@ -27,7 +27,7 @@ export class PlantingDecisionContextBuilder {
       activeWarnings,
       pendingTasks,
       canceledTasks,
-      completedEvents,
+      completedEventsRaw,
     ] = await Promise.all([
       params.em.findOne(
         WeatherSnapshot,
@@ -66,11 +66,20 @@ export class PlantingDecisionContextBuilder {
         { populate: ['actionTemplate', 'planting'] },
       ),
       params.em.find(PlantingEvent, {
-        planting: params.planting.id,
+        userId: params.planting.user.id,
+        bedId: params.planting.bed.id,
         eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
-        eventTime: { $gte: since72h },
+        eventTime: { $gte: since7d },
       }),
     ]);
+
+    const completedEvents = completedEventsRaw.filter((event) => {
+      if (event.planting?.id === params.planting.id) {
+        return true;
+      }
+
+      return event.payload?.scope === 'bed';
+    });
 
     const weatherDaily = latestWeatherSnapshot?.data?.daily ?? [];
     const weatherHourly = latestWeatherSnapshot?.data?.hourly ?? [];

@@ -11,6 +11,7 @@ import {
   hasPendingDecisionTask,
   hasRecentCanceledDecisionTask,
   lastCompletedDecisionAt,
+  latestMoistureLevel,
 } from '../decision-context.helpers';
 import { normalizeDueAt } from '../../../common/types/date-utils';
 import {
@@ -51,6 +52,16 @@ export class WateringDecisionEvaluator implements DecisionEvaluator {
     }
 
     const highHeat = (context.forecastMaxTemp24h ?? 0) >= 30;
+    const moistureLevel = latestMoistureLevel(context);
+
+    if (moistureLevel === 'wet') {
+      return {
+        evaluator: 'WateringDecisionEvaluator',
+        decisionType: 'WATERING',
+        result: 'SKIPPED',
+        reason: 'skipped: recent moisture check indicates wet soil',
+      };
+    }
 
     if (hasCompletedDecisionYesterday(context, 'WATERING') && !highHeat) {
       return {
@@ -92,7 +103,9 @@ export class WateringDecisionEvaluator implements DecisionEvaluator {
       noForecastRain &&
       !highHeat;
 
-    if (uncertainWatering) {
+    const moistureDryBoost = moistureLevel === 'dry' ? 3 : 0;
+
+    if (uncertainWatering && moistureLevel !== 'dry') {
       return {
         evaluator: 'WateringDecisionEvaluator',
         decisionType: 'WATERING',
@@ -111,6 +124,7 @@ export class WateringDecisionEvaluator implements DecisionEvaluator {
       (noForecastRain ? 2 : 0) +
       (highHeat ? 2 : 0) +
       (daysSinceWatering >= 2 ? 2 : 0) +
+      moistureDryBoost +
       demandBoost -
       retentionPenalty -
       drainagePenalty;
@@ -132,6 +146,7 @@ export class WateringDecisionEvaluator implements DecisionEvaluator {
               forecastPrecipMm48h: context.forecastPrecipMm48h,
               forecastMaxTemp24h: context.forecastMaxTemp24h,
               daysSinceWatering,
+              moistureLevel,
             }
           : undefined,
       };
@@ -168,6 +183,7 @@ export class WateringDecisionEvaluator implements DecisionEvaluator {
             forecastPrecipMm48h: context.forecastPrecipMm48h,
             forecastMaxTemp24h: context.forecastMaxTemp24h,
             daysSinceWatering,
+            moistureLevel,
           }
         : undefined,
       candidate,

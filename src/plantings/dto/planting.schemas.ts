@@ -3,6 +3,7 @@ import {
   PlantingStartMethod,
   PlantingStatus,
 } from '../../common/enums/planting.enums';
+import { PlantingQuickActionKind } from '../../common/enums/quick-action.enums';
 
 export type PlantingBaseDto = {
   bedId?: string;
@@ -48,6 +49,12 @@ export type RecomputePlantingActionsDto = {
 
 export type TaskDecisionsDebugQueryDto = {
   verbose?: boolean;
+};
+
+export type CreatePlantingQuickActionDto = {
+  actionKind: PlantingQuickActionKind.NOTE;
+  occurredAt?: string;
+  note: string;
 };
 
 const isoDateSchema = z.string().datetime();
@@ -171,3 +178,9 @@ export const updateHarvestResultSchema = z.object({
 });
 
 export type UpdateHarvestResultDto = z.infer<typeof updateHarvestResultSchema>;
+
+export const createPlantingQuickActionSchema = z.object({
+  actionKind: z.literal(PlantingQuickActionKind.NOTE),
+  occurredAt: isoDateSchema.optional(),
+  note: z.string().trim().min(1),
+});

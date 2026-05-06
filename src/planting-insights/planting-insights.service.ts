@@ -202,6 +202,19 @@ export class PlantingInsightsService {
     const diseaseOccurrenceIdsFromEvents = new Set<string>();
 
     for (const e of events) {
+      const actionKind =
+        typeof e.payload?.actionKind === 'string' ? e.payload.actionKind : null;
+      const scope =
+        typeof e.payload?.scope === 'string' ? e.payload.scope : null;
+
+      if (
+        e.eventType === PlantingEventType.PLANTING_ACTION_COMPLETED &&
+        actionKind === 'NOTE' &&
+        scope === 'bed'
+      ) {
+        continue;
+      }
+
       const occurrenceId =
         typeof e.payload?.occurrenceId === 'string'
           ? e.payload.occurrenceId

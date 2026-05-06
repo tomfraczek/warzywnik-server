@@ -8,6 +8,7 @@ import {
   PlantingStartMethod,
   PlantingStatus,
 } from '../common/enums/planting.enums';
+import { PlantingEventType } from '../common/enums/planting-event.enums';
 
 describe('ActionAutomationService routine watering guard', () => {
   it('decision skip for WATERING does not block routine MOISTURE_CHECK', async () => {
@@ -120,7 +121,20 @@ describe('ActionAutomationService routine watering guard', () => {
         buildDecisionEvaluation: jest.Mock;
       }
     ).buildDecisionEvaluation = jest.fn().mockResolvedValue({
-      context: {},
+      context: {
+        now,
+        planting,
+        latestWeatherSnapshot: null,
+        activeWarnings: [],
+        pendingTasks: [],
+        recentlyCanceledTasks: [],
+        recentCompletedActionEvents: [],
+        recentPrecipMm24h: 0,
+        recentPrecipMm72h: 0,
+        forecastPrecipMm24h: 0,
+        forecastPrecipMm48h: 0,
+        forecastMaxTemp24h: 20,
+      },
       traces: [
         {
           evaluator: 'WateringDecisionEvaluator',
@@ -205,5 +219,157 @@ describe('ActionAutomationService routine watering guard', () => {
         (item: { decisionType?: string }) => item.decisionType === 'WATERING',
       ),
     ).toBe(false);
+  });
+
+  it('does not create routine WEEDING when already completed today', async () => {
+    const now = new Date('2026-05-05T08:00:00.000Z');
+
+    const weedingRule = {
+      id: 'rule-weeding',
+      trigger: ActionRuleTrigger.ON_SOWED,
+      schedule: ActionRuleSchedule.EVERY_N_DAYS,
+      actionTemplate: {
+        id: 'tpl-weeding',
+        type: 'weeding',
+        name: 'Wypiel grządkę',
+      },
+    } as unknown as { id: string };
+
+    const planting = {
+      id: 'planting-1',
+      status: PlantingStatus.IN_GROUND,
+      startMethod: PlantingStartMethod.DIRECT_SOW,
+      timelineTimezone: 'UTC',
+      plannedStartDate: now,
+      actualStartDate: now,
+      sowedAt: now,
+      transplantedAt: null,
+      harvestWindowStart: null,
+      harvestWindowEnd: null,
+      appliedRulesVersion: 1,
+      vegetable: {
+        id: 'veg-1',
+        rulesVersion: 1,
+      },
+      bed: {
+        id: 'bed-1',
+        growingSpace: { id: 'gs-1' },
+      },
+    } as unknown as { id: string };
+
+    const txEm = {
+      findOne: jest.fn().mockResolvedValue(planting),
+      find: jest.fn().mockResolvedValue([weedingRule]),
+      flush: jest.fn().mockResolvedValue(undefined),
+    } as unknown as EntityManager;
+
+    const rootEm = {
+      transactional: jest
+        .fn()
+        .mockImplementation((cb: (em: EntityManager) => unknown) => cb(txEm)),
+    } as unknown as EntityManager;
+
+    const service = new ActionAutomationService(rootEm);
+
+    (
+      service as unknown as {
+        buildCandidatesForPlanting: jest.Mock;
+      }
+    ).buildCandidatesForPlanting = jest.fn().mockReturnValue([
+      {
+        rule: weedingRule,
+        sourceKey: 'routine:weeding',
+        cycleIndex: 0,
+        dueAt: now,
+      },
+    ]);
+
+    (
+      service as unknown as {
+        applyAntiFloodLimits: jest.Mock;
+      }
+    ).applyAntiFloodLimits = jest.fn().mockResolvedValue({
+      accepted: [
+        {
+          rule: weedingRule,
+          sourceKey: 'routine:weeding',
+          cycleIndex: 0,
+          dueAt: now,
+        },
+      ],
+      skipped: [],
+    });
+
+    (
+      service as unknown as {
+        buildDecisionEvaluation: jest.Mock;
+      }
+    ).buildDecisionEvaluation = jest.fn().mockResolvedValue({
+      context: {
+        now,
+        planting,
+        latestWeatherSnapshot: null,
+        activeWarnings: [],
+        pendingTasks: [],
+        recentlyCanceledTasks: [],
+        recentCompletedActionEvents: [
+          {
+            eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+            eventTime: now,
+            payload: { decisionType: 'WEEDING' },
+          },
+        ],
+        recentPrecipMm24h: 0,
+        recentPrecipMm72h: 0,
+        forecastPrecipMm24h: 0,
+        forecastPrecipMm48h: 0,
+        forecastMaxTemp24h: 20,
+      },
+      traces: [],
+      candidates: [],
+    });
+
+    (
+      service as unknown as {
+        resetGeneratedTasksForPlanting: jest.Mock;
+      }
+    ).resetGeneratedTasksForPlanting = jest.fn().mockResolvedValue(undefined);
+
+    const upsertGeneratedTaskAndReminder = jest
+      .fn()
+      .mockResolvedValue(undefined);
+    (
+      service as unknown as {
+        upsertGeneratedTaskAndReminder: jest.Mock;
+      }
+    ).upsertGeneratedTaskAndReminder = upsertGeneratedTaskAndReminder;
+
+    (
+      service as unknown as {
+        upsertDecisionTaskAndReminder: jest.Mock;
+      }
+    ).upsertDecisionTaskAndReminder = jest.fn().mockResolvedValue(undefined);
+
+    (
+      service as unknown as {
+        cleanupStaleGeneratedTasksForPlanting: jest.Mock;
+      }
+    ).cleanupStaleGeneratedTasksForPlanting = jest
+      .fn()
+      .mockResolvedValue(undefined);
+
+    (
+      service as unknown as {
+        resolveDecisionTypeFromTemplate: (rule: { id: string }) => string;
+      }
+    ).resolveDecisionTypeFromTemplate = () => 'WEEDING';
+
+    await service.recomputeForPlanting({
+      user: { id: 'user-1' } as never,
+      plantingId: 'planting-1',
+      reason: 'TEST',
+    });
+
+    expect(upsertGeneratedTaskAndReminder).not.toHaveBeenCalled();
   });
 });

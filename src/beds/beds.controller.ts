@@ -13,9 +13,11 @@ import {
 } from '@nestjs/common';
 import { BedsService } from './beds.service';
 import {
+  createBedQuickActionSchema,
   createBedSchema,
   listBedsQuerySchema,
   updateBedSchema,
+  CreateBedQuickActionDto,
   CreateBedDto,
   ListBedsQueryDto,
   UpdateBedDto,
@@ -56,6 +58,28 @@ export class BedsController {
     @Body(new ZodValidationPipe(updateBedSchema)) body: UpdateBedDto,
   ) {
     return this.bedsService.update(req.userEntity as User, id, body);
+  }
+
+  @Post(':bedId/quick-actions')
+  createQuickAction(
+    @Req() req: { userEntity?: User },
+    @Param('bedId', new ParseUUIDPipe()) bedId: string,
+    @Body(new ZodValidationPipe(createBedQuickActionSchema))
+    body: CreateBedQuickActionDto,
+  ) {
+    return this.bedsService.createQuickAction(
+      req.userEntity as User,
+      bedId,
+      body,
+    );
+  }
+
+  @Get(':bedId/quick-actions/notes')
+  getQuickActionNotes(
+    @Req() req: { userEntity?: User },
+    @Param('bedId', new ParseUUIDPipe()) bedId: string,
+  ) {
+    return this.bedsService.getQuickActionNotes(req.userEntity as User, bedId);
   }
 
   @Delete(':id')
