@@ -38,14 +38,14 @@ export const getAllowedStatusTransitions = (
 
   if (
     current === PlantingStatus.FAILED ||
-    current === PlantingStatus.CANCELLED ||
-    current === PlantingStatus.HARVESTED
+    current === PlantingStatus.CANCELLED
   ) {
     return [clearedStatus];
   }
 
   if (current === PlantingStatus.CLEARED) {
-    return [];
+    const previous = path[path.length - 2];
+    return previous ? [previous] : [];
   }
 
   const index = path.indexOf(current);
