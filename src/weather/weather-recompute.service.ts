@@ -260,6 +260,7 @@ export class WeatherRecomputeService {
       },
       {
         orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }],
+        populate: ['bed', 'planting', 'planting.bed', 'planting.vegetable'],
       },
     );
 
@@ -277,20 +278,30 @@ export class WeatherRecomputeService {
       });
     }
 
-    const mapped: TaskDto[] = items.map((item) => ({
-      id: item.id,
-      title: item.title,
-      description: item.description ?? null,
-      dueAt: item.dueAt?.toISOString() ?? null,
-      status: item.status,
-      source: item.source,
-      targetType: item.targetType,
-      plantingId: item.planting?.id ?? null,
-      bedId: item.bed?.id ?? null,
-      growingSpaceId: item.growingSpace?.id ?? null,
-      isManuallyRescheduled: item.isManuallyRescheduled,
-      meta: this.buildTaskMeta(item, user, activeBedsCountForUserScope),
-    }));
+    const mapped: TaskDto[] = items.map((item) => {
+      const resolvedPlantingId = item.planting?.id ?? null;
+      const resolvedBed = item.bed ?? item.planting?.bed ?? null;
+      const resolvedBedId = resolvedBed?.id ?? null;
+      const resolvedBedName = resolvedBed?.name ?? null;
+      const resolvedVegetableName = item.planting?.vegetable?.name ?? null;
+
+      return {
+        id: item.id,
+        title: item.title,
+        description: item.description ?? null,
+        dueAt: item.dueAt?.toISOString() ?? null,
+        status: item.status,
+        source: item.source,
+        targetType: item.targetType,
+        plantingId: resolvedPlantingId,
+        bedId: resolvedBedId,
+        vegetableName: resolvedVegetableName,
+        bedName: resolvedBedName,
+        growingSpaceId: item.growingSpace?.id ?? null,
+        isManuallyRescheduled: item.isManuallyRescheduled,
+        meta: this.buildTaskMeta(item, user, activeBedsCountForUserScope),
+      };
+    });
 
     return {
       computedAt: new Date().toISOString(),
@@ -316,6 +327,7 @@ export class WeatherRecomputeService {
     }
 
     const warningCode = this.extractWarningCode(item.dedupeKey);
+    const resolvedBed = item.bed ?? item.planting?.bed ?? null;
 
     if (item.targetType === ActionTaskTargetType.USER) {
       return {
@@ -331,7 +343,7 @@ export class WeatherRecomputeService {
       return {
         scope: WarningScope.BED,
         affectsAllBeds: false,
-        affectedBedIds: item.bed?.id ? [item.bed.id] : undefined,
+        affectedBedIds: resolvedBed?.id ? [resolvedBed.id] : undefined,
         warningCode: warningCode ?? undefined,
       };
     }
@@ -339,7 +351,7 @@ export class WeatherRecomputeService {
     return {
       scope: WarningScope.PLANTING,
       affectsAllBeds: false,
-      affectedBedIds: item.bed?.id ? [item.bed.id] : undefined,
+      affectedBedIds: resolvedBed?.id ? [resolvedBed.id] : undefined,
       warningCode: warningCode ?? undefined,
     };
   }

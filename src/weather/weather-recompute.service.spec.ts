@@ -66,7 +66,7 @@ describe('WeatherRecomputeService', () => {
       dueAt: new Date('2026-02-27T11:00:00.000Z'),
       createdAt: new Date('2026-02-27T09:30:00.000Z'),
       user: { id: 'user-1' } as never,
-      bed: { id: 'bed-1' } as never,
+      bed: { id: 'bed-1', name: 'Grządka A' } as never,
     } as unknown as ActionTask,
     {
       id: 't-weather-planting-pending',
@@ -79,8 +79,12 @@ describe('WeatherRecomputeService', () => {
       dueAt: new Date('2026-02-27T12:00:00.000Z'),
       createdAt: new Date('2026-02-27T10:00:00.000Z'),
       user: { id: 'user-1' } as never,
-      planting: { id: 'pl-1' } as never,
-      bed: { id: 'bed-2' } as never,
+      planting: {
+        id: 'pl-1',
+        bed: { id: 'bed-2', name: 'Grządka B' },
+        vegetable: { name: 'Marchew' },
+      } as never,
+      bed: null,
     } as unknown as ActionTask,
     {
       id: 't-manual-pending',
@@ -92,7 +96,7 @@ describe('WeatherRecomputeService', () => {
       dueAt: new Date('2026-02-27T13:00:00.000Z'),
       createdAt: new Date('2026-02-27T10:30:00.000Z'),
       user: { id: 'user-1' } as never,
-      bed: { id: 'bed-9' } as never,
+      bed: { id: 'bed-9', name: 'Grządka Manualna' } as never,
     } as unknown as ActionTask,
     {
       id: 't-weather-user-done',
@@ -140,6 +144,12 @@ describe('WeatherRecomputeService', () => {
     const bedWeather = result.items.find(
       (item) => item.id === 't-weather-bed-pending',
     );
+    expect(bedWeather).toMatchObject({
+      targetType: ActionTaskTargetType.BED,
+      bedId: 'bed-1',
+      bedName: 'Grządka A',
+      vegetableName: null,
+    });
     expect(bedWeather?.meta).toMatchObject({
       scope: WarningScope.BED,
       affectsAllBeds: false,
@@ -150,6 +160,13 @@ describe('WeatherRecomputeService', () => {
     const plantingWeather = result.items.find(
       (item) => item.id === 't-weather-planting-pending',
     );
+    expect(plantingWeather).toMatchObject({
+      targetType: ActionTaskTargetType.PLANTING,
+      plantingId: 'pl-1',
+      vegetableName: 'Marchew',
+      bedId: 'bed-2',
+      bedName: 'Grządka B',
+    });
     expect(plantingWeather?.meta).toMatchObject({
       scope: WarningScope.PLANTING,
       affectsAllBeds: false,
@@ -158,6 +175,11 @@ describe('WeatherRecomputeService', () => {
     });
 
     const manual = result.items.find((item) => item.id === 't-manual-pending');
+    expect(manual).toMatchObject({
+      targetType: ActionTaskTargetType.BED,
+      bedId: 'bed-9',
+      bedName: 'Grządka Manualna',
+    });
     expect(manual?.meta).toBeNull();
 
     expect((em.count as unknown as jest.Mock).mock.calls.length).toBe(1);

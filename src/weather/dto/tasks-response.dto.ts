@@ -76,6 +76,14 @@ export class TaskDto {
 
   @IsOptional()
   @IsString()
+  vegetableName?: string | null;
+
+  @IsOptional()
+  @IsString()
+  bedName?: string | null;
+
+  @IsOptional()
+  @IsString()
   growingSpaceId?: string | null;
 
   @IsBoolean()
