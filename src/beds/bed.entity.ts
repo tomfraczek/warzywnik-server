@@ -35,12 +35,6 @@ export class Bed {
   locationLabel?: string | null;
 
   @Property({ type: 'int', nullable: true })
-  lengthCm?: number | null;
-
-  @Property({ type: 'int', nullable: true })
-  widthCm?: number | null;
-
-  @Property({ type: 'int', nullable: true })
   depthCm?: number | null;
 
   @ManyToOne(() => Soil, { nullable: true })

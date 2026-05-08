@@ -247,8 +247,6 @@ export class BedsService {
     bed.name = dto.name;
     bed.description = dto.description ?? null;
     bed.locationLabel = dto.locationLabel ?? null;
-    bed.lengthCm = dto.lengthCm ?? null;
-    bed.widthCm = dto.widthCm ?? null;
     bed.depthCm = dto.depthCm ?? null;
     bed.soilTestingEnabled = dto.soilTestingEnabled ?? false;
     bed.measuredN = dto.measuredN ?? null;
@@ -298,8 +296,6 @@ export class BedsService {
     if (dto.name !== undefined) bed.name = dto.name;
     if (dto.description !== undefined) bed.description = dto.description;
     if (dto.locationLabel !== undefined) bed.locationLabel = dto.locationLabel;
-    if (dto.lengthCm !== undefined) bed.lengthCm = dto.lengthCm;
-    if (dto.widthCm !== undefined) bed.widthCm = dto.widthCm;
     if (dto.depthCm !== undefined) bed.depthCm = dto.depthCm;
     if (dto.soilTestingEnabled !== undefined)
       bed.soilTestingEnabled = dto.soilTestingEnabled;
@@ -486,8 +482,6 @@ export class BedsService {
       name: bed.name,
       description: bed.description ?? null,
       locationLabel: bed.locationLabel ?? null,
-      lengthCm: bed.lengthCm ?? null,
-      widthCm: bed.widthCm ?? null,
       depthCm: bed.depthCm ?? null,
       soilId: bed.soil?.id ?? null,
       soilSlug: bed.soil?.slug ?? null,

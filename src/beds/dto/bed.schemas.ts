@@ -9,8 +9,6 @@ export type BedBaseDto = {
   name?: string;
   description?: string | null;
   locationLabel?: string | null;
-  lengthCm?: number | null;
-  widthCm?: number | null;
   depthCm?: number | null;
   soilId?: string | null;
   soil?: string | null;
@@ -55,8 +53,6 @@ const baseBedSchema = z.object({
   name: nameSchema.optional(),
   description: z.string().min(1).nullable().optional(),
   locationLabel: optionalLabelSchema.optional(),
-  lengthCm: positiveIntSchema.nullable().optional(),
-  widthCm: positiveIntSchema.nullable().optional(),
   depthCm: positiveIntSchema.nullable().optional(),
   soilId: slugRefSchema.nullable().optional(),
   soil: slugRefSchema.nullable().optional(),
