@@ -10,6 +10,25 @@ import { PlantingEventType } from '../../common/enums/planting-event.enums';
 import { PlantingEvent } from '../../planting-insights/planting-event.entity';
 
 describe('WeatherTaskPlannerService', () => {
+  it('skips planning when automatic tasks are disabled for user', async () => {
+    const em = {
+      findOne: jest
+        .fn()
+        .mockResolvedValue({ id: 'user-1', automaticTasksEnabled: false }),
+      find: jest.fn(),
+      transactional: jest.fn(),
+      fork: jest.fn(function (this: unknown) {
+        return this;
+      }),
+    };
+
+    const service = new WeatherTaskPlannerService(em as never);
+    await service.recomputeWeatherTasksForUser('user-1');
+
+    expect(em.find).not.toHaveBeenCalled();
+    expect(em.transactional).not.toHaveBeenCalled();
+  });
+
   it('creates tasks only from operational warnings for today/tomorrow', async () => {
     const now = new Date();
     const today = now.toISOString().slice(0, 10);

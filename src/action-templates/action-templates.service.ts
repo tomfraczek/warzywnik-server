@@ -10,10 +10,12 @@ import {
   ActionTemplateEnvironment,
   ActionTemplateGenerationMode,
   ActionTemplatePriority,
+  ActionTemplateTarget,
 } from '../common/enums/action.enums';
 import { toSlug } from '../common/utils/slug.util';
 import {
   CreateActionTemplateDto,
+  ListManualActionTemplatesQueryDto,
   ListActionTemplatesQueryDto,
   UpdateActionTemplateDto,
 } from './dto/action-template.schemas';
@@ -58,6 +60,30 @@ export class ActionTemplatesService {
     return this.serialize(entity);
   }
 
+  async listManual(query: ListManualActionTemplatesQueryDto) {
+    const where: Record<string, unknown> = {
+      isUserSelectable: true,
+      target: query.target
+        ? query.target
+        : { $in: [ActionTemplateTarget.BED, ActionTemplateTarget.PLANTING] },
+    };
+
+    if (query.q) {
+      where.$or = [
+        { name: { $ilike: `%${query.q}%` } },
+        { description: { $ilike: `%${query.q}%` } },
+      ];
+    }
+
+    const items = await this.em.find(ActionTemplate, where, {
+      orderBy: { name: 'asc' },
+    });
+
+    return {
+      items: items.map((item) => this.serialize(item)),
+    };
+  }
+
   async create(dto: CreateActionTemplateDto) {
     const existing = await this.em.findOne(ActionTemplate, {
       name: { $ilike: dto.name },
@@ -83,6 +109,7 @@ export class ActionTemplatesService {
     template.minDaysBetweenOccurrences = dto.minDaysBetweenOccurrences ?? null;
     template.requiresUserConfirmation = dto.requiresUserConfirmation ?? false;
     template.defaultDueOffsetDays = dto.defaultDueOffsetDays ?? null;
+    template.isUserSelectable = dto.isUserSelectable ?? false;
 
     await this.em.persistAndFlush(template);
     return this.serialize(template);
@@ -156,6 +183,10 @@ export class ActionTemplatesService {
       template.defaultDueOffsetDays = dto.defaultDueOffsetDays;
     }
 
+    if (dto.isUserSelectable !== undefined) {
+      template.isUserSelectable = dto.isUserSelectable;
+    }
+
     await this.em.flush();
     return this.serialize(template);
   }
@@ -200,6 +231,7 @@ export class ActionTemplatesService {
       minDaysBetweenOccurrences: entity.minDaysBetweenOccurrences ?? null,
       requiresUserConfirmation: entity.requiresUserConfirmation,
       defaultDueOffsetDays: entity.defaultDueOffsetDays,
+      isUserSelectable: entity.isUserSelectable,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };

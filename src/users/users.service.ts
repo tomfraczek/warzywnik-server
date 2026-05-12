@@ -93,6 +93,10 @@ export class UsersService {
       user.avatarId = dto.avatarId;
     }
 
+    if (dto.automaticTasksEnabled !== undefined) {
+      user.automaticTasksEnabled = dto.automaticTasksEnabled;
+    }
+
     if (dto.themeMode !== undefined) {
       user.themeMode = dto.themeMode;
     }
@@ -318,6 +322,7 @@ export class UsersService {
       locationLon: sourceLocation?.lon ?? user.locationLon ?? null,
       locationUpdatedAt:
         sourceLocation?.updatedAt ?? user.locationUpdatedAt ?? null,
+      automaticTasksEnabled: user.automaticTasksEnabled,
     };
   }
 }

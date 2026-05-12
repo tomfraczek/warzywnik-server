@@ -11,6 +11,12 @@ export type CreateActionTaskDto = {
   description?: string | null;
 };
 
+export type CreateManualActionTaskDto = {
+  actionTemplateId: string;
+  dueAt: string;
+  description?: string | null;
+};
+
 export type ListActionTasksQueryDto = {
   status: 'pending' | 'done' | 'all';
   from?: string;
@@ -66,6 +72,12 @@ export const createActionTaskSchema = z
       });
     }
   });
+
+export const createManualActionTaskSchema = z.object({
+  actionTemplateId: z.string().uuid(),
+  dueAt: isoDateSchema,
+  description: z.string().min(1).nullable().optional(),
+});
 
 export const listActionTasksQuerySchema = z.object({
   status: z.enum(['pending', 'done', 'all']).default('all'),

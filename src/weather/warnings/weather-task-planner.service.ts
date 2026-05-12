@@ -88,6 +88,13 @@ export class WeatherTaskPlannerService {
       throw new NotFoundException('User not found');
     }
 
+    if (user.automaticTasksEnabled === false) {
+      this.logger.log(
+        `skip weather task recompute user=${userId} automaticTasksEnabled=false`,
+      );
+      return;
+    }
+
     const now = new Date();
     const warnings = await em.find(
       WarningInstance,

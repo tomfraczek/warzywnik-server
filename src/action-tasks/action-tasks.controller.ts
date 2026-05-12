@@ -15,13 +15,13 @@ import { ActionTasksService } from './action-tasks.service';
 import {
   createBedActionTasksBulkSchema,
   CreateBedActionTasksBulkDto,
+  createManualActionTaskSchema,
+  CreateManualActionTaskDto,
   createPlantingActionTasksBulkSchema,
   CreatePlantingActionTasksBulkDto,
-  createActionTaskSchema,
   listBedActionTasksQuerySchema,
   listActionTasksQuerySchema,
   patchActionTaskSchema,
-  CreateActionTaskDto,
   ListBedActionTasksQueryDto,
   ListActionTasksQueryDto,
   PatchActionTaskDto,
@@ -41,12 +41,26 @@ export class ActionTasksController {
   createForPlanting(
     @Req() req: RequestWithUser,
     @Param('plantingId', new ParseUUIDPipe()) plantingId: string,
-    @Body(new ZodValidationPipe(createActionTaskSchema))
-    body: CreateActionTaskDto,
+    @Body(new ZodValidationPipe(createManualActionTaskSchema))
+    body: CreateManualActionTaskDto,
   ) {
     return this.actionTasksService.createForPlanting(
       req.userEntity as User,
       plantingId,
+      body,
+    );
+  }
+
+  @Post('v1/beds/:bedId/action-tasks')
+  createForBed(
+    @Req() req: RequestWithUser,
+    @Param('bedId', new ParseUUIDPipe()) bedId: string,
+    @Body(new ZodValidationPipe(createManualActionTaskSchema))
+    body: CreateManualActionTaskDto,
+  ) {
+    return this.actionTasksService.createForBed(
+      req.userEntity as User,
+      bedId,
       body,
     );
   }

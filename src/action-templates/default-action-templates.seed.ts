@@ -14,6 +14,7 @@ import { toSlug } from '../common/utils/slug.util';
 type ActionTemplateSeedRecord = {
   name: string;
   description: string | null;
+  isUserSelectable?: boolean;
   target: ActionTemplateTarget;
   environment: ActionTemplateEnvironment;
   type: ActionTemplateType;
@@ -28,6 +29,14 @@ type ActionTemplateSeedRecord = {
 
 export const DEFAULT_ACTION_TEMPLATES: readonly ActionTemplateSeedRecord[] =
   actionTemplatesSeedData as readonly ActionTemplateSeedRecord[];
+
+const resolveIsUserSelectable = (item: ActionTemplateSeedRecord) => {
+  if (item.isUserSelectable !== undefined) {
+    return item.isUserSelectable;
+  }
+
+  return item.generationMode === ActionTemplateGenerationMode.MANUAL_ONLY;
+};
 
 export const upsertDefaultActionTemplates = async (
   em: EntityManager,
@@ -53,6 +62,7 @@ export const upsertDefaultActionTemplates = async (
       existingBySlug.requiresUserConfirmation =
         item.requiresUserConfirmation ?? false;
       existingBySlug.defaultDueOffsetDays = item.defaultDueOffsetDays;
+      existingBySlug.isUserSelectable = resolveIsUserSelectable(item);
       continue;
     }
 
@@ -79,6 +89,7 @@ export const upsertDefaultActionTemplates = async (
       existingExact.requiresUserConfirmation =
         item.requiresUserConfirmation ?? false;
       existingExact.defaultDueOffsetDays = item.defaultDueOffsetDays;
+      existingExact.isUserSelectable = resolveIsUserSelectable(item);
       continue;
     }
 
@@ -105,6 +116,7 @@ export const upsertDefaultActionTemplates = async (
         item.requiresUserConfirmation ?? false;
       existingByName.description = item.description;
       existingByName.defaultDueOffsetDays = item.defaultDueOffsetDays;
+      existingByName.isUserSelectable = resolveIsUserSelectable(item);
       continue;
     }
 
@@ -125,6 +137,7 @@ export const upsertDefaultActionTemplates = async (
     template.minDaysBetweenOccurrences = item.minDaysBetweenOccurrences ?? null;
     template.requiresUserConfirmation = item.requiresUserConfirmation ?? false;
     template.defaultDueOffsetDays = item.defaultDueOffsetDays;
+    template.isUserSelectable = resolveIsUserSelectable(item);
 
     em.persist(template);
   }

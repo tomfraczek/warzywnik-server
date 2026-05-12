@@ -56,6 +56,13 @@ export class WeatherRecomputeService {
   async recomputeTasks(userId: string): Promise<void> {
     const user = await this.requireUser(userId);
 
+    if (user.automaticTasksEnabled === false) {
+      this.logger.log(
+        `skip recompute tasks for user=${userId} automaticTasksEnabled=false`,
+      );
+      return;
+    }
+
     const plantings = await this.em.find(Planting, {
       user: user.id,
       bed: { isActive: true },

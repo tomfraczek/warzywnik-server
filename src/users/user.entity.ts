@@ -85,6 +85,9 @@ export class User {
   @Property({ type: 'boolean', default: true })
   notificationsEnabled: boolean = true;
 
+  @Property({ type: 'boolean', default: true })
+  automaticTasksEnabled: boolean = true;
+
   @Property({ type: 'int', default: 9 })
   notificationHour: number = 9;
 

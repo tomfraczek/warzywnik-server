@@ -9,11 +9,16 @@ import { ActionTask } from '../action-tasks/action-task.entity';
 import { WeatherRecomputeService } from './weather-recompute.service';
 
 describe('WeatherRecomputeService', () => {
-  const makeService = (tasks: ActionTask[]) => {
+  const makeService = (
+    tasks: ActionTask[],
+    userOverrides?: Record<string, unknown>,
+  ) => {
     const em = {
       findOne: jest.fn().mockResolvedValue({
         id: 'user-1',
         locationLabel: 'Ogród przy domu',
+        automaticTasksEnabled: true,
+        ...(userOverrides ?? {}),
       }),
       find: jest.fn(
         (
@@ -183,5 +188,41 @@ describe('WeatherRecomputeService', () => {
     expect(manual?.meta).toBeNull();
 
     expect((em.count as unknown as jest.Mock).mock.calls.length).toBe(1);
+  });
+
+  it('skips recomputeTasks when automaticTasksEnabled=false', async () => {
+    const em = {
+      findOne: jest.fn().mockResolvedValue({
+        id: 'user-1',
+        automaticTasksEnabled: false,
+      }),
+      find: jest.fn(),
+    } as unknown as EntityManager;
+
+    const actionAutomationService = {
+      recomputeForPlanting: jest.fn(),
+    };
+    const weatherTaskPlannerService = {
+      recomputeWeatherTasksForUser: jest.fn(),
+    };
+
+    const service = new WeatherRecomputeService(
+      em,
+      actionAutomationService as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      weatherTaskPlannerService as never,
+    );
+
+    await service.recomputeTasks('user-1');
+
+    expect(
+      (em.find as unknown as jest.Mock | undefined)?.mock?.calls ?? [],
+    ).toHaveLength(0);
+    expect(actionAutomationService.recomputeForPlanting).not.toHaveBeenCalled();
+    expect(
+      weatherTaskPlannerService.recomputeWeatherTasksForUser,
+    ).not.toHaveBeenCalled();
   });
 });

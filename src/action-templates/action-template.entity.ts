@@ -64,6 +64,9 @@ export class ActionTemplate {
   @Property({ type: 'int', nullable: true })
   defaultDueOffsetDays: number | null = null;
 
+  @Property({ type: 'boolean', default: false })
+  isUserSelectable: boolean = false;
+
   @ManyToMany(() => Pest, 'recommendedActions')
   recommendedForPests = new Collection<Pest>(this);
 

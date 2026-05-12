@@ -14,10 +14,12 @@ import { ActionTemplatesService } from './action-templates.service';
 import {
   createActionTemplateSchema,
   deleteActionTemplatesBulkSchema,
+  listManualActionTemplatesQuerySchema,
   listActionTemplatesQuerySchema,
   updateActionTemplateSchema,
   CreateActionTemplateDto,
   DeleteActionTemplatesBulkDto,
+  ListManualActionTemplatesQueryDto,
   ListActionTemplatesQueryDto,
   UpdateActionTemplateDto,
 } from './dto/action-template.schemas';
@@ -35,6 +37,14 @@ export class ActionTemplatesController {
     query: ListActionTemplatesQueryDto,
   ) {
     return this.actionTemplatesService.list(query);
+  }
+
+  @Get('manual')
+  listManual(
+    @Query(new ZodValidationPipe(listManualActionTemplatesQuerySchema))
+    query: ListManualActionTemplatesQueryDto,
+  ) {
+    return this.actionTemplatesService.listManual(query);
   }
 
   @Get(':id')

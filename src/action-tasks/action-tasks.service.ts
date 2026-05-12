@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -7,7 +8,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { ActionTask } from './action-task.entity';
 import {
   CreateBedActionTasksBulkDto,
-  CreateActionTaskDto,
+  CreateManualActionTaskDto,
   CreatePlantingActionTasksBulkDto,
   ListBedActionTasksQueryDto,
   ListActionTasksQueryDto,
@@ -41,16 +42,22 @@ export class ActionTasksService {
   async createForPlanting(
     user: User,
     plantingId: string,
-    dto: CreateActionTaskDto,
+    dto: CreateManualActionTaskDto,
   ) {
     return this.em.transactional(async (em) => {
       const planting = await this.getPlantingOrThrow(user, plantingId, em);
+
+      const template = await this.getManualTemplateOrThrow(
+        dto.actionTemplateId,
+        ActionTemplateTarget.PLANTING,
+        em,
+      );
 
       const task = new ActionTask();
       task.user = user;
       task.targetType = ActionTaskTargetType.PLANTING;
       task.planting = planting;
-      task.bed = null;
+      task.bed = planting.bed;
       task.source = ActionTaskSource.MANUAL;
       task.sourceType = ActionTaskSourceType.MANUAL;
       task.sourceRefId = null;
@@ -62,41 +69,19 @@ export class ActionTasksService {
       task.isUserModified = false;
       task.suppressedAt = null;
 
-      if (dto.actionTemplateId) {
-        const template = await em.findOne(ActionTemplate, {
-          id: dto.actionTemplateId,
-        });
-
-        if (!template) {
-          throw new NotFoundException('Action template not found');
-        }
-
-        if (template.target !== ActionTemplateTarget.PLANTING) {
-          throw new BadRequestException(
-            'Action template target is not compatible with planting',
-          );
-        }
-
-        task.actionTemplate = template;
-        task.title = template.name;
-        task.description =
-          dto.description !== undefined
-            ? dto.description
-            : (template.description ?? null);
-        task.dueAt = dto.dueAt
-          ? this.normalizeTaskDueAt(this.parseDate(dto.dueAt, 'dueAt'))
-          : this.resolveTemplateDueAt(
-              new Date(),
-              template.defaultDueOffsetDays,
-            );
-      } else {
-        task.actionTemplate = null;
-        task.title = dto.title as string;
-        task.description = dto.description ?? null;
-        task.dueAt = dto.dueAt
-          ? this.normalizeTaskDueAt(this.parseDate(dto.dueAt, 'dueAt'))
-          : this.normalizeTaskDueAt(new Date());
-      }
+      task.actionTemplate = template;
+      task.title = template.name;
+      task.description =
+        dto.description !== undefined
+          ? dto.description
+          : (template.description ?? null);
+      task.dueAt = this.normalizeTaskDueAt(this.parseDate(dto.dueAt, 'dueAt'));
+      task.metadata = {
+        ...(task.metadata ?? {}),
+        manual: true,
+        targetType: ActionTaskTargetType.PLANTING,
+        actionTemplateId: template.id,
+      };
 
       em.persist(task);
       await em.flush();
@@ -105,6 +90,65 @@ export class ActionTasksService {
         task,
         em,
       });
+      await em.flush();
+
+      await em.populate(task, [
+        'actionTemplate',
+        'planting',
+        'planting.vegetable',
+        'bed',
+      ]);
+
+      return this.serialize(task);
+    });
+  }
+
+  async createForBed(
+    user: User,
+    bedId: string,
+    dto: CreateManualActionTaskDto,
+  ) {
+    return this.em.transactional(async (em) => {
+      const bed = await this.getBedOrThrow(user, bedId, em);
+      const template = await this.getManualTemplateOrThrow(
+        dto.actionTemplateId,
+        ActionTemplateTarget.BED,
+        em,
+      );
+
+      const task = new ActionTask();
+      task.user = user;
+      task.targetType = ActionTaskTargetType.BED;
+      task.bed = bed;
+      task.planting = null;
+      task.source = ActionTaskSource.MANUAL;
+      task.sourceType = ActionTaskSourceType.MANUAL;
+      task.sourceRefId = null;
+      task.sourceKey = null;
+      task.cycleIndex = 0;
+      task.originalDueAt = null;
+      task.generatedAt = null;
+      task.isManuallyRescheduled = false;
+      task.isUserModified = false;
+      task.suppressedAt = null;
+      task.actionTemplate = template;
+      task.title = template.name;
+      task.description =
+        dto.description !== undefined
+          ? dto.description
+          : (template.description ?? null);
+      task.dueAt = this.normalizeTaskDueAt(this.parseDate(dto.dueAt, 'dueAt'));
+      task.metadata = {
+        ...(task.metadata ?? {}),
+        manual: true,
+        targetType: ActionTaskTargetType.BED,
+        actionTemplateId: template.id,
+      };
+
+      em.persist(task);
+      await em.flush();
+
+      await this.remindersService.upsertPendingForActionTask({ task, em });
       await em.flush();
 
       await em.populate(task, [
@@ -216,11 +260,15 @@ export class ActionTasksService {
       bedId: string;
       vegetableId: string;
       taskId: string;
+      actionTemplateId: string | null;
       actionType: string | null;
       decisionType: string | null;
       actionKind: string | null;
       actionTitle: string;
       source: ActionTaskSource;
+      targetType: ActionTaskTargetType;
+      dueAt: string | null;
+      description: string | null;
       doneAt: Date;
     };
 
@@ -230,11 +278,15 @@ export class ActionTasksService {
       bedId: string;
       vegetableId: string;
       taskId: string;
+      actionTemplateId: string | null;
       actionType: string | null;
       decisionType: string | null;
       actionKind: string | null;
       actionTitle: string;
       source: ActionTaskSource;
+      targetType: ActionTaskTargetType;
+      dueAt: string | null;
+      description: string | null;
       previousDueAt: Date | null;
       nextDueAt: Date | null;
       changedAt: Date;
@@ -333,6 +385,10 @@ export class ActionTasksService {
                 : null,
             actionTitle: task.title,
             source: task.source,
+            actionTemplateId: task.actionTemplate?.id ?? null,
+            targetType: task.targetType,
+            dueAt: task.dueAt?.toISOString() ?? null,
+            description: task.description ?? null,
             previousDueAt,
             nextDueAt,
             changedAt: new Date(),
@@ -366,8 +422,61 @@ export class ActionTasksService {
               : null,
           actionTitle: task.title,
           source: task.source,
+          actionTemplateId: task.actionTemplate.id,
+          targetType: task.targetType,
+          dueAt: task.dueAt?.toISOString() ?? null,
+          description: task.description ?? null,
           doneAt: task.doneAt,
         };
+      }
+
+      if (
+        task.status === ActionTaskStatus.DONE &&
+        task.targetType === ActionTaskTargetType.BED &&
+        task.bed != null &&
+        task.actionTemplate != null &&
+        task.doneAt != null
+      ) {
+        const bedPlantings = await em.find(
+          Planting,
+          {
+            user: user.id,
+            bed: task.bed.id,
+          },
+          { populate: ['bed', 'vegetable'] },
+        );
+
+        for (const planting of bedPlantings) {
+          await this.plantingInsightsService.recordEvent({
+            plantingId: planting.id,
+            userId: user.id,
+            bedId: planting.bed.id,
+            vegetableId: planting.vegetable.id,
+            eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+            eventTime: task.doneAt,
+            payload: {
+              taskId: task.id,
+              actionTemplateId: task.actionTemplate.id,
+              actionType: task.actionTemplate.type,
+              decisionType:
+                typeof task.metadata?.decisionType === 'string'
+                  ? task.metadata.decisionType
+                  : null,
+              actionKind:
+                typeof task.metadata?.actionKind === 'string'
+                  ? task.metadata.actionKind
+                  : null,
+              actionTitle: task.title,
+              source: task.source,
+              targetType: task.targetType,
+              dueAt: task.dueAt?.toISOString() ?? null,
+              doneAt: task.doneAt.toISOString(),
+              description: task.description ?? null,
+              scope: 'bed',
+              bedId: task.bed.id,
+            },
+          });
+        }
       }
 
       await em.flush();
@@ -386,11 +495,15 @@ export class ActionTasksService {
         eventTime: p.doneAt,
         payload: {
           taskId: p.taskId,
+          actionTemplateId: p.actionTemplateId,
           actionType: p.actionType,
           decisionType: p.decisionType,
           actionKind: p.actionKind,
           actionTitle: p.actionTitle,
           source: p.source,
+          targetType: p.targetType,
+          dueAt: p.dueAt,
+          description: p.description,
         },
       });
     }
@@ -406,11 +519,15 @@ export class ActionTasksService {
         eventTime: p.changedAt,
         payload: {
           taskId: p.taskId,
+          actionTemplateId: p.actionTemplateId,
           actionType: p.actionType,
           decisionType: p.decisionType,
           actionKind: p.actionKind,
           actionTitle: p.actionTitle,
           source: p.source,
+          targetType: p.targetType,
+          dueAt: p.dueAt,
+          description: p.description,
           previousDueAt: p.previousDueAt?.toISOString() ?? null,
           nextDueAt: p.nextDueAt?.toISOString() ?? null,
         },
@@ -574,6 +691,12 @@ export class ActionTasksService {
         );
       }
 
+      if (!template.isUserSelectable) {
+        throw new ForbiddenException(
+          `Action template ${template.id} is not user selectable`,
+        );
+      }
+
       const task = new ActionTask();
       task.user = params.user;
       params.setupTask(task);
@@ -597,6 +720,15 @@ export class ActionTasksService {
       task.isManuallyRescheduled = false;
       task.isUserModified = false;
       task.suppressedAt = null;
+      task.metadata = {
+        ...(task.metadata ?? {}),
+        manual: true,
+        targetType:
+          params.expectedTarget === ActionTemplateTarget.BED
+            ? ActionTaskTargetType.BED
+            : ActionTaskTargetType.PLANTING,
+        actionTemplateId: template.id,
+      };
 
       return task;
     });
@@ -660,5 +792,31 @@ export class ActionTasksService {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };
+  }
+
+  private async getManualTemplateOrThrow(
+    actionTemplateId: string,
+    expectedTarget: ActionTemplateTarget,
+    em: EntityManager,
+  ) {
+    const template = await em.findOne(ActionTemplate, {
+      id: actionTemplateId,
+    });
+
+    if (!template) {
+      throw new NotFoundException('Action template not found');
+    }
+
+    if (!template.isUserSelectable) {
+      throw new ForbiddenException('Action template is not user selectable');
+    }
+
+    if (template.target !== expectedTarget) {
+      throw new BadRequestException(
+        `Action template target is not compatible with ${expectedTarget}`,
+      );
+    }
+
+    return template;
   }
 }

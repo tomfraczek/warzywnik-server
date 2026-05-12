@@ -173,6 +173,20 @@ export class ActionAutomationService {
         throw new NotFoundException('Planting not found');
       }
 
+      if (params.user.automaticTasksEnabled === false) {
+        this.logger.log(
+          `skip recompute for planting=${params.plantingId} reason=${params.reason} automaticTasksEnabled=false`,
+        );
+
+        return {
+          plantingId: planting.id,
+          reason: params.reason,
+          desiredCount: 0,
+          skipped: true,
+          automaticTasksEnabled: false,
+        };
+      }
+
       if (params.useLatestRules) {
         planting.appliedRulesVersion = planting.vegetable.rulesVersion;
       } else if (

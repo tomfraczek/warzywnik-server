@@ -11,6 +11,7 @@ import {
 export type PatchMeDto = {
   displayName?: string | null;
   avatarId?: string | null;
+  automaticTasksEnabled?: boolean;
   themeMode?: ThemeMode;
   language?: Language;
   temperatureUnit?: TemperatureUnit;
@@ -32,6 +33,7 @@ export const patchMeSchema = z
   .object({
     displayName: z.string().min(1).max(50).nullable().optional(),
     avatarId: avatarEnum.nullable().optional(),
+    automaticTasksEnabled: z.coerce.boolean().optional(),
     themeMode: z.nativeEnum(ThemeMode).optional(),
     language: z.nativeEnum(Language).optional(),
     temperatureUnit: z.nativeEnum(TemperatureUnit).optional(),

@@ -79,7 +79,8 @@ export class CalendarService {
         dueAt: task.dueAt,
         bedId: task.bed?.id ?? null,
         plantingId: task.planting?.id ?? null,
-        source: task.sourceRefId ? 'VEGETABLE_RULE' : 'MANUAL',
+        source: task.source,
+        sourceType: task.sourceType,
         title: task.title,
         actionTemplate: task.actionTemplate
           ? {

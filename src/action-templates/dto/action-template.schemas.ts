@@ -11,6 +11,7 @@ import {
 export type ActionTemplateBaseDto = {
   name?: string;
   description?: string | null;
+  isUserSelectable?: boolean;
   target?: ActionTemplateTarget;
   environment?: ActionTemplateEnvironment;
   type?: ActionTemplateType;
@@ -42,9 +43,15 @@ export type ListActionTemplatesQueryDto = {
   q?: string;
 };
 
+export type ListManualActionTemplatesQueryDto = {
+  target?: ActionTemplateTarget;
+  q?: string;
+};
+
 const baseActionTemplateSchema = z.object({
   name: z.string().min(2).max(120).optional(),
   description: z.string().min(1).nullable().optional(),
+  isUserSelectable: z.coerce.boolean().optional(),
   target: z.nativeEnum(ActionTemplateTarget).optional(),
   environment: z.nativeEnum(ActionTemplateEnvironment).optional(),
   type: z.nativeEnum(ActionTemplateType).optional(),
@@ -82,5 +89,20 @@ export const deleteActionTemplatesBulkSchema = z.object({
 export const listActionTemplatesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
+  q: z.string().min(1).optional(),
+});
+
+export const listManualActionTemplatesQuerySchema = z.object({
+  target: z
+    .nativeEnum(ActionTemplateTarget)
+    .refine(
+      (value) =>
+        value === ActionTemplateTarget.BED ||
+        value === ActionTemplateTarget.PLANTING,
+      {
+        message: 'target must be either bed or planting',
+      },
+    )
+    .optional(),
   q: z.string().min(1).optional(),
 });
