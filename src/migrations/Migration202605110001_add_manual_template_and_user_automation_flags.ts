@@ -9,9 +9,7 @@ export class Migration202605110001_add_manual_template_and_user_automation_flags
       'alter table "users" add column "automatic_tasks_enabled" boolean not null default true;',
     );
 
-    this.addSql(
-      'update "action_templates" set "is_user_selectable" = true where "generation_mode"::text = \'MANUAL_ONLY\';',
-    );
+    this.addSql('update "action_templates" set "is_user_selectable" = true;');
   }
 
   override async down(): Promise<void> {

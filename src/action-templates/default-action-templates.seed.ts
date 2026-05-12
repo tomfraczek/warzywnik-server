@@ -35,7 +35,7 @@ const resolveIsUserSelectable = (item: ActionTemplateSeedRecord) => {
     return item.isUserSelectable;
   }
 
-  return item.generationMode === ActionTemplateGenerationMode.MANUAL_ONLY;
+  return true;
 };
 
 export const upsertDefaultActionTemplates = async (
