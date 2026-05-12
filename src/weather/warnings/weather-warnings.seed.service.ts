@@ -173,7 +173,7 @@ export class WeatherWarningsSeedService implements OnModuleInit {
         code: WarningCode.FROST_RISK_NEXT_7_DAYS,
         title: 'Radar: możliwy przymrozek nocą (7 dni)',
         messageTemplate:
-          'W najbliższych 7 dniach nocą/przed świtem możliwy spadek temperatury do {minTempC}°C (próg {thresholdC}°C).',
+          'W najbliższych 7 dniach nocą/przed świtem temperatura może spaść do {minTempC}°C (próg {thresholdC}°C), co zwiększa ryzyko uszkodzenia młodych liści, zahamowania wzrostu i stresu chłodowego u roślin wrażliwych.',
         hintTemplate:
           'To alert radarowy. Taski powstają tylko dla kodów Dziś/Jutro.',
         severity: WarningSeverity.CRITICAL,
@@ -186,7 +186,7 @@ export class WeatherWarningsSeedService implements OnModuleInit {
         code: WarningCode.HARD_FROST_RISK_NEXT_7_DAYS,
         title: 'Radar: możliwy silny mróz nocą (7 dni)',
         messageTemplate:
-          'W najbliższych 7 dniach nocą/przed świtem możliwy silny mróz: {minTempC}°C (próg {thresholdC}°C).',
+          'W najbliższych 7 dniach nocą/przed świtem możliwy jest silny mróz do {minTempC}°C (próg {thresholdC}°C), który może powodować poważne uszkodzenia tkanek, zamieranie wierzchołków wzrostu i straty w uprawach wrażliwych.',
         severity: WarningSeverity.CRITICAL,
         category: WarningRuleCategory.WEATHER_OUTDOOR,
         horizon: WarningRuleHorizon.RADAR,
@@ -197,7 +197,7 @@ export class WeatherWarningsSeedService implements OnModuleInit {
         code: WarningCode.DROUGHT_RISK_NEXT_7_DAYS,
         title: 'Radar: ryzyko suszy (7 dni)',
         messageTemplate:
-          'Suma opadów 7d to {precipSumMm} mm (próg {thresholdMm} mm).',
+          'Suma opadów z 7 dni wynosi tylko {precipSumMm} mm (próg {thresholdMm} mm), więc gleba może wyraźnie przesychać, a rośliny mogą mieć utrudnione pobieranie wody i składników pokarmowych.',
         category: WarningRuleCategory.WEATHER_OUTDOOR,
         horizon: WarningRuleHorizon.RADAR,
         dayPart: WarningRuleDayPart.ANY,
@@ -389,154 +389,154 @@ export class WeatherWarningsSeedService implements OnModuleInit {
         code: WarningCode.FROST_RISK_TODAY_NIGHT,
         title: 'Dziś w nocy: ryzyko przymrozku',
         message:
-          '{dayLabel} {dayPartLabel} możliwy spadek temperatury do {minTempC}°C (próg {thresholdC}°C).',
+          '{dayLabel} {dayPartLabel} temperatura może spaść do {minTempC}°C (próg {thresholdC}°C), co grozi uszkodzeniem młodych liści, zahamowaniem wzrostu i stresem chłodowym u bardziej wrażliwych roślin.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.FROST_RISK_TOMORROW_NIGHT,
         title: 'Jutro w nocy: ryzyko przymrozku',
         message:
-          '{dayLabel} {dayPartLabel} możliwy spadek temperatury do {minTempC}°C (próg {thresholdC}°C).',
+          '{dayLabel} {dayPartLabel} temperatura może spaść do {minTempC}°C (próg {thresholdC}°C), co grozi uszkodzeniem młodych liści, zahamowaniem wzrostu i stresem chłodowym u bardziej wrażliwych roślin.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.HARD_FROST_RISK_TODAY_NIGHT,
         title: 'Dziś w nocy: ryzyko silnego mrozu',
         message:
-          '{dayLabel} {dayPartLabel} możliwy silny mróz do {minTempC}°C (próg {thresholdC}°C).',
+          '{dayLabel} {dayPartLabel} możliwy jest silny mróz do {minTempC}°C (próg {thresholdC}°C), który może prowadzić do poważnego uszkodzenia tkanek, zniszczenia młodych pędów i trwałych strat w uprawie.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.HARD_FROST_RISK_TOMORROW_NIGHT,
         title: 'Jutro w nocy: ryzyko silnego mrozu',
         message:
-          '{dayLabel} {dayPartLabel} możliwy silny mróz do {minTempC}°C (próg {thresholdC}°C).',
+          '{dayLabel} {dayPartLabel} możliwy jest silny mróz do {minTempC}°C (próg {thresholdC}°C), który może prowadzić do poważnego uszkodzenia tkanek, zniszczenia młodych pędów i trwałych strat w uprawie.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.HEAVY_RAIN_TODAY_DAY,
         title: 'Dziś w dzień: intensywne opady',
         message:
-          '{dayLabel} {dayPartLabel}: suma opadów {precipSumMm} mm (próg {thresholdMm} mm).',
+          '{dayLabel} {dayPartLabel} prognozowana suma opadów to {precipSumMm} mm (próg {thresholdMm} mm), co może prowadzić do zalewania grządki, wypłukiwania składników pokarmowych i pogorszenia napowietrzenia korzeni.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.HEAVY_RAIN_TODAY_NIGHT,
         title: 'Dziś w nocy: intensywne opady',
         message:
-          '{dayLabel} {dayPartLabel}: suma opadów {precipSumMm} mm (próg {thresholdMm} mm).',
+          '{dayLabel} {dayPartLabel} prognozowana suma opadów to {precipSumMm} mm (próg {thresholdMm} mm), co może prowadzić do zalewania grządki, wypłukiwania składników pokarmowych i pogorszenia napowietrzenia korzeni.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.HEAVY_RAIN_TOMORROW_DAY,
         title: 'Jutro w dzień: intensywne opady',
         message:
-          '{dayLabel} {dayPartLabel}: suma opadów {precipSumMm} mm (próg {thresholdMm} mm).',
+          '{dayLabel} {dayPartLabel} prognozowana suma opadów to {precipSumMm} mm (próg {thresholdMm} mm), co może prowadzić do zalewania grządki, wypłukiwania składników pokarmowych i pogorszenia napowietrzenia korzeni.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.HEAVY_RAIN_TOMORROW_NIGHT,
         title: 'Jutro w nocy: intensywne opady',
         message:
-          '{dayLabel} {dayPartLabel}: suma opadów {precipSumMm} mm (próg {thresholdMm} mm).',
+          '{dayLabel} {dayPartLabel} prognozowana suma opadów to {precipSumMm} mm (próg {thresholdMm} mm), co może prowadzić do zalewania grządki, wypłukiwania składników pokarmowych i pogorszenia napowietrzenia korzeni.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.WIND_DAMAGE_TODAY_DAY,
         title: 'Dziś w dzień: ryzyko szkód od wiatru',
         message:
-          '{dayLabel} {dayPartLabel}: wiatr do {windMaxKmh} km/h (próg {thresholdKmh} km/h).',
+          '{dayLabel} {dayPartLabel} wiatr może osiągać {windMaxKmh} km/h (próg {thresholdKmh} km/h), co zwiększa ryzyko łamania pędów, przewracania wyższych roślin i uszkodzeń podpór lub osłon.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.WIND_DAMAGE_TODAY_NIGHT,
         title: 'Dziś w nocy: ryzyko szkód od wiatru',
         message:
-          '{dayLabel} {dayPartLabel}: wiatr do {windMaxKmh} km/h (próg {thresholdKmh} km/h).',
+          '{dayLabel} {dayPartLabel} wiatr może osiągać {windMaxKmh} km/h (próg {thresholdKmh} km/h), co zwiększa ryzyko łamania pędów, przewracania wyższych roślin i uszkodzeń podpór lub osłon.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.WIND_DAMAGE_TOMORROW_DAY,
         title: 'Jutro w dzień: ryzyko szkód od wiatru',
         message:
-          '{dayLabel} {dayPartLabel}: wiatr do {windMaxKmh} km/h (próg {thresholdKmh} km/h).',
+          '{dayLabel} {dayPartLabel} wiatr może osiągać {windMaxKmh} km/h (próg {thresholdKmh} km/h), co zwiększa ryzyko łamania pędów, przewracania wyższych roślin i uszkodzeń podpór lub osłon.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.WIND_DAMAGE_TOMORROW_NIGHT,
         title: 'Jutro w nocy: ryzyko szkód od wiatru',
         message:
-          '{dayLabel} {dayPartLabel}: wiatr do {windMaxKmh} km/h (próg {thresholdKmh} km/h).',
+          '{dayLabel} {dayPartLabel} wiatr może osiągać {windMaxKmh} km/h (próg {thresholdKmh} km/h), co zwiększa ryzyko łamania pędów, przewracania wyższych roślin i uszkodzeń podpór lub osłon.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.WATERING_NEEDED_TODAY,
         title: 'Dziś: podlewanie operacyjne',
         message:
-          '{dayLabel}: niskie opady ({precipSumMm} mm) i warunki parowania wskazują na potrzebę podlewania.',
+          '{dayLabel} niskie opady ({precipSumMm} mm) i warunki sprzyjające parowaniu zwiększają ryzyko przesuszenia strefy korzeniowej, więc rośliny mogą mieć trudność z pobieraniem wody i składników pokarmowych.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.WATERING_NEEDED_TOMORROW,
         title: 'Jutro: podlewanie operacyjne',
         message:
-          '{dayLabel}: niskie opady ({precipSumMm} mm) i warunki parowania wskazują na potrzebę podlewania.',
+          '{dayLabel} niskie opady ({precipSumMm} mm) i warunki sprzyjające parowaniu zwiększają ryzyko przesuszenia strefy korzeniowej, więc rośliny mogą mieć trudność z pobieraniem wody i składników pokarmowych.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.SOWING_PAUSE_TOO_COLD_TODAY,
         title: 'Dziś: wstrzymaj siew (za zimno)',
         message:
-          '{dayLabel}: dla {vegetableName} na {bedName} jest za zimno na bezpieczny siew.',
+          '{dayLabel} dla {vegetableName} na {bedName} jest za zimno na bezpieczny siew, więc nasiona mogą kiełkować bardzo wolno, nierówno albo zacząć gnić w chłodnej glebie.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.SOWING_PAUSE_TOO_COLD_TOMORROW,
         title: 'Jutro: wstrzymaj siew (za zimno)',
         message:
-          '{dayLabel}: dla {vegetableName} na {bedName} jest za zimno na bezpieczny siew.',
+          '{dayLabel} dla {vegetableName} na {bedName} jest za zimno na bezpieczny siew, więc nasiona mogą kiełkować bardzo wolno, nierówno albo zacząć gnić w chłodnej glebie.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT,
         title: 'Dziś w nocy: osłoń kiełkujące rośliny',
         message:
-          '{dayLabel} {dayPartLabel}: {vegetableName} na {bedName} wymaga osłony (min {minTempC}°C).',
+          '{dayLabel} {dayPartLabel} {vegetableName} na {bedName} wymaga osłony, ponieważ temperatura może spaść do {minTempC}°C i spowolnić kiełkowanie, uszkodzić liścienie albo osłabić świeżo wzeszłe siewki.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT,
         title: 'Jutro w nocy: osłoń kiełkujące rośliny',
         message:
-          '{dayLabel} {dayPartLabel}: {vegetableName} na {bedName} wymaga osłony (min {minTempC}°C).',
+          '{dayLabel} {dayPartLabel} {vegetableName} na {bedName} wymaga osłony, ponieważ temperatura może spaść do {minTempC}°C i spowolnić kiełkowanie, uszkodzić liścienie albo osłabić świeżo wzeszłe siewki.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.OVERWATERING_PREPARE_TODAY,
         title: 'Dziś: przygotuj drenaż',
         message:
-          '{dayLabel}: w {bedName} przygotuj odpływ przed opadami ({precipSumMm} mm).',
+          '{dayLabel} w {bedName} warto przygotować odpływ przed opadami ({precipSumMm} mm), bo nadmiar wody może szybko ograniczyć dostęp tlenu do korzeni i pogorszyć warunki wzrostu.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.OVERWATERING_PREPARE_TOMORROW,
         title: 'Jutro: przygotuj drenaż',
         message:
-          '{dayLabel}: w {bedName} przygotuj odpływ przed opadami ({precipSumMm} mm).',
+          '{dayLabel} w {bedName} warto przygotować odpływ przed opadami ({precipSumMm} mm), bo nadmiar wody może szybko ograniczyć dostęp tlenu do korzeni i pogorszyć warunki wzrostu.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.OVERWATERING_CHECK_TODAY,
         title: 'Dziś: sprawdź zastoiska wody',
         message:
-          '{dayLabel}: po opadach skontroluj {bedName} pod kątem zastoisk i drenażu.',
+          '{dayLabel} po opadach skontroluj {bedName}, bo zastoiska wody i długo mokra gleba zwiększają ryzyko niedotlenienia korzeni, zahamowania wzrostu i problemów chorobowych.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.OVERWATERING_CHECK_TOMORROW,
         title: 'Jutro: sprawdź zastoiska wody',
         message:
-          '{dayLabel}: po opadach skontroluj {bedName} pod kątem zastoisk i drenażu.',
+          '{dayLabel} po opadach skontroluj {bedName}, bo zastoiska wody i długo mokra gleba zwiększają ryzyko niedotlenienia korzeni, zahamowania wzrostu i problemów chorobowych.',
         dayPart: WarningRuleDayPart.ANY,
       },
     ];
@@ -564,121 +564,127 @@ export class WeatherWarningsSeedService implements OnModuleInit {
       {
         code: WarningCode.GREENHOUSE_FROST_RISK_TODAY_NIGHT,
         title: 'Szklarnia/tunel: dziś w nocy ryzyko przymrozku',
-        message: '{dayLabel} {dayPartLabel}: możliwy mróz do {minTempC}°C.',
+        message:
+          '{dayLabel} {dayPartLabel} pod osłoną temperatura może spaść do {minTempC}°C, co nadal grozi uszkodzeniem roślin ciepłolubnych, młodych przyrostów i świeżo posadzonych sadzonek.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.GREENHOUSE_FROST_RISK_TOMORROW_NIGHT,
         title: 'Szklarnia/tunel: jutro w nocy ryzyko przymrozku',
-        message: '{dayLabel} {dayPartLabel}: możliwy mróz do {minTempC}°C.',
+        message:
+          '{dayLabel} {dayPartLabel} pod osłoną temperatura może spaść do {minTempC}°C, co nadal grozi uszkodzeniem roślin ciepłolubnych, młodych przyrostów i świeżo posadzonych sadzonek.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.GREENHOUSE_HARD_FROST_RISK_TODAY_NIGHT,
         title: 'Szklarnia/tunel: dziś w nocy ryzyko silnego mrozu',
         message:
-          '{dayLabel} {dayPartLabel}: możliwy silny mróz do {minTempC}°C.',
+          '{dayLabel} {dayPartLabel} pod osłoną możliwy jest silny mróz do {minTempC}°C, który może przekroczyć możliwości samej konstrukcji i doprowadzić do ciężkich uszkodzeń roślin.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.GREENHOUSE_HARD_FROST_RISK_TOMORROW_NIGHT,
         title: 'Szklarnia/tunel: jutro w nocy ryzyko silnego mrozu',
         message:
-          '{dayLabel} {dayPartLabel}: możliwy silny mróz do {minTempC}°C.',
+          '{dayLabel} {dayPartLabel} pod osłoną możliwy jest silny mróz do {minTempC}°C, który może przekroczyć możliwości samej konstrukcji i doprowadzić do ciężkich uszkodzeń roślin.',
         dayPart: WarningRuleDayPart.NIGHT,
       },
       {
         code: WarningCode.GREENHOUSE_HEAT_WAVE_TODAY_DAY,
         title: 'Szklarnia/tunel: dziś w dzień ryzyko przegrzania',
         message:
-          '{dayLabel} {dayPartLabel}: temperatura może wzrosnąć do {maxTempC}°C.',
+          '{dayLabel} {dayPartLabel} temperatura w obiekcie może wzrosnąć do {maxTempC}°C, co grozi stresem cieplnym, więdnięciem, zrzucaniem kwiatów i problemami z zapylaniem.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.GREENHOUSE_HEAT_WAVE_TOMORROW_DAY,
         title: 'Szklarnia/tunel: jutro w dzień ryzyko przegrzania',
         message:
-          '{dayLabel} {dayPartLabel}: temperatura może wzrosnąć do {maxTempC}°C.',
+          '{dayLabel} {dayPartLabel} temperatura w obiekcie może wzrosnąć do {maxTempC}°C, co grozi stresem cieplnym, więdnięciem, zrzucaniem kwiatów i problemami z zapylaniem.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.GREENHOUSE_STRONG_WIND_TODAY_DAY,
         title: 'Szklarnia/tunel: dziś w dzień silny wiatr',
-        message: '{dayLabel} {dayPartLabel}: wiatr do {windMaxKmh} km/h.',
+        message:
+          '{dayLabel} {dayPartLabel} wiatr może osiągać {windMaxKmh} km/h, co zwiększa ryzyko uszkodzenia folii, drzwi, wietrzników i lekkich elementów konstrukcji.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.GREENHOUSE_STRONG_WIND_TOMORROW_DAY,
         title: 'Szklarnia/tunel: jutro w dzień silny wiatr',
-        message: '{dayLabel} {dayPartLabel}: wiatr do {windMaxKmh} km/h.',
+        message:
+          '{dayLabel} {dayPartLabel} wiatr może osiągać {windMaxKmh} km/h, co zwiększa ryzyko uszkodzenia folii, drzwi, wietrzników i lekkich elementów konstrukcji.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.GREENHOUSE_STORM_TODAY_DAY,
         title: 'Szklarnia/tunel: dziś w dzień ryzyko burzy',
         message:
-          '{dayLabel} {dayPartLabel}: ryzyko burzowych porywów i opadów.',
+          '{dayLabel} {dayPartLabel} istnieje ryzyko burzowych porywów i gwałtownych opadów, które mogą uszkodzić konstrukcję, rozszczelnić osłony i pogorszyć warunki dla roślin przy ścianach oraz wejściach.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.GREENHOUSE_STORM_TOMORROW_DAY,
         title: 'Szklarnia/tunel: jutro w dzień ryzyko burzy',
         message:
-          '{dayLabel} {dayPartLabel}: ryzyko burzowych porywów i opadów.',
+          '{dayLabel} {dayPartLabel} istnieje ryzyko burzowych porywów i gwałtownych opadów, które mogą uszkodzić konstrukcję, rozszczelnić osłony i pogorszyć warunki dla roślin przy ścianach oraz wejściach.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.GREENHOUSE_HEAVY_RAIN_TODAY_DAY,
         title: 'Szklarnia/tunel: dziś w dzień intensywny deszcz',
-        message: '{dayLabel} {dayPartLabel}: opad {precipSumMm} mm.',
+        message:
+          '{dayLabel} {dayPartLabel} prognozowany opad {precipSumMm} mm może powodować podmakanie otoczenia obiektu, przeciążenie odwodnienia i zawilgocenie stref przy wejściach lub bokach konstrukcji.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.GREENHOUSE_HEAVY_RAIN_TOMORROW_DAY,
         title: 'Szklarnia/tunel: jutro w dzień intensywny deszcz',
-        message: '{dayLabel} {dayPartLabel}: opad {precipSumMm} mm.',
+        message:
+          '{dayLabel} {dayPartLabel} prognozowany opad {precipSumMm} mm może powodować podmakanie otoczenia obiektu, przeciążenie odwodnienia i zawilgocenie stref przy wejściach lub bokach konstrukcji.',
         dayPart: WarningRuleDayPart.DAY,
       },
       {
         code: WarningCode.GREENHOUSE_SNOW_LOAD_TODAY,
         title: 'Szklarnia/tunel: dziś ryzyko obciążenia śniegiem',
         message:
-          '{dayLabel}: śnieg może obciążyć konstrukcję ({snowSumMm} mm).',
+          '{dayLabel} śnieg może obciążyć konstrukcję ({snowSumMm} mm), co zwiększa ryzyko odkształceń, osłabienia łączeń i uszkodzenia stelaża lub poszycia.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.GREENHOUSE_SNOW_LOAD_TOMORROW,
         title: 'Szklarnia/tunel: jutro ryzyko obciążenia śniegiem',
         message:
-          '{dayLabel}: śnieg może obciążyć konstrukcję ({snowSumMm} mm).',
+          '{dayLabel} śnieg może obciążyć konstrukcję ({snowSumMm} mm), co zwiększa ryzyko odkształceń, osłabienia łączeń i uszkodzenia stelaża lub poszycia.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.GREENHOUSE_WET_SNOW_TODAY,
         title: 'Szklarnia/tunel: dziś ryzyko mokrego śniegu',
         message:
-          '{dayLabel}: mokry śnieg zwiększa ryzyko uszkodzeń ({wetSnowMm} mm).',
+          '{dayLabel} mokry śnieg ({wetSnowMm} mm) zwiększa ryzyko uszkodzeń, bo szybko narasta na poszyciu i znacznie mocniej obciąża konstrukcję niż suchy śnieg.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.GREENHOUSE_WET_SNOW_TOMORROW,
         title: 'Szklarnia/tunel: jutro ryzyko mokrego śniegu',
         message:
-          '{dayLabel}: mokry śnieg zwiększa ryzyko uszkodzeń ({wetSnowMm} mm).',
+          '{dayLabel} mokry śnieg ({wetSnowMm} mm) zwiększa ryzyko uszkodzeń, bo szybko narasta na poszyciu i znacznie mocniej obciąża konstrukcję niż suchy śnieg.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TODAY,
         title: 'Szklarnia/tunel: dziś nagły spadek temperatury',
         message:
-          '{dayLabel}: możliwy nagły spadek temperatury ({tempDropC}°C).',
+          '{dayLabel} możliwy jest nagły spadek temperatury o {tempDropC}°C, co może wywołać szok termiczny, pogorszyć kondycję roślin i zwiększyć ryzyko uszkodzeń u gatunków wrażliwych.',
         dayPart: WarningRuleDayPart.ANY,
       },
       {
         code: WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TOMORROW,
         title: 'Szklarnia/tunel: jutro nagły spadek temperatury',
         message:
-          '{dayLabel}: możliwy nagły spadek temperatury ({tempDropC}°C).',
+          '{dayLabel} możliwy jest nagły spadek temperatury o {tempDropC}°C, co może wywołać szok termiczny, pogorszyć kondycję roślin i zwiększyć ryzyko uszkodzeń u gatunków wrażliwych.',
         dayPart: WarningRuleDayPart.ANY,
       },
     ];
