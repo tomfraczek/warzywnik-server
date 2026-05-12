@@ -1,7 +1,94 @@
 import { WeatherController } from './weather.controller';
+import { WarningCode, WarningSeverity } from '../common/enums/warning.enums';
 
 describe('WeatherController', () => {
   const req = { userEntity: { id: 'user-1' } } as never;
+
+  it('returns summary status for frost in /weather response', async () => {
+    const weatherService = {
+      getWeatherForUser: jest.fn().mockResolvedValue({
+        fetchedAt: new Date().toISOString(),
+        expiresAt: new Date().toISOString(),
+        stale: false,
+        location: { label: 'Ogród', lat: 50, lon: 20 },
+        today: {},
+        current: {},
+        units: {},
+        hourlyToday: [],
+        nextDays: [],
+      }),
+    };
+
+    const weatherRecomputeService = {
+      getWarningsResponse: jest.fn().mockResolvedValue({
+        computedAt: new Date().toISOString(),
+        weatherBasis: 'FRESH',
+        items: [
+          {
+            code: WarningCode.FROST_RISK_TODAY_NIGHT,
+            severity: WarningSeverity.WARNING,
+            title: 'Dziś w nocy: ryzyko przymrozku',
+            message: 'Możliwy spadek temperatury do -1°C',
+            validTo: new Date().toISOString(),
+          },
+        ],
+      }),
+      getTasksResponse: jest.fn(),
+    };
+
+    const controller = new WeatherController(
+      weatherService as never,
+      weatherRecomputeService as never,
+    );
+
+    const result = await controller.getWeather(req);
+
+    expect(result.status).toEqual(
+      expect.objectContaining({
+        code: 'FROST',
+        level: 'warning',
+      }),
+    );
+  });
+
+  it('returns OK status when there are no warnings', async () => {
+    const weatherService = {
+      getWeatherForUser: jest.fn().mockResolvedValue({
+        fetchedAt: new Date().toISOString(),
+        expiresAt: new Date().toISOString(),
+        stale: false,
+        location: { label: 'Ogród', lat: 50, lon: 20 },
+        today: {},
+        current: {},
+        units: {},
+        hourlyToday: [],
+        nextDays: [],
+      }),
+    };
+
+    const weatherRecomputeService = {
+      getWarningsResponse: jest.fn().mockResolvedValue({
+        computedAt: new Date().toISOString(),
+        weatherBasis: 'FRESH',
+        items: [],
+      }),
+      getTasksResponse: jest.fn(),
+    };
+
+    const controller = new WeatherController(
+      weatherService as never,
+      weatherRecomputeService as never,
+    );
+
+    const result = await controller.getWeather(req);
+
+    expect(result.status).toEqual(
+      expect.objectContaining({
+        code: 'OK',
+        level: 'ok',
+      }),
+    );
+  });
 
   it('uses pending filter by default for /tasks', async () => {
     const weatherService = {};

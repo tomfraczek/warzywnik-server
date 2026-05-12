@@ -248,6 +248,28 @@ export class WeatherUnitsDto {
   precipitation!: string;
 }
 
+export class WeatherStatusDto {
+  @IsIn(['ok', 'watch', 'warning', 'critical'])
+  level!: 'ok' | 'watch' | 'warning' | 'critical';
+
+  @IsString()
+  code!: string;
+
+  @IsString()
+  title!: string;
+
+  @IsString()
+  subtitle!: string;
+
+  @IsOptional()
+  @IsISO8601()
+  validTo?: string | null;
+
+  @IsArray()
+  @IsString({ each: true })
+  sources!: string[];
+}
+
 export class WeatherResponseDto {
   @IsISO8601()
   fetchedAt!: string;
@@ -261,6 +283,11 @@ export class WeatherResponseDto {
   @IsOptional()
   @IsString()
   message?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => WeatherStatusDto)
+  status?: WeatherStatusDto;
 
   @ValidateNested()
   @Type(() => WeatherLocationDto)
