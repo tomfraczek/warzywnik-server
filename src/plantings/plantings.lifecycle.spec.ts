@@ -251,6 +251,34 @@ describe('PlantingsService transplant lifecycle', () => {
     });
   });
 
+  it('uses optional date field as planned start date on create', async () => {
+    const { service, em } = createDeps();
+    const bed = makeBed();
+    const vegetable = makeVegetable();
+
+    em.findOne.mockImplementation((entity: unknown) => {
+      if (entity === Bed) return Promise.resolve(bed);
+      if (entity === Vegetable) return Promise.resolve(vegetable);
+      return Promise.resolve(null);
+    });
+
+    await service.create(user, {
+      bedId: bed.id,
+      vegetableId: vegetable.id,
+      date: '2026-04-11T08:30:00.000Z',
+    });
+
+    const persisted = em.persistAndFlush.mock.calls[0]?.[0];
+    expect(persisted).toBeDefined();
+    if (!persisted) {
+      throw new Error('Persisted planting was not captured');
+    }
+
+    expect(persisted.plannedStartDate.toISOString()).toBe(
+      '2026-04-11T08:30:00.000Z',
+    );
+  });
+
   it('sets sowedAt to now on DIRECT_SOW -> IN_GROUND update without sowedAt', async () => {
     const { service, em } = createDeps();
     const planting = {

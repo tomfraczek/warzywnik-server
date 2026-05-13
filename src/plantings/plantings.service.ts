@@ -199,8 +199,9 @@ export class PlantingsService {
     planting.user = user;
     planting.bed = bed;
     planting.vegetable = vegetable;
-    planting.plannedStartDate = dto.plannedStartDate
-      ? this.parseDate(dto.plannedStartDate, 'plannedStartDate')
+    const startDate = dto.plannedStartDate ?? dto.date;
+    planting.plannedStartDate = startDate
+      ? this.parseDate(startDate, 'plannedStartDate')
       : new Date();
     planting.actualStartDate =
       dto.actualStartDate !== undefined
