@@ -230,7 +230,12 @@ describe('BedsService quick actions', () => {
       }
     ).remove({ id: 'user-1' } as User, 'bed-1');
 
-    expect(txEm.nativeUpdate).toHaveBeenCalledWith(
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const nativeUpdateMock = txEm.nativeUpdate as unknown as jest.Mock;
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const removeAndFlushMock = txEm.removeAndFlush as unknown as jest.Mock;
+
+    expect(nativeUpdateMock).toHaveBeenCalledWith(
       ActionTask,
       {
         user: 'user-1',
@@ -242,11 +247,9 @@ describe('BedsService quick actions', () => {
       },
     );
 
-    expect(txEm.removeAndFlush).toHaveBeenCalledWith({ id: 'bed-1' });
-    expect(
-      (txEm.nativeUpdate as unknown as jest.Mock).mock.invocationCallOrder[0],
-    ).toBeLessThan(
-      (txEm.removeAndFlush as unknown as jest.Mock).mock.invocationCallOrder[0],
+    expect(removeAndFlushMock).toHaveBeenCalledWith({ id: 'bed-1' });
+    expect(nativeUpdateMock.mock.invocationCallOrder[0]).toBeLessThan(
+      removeAndFlushMock.mock.invocationCallOrder[0],
     );
   });
 });

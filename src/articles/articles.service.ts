@@ -11,7 +11,11 @@ import {
   ListArticlesQueryDto,
   UpdateArticleDto,
 } from './dto/article.schemas';
-import { ArticleContext, ArticleStatus } from '../common/enums/article.enums';
+import {
+  ArticleContext,
+  ArticleSeason,
+  ArticleStatus,
+} from '../common/enums/article.enums';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { User } from '../users/user.entity';
 import { calculateReadTimeMinutes } from '../common/utils/read-time.util';
@@ -397,22 +401,20 @@ export class ArticlesService {
     });
   }
 
-  private resolveSeason(
-    month: number,
-  ): 'winter' | 'spring' | 'summer' | 'autumn' {
+  private resolveSeason(month: number): ArticleSeason {
     if ([12, 1, 2].includes(month)) {
-      return 'winter';
+      return ArticleSeason.WINTER;
     }
 
     if ([3, 4, 5].includes(month)) {
-      return 'spring';
+      return ArticleSeason.SPRING;
     }
 
     if ([6, 7, 8].includes(month)) {
-      return 'summer';
+      return ArticleSeason.SUMMER;
     }
 
-    return 'autumn';
+    return ArticleSeason.AUTUMN;
   }
 
   private deriveContextsForPlanting(planting: Planting): Set<ArticleContext> {

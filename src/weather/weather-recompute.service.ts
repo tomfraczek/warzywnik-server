@@ -21,7 +21,11 @@ import {
   WarningsService,
   type WarningOutput,
 } from '../warning-rules/warnings.service';
-import { WarningCode, WarningScope } from '../common/enums/warning.enums';
+import {
+  WarningCode,
+  WarningScope,
+  WarningSeverity,
+} from '../common/enums/warning.enums';
 import { WeatherWarningOrchestratorService } from './warnings/weather-warning-orchestrator.service';
 import { WeatherTaskPlannerService } from './warnings/weather-task-planner.service';
 import { WeatherSnapshot } from './weather-snapshot.entity';
@@ -71,15 +75,15 @@ export class WeatherRecomputeService {
       this.weatherWarningOrchestrator.listActiveForUser(userId),
     ]);
 
-    const warningDtos = warningInstances.map((warning) => ({
+    const warningDtos: WarningDto[] = warningInstances.map((warning) => ({
       code: warning.code,
       severity: warning.code.includes('HARD')
-        ? 'CRITICAL'
+        ? WarningSeverity.CRITICAL
         : warning.code.includes('FROST') ||
             warning.code.includes('HEAVY_RAIN') ||
             warning.code.includes('STORM')
-          ? 'WARNING'
-          : 'INFO',
+          ? WarningSeverity.WARNING
+          : WarningSeverity.INFO,
       title: warning.code,
       message: warning.code,
       hint: null,

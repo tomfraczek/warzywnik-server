@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {

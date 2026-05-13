@@ -19,7 +19,6 @@ export class PlantingDecisionContextBuilder {
     now?: Date;
   }): Promise<PlantingDecisionContext> {
     const now = params.now ?? new Date();
-    const since72h = new Date(now.getTime() - 72 * 60 * 60 * 1000);
     const since7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     const [
