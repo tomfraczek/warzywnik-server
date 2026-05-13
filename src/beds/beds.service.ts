@@ -356,12 +356,44 @@ export class BedsService {
         throw new NotFoundException('Bed not found');
       }
 
+      const plantings = await em.find(
+        Planting,
+        { user: user.id, bed: bed.id },
+        { fields: ['id'] },
+      );
+      const plantingIds = plantings.map((planting) => planting.id);
+
       // Keep existing side effects from deactivation before physical delete.
       await this.handleBedStatusTransition(user, bed.id, true, false, em);
 
-      await this.cleanupBedLinkedOccurrences(em, user.id, bed.id);
+      await this.detachBedLinkedActionTasks(em, user.id, bed.id, plantingIds);
+
+      await this.cleanupBedLinkedOccurrences(em, plantingIds);
 
       await em.removeAndFlush(bed);
+    });
+  }
+
+  private async detachBedLinkedActionTasks(
+    em: EntityManager,
+    userId: string,
+    bedId: string,
+    plantingIds: string[],
+  ) {
+    const linkedTasksWhere: Record<string, unknown> = {
+      user: userId,
+      $or: [{ bed: bedId }],
+    };
+
+    if (plantingIds.length > 0) {
+      (linkedTasksWhere.$or as Array<Record<string, unknown>>).push({
+        planting: { $in: plantingIds },
+      });
+    }
+
+    await em.nativeUpdate(ActionTask, linkedTasksWhere, {
+      bed: null,
+      planting: null,
     });
   }
 
@@ -411,16 +443,8 @@ export class BedsService {
 
   private async cleanupBedLinkedOccurrences(
     em: EntityManager,
-    userId: string,
-    bedId: string,
+    plantingIds: string[],
   ) {
-    const plantings = await em.find(
-      Planting,
-      { user: userId, bed: bedId },
-      { fields: ['id'] },
-    );
-    const plantingIds = plantings.map((planting) => planting.id);
-
     if (plantingIds.length === 0) {
       return;
     }

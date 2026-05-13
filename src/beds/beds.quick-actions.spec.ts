@@ -3,6 +3,7 @@ import { BedsService } from './beds.service';
 import { WeatherRecomputeService } from '../weather/weather-recompute.service';
 import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
+import { ActionTask } from '../action-tasks/action-task.entity';
 import { User } from '../users/user.entity';
 import { BedQuickActionKind } from '../common/enums/quick-action.enums';
 
@@ -176,5 +177,76 @@ describe('BedsService quick actions', () => {
       }),
     );
     expect(result.items[0].plantingIds.sort()).toEqual(['p-1', 'p-2']);
+  });
+
+  it('detaches linked action tasks before physical bed delete', async () => {
+    const txEm = {
+      findOne: jest.fn().mockResolvedValue({ id: 'bed-1' }),
+      find: jest
+        .fn()
+        .mockResolvedValueOnce([{ id: 'pl-1' }])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([]),
+      flush: jest.fn().mockResolvedValue(undefined),
+      nativeUpdate: jest.fn().mockResolvedValue(1),
+      nativeDelete: jest.fn().mockResolvedValue(0),
+      removeAndFlush: jest.fn().mockResolvedValue(undefined),
+    } as unknown as EntityManager;
+
+    const em = {
+      transactional: jest
+        .fn()
+        .mockImplementation(
+          async (handler: (innerEm: EntityManager) => Promise<void>) =>
+            handler(txEm),
+        ),
+    } as unknown as EntityManager;
+
+    const weatherRecomputeService = {
+      recomputeWarnings: jest.fn(),
+      recomputeTasks: jest.fn(),
+    } as unknown as WeatherRecomputeService;
+
+    const plantingInsightsService = {
+      recordEvent: jest.fn(),
+    } as unknown as PlantingInsightsService;
+
+    const actionAutomationService = {
+      recomputeForPlanting: jest.fn(),
+    } as unknown as ActionAutomationService;
+
+    const service = new BedsService(
+      em,
+      weatherRecomputeService,
+      plantingInsightsService,
+      actionAutomationService,
+    );
+
+    await (
+      service as unknown as {
+        remove: (user: User, bedId: string) => Promise<void>;
+      }
+    ).remove({ id: 'user-1' } as User, 'bed-1');
+
+    expect(txEm.nativeUpdate).toHaveBeenCalledWith(
+      ActionTask,
+      {
+        user: 'user-1',
+        $or: [{ bed: 'bed-1' }, { planting: { $in: ['pl-1'] } }],
+      },
+      {
+        bed: null,
+        planting: null,
+      },
+    );
+
+    expect(txEm.removeAndFlush).toHaveBeenCalledWith({ id: 'bed-1' });
+    expect(
+      (txEm.nativeUpdate as unknown as jest.Mock).mock.invocationCallOrder[0],
+    ).toBeLessThan(
+      (txEm.removeAndFlush as unknown as jest.Mock).mock.invocationCallOrder[0],
+    );
   });
 });
