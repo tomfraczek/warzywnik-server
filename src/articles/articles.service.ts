@@ -11,10 +11,18 @@ import {
   ListArticlesQueryDto,
   UpdateArticleDto,
 } from './dto/article.schemas';
-import { ArticleStatus } from '../common/enums/article.enums';
+import { ArticleContext, ArticleStatus } from '../common/enums/article.enums';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { User } from '../users/user.entity';
 import { calculateReadTimeMinutes } from '../common/utils/read-time.util';
+import { NotificationEventService } from '../notifications/notification-event.service';
+import { Planting } from '../plantings/planting.entity';
+import { ACTIVE_PLANTING_STATUSES } from '../plantings/planting-lifecycle';
+import { PlantingDisease } from '../planting-diseases/planting-disease.entity';
+import { PestOccurrence } from '../pest-occurrences/pest-occurrence.entity';
+import { ActionTask } from '../action-tasks/action-task.entity';
+import { ActionTaskStatus } from '../common/enums/action.enums';
+import { PlantingStatus } from '../common/enums/planting.enums';
 
 const isUuid = (value: string): boolean => /^[0-9a-fA-F-]{36}$/.test(value);
 
@@ -39,6 +47,7 @@ export class ArticlesService {
   constructor(
     private readonly em: EntityManager,
     private readonly analyticsService: AnalyticsService,
+    private readonly notificationEventService: NotificationEventService,
   ) {}
 
   async listPublic(query: ListArticlesQueryDto) {
@@ -194,6 +203,11 @@ export class ArticlesService {
     article.readTimeMinutes = calculateReadTimeMinutes(article.content);
 
     await this.em.persistAndFlush(article);
+
+    if (article.status === ArticleStatus.PUBLISHED) {
+      await this.publishArticleRecommendations(article);
+    }
+
     return this.serializeDetail(article);
   }
 
@@ -202,6 +216,8 @@ export class ArticlesService {
     if (!article) {
       throw new NotFoundException('Article not found');
     }
+
+    const wasPublished = article.status === ArticleStatus.PUBLISHED;
 
     if (dto.slug && dto.slug !== article.slug) {
       const existing = await this.em.findOne(Article, { slug: dto.slug });
@@ -241,7 +257,182 @@ export class ArticlesService {
     article.readTimeMinutes = calculateReadTimeMinutes(article.content);
 
     await this.em.persistAndFlush(article);
+
+    const nowPublished = article.status === ArticleStatus.PUBLISHED;
+    const becamePublished = !wasPublished && nowPublished;
+    const publishedAtSet = dto.publishedAt !== undefined && nowPublished;
+    if (becamePublished || publishedAtSet) {
+      await this.publishArticleRecommendations(article);
+    }
+
     return this.serializeDetail(article);
+  }
+
+  private async publishArticleRecommendations(article: Article): Promise<void> {
+    const now = new Date();
+    const currentMonth = now.getUTCMonth() + 1;
+    const season = this.resolveSeason(currentMonth);
+
+    if (article.months.length > 0 && !article.months.includes(currentMonth)) {
+      return;
+    }
+
+    if (article.seasons.length > 0 && !article.seasons.includes(season)) {
+      return;
+    }
+
+    const plantings = await this.em.find(
+      Planting,
+      {
+        status: { $in: ACTIVE_PLANTING_STATUSES },
+      },
+      {
+        populate: ['user', 'vegetable', 'bed', 'bed.soil'],
+      },
+    );
+
+    if (plantings.length === 0) {
+      return;
+    }
+
+    const plantingIds = plantings.map((item) => item.id);
+    const [diseases, pests, fertilizerTasks] = await Promise.all([
+      this.em.find(
+        PlantingDisease,
+        {
+          planting: { $in: plantingIds },
+        },
+        { populate: ['disease', 'planting'] },
+      ),
+      this.em.find(
+        PestOccurrence,
+        {
+          planting: { $in: plantingIds },
+        },
+        { populate: ['pest', 'planting'] },
+      ),
+      this.em.find(ActionTask, {
+        user: { $in: [...new Set(plantings.map((item) => item.user.id))] },
+        status: { $in: [ActionTaskStatus.PENDING, ActionTaskStatus.DONE] },
+        createdAt: { $gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) },
+      }),
+    ]);
+
+    const diseaseSlugByPlantingId = new Map<string, Set<string>>();
+    for (const disease of diseases) {
+      const set = diseaseSlugByPlantingId.get(disease.planting.id) ?? new Set();
+      set.add(disease.disease.slug);
+      diseaseSlugByPlantingId.set(disease.planting.id, set);
+    }
+
+    const pestSlugByPlantingId = new Map<string, Set<string>>();
+    for (const pest of pests) {
+      const set = pestSlugByPlantingId.get(pest.planting.id) ?? new Set();
+      set.add(pest.pest.slug);
+      pestSlugByPlantingId.set(pest.planting.id, set);
+    }
+
+    const matchedUserIds = new Set<string>();
+    const fertilizerTaskTitlesByUserId = new Map<string, string[]>();
+
+    for (const task of fertilizerTasks) {
+      const current = fertilizerTaskTitlesByUserId.get(task.user.id) ?? [];
+      current.push(task.title.toLowerCase());
+      fertilizerTaskTitlesByUserId.set(task.user.id, current);
+    }
+
+    for (const planting of plantings) {
+      const matchVegetable =
+        article.relatedVegetableSlugs.length === 0 ||
+        article.relatedVegetableSlugs.includes(planting.vegetable.slug);
+
+      const matchSoil =
+        article.relatedSoilSlugs.length === 0 ||
+        (planting.bed.soil != null &&
+          article.relatedSoilSlugs.includes(planting.bed.soil.slug));
+
+      const diseaseSet = diseaseSlugByPlantingId.get(planting.id) ?? new Set();
+      const matchDisease =
+        article.relatedDiseaseSlugs.length === 0 ||
+        article.relatedDiseaseSlugs.some((slug) => diseaseSet.has(slug));
+
+      const pestSet = pestSlugByPlantingId.get(planting.id) ?? new Set();
+      const matchPest =
+        article.relatedPestSlugs.length === 0 ||
+        article.relatedPestSlugs.some((slug) => pestSet.has(slug));
+
+      const userTaskTitles =
+        fertilizerTaskTitlesByUserId.get(planting.user.id) ?? [];
+      const matchFertilizer =
+        article.relatedFertilizerSlugs.length === 0 ||
+        article.relatedFertilizerSlugs.some((slug) =>
+          userTaskTitles.some((title) => title.includes(slug.toLowerCase())),
+        );
+
+      const contexts = this.deriveContextsForPlanting(planting);
+      const matchContext =
+        article.contexts.length === 0 ||
+        article.contexts.some((ctx) => contexts.has(ctx));
+
+      if (
+        matchVegetable &&
+        matchSoil &&
+        matchDisease &&
+        matchPest &&
+        matchFertilizer &&
+        matchContext
+      ) {
+        matchedUserIds.add(planting.user.id);
+      }
+    }
+
+    if (matchedUserIds.size === 0) {
+      return;
+    }
+
+    await this.notificationEventService.publishArticleEvent({
+      userIds: Array.from(matchedUserIds),
+      articleId: article.id,
+      articleSlug: article.slug,
+    });
+  }
+
+  private resolveSeason(
+    month: number,
+  ): 'winter' | 'spring' | 'summer' | 'autumn' {
+    if ([12, 1, 2].includes(month)) {
+      return 'winter';
+    }
+
+    if ([3, 4, 5].includes(month)) {
+      return 'spring';
+    }
+
+    if ([6, 7, 8].includes(month)) {
+      return 'summer';
+    }
+
+    return 'autumn';
+  }
+
+  private deriveContextsForPlanting(planting: Planting): Set<ArticleContext> {
+    const contexts = new Set<ArticleContext>([ArticleContext.LEARNING]);
+
+    if (
+      planting.status === PlantingStatus.NEW ||
+      planting.status === PlantingStatus.SEEDLING_PREPARED
+    ) {
+      contexts.add(ArticleContext.PLANNING);
+      contexts.add(ArticleContext.SOWING);
+    }
+
+    if (planting.harvestWindowStart || planting.harvestWindowEnd) {
+      contexts.add(ArticleContext.HARVEST);
+    }
+
+    contexts.add(ArticleContext.PROBLEM_SOLVING);
+
+    return contexts;
   }
 
   async remove(id: string) {

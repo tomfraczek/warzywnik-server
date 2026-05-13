@@ -33,6 +33,7 @@ import { WeatherWarningConfigsSeedService } from './warnings/weather-warning-con
 import { Bed } from '../beds/bed.entity';
 import { WeatherStatusService } from './weather-status.service';
 import { WeatherStatusConfigService } from './weather-status-config.service';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { WeatherStatusConfigService } from './weather-status-config.service';
     ActionTasksModule,
     PlantingsModule,
     WarningRulesModule,
+    NotificationsModule,
   ],
   controllers: [WeatherController],
   providers: [

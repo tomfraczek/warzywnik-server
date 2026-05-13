@@ -38,6 +38,7 @@ import { WeatherModule } from './weather/weather.module';
 import { PlantingInsightsModule } from './planting-insights/planting-insights.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { FavoritesModule } from './favorites/favorites.module';
     PlantingInsightsModule,
     AnalyticsModule,
     FavoritesModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

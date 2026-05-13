@@ -15,6 +15,7 @@ import { Planting } from '../../plantings/planting.entity';
 import { getLocalDate, localDatePlusDays } from './weather-warning.types';
 import { PlantingEvent } from '../../planting-insights/planting-event.entity';
 import { PlantingEventType } from '../../common/enums/planting-event.enums';
+import { NotificationEventService } from '../../notifications/notification-event.service';
 
 type TaskProposal = {
   dedupeKey: string;
@@ -79,7 +80,10 @@ const OPERATIONAL_TASK_CODES = new Set<WarningCode>([
 export class WeatherTaskPlannerService {
   private readonly logger = new Logger(WeatherTaskPlannerService.name);
 
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly notificationEventService: NotificationEventService,
+  ) {}
 
   async recomputeWeatherTasksForUser(userId: string): Promise<void> {
     const em = this.em.fork();
@@ -148,6 +152,8 @@ export class WeatherTaskPlannerService {
     const proposalByKey = new Map(
       proposals.map((item) => [item.dedupeKey, item]),
     );
+
+    const createdTasksBuffer: ActionTask[] = [];
 
     await em.transactional(async (txEm) => {
       const connection = (
@@ -229,6 +235,7 @@ export class WeatherTaskPlannerService {
         }
 
         txEm.persist(task);
+        createdTasksBuffer.push(task);
       }
 
       for (const task of existing) {
@@ -239,6 +246,24 @@ export class WeatherTaskPlannerService {
 
       await txEm.flush();
     });
+
+    const createdTaskIds = createdTasksBuffer
+      .map((item) => item.id)
+      .filter((id): id is string => typeof id === 'string');
+
+    if (createdTaskIds.length > 0) {
+      const createdTasks = await em.find(
+        ActionTask,
+        { id: { $in: createdTaskIds } },
+        { populate: ['bed', 'planting'] },
+      );
+
+      await this.notificationEventService.publishTaskEvents({
+        userId,
+        tasks: createdTasks,
+        source: 'weather-task-planner',
+      });
+    }
 
     this.logger.log(
       `recomputed weather tasks user=${userId} proposals=${proposals.length}`,

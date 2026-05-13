@@ -30,6 +30,7 @@ import { RemindersService } from '../reminders/reminders.service';
 import { normalizeDueAt } from '../common/types/date-utils';
 import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
 import { PlantingEventType } from '../common/enums/planting-event.enums';
+import { NotificationEventService } from '../notifications/notification-event.service';
 
 @Injectable()
 export class ActionTasksService {
@@ -37,6 +38,7 @@ export class ActionTasksService {
     private readonly em: EntityManager,
     private readonly remindersService: RemindersService,
     private readonly plantingInsightsService: PlantingInsightsService,
+    private readonly notificationEventService: NotificationEventService,
   ) {}
 
   async createForPlanting(
@@ -99,6 +101,12 @@ export class ActionTasksService {
         'bed',
       ]);
 
+      await this.notificationEventService.publishTaskEvents({
+        userId: user.id,
+        tasks: [task],
+        source: 'action-tasks.manual',
+      });
+
       return this.serialize(task);
     });
   }
@@ -157,6 +165,12 @@ export class ActionTasksService {
         'planting.vegetable',
         'bed',
       ]);
+
+      await this.notificationEventService.publishTaskEvents({
+        userId: user.id,
+        tasks: [task],
+        source: 'action-tasks.manual',
+      });
 
       return this.serialize(task);
     });
@@ -225,6 +239,12 @@ export class ActionTasksService {
         em,
       });
 
+      await this.notificationEventService.publishTaskEvents({
+        userId: user.id,
+        tasks: created,
+        source: 'action-tasks.manual.bulk',
+      });
+
       return { items: created.map((item) => this.serialize(item)) };
     });
   }
@@ -247,6 +267,12 @@ export class ActionTasksService {
           task.planting = planting;
         },
         em,
+      });
+
+      await this.notificationEventService.publishTaskEvents({
+        userId: user.id,
+        tasks: created,
+        source: 'action-tasks.manual.bulk',
       });
 
       return { items: created.map((item) => this.serialize(item)) };

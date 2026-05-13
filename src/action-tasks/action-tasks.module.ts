@@ -12,6 +12,7 @@ import { VegetableActionRule } from '../vegetables/vegetable-action-rule.entity'
 import { PlantingInsightsModule } from '../planting-insights/planting-insights.module';
 import { ActionAutomationController } from './action-automation.controller';
 import { ActionRecommendation } from './action-recommendation.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ActionRecommendation } from './action-recommendation.entity';
     ]),
     RemindersModule,
     PlantingInsightsModule,
+    NotificationsModule,
   ],
   providers: [ActionTasksService, ActionAutomationService],
   controllers: [ActionTasksController, ActionAutomationController],

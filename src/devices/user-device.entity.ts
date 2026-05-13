@@ -29,6 +29,21 @@ export class UserDevice {
   @Property({ type: 'boolean', default: true })
   isEnabled: boolean = true;
 
+  @Property({ type: Date, nullable: true })
+  lastSuccessAt?: Date | null;
+
+  @Property({ type: Date, nullable: true })
+  lastErrorAt?: Date | null;
+
+  @Property({ length: 64, nullable: true })
+  lastErrorCode?: string | null;
+
+  @Property({ length: 120, nullable: true })
+  disabledReason?: string | null;
+
+  @Property({ type: Date, nullable: true })
+  lastReceiptCheckedAt?: Date | null;
+
   @Property({ type: Date, defaultRaw: 'now()' })
   createdAt: Date = new Date();
 

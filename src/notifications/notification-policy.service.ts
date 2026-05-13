@@ -1,0 +1,128 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { EntityManager } from '@mikro-orm/postgresql';
+import {
+  NotificationIntensity,
+  NotificationPriority,
+  NotificationType,
+} from '../common/enums/notification.enums';
+import { User } from '../users/user.entity';
+import { NotificationPreference } from './entities/notification-preference.entity';
+import { NotificationDedupe } from './entities/notification-dedupe.entity';
+import { NotificationPreferencesService } from './notification-preferences.service';
+
+type NotificationPolicyDecision = {
+  decision: 'PUSH' | 'CENTER_ONLY' | 'SKIP';
+  reason: string;
+};
+
+@Injectable()
+export class NotificationPolicyService {
+  private readonly logger = new Logger(NotificationPolicyService.name);
+
+  constructor(
+    private readonly em: EntityManager,
+    private readonly notificationPreferencesService: NotificationPreferencesService,
+  ) {}
+
+  async evaluate(params: {
+    user: User;
+    type: NotificationType;
+    priority: NotificationPriority;
+    dedupeKey: string;
+    dedupeHours: number;
+  }): Promise<NotificationPolicyDecision> {
+    const { user, type, priority, dedupeKey, dedupeHours } = params;
+
+    if (!user.notificationsEnabled) {
+      return { decision: 'SKIP', reason: 'preference_disabled' };
+    }
+
+    const preference =
+      await this.notificationPreferencesService.getOrCreatePreference(user);
+
+    if (!this.isTypeEnabled(type, preference)) {
+      return { decision: 'SKIP', reason: 'type_disabled' };
+    }
+
+    const dedupeExists = await this.em.findOne(NotificationDedupe, {
+      user: user.id,
+      type,
+      dedupeKey,
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (dedupeExists) {
+      return { decision: 'SKIP', reason: 'deduped' };
+    }
+
+    const intensityDecision = this.evaluateIntensity(
+      preference.intensity,
+      priority,
+    );
+    if (intensityDecision !== 'PUSH') {
+      this.logger.log(
+        `notification intensity gate user=${user.id} type=${type} priority=${priority} decision=${intensityDecision}`,
+      );
+    }
+
+    const dedupe = new NotificationDedupe();
+    dedupe.user = user;
+    dedupe.type = type;
+    dedupe.dedupeKey = dedupeKey;
+    dedupe.expiresAt = new Date(Date.now() + dedupeHours * 60 * 60 * 1000);
+    this.em.persist(dedupe);
+
+    return {
+      decision: intensityDecision,
+      reason:
+        intensityDecision === 'CENTER_ONLY' ? 'low_priority_center_only' : 'ok',
+    };
+  }
+
+  private isTypeEnabled(
+    type: NotificationType,
+    preference: NotificationPreference,
+  ): boolean {
+    switch (type) {
+      case NotificationType.TASKS_GENERATED:
+        return preference.tasksEnabled;
+      case NotificationType.DAILY_TASKS_SUMMARY:
+        return preference.dailySummaryEnabled;
+      case NotificationType.WEATHER_STATUS_CHANGED:
+        return preference.weatherStatusEnabled;
+      case NotificationType.GARDEN_RISK_CHANGED:
+        return preference.gardenRiskEnabled;
+      case NotificationType.WEATHER_ALERTS_SUMMARY:
+        return preference.weatherAlertsEnabled;
+      case NotificationType.ARTICLE_RECOMMENDED:
+        return preference.recommendedArticlesEnabled;
+      case NotificationType.LIFECYCLE_SUGGESTION:
+        return preference.lifecycleSuggestionsEnabled;
+      case NotificationType.WEEKLY_DIGEST:
+        return preference.weeklyDigestEnabled;
+      default:
+        return true;
+    }
+  }
+
+  private evaluateIntensity(
+    intensity: NotificationIntensity,
+    priority: NotificationPriority,
+  ): 'PUSH' | 'CENTER_ONLY' {
+    if (intensity === NotificationIntensity.IMPORTANT_ONLY) {
+      return priority === NotificationPriority.HIGH ||
+        priority === NotificationPriority.CRITICAL
+        ? 'PUSH'
+        : 'CENTER_ONLY';
+    }
+
+    if (intensity === NotificationIntensity.BALANCED) {
+      if (priority === NotificationPriority.LOW) {
+        return 'CENTER_ONLY';
+      }
+      return 'PUSH';
+    }
+
+    return 'PUSH';
+  }
+}

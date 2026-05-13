@@ -189,7 +189,12 @@ describe('ActionTasksService list scoping', () => {
         }),
     } as unknown as EntityManager;
 
-    const service = new ActionTasksService(em, {} as never, {} as never);
+    const service = new ActionTasksService(
+      em,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
 
     return { service, em };
   };

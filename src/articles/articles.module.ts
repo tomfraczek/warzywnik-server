@@ -4,9 +4,14 @@ import { ArticlesController } from './articles.controller';
 import { ArticlesService } from './articles.service';
 import { Article } from './article.entity';
 import { AnalyticsModule } from '../analytics/analytics.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Article]), AnalyticsModule],
+  imports: [
+    MikroOrmModule.forFeature([Article]),
+    AnalyticsModule,
+    NotificationsModule,
+  ],
   controllers: [ArticlesController],
   providers: [ArticlesService],
   exports: [ArticlesService],

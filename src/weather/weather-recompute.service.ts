@@ -27,6 +27,10 @@ import { WeatherTaskPlannerService } from './warnings/weather-task-planner.servi
 import { WeatherSnapshot } from './weather-snapshot.entity';
 import { Bed } from '../beds/bed.entity';
 import { ACTIVE_PLANTING_STATUSES } from '../plantings/planting-lifecycle';
+import { WeatherStatusService } from './weather-status.service';
+import { WeatherNotificationState } from '../notifications/entities/weather-notification-state.entity';
+import { NotificationEventService } from '../notifications/notification-event.service';
+import { NotificationPriority } from '../common/enums/notification.enums';
 
 type TaskStatusFilter = 'pending' | 'done' | 'all';
 
@@ -41,6 +45,8 @@ export class WeatherRecomputeService {
     private readonly warningsService: WarningsService,
     private readonly weatherWarningOrchestrator: WeatherWarningOrchestratorService,
     private readonly weatherTaskPlannerService: WeatherTaskPlannerService,
+    private readonly weatherStatusService: WeatherStatusService,
+    private readonly notificationEventService: NotificationEventService,
   ) {}
 
   async recomputeWarnings(userId: string, _weatherBasis?: WeatherBasis) {
@@ -48,9 +54,145 @@ export class WeatherRecomputeService {
     await this.requireUser(userId);
     const result =
       await this.weatherWarningOrchestrator.recomputeForUser(userId);
+
+    await this.emitWeatherNotificationEvents(userId, result.computedAt);
+
     this.logger.log(
       `recomputed warnings for user=${userId} count=${result.activeCount}`,
     );
+  }
+
+  private async emitWeatherNotificationEvents(
+    userId: string,
+    computedAt: Date,
+  ): Promise<void> {
+    const [snapshotData, warningInstances] = await Promise.all([
+      this.weatherService.getLatestSnapshotDataForUser(userId),
+      this.weatherWarningOrchestrator.listActiveForUser(userId),
+    ]);
+
+    const warningDtos = warningInstances.map((warning) => ({
+      code: warning.code,
+      severity: warning.code.includes('HARD')
+        ? 'CRITICAL'
+        : warning.code.includes('FROST') ||
+            warning.code.includes('HEAVY_RAIN') ||
+            warning.code.includes('STORM')
+          ? 'WARNING'
+          : 'INFO',
+      title: warning.code,
+      message: warning.code,
+      hint: null,
+      details: warning.details ?? null,
+      dedupeKey: warning.dedupeKey,
+      scope: warning.scope,
+      bedId: warning.bed?.id ?? null,
+      bedName: warning.bed?.name ?? null,
+      plantingId: warning.planting?.id ?? null,
+      vegetableName: warning.planting?.vegetable?.name ?? null,
+      localDate: null,
+      dayPart: null,
+      validFrom: warning.validFrom.toISOString(),
+      validTo: warning.validTo.toISOString(),
+    }));
+
+    const weatherStatus = this.weatherStatusService.buildNearTermWeatherStatus(
+      snapshotData,
+      computedAt,
+    );
+    const gardenRisk =
+      this.weatherStatusService.buildGardenRiskStatus(warningDtos);
+
+    let state = await this.em.findOne(WeatherNotificationState, {
+      user: userId,
+    });
+
+    if (!state) {
+      state = new WeatherNotificationState();
+      state.user = this.em.getReference(User, userId);
+    }
+
+    const previousWeatherStatus = state.lastWeatherStatus;
+    const previousGardenRisk = state.lastGardenRiskStatus;
+
+    const weatherPriority = this.mapStatusSeverityToPriority(
+      weatherStatus.severity,
+    );
+    const riskPriority = this.mapStatusSeverityToPriority(gardenRisk.severity);
+
+    const weatherChanged =
+      previousWeatherStatus != null &&
+      previousWeatherStatus !== weatherStatus.code &&
+      weatherPriority !== NotificationPriority.LOW;
+
+    const gardenRiskIncreased = this.isGardenRiskIncrease(
+      previousGardenRisk,
+      gardenRisk.code,
+    );
+
+    state.lastWeatherStatus = weatherStatus.code;
+    state.lastWeatherStatusSeverity = weatherPriority;
+    state.lastGardenRiskStatus = gardenRisk.code;
+    state.lastGardenRiskSeverity = riskPriority;
+    state.lastComputedAt = computedAt;
+
+    this.em.persist(state);
+    await this.em.flush();
+
+    await this.notificationEventService.publishWeatherEvents({
+      userId,
+      recomputeKey: computedAt.toISOString(),
+      weatherStatusCode: weatherStatus.code,
+      weatherStatusPriority: weatherPriority,
+      weatherChanged,
+      gardenRiskCode: gardenRisk.code,
+      gardenRiskPriority: riskPriority,
+      gardenRiskIncreased,
+      warningInstances,
+    });
+  }
+
+  private mapStatusSeverityToPriority(severity: string): NotificationPriority {
+    if (severity === 'danger') {
+      return NotificationPriority.CRITICAL;
+    }
+
+    if (severity === 'warning') {
+      return NotificationPriority.HIGH;
+    }
+
+    if (severity === 'info') {
+      return NotificationPriority.NORMAL;
+    }
+
+    return NotificationPriority.LOW;
+  }
+
+  private isGardenRiskIncrease(
+    previousCode: string | null | undefined,
+    currentCode: string,
+  ): boolean {
+    const rank = (code: string | null | undefined): number => {
+      if (!code || code === 'OK' || code === 'none' || code === 'low') {
+        return 0;
+      }
+
+      if (code.includes('WATCH') || code === 'medium') {
+        return 1;
+      }
+
+      if (code.includes('WARNING') || code === 'high') {
+        return 2;
+      }
+
+      if (code.includes('CRITICAL')) {
+        return 3;
+      }
+
+      return 1;
+    };
+
+    return rank(currentCode) > rank(previousCode) && rank(currentCode) >= 1;
   }
 
   async recomputeTasks(userId: string): Promise<void> {

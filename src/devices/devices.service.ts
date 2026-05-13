@@ -17,6 +17,7 @@ export class DevicesService {
       existing.user = user;
       existing.platform = dto.platform;
       existing.isEnabled = true;
+      existing.disabledReason = null;
       await this.em.flush();
       return this.serialize(existing);
     }
@@ -26,6 +27,7 @@ export class DevicesService {
     device.platform = dto.platform;
     device.expoPushToken = dto.expoPushToken;
     device.isEnabled = true;
+    device.disabledReason = null;
 
     await this.em.persistAndFlush(device);
     return this.serialize(device);
@@ -42,6 +44,7 @@ export class DevicesService {
     }
 
     device.isEnabled = false;
+    device.disabledReason = 'USER_DISABLED';
     await this.em.flush();
 
     return this.serialize(device);
@@ -54,6 +57,11 @@ export class DevicesService {
       platform: device.platform,
       expoPushToken: device.expoPushToken,
       isEnabled: device.isEnabled,
+      lastSuccessAt: device.lastSuccessAt ?? null,
+      lastErrorAt: device.lastErrorAt ?? null,
+      lastErrorCode: device.lastErrorCode ?? null,
+      disabledReason: device.disabledReason ?? null,
+      lastReceiptCheckedAt: device.lastReceiptCheckedAt ?? null,
       createdAt: device.createdAt,
       updatedAt: device.updatedAt,
     };
