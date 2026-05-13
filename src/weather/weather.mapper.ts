@@ -5,7 +5,7 @@ import {
   type WeatherHourlyPoint,
   type WeatherSnapshotData,
 } from './weather-snapshot.entity';
-import { OpenMeteoForecastResponse, type WeatherType } from './weather.types';
+import { OpenMeteoForecastResponse } from './weather.types';
 import {
   WeatherCurrentDto,
   WeatherDailyDto,
@@ -14,6 +14,7 @@ import {
   WeatherTodayDto,
   WeatherUnitsDto,
 } from './dto/weather-response.dto';
+import { toWeatherLabel, toWeatherType } from './weather-code.util';
 
 type LegacyWeatherDailyPoint = Omit<WeatherDailyPoint, 'weatherCode'> & {
   weatherCode?: number;
@@ -64,67 +65,6 @@ const normalizeIsDay = (value: unknown): boolean => {
   if (typeof value === 'string') return value === '1' || value === 'true';
   return true;
 };
-
-function toWeatherType(code: number): WeatherType {
-  if (code === 0) return 'CLEAR';
-  if (code === 1 || code === 2) return 'PARTLY_CLOUDY';
-  if (code === 3) return 'CLOUDY';
-  if (code === 45 || code === 48) return 'FOG';
-  if (code >= 51 && code <= 57) return 'DRIZZLE';
-  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return 'RAIN';
-  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'SNOW';
-  if (code === 95) return 'THUNDERSTORM';
-  if (code === 96 || code === 99) return 'HAIL';
-  return 'UNKNOWN';
-}
-
-function toWeatherLabel(code: number, isDay?: boolean): string {
-  switch (code) {
-    case 0:
-      return isDay === false ? 'Bezchmurnie' : 'Słonecznie';
-    case 1:
-      return isDay === false ? 'Prawie bezchmurnie' : 'Przeważnie słonecznie';
-    case 2:
-      return 'Częściowe zachmurzenie';
-    case 3:
-      return 'Pochmurnie';
-    case 45:
-    case 48:
-      return 'Mgła';
-    case 51:
-    case 53:
-    case 55:
-      return 'Mżawka';
-    case 56:
-    case 57:
-      return 'Marznąca mżawka';
-    case 61:
-    case 63:
-    case 65:
-      return 'Deszcz';
-    case 66:
-    case 67:
-      return 'Marznący deszcz';
-    case 71:
-    case 73:
-    case 75:
-    case 77:
-    case 85:
-    case 86:
-      return 'Śnieg';
-    case 80:
-    case 81:
-    case 82:
-      return 'Przelotny deszcz';
-    case 95:
-      return 'Burza';
-    case 96:
-    case 99:
-      return 'Burza z gradem';
-    default:
-      return 'Nieznane warunki';
-  }
-}
 
 export function mapOpenMeteoToSnapshotData(
   payload: OpenMeteoForecastResponse,
@@ -306,7 +246,7 @@ export function mapSnapshotToWeatherResponse(params: {
     fetchedAt: params.snapshot.fetchedAt.toISOString(),
     expiresAt: params.snapshot.expiresAt.toISOString(),
     stale: params.stale,
-    message: `DEBUG_MARKER_${Date.now()}`,
+    message: params.message,
     location: {
       label: params.location.label,
       lat: params.location.lat,

@@ -128,6 +128,13 @@ export class WeatherService {
     return 'FRESH';
   }
 
+  async getLatestSnapshotDataForUser(
+    userId: string,
+  ): Promise<WeatherSnapshotData | null> {
+    const snapshot = await this.findSnapshot(userId);
+    return snapshot?.data ?? null;
+  }
+
   async refreshSnapshotForUser(params: {
     userId: string;
     reason: string;

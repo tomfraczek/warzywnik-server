@@ -1,10 +1,62 @@
 import { WeatherController } from './weather.controller';
 import { WarningCode, WarningSeverity } from '../common/enums/warning.enums';
+import { WeatherStatusService } from './weather-status.service';
+import { WeatherStatusConfigService } from './weather-status-config.service';
+
+const createWeatherStatusService = () =>
+  new WeatherStatusService(new WeatherStatusConfigService());
+
+const snapshotData = {
+  timezone: 'Europe/Warsaw',
+  current: {
+    time: '2026-05-13T12:00',
+    temp: 18,
+    precip: 0,
+    rain: 0,
+    snow: 0,
+    wind: 12,
+    weatherCode: 3,
+    isDay: true,
+  },
+  daily: [],
+  hourly: [
+    {
+      time: '2026-05-13T12:00',
+      temp: 18,
+      precip: 0,
+      rain: 0,
+      snow: 0,
+      wind: 12,
+      weatherCode: 3,
+      isDay: true,
+    },
+    {
+      time: '2026-05-13T17:00',
+      temp: 21,
+      precip: 4,
+      rain: 4,
+      snow: 0,
+      wind: 22,
+      weatherCode: 95,
+      isDay: true,
+    },
+    {
+      time: '2026-05-13T18:00',
+      temp: 19,
+      precip: 3.5,
+      rain: 3.5,
+      snow: 0,
+      wind: 24,
+      weatherCode: 95,
+      isDay: false,
+    },
+  ],
+};
 
 describe('WeatherController', () => {
   const req = { userEntity: { id: 'user-1' } } as never;
 
-  it('returns summary status for frost in /weather response', async () => {
+  it('returns near-term status and garden risk status in /weather response', async () => {
     const weatherService = {
       getWeatherForUser: jest.fn().mockResolvedValue({
         fetchedAt: new Date().toISOString(),
@@ -17,6 +69,7 @@ describe('WeatherController', () => {
         hourlyToday: [],
         nextDays: [],
       }),
+      getLatestSnapshotDataForUser: jest.fn().mockResolvedValue(snapshotData),
     };
 
     const weatherRecomputeService = {
@@ -39,19 +92,28 @@ describe('WeatherController', () => {
     const controller = new WeatherController(
       weatherService as never,
       weatherRecomputeService as never,
+      createWeatherStatusService(),
     );
 
     const result = await controller.getWeather(req);
 
     expect(result.status).toEqual(
       expect.objectContaining({
+        code: 'THUNDERSTORM_LATER',
+        severity: 'warning',
+        source: 'hourly_forecast',
+      }),
+    );
+    expect(result.gardenRiskStatus).toEqual(
+      expect.objectContaining({
         code: 'FROST',
-        level: 'warning',
+        severity: 'warning',
+        source: 'warnings',
       }),
     );
   });
 
-  it('returns OK status when there are no warnings', async () => {
+  it('returns CALM near-term status and OK garden risk when there are no warnings', async () => {
     const weatherService = {
       getWeatherForUser: jest.fn().mockResolvedValue({
         fetchedAt: new Date().toISOString(),
@@ -63,6 +125,16 @@ describe('WeatherController', () => {
         units: {},
         hourlyToday: [],
         nextDays: [],
+      }),
+      getLatestSnapshotDataForUser: jest.fn().mockResolvedValue({
+        ...snapshotData,
+        hourly: snapshotData.hourly.map((item) => ({
+          ...item,
+          precip: 0,
+          rain: 0,
+          wind: 10,
+          weatherCode: 3,
+        })),
       }),
     };
 
@@ -78,14 +150,21 @@ describe('WeatherController', () => {
     const controller = new WeatherController(
       weatherService as never,
       weatherRecomputeService as never,
+      createWeatherStatusService(),
     );
 
     const result = await controller.getWeather(req);
 
     expect(result.status).toEqual(
       expect.objectContaining({
+        code: 'CALM',
+        severity: 'ok',
+      }),
+    );
+    expect(result.gardenRiskStatus).toEqual(
+      expect.objectContaining({
         code: 'OK',
-        level: 'ok',
+        severity: 'ok',
       }),
     );
   });
@@ -102,6 +181,7 @@ describe('WeatherController', () => {
     const controller = new WeatherController(
       weatherService as never,
       weatherRecomputeService as never,
+      createWeatherStatusService(),
     );
 
     await controller.getTasks(req, undefined, undefined);
@@ -124,6 +204,7 @@ describe('WeatherController', () => {
     const controller = new WeatherController(
       weatherService as never,
       weatherRecomputeService as never,
+      createWeatherStatusService(),
     );
 
     await controller.getTasks(req, undefined, 'true');
@@ -146,6 +227,7 @@ describe('WeatherController', () => {
     const controller = new WeatherController(
       weatherService as never,
       weatherRecomputeService as never,
+      createWeatherStatusService(),
     );
 
     await controller.getTasks(req, 'done', 'true');

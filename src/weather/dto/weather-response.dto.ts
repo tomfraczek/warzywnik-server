@@ -10,6 +10,18 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
+export const WEATHER_STATUS_SEVERITIES = [
+  'ok',
+  'info',
+  'warning',
+  'danger',
+] as const;
+
+export const WEATHER_STATUS_SOURCES = ['hourly_forecast', 'warnings'] as const;
+
+export type WeatherStatusSeverity = (typeof WEATHER_STATUS_SEVERITIES)[number];
+export type WeatherStatusSource = (typeof WEATHER_STATUS_SOURCES)[number];
+
 export class WeatherLocationDto {
   @IsString()
   label!: string;
@@ -249,8 +261,8 @@ export class WeatherUnitsDto {
 }
 
 export class WeatherStatusDto {
-  @IsIn(['ok', 'watch', 'warning', 'critical'])
-  level!: 'ok' | 'watch' | 'warning' | 'critical';
+  @IsIn(WEATHER_STATUS_SEVERITIES)
+  severity!: WeatherStatusSeverity;
 
   @IsString()
   code!: string;
@@ -263,11 +275,89 @@ export class WeatherStatusDto {
 
   @IsOptional()
   @IsISO8601()
+  startsAt?: string | null;
+
+  @IsOptional()
+  @IsISO8601()
+  endsAt?: string | null;
+
+  @IsOptional()
+  @IsISO8601()
   validTo?: string | null;
+
+  @IsIn(WEATHER_STATUS_SOURCES)
+  source!: WeatherStatusSource;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  sources?: string[];
+}
+
+export class WeatherStatusDebugHourDto {
+  @IsString()
+  time!: string;
+
+  @IsString()
+  localTime!: string;
+
+  @IsNumber()
+  offsetHours!: number;
+
+  @IsBoolean()
+  isCurrent!: boolean;
 
   @IsArray()
   @IsString({ each: true })
-  sources!: string[];
+  phenomena!: string[];
+
+  @IsNumber()
+  precip!: number;
+
+  @IsNumber()
+  rain!: number;
+
+  @IsNumber()
+  snow!: number;
+
+  @IsNumber()
+  windSpeed!: number;
+
+  @IsNumber()
+  weatherCode!: number;
+}
+
+export class WeatherStatusDebugCandidateDto {
+  @IsString()
+  code!: string;
+
+  @IsString()
+  timing!: string;
+
+  @IsNumber()
+  score!: number;
+
+  @IsArray()
+  @IsString({ each: true })
+  matchedHours!: string[];
+}
+
+export class WeatherStatusDebugDto {
+  @IsString()
+  timezone!: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WeatherStatusDebugHourDto)
+  analyzedHours!: WeatherStatusDebugHourDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WeatherStatusDebugCandidateDto)
+  candidates!: WeatherStatusDebugCandidateDto[];
+
+  @IsString()
+  selectedCode!: string;
 }
 
 export class WeatherResponseDto {
@@ -288,6 +378,16 @@ export class WeatherResponseDto {
   @ValidateNested()
   @Type(() => WeatherStatusDto)
   status?: WeatherStatusDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => WeatherStatusDto)
+  gardenRiskStatus?: WeatherStatusDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => WeatherStatusDebugDto)
+  statusDebug?: WeatherStatusDebugDto;
 
   @ValidateNested()
   @Type(() => WeatherLocationDto)

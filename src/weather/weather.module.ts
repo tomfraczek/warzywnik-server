@@ -31,6 +31,8 @@ import { WeatherWarningOrchestratorService } from './warnings/weather-warning-or
 import { WeatherTaskPlannerService } from './warnings/weather-task-planner.service';
 import { WeatherWarningConfigsSeedService } from './warnings/weather-warning-configs.seed.service';
 import { Bed } from '../beds/bed.entity';
+import { WeatherStatusService } from './weather-status.service';
+import { WeatherStatusConfigService } from './weather-status-config.service';
 
 @Module({
   imports: [
@@ -69,6 +71,8 @@ import { Bed } from '../beds/bed.entity';
     WeatherWarningOrchestratorService,
     WeatherTaskPlannerService,
     WeatherWarningConfigsSeedService,
+    WeatherStatusConfigService,
+    WeatherStatusService,
   ],
   exports: [WeatherService, WeatherRecomputeService],
 })
