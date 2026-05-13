@@ -261,6 +261,10 @@ export class WeatherUnitsDto {
 }
 
 export class WeatherStatusDto {
+  @IsOptional()
+  @IsIn(['ok', 'watch', 'warning', 'critical'])
+  level?: 'ok' | 'watch' | 'warning' | 'critical';
+
   @IsIn(WEATHER_STATUS_SEVERITIES)
   severity!: WeatherStatusSeverity;
 

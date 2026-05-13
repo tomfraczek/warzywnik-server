@@ -32,9 +32,11 @@ type NearTermPhenomenon =
 type TimingBucket = 'NOW' | 'SOON' | 'LATER';
 
 type BuiltWeatherStatusSeverity = 'ok' | 'info' | 'warning' | 'danger';
+type BuiltWeatherStatusLevel = 'ok' | 'watch' | 'warning' | 'critical';
 
 type BuiltWeatherStatus = {
   code: string;
+  level?: BuiltWeatherStatusLevel;
   severity: BuiltWeatherStatusSeverity;
   title: string;
   subtitle: string;
@@ -112,6 +114,18 @@ const TIMING_SCORE: Record<TimingBucket, number> = {
   LATER: 0,
 };
 
+const WARNING_SEVERITY_RANK: Record<WarningSeverity, number> = {
+  [WarningSeverity.INFO]: 1,
+  [WarningSeverity.WARNING]: 2,
+  [WarningSeverity.CRITICAL]: 3,
+};
+
+const NON_GARDEN_WARNING_CODES = new Set<WarningCode>([
+  // Świadomie oznaczone jako meteo-only / nieoperacyjne dla ogrodu.
+  WarningCode.STORM_RISK,
+  WarningCode.HAIL_RISK,
+]);
+
 @Injectable()
 export class WeatherStatusService {
   constructor(
@@ -179,18 +193,22 @@ export class WeatherStatusService {
   }
 
   buildGardenRiskStatus(warnings: WarningDto[]): BuiltWeatherStatus {
-    const severityRank: Record<WarningSeverity, number> = {
-      [WarningSeverity.INFO]: 1,
-      [WarningSeverity.WARNING]: 2,
-      [WarningSeverity.CRITICAL]: 3,
-    };
-
-    const sorted = [...warnings].sort(
-      (a, b) => severityRank[b.severity] - severityRank[a.severity],
+    const relevant = warnings.filter(
+      (item) => !NON_GARDEN_WARNING_CODES.has(item.code),
     );
 
-    const pick = (codes: Set<WarningCode>) =>
-      sorted.filter((item) => codes.has(item.code));
+    if (relevant.length === 0) {
+      return {
+        code: 'OK',
+        level: 'ok',
+        severity: 'ok',
+        title: 'Brak pilnych zagrożeń dla upraw',
+        subtitle: 'Nie wykryto ostrzeżeń wymagających działania w ogrodzie.',
+        source: 'warnings',
+        validTo: null,
+        sources: [],
+      };
+    }
 
     const hardFrostCodes = new Set<WarningCode>([
       WarningCode.HARD_FROST_RISK_TODAY_NIGHT,
@@ -198,6 +216,8 @@ export class WeatherStatusService {
       WarningCode.HARD_FROST_RISK_NEXT_7_DAYS,
       WarningCode.GREENHOUSE_HARD_FROST_RISK_TODAY_NIGHT,
       WarningCode.GREENHOUSE_HARD_FROST_RISK_TOMORROW_NIGHT,
+      WarningCode.HARD_FROST_RISK,
+      WarningCode.GREENHOUSE_HARD_FROST_PROTECTION,
     ]);
     const frostCodes = new Set<WarningCode>([
       WarningCode.FROST_RISK_TODAY_NIGHT,
@@ -205,8 +225,30 @@ export class WeatherStatusService {
       WarningCode.FROST_RISK_NEXT_7_DAYS,
       WarningCode.GREENHOUSE_FROST_RISK_TODAY_NIGHT,
       WarningCode.GREENHOUSE_FROST_RISK_TOMORROW_NIGHT,
+      WarningCode.FROST_RISK,
     ]);
-    const stormCodes = new Set<WarningCode>([
+    const germinationProtectCodes = new Set<WarningCode>([
+      WarningCode.GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT,
+      WarningCode.GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT,
+      WarningCode.GERMINATION_PROTECT_TOO_COLD,
+      WarningCode.GREENHOUSE_NIGHT_FROST_PROTECTION,
+    ]);
+    const sowingPauseCodes = new Set<WarningCode>([
+      WarningCode.SOWING_PAUSE_TOO_COLD_TODAY,
+      WarningCode.SOWING_PAUSE_TOO_COLD_TOMORROW,
+      WarningCode.SOWING_PAUSE_TOO_COLD,
+    ]);
+    const overwateringCodes = new Set<WarningCode>([
+      WarningCode.OVERWATERING_PREPARE_TODAY,
+      WarningCode.OVERWATERING_PREPARE_TOMORROW,
+      WarningCode.OVERWATERING_CHECK_TODAY,
+      WarningCode.OVERWATERING_CHECK_TOMORROW,
+      WarningCode.OVERWATERING_PREPARE,
+      WarningCode.OVERWATERING_CHECK,
+      WarningCode.OVERWATERING_RISK,
+      WarningCode.GREENHOUSE_HEAVY_RAIN_CHECK_DRAINAGE,
+    ]);
+    const windCodes = new Set<WarningCode>([
       WarningCode.WIND_DAMAGE_TODAY_DAY,
       WarningCode.WIND_DAMAGE_TODAY_NIGHT,
       WarningCode.WIND_DAMAGE_TOMORROW_DAY,
@@ -216,21 +258,20 @@ export class WeatherStatusService {
       WarningCode.GREENHOUSE_STORM_TOMORROW_DAY,
       WarningCode.GREENHOUSE_STRONG_WIND_TODAY_DAY,
       WarningCode.GREENHOUSE_STRONG_WIND_TOMORROW_DAY,
+      WarningCode.GREENHOUSE_STRONG_WIND_SECURE,
+      WarningCode.STRONG_WIND,
     ]);
-    const rainCodes = new Set<WarningCode>([
+    const heavyRainCodes = new Set<WarningCode>([
       WarningCode.HEAVY_RAIN_TODAY_DAY,
       WarningCode.HEAVY_RAIN_TODAY_NIGHT,
       WarningCode.HEAVY_RAIN_TOMORROW_DAY,
       WarningCode.HEAVY_RAIN_TOMORROW_NIGHT,
       WarningCode.HEAVY_RAIN_RISK_NEXT_48H,
-      WarningCode.OVERWATERING_PREPARE_TODAY,
-      WarningCode.OVERWATERING_PREPARE_TOMORROW,
-      WarningCode.OVERWATERING_CHECK_TODAY,
-      WarningCode.OVERWATERING_CHECK_TOMORROW,
       WarningCode.GREENHOUSE_HEAVY_RAIN_TODAY_DAY,
       WarningCode.GREENHOUSE_HEAVY_RAIN_TOMORROW_DAY,
+      WarningCode.HEAVY_RAIN,
     ]);
-    const droughtCodes = new Set<WarningCode>([
+    const wateringNeededCodes = new Set<WarningCode>([
       WarningCode.DROUGHT_RISK_NEXT_7_DAYS,
       WarningCode.WATERING_NEEDED_TODAY,
       WarningCode.WATERING_NEEDED_TOMORROW,
@@ -238,75 +279,171 @@ export class WeatherStatusService {
       WarningCode.WATERING_NEEDED,
     ]);
 
-    const toStatus = (
-      code: string,
-      title: string,
-      severity: BuiltWeatherStatusSeverity,
-      matched: WarningDto[],
-    ): BuiltWeatherStatus => ({
-      code,
-      severity,
-      title,
-      subtitle: matched[0]?.message ?? matched[0]?.title ?? title,
-      validTo: matched[0]?.validTo ?? null,
-      source: 'warnings',
-      sources: Array.from(new Set(matched.map((item) => item.code))),
-    });
+    const prioritizedGroups: Array<{
+      codes: Set<WarningCode>;
+      statusCode: string;
+      level: BuiltWeatherStatusLevel;
+      severity: BuiltWeatherStatusSeverity;
+      title: string;
+      fallbackSubtitle: string;
+    }> = [
+      {
+        codes: hardFrostCodes,
+        statusCode: 'HARD_FROST',
+        level: 'critical',
+        severity: 'danger',
+        title: 'Silny przymrozek',
+        fallbackSubtitle: 'Nadchodzi okres silnego przymrozku.',
+      },
+      {
+        codes: frostCodes,
+        statusCode: 'FROST',
+        level: 'warning',
+        severity: 'warning',
+        title: 'Ryzyko przymrozku',
+        fallbackSubtitle: 'Noc może być zbyt chłodna dla roślin.',
+      },
+      {
+        codes: germinationProtectCodes,
+        statusCode: 'GERMINATION_PROTECT',
+        level: 'warning',
+        severity: 'warning',
+        title: 'Chroń młode siewki',
+        fallbackSubtitle: 'Noc może być zbyt chłodna dla świeżych wysiewów.',
+      },
+      {
+        codes: sowingPauseCodes,
+        statusCode: 'SOWING_PAUSE',
+        level: 'watch',
+        severity: 'warning',
+        title: 'Wstrzymaj siew',
+        fallbackSubtitle:
+          'Warunki są zbyt chłodne dla kiełkowania. Lepiej poczekać z wysiewem.',
+      },
+      {
+        codes: overwateringCodes,
+        statusCode: 'OVERWATERING',
+        level: 'warning',
+        severity: 'warning',
+        title: 'Ryzyko nadmiaru wody',
+        fallbackSubtitle: 'Sprawdź grządki o słabszym drenażu.',
+      },
+      {
+        codes: windCodes,
+        statusCode: 'WIND_DAMAGE',
+        level: 'warning',
+        severity: 'warning',
+        title: 'Silny wiatr',
+        fallbackSubtitle: 'Podmuchy mogą uszkadzać rośliny i osłony.',
+      },
+      {
+        codes: heavyRainCodes,
+        statusCode: 'HEAVY_RAIN',
+        level: 'warning',
+        severity: 'warning',
+        title: 'Intensywny deszcz',
+        fallbackSubtitle: 'Możliwe intensywne opady wpływające na grządki.',
+      },
+      {
+        codes: wateringNeededCodes,
+        statusCode: 'WATERING_NEEDED',
+        level: 'watch',
+        severity: 'info',
+        title: 'Może być potrzebne podlewanie',
+        fallbackSubtitle: 'Warunki mogą szybko przesuszać podłoże.',
+      },
+    ];
 
-    const hardFrost = pick(hardFrostCodes);
-    if (hardFrost.length > 0) {
-      return toStatus(
-        'HARD_FROST',
-        'Nadchodzi silny mróz',
-        'danger',
-        hardFrost,
-      );
+    for (const group of prioritizedGroups) {
+      const matched = relevant.filter((item) => group.codes.has(item.code));
+      if (matched.length === 0) {
+        continue;
+      }
+
+      const primary = this.pickPrimaryWarning(matched);
+      return {
+        code: group.statusCode,
+        level: group.level,
+        severity: group.severity,
+        title: group.title,
+        subtitle: primary.message || group.fallbackSubtitle,
+        validTo: primary.validTo ?? null,
+        source: 'warnings',
+        sources: Array.from(new Set(matched.map((item) => item.code))),
+      };
     }
 
-    const frost = pick(frostCodes);
-    if (frost.length > 0) {
-      return toStatus('FROST', 'Nadchodzą przymrozki', 'warning', frost);
-    }
-
-    const storms = pick(stormCodes);
-    if (storms.length > 0) {
-      return toStatus(
-        'STORM',
-        'Zbliżają się gwałtowne zjawiska',
-        storms[0]?.severity === WarningSeverity.CRITICAL ? 'danger' : 'warning',
-        storms,
-      );
-    }
-
-    const rains = pick(rainCodes);
-    if (rains.length > 0) {
-      return toStatus(
-        'HEAVY_RAIN',
-        'Możliwe intensywne opady',
-        'warning',
-        rains,
-      );
-    }
-
-    const drought = pick(droughtCodes);
-    if (drought.length > 0) {
-      return toStatus(
-        'DROUGHT',
-        'Uwaga na suszę i przesuszenie',
-        drought[0]?.severity === WarningSeverity.INFO ? 'info' : 'warning',
-        drought,
-      );
-    }
-
+    const fallbackPrimary = this.pickPrimaryWarning(relevant);
     return {
-      code: 'OK',
-      severity: 'ok',
-      title: 'Brak pilnych zagrożeń dla upraw',
-      subtitle: 'Nie wykryto ostrzeżeń wymagających działania w ogrodzie.',
+      code: 'GARDEN_WARNING',
+      level: this.levelFromWarningSeverity(fallbackPrimary.severity),
+      severity: this.statusSeverityFromWarningSeverity(
+        fallbackPrimary.severity,
+      ),
+      title: fallbackPrimary.title || 'Aktywne ostrzeżenie ogrodnicze',
+      subtitle:
+        fallbackPrimary.message ||
+        'Wykryto ostrzeżenie wymagające uwagi w ogrodzie.',
+      validTo: fallbackPrimary.validTo ?? null,
       source: 'warnings',
-      validTo: null,
-      sources: [],
+      sources: [fallbackPrimary.code],
     };
+  }
+
+  private pickPrimaryWarning(warnings: WarningDto[]): WarningDto {
+    return [...warnings].sort((a, b) => {
+      const severityDiff =
+        WARNING_SEVERITY_RANK[b.severity] - WARNING_SEVERITY_RANK[a.severity];
+      if (severityDiff !== 0) {
+        return severityDiff;
+      }
+
+      const aTime = this.parseWarningDate(a.validFrom);
+      const bTime = this.parseWarningDate(b.validFrom);
+      if (aTime !== bTime) {
+        return aTime - bTime;
+      }
+
+      const codeDiff = a.code.localeCompare(b.code);
+      if (codeDiff !== 0) {
+        return codeDiff;
+      }
+
+      return (a.title || '').localeCompare(b.title || '');
+    })[0];
+  }
+
+  private parseWarningDate(value?: string | null): number {
+    if (!value) {
+      return Number.POSITIVE_INFINITY;
+    }
+
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? Number.POSITIVE_INFINITY : parsed;
+  }
+
+  private levelFromWarningSeverity(
+    severity: WarningSeverity,
+  ): BuiltWeatherStatusLevel {
+    if (severity === WarningSeverity.CRITICAL) {
+      return 'critical';
+    }
+    if (severity === WarningSeverity.WARNING) {
+      return 'warning';
+    }
+    return 'watch';
+  }
+
+  private statusSeverityFromWarningSeverity(
+    severity: WarningSeverity,
+  ): BuiltWeatherStatusSeverity {
+    if (severity === WarningSeverity.CRITICAL) {
+      return 'danger';
+    }
+    if (severity === WarningSeverity.WARNING) {
+      return 'warning';
+    }
+    return 'info';
   }
 
   private collectAnalyzedHours(
@@ -709,6 +846,7 @@ export class WeatherStatusService {
   private buildCalmStatus(): BuiltWeatherStatus {
     return {
       code: 'CALM',
+      level: 'ok',
       severity: 'ok',
       title: 'Spokojnie',
       subtitle: 'W najbliższych godzinach nie widać istotnych zmian pogody.',

@@ -18,6 +18,24 @@ type GardenRiskStatus = ReturnType<
   WeatherStatusService['buildGardenRiskStatus']
 >;
 
+const warning = (params: {
+  code: WarningCode;
+  severity?: WarningSeverity;
+  title?: string;
+  message?: string;
+  validFrom?: string;
+  validTo?: string;
+}): WarningDto => ({
+  dedupeKey: `dedupe:${params.code}:${params.validFrom ?? 'none'}`,
+  code: params.code,
+  severity: params.severity ?? WarningSeverity.WARNING,
+  title: params.title ?? params.code,
+  message: params.message ?? `${params.code} message`,
+  scope: WarningScope.USER,
+  validFrom: params.validFrom,
+  validTo: params.validTo,
+});
+
 const baseSnapshot = (): WeatherSnapshotData => ({
   timezone: 'Europe/Warsaw',
   current: {
@@ -240,5 +258,110 @@ describe('WeatherStatusService', () => {
 
     expect(result.debug.candidates.length).toBeGreaterThan(0);
     expect(result.debug.selectedCode).toBe('THUNDERSTORM_SOON');
+  });
+
+  it('returns OK when warning list is empty', () => {
+    const service = createService();
+
+    const result = service.buildGardenRiskStatus([]);
+
+    expect(result.code).toBe('OK');
+    expect(result.level).toBe('ok');
+  });
+
+  it('maps single SOWING_PAUSE warning to SOWING_PAUSE status', () => {
+    const service = createService();
+
+    const result = service.buildGardenRiskStatus([
+      warning({ code: WarningCode.SOWING_PAUSE_TOO_COLD_TODAY }),
+    ]);
+
+    expect(result.code).toBe('SOWING_PAUSE');
+    expect(result.title).toBe('Wstrzymaj siew');
+    expect(result.code).not.toBe('OK');
+  });
+
+  it('allows near-term CALM while gardenRiskStatus indicates sowing pause', () => {
+    const service = createService();
+    const snapshot = baseSnapshot();
+
+    const weatherStatus = service.buildNearTermWeatherStatus(snapshot, now);
+    const gardenRiskStatus = service.buildGardenRiskStatus([
+      warning({ code: WarningCode.SOWING_PAUSE_TOO_COLD_TODAY }),
+    ]);
+
+    expect(weatherStatus.code).toBe('CALM');
+    expect(gardenRiskStatus.code).toBe('SOWING_PAUSE');
+  });
+
+  it('maps GERMINATION_PROTECT warning to GERMINATION_PROTECT status', () => {
+    const service = createService();
+
+    const result = service.buildGardenRiskStatus([
+      warning({ code: WarningCode.GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT }),
+    ]);
+
+    expect(result.code).toBe('GERMINATION_PROTECT');
+    expect(result.title).toBe('Chroń młode siewki');
+  });
+
+  it('maps WATERING_NEEDED warning to WATERING_NEEDED status', () => {
+    const service = createService();
+
+    const result = service.buildGardenRiskStatus([
+      warning({ code: WarningCode.WATERING_NEEDED_TODAY }),
+    ]);
+
+    expect(result.code).toBe('WATERING_NEEDED');
+    expect(result.level).toBe('watch');
+  });
+
+  it('maps OVERWATERING warning to OVERWATERING status', () => {
+    const service = createService();
+
+    const result = service.buildGardenRiskStatus([
+      warning({ code: WarningCode.OVERWATERING_CHECK_TODAY }),
+    ]);
+
+    expect(result.code).toBe('OVERWATERING');
+    expect(result.title).toBe('Ryzyko nadmiaru wody');
+  });
+
+  it('prioritizes HARD_FROST over SOWING_PAUSE', () => {
+    const service = createService();
+
+    const result = service.buildGardenRiskStatus([
+      warning({ code: WarningCode.SOWING_PAUSE_TOO_COLD_TODAY }),
+      warning({ code: WarningCode.HARD_FROST_RISK_TODAY_NIGHT }),
+    ]);
+
+    expect(result.code).toBe('HARD_FROST');
+  });
+
+  it('returns fallback GARDEN_WARNING for unmapped active warning', () => {
+    const service = createService();
+
+    const result = service.buildGardenRiskStatus([
+      warning({
+        code: WarningCode.TRANSPLANT_DELAY_TOO_COLD,
+        severity: WarningSeverity.WARNING,
+        title: 'Opóźnij przesadzanie',
+        message: 'Temperatury są za niskie do bezpiecznego przesadzenia.',
+      }),
+    ]);
+
+    expect(result.code).toBe('GARDEN_WARNING');
+    expect(result.code).not.toBe('OK');
+    expect(result.title).toBe('Opóźnij przesadzanie');
+  });
+
+  it('returns OK for explicitly non-garden meteo-only warnings', () => {
+    const service = createService();
+
+    const result = service.buildGardenRiskStatus([
+      warning({ code: WarningCode.HAIL_RISK }),
+    ]);
+
+    expect(result.code).toBe('OK');
   });
 });
