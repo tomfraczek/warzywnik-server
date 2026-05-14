@@ -13,6 +13,7 @@ import { NotificationBatch } from './entities/notification-batch.entity';
 import { NotificationRoutingService } from './notification-routing.service';
 import { NotificationPolicyService } from './notification-policy.service';
 import { NotificationCenterService } from './notification-center.service';
+import { NotificationCopyService } from './notification-copy.service';
 
 type BatchCandidate = {
   type: NotificationType;
@@ -23,6 +24,10 @@ type BatchCandidate = {
   dedupeKey: string;
   priority: NotificationPriority;
   dedupeHours: number;
+  suppressPushWhenDedupedBy?: {
+    type: NotificationType;
+    dedupeKey: string;
+  };
 };
 
 @Injectable()
@@ -34,6 +39,7 @@ export class NotificationAggregatorService {
     private readonly notificationRoutingService: NotificationRoutingService,
     private readonly notificationPolicyService: NotificationPolicyService,
     private readonly notificationCenterService: NotificationCenterService,
+    private readonly notificationCopyService: NotificationCopyService,
   ) {}
 
   @Cron('*/1 * * * *', { name: 'notification-aggregate-outbox' })
@@ -90,6 +96,7 @@ export class NotificationAggregatorService {
       priority: candidate.priority,
       dedupeKey: candidate.dedupeKey,
       dedupeHours: candidate.dedupeHours,
+      suppressPushWhenDedupedBy: candidate.suppressPushWhenDedupedBy,
     });
 
     if (decision.decision === 'SKIP') {
@@ -172,12 +179,15 @@ export class NotificationAggregatorService {
       });
       const targetId = plantingIds[0] ?? bedIds[0] ?? 'planner';
       const dedupeWindow = new Date().toISOString().slice(0, 13);
+      const copy = this.notificationCopyService.buildTasksGeneratedCopy(
+        actionTaskIds.length,
+      );
 
       return {
         type,
         routeTarget,
-        title: 'Nowe zadania w ogrodzie',
-        body: `Dodano ${actionTaskIds.length} nowych zadań.`,
+        title: copy.title,
+        body: copy.body,
         payload: {
           actionTaskIds,
           bedIds,
@@ -201,11 +211,14 @@ export class NotificationAggregatorService {
       );
       const uniqIds = [...new Set(ids)];
       const day = new Date().toISOString().slice(0, 10);
+      const copy = this.notificationCopyService.buildDailySummaryCopy(
+        uniqIds.length,
+      );
       return {
         type,
         routeTarget: NotificationRouteTarget.PLANNER,
-        title: 'Plan na dziś',
-        body: `Na dziś masz ${uniqIds.length} zadań do wykonania.`,
+        title: copy.title,
+        body: copy.body,
         payload: { actionTaskIds: uniqIds },
         dedupeKey: `${events[0].user.id}:${type}:${day}`,
         priority: NotificationPriority.NORMAL,
@@ -217,11 +230,15 @@ export class NotificationAggregatorService {
       const weatherStatusCode = this.readString(
         events[events.length - 1].payload.weatherStatusCode,
       );
+      const copy =
+        this.notificationCopyService.buildWeatherStatusChangedCopy(
+          weatherStatusCode,
+        );
       return {
         type,
         routeTarget: NotificationRouteTarget.WEATHER,
-        title: 'Zmiana pogody',
-        body: `Nowy status pogody: ${weatherStatusCode ?? 'aktualizacja'}.`,
+        title: copy.title,
+        body: copy.body,
         payload: { weatherStatusCode },
         dedupeKey: `${events[0].user.id}:${type}:${weatherStatusCode ?? 'NA'}`,
         priority: events[events.length - 1].priority,
@@ -230,18 +247,47 @@ export class NotificationAggregatorService {
     }
 
     if (type === NotificationType.GARDEN_RISK_CHANGED) {
-      const gardenRiskCode = this.readString(
-        events[events.length - 1].payload.gardenRiskCode,
+      const latestPayload = events[events.length - 1].payload;
+      const riskReason =
+        this.readString(latestPayload.riskReason) ??
+        this.readString(latestPayload.gardenRiskCode);
+      const riskLevel =
+        this.readString(latestPayload.riskLevel) ??
+        this.notificationCopyService.mapPriorityToRiskLevel(
+          events[events.length - 1].priority,
+        );
+      const warningCode = this.readString(latestPayload.warningCode);
+      const copy =
+        this.notificationCopyService.buildGardenRiskChangedCopy(riskReason);
+      const weatherAlertCoverageKey = this.readString(
+        latestPayload.weatherAlertCoverageKey,
       );
+
       return {
         type,
         routeTarget: NotificationRouteTarget.GARDEN_RISK,
-        title: 'Zmiana ryzyka ogrodu',
-        body: `Poziom ryzyka: ${gardenRiskCode ?? 'aktualizacja'}.`,
-        payload: { gardenRiskCode },
-        dedupeKey: `${events[0].user.id}:${type}:${gardenRiskCode ?? 'NA'}`,
+        title: copy.title,
+        body: copy.body,
+        payload: {
+          riskLevel,
+          riskReason,
+          warningCode,
+          warningCodes: this.readStringArray(latestPayload.warningCodes),
+          gardenRiskCode: this.readString(latestPayload.gardenRiskCode),
+          validFrom: this.readString(latestPayload.validFrom),
+          validTo: this.readString(latestPayload.validTo),
+        },
+        dedupeKey:
+          events[events.length - 1].dedupeKey ||
+          `${events[0].user.id}:${type}:${riskReason ?? 'NA'}`,
         priority: events[events.length - 1].priority,
-        dedupeHours: 6,
+        dedupeHours: 12,
+        suppressPushWhenDedupedBy: weatherAlertCoverageKey
+          ? {
+              type: NotificationType.WEATHER_ALERTS_SUMMARY,
+              dedupeKey: weatherAlertCoverageKey,
+            }
+          : undefined,
       };
     }
 
@@ -249,18 +295,34 @@ export class NotificationAggregatorService {
       const warningIds = events.flatMap((item) =>
         this.readStringArray(item.payload.warningIds),
       );
-      const recomputeKey = this.readString(
-        events[events.length - 1].payload.recomputeKey,
+      const latestPayload = events[events.length - 1].payload;
+      const warningReasons = this.readStringArray(latestPayload.warningReasons);
+      const primaryWarningReason =
+        this.readString(latestPayload.primaryWarningReason) ??
+        warningReasons[0] ??
+        null;
+      const copy = this.notificationCopyService.buildWeatherAlertsSummaryCopy(
+        warningIds.length,
+        primaryWarningReason,
       );
       return {
         type,
         routeTarget: NotificationRouteTarget.WEATHER_ALERTS,
-        title: 'Alerty pogodowe',
-        body: `Wykryto ${warningIds.length} istotnych alertów pogodowych.`,
-        payload: { warningIds: [...new Set(warningIds)] },
-        dedupeKey: `${events[0].user.id}:${type}:${recomputeKey ?? 'now'}`,
+        title: copy.title,
+        body: copy.body,
+        payload: {
+          warningIds: [...new Set(warningIds)],
+          warningCodes: this.readStringArray(latestPayload.warningCodes),
+          warningReasons,
+          primaryWarningReason,
+          validFrom: this.readString(latestPayload.validFrom),
+          validTo: this.readString(latestPayload.validTo),
+        },
+        dedupeKey:
+          events[events.length - 1].dedupeKey ||
+          `${events[0].user.id}:${type}:${primaryWarningReason ?? 'GENERIC'}`,
         priority: NotificationPriority.HIGH,
-        dedupeHours: 6,
+        dedupeHours: 8,
       };
     }
 
@@ -283,18 +345,15 @@ export class NotificationAggregatorService {
         this.notificationRoutingService.pickArticleRouteTarget(
           articleIds.length,
         );
+      const copy = this.notificationCopyService.buildArticleRecommendedCopy(
+        articleIds.length,
+      );
 
       return {
         type,
         routeTarget,
-        title:
-          articleIds.length === 1
-            ? 'Nowy artykuł dla Twoich upraw'
-            : 'Nowe artykuły dla Twoich upraw',
-        body:
-          articleIds.length === 1
-            ? 'Pojawił się nowy artykuł dopasowany do Twojego ogrodu.'
-            : `Pojawiło się ${articleIds.length} nowych artykułów dopasowanych do Twojego ogrodu.`,
+        title: copy.title,
+        body: copy.body,
         payload: {
           articleId: articleIds[0] ?? null,
           articleSlug: articleSlugs[0] ?? null,
@@ -310,13 +369,15 @@ export class NotificationAggregatorService {
       const suggestion =
         this.readString(events[0].payload.suggestedAction) ??
         'aktualizacja cyklu';
+      const copy =
+        this.notificationCopyService.buildLifecycleSuggestionCopy(suggestion);
       return {
         type,
         routeTarget: this.readString(events[0].payload.plantingId)
           ? NotificationRouteTarget.PLANTING_DETAIL
           : NotificationRouteTarget.BED_DETAIL,
-        title: 'Sugestia lifecycle',
-        body: suggestion,
+        title: copy.title,
+        body: copy.body,
         payload: events[0].payload,
         dedupeKey: events[0].dedupeKey,
         priority: events[0].priority,
@@ -325,11 +386,12 @@ export class NotificationAggregatorService {
     }
 
     if (type === NotificationType.WEEKLY_DIGEST) {
+      const copy = this.notificationCopyService.buildWeeklyDigestCopy();
       return {
         type,
         routeTarget: NotificationRouteTarget.NOTIFICATION_CENTER,
-        title: 'Tygodniowe podsumowanie ogrodu',
-        body: 'Sprawdź podsumowanie z ostatnich 7 dni.',
+        title: copy.title,
+        body: copy.body,
         payload: events[events.length - 1].payload,
         dedupeKey: events[events.length - 1].dedupeKey,
         priority: NotificationPriority.NORMAL,

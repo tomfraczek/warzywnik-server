@@ -14,6 +14,7 @@ import {
   ActionTaskStatus,
 } from '../common/enums/action.enums';
 import { WarningInstance } from '../weather/warnings/warning-instance.entity';
+import { NotificationCopyService } from './notification-copy.service';
 
 type PublishEventParams = {
   userId: string;
@@ -30,7 +31,10 @@ type PublishEventParams = {
 export class NotificationEventService {
   private readonly logger = new Logger(NotificationEventService.name);
 
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly notificationCopyService: NotificationCopyService,
+  ) {}
 
   async publishEvent(params: PublishEventParams): Promise<void> {
     const user = await this.em.findOne(User, { id: params.userId });
@@ -121,6 +125,39 @@ export class NotificationEventService {
     gardenRiskIncreased: boolean;
     warningInstances: WarningInstance[];
   }): Promise<void> {
+    const importantWarnings = params.warningInstances.filter((warning) => {
+      const code = `${warning.code}`;
+      return (
+        code.includes('FROST') ||
+        code.includes('HARD_FROST') ||
+        code.includes('HEAVY_RAIN') ||
+        code.includes('DROUGHT') ||
+        code.includes('WIND_DAMAGE') ||
+        code.includes('STORM')
+      );
+    });
+
+    const importantWarningReasons = [
+      ...new Set(
+        importantWarnings
+          .map((warning) =>
+            this.notificationCopyService.normalizeWarningReason(
+              `${warning.code}`,
+            ),
+          )
+          .filter((value): value is string => Boolean(value)),
+      ),
+    ].sort();
+
+    const windowStart = this.floorToHourIso(
+      this.minDate(importantWarnings.map((item) => item.validFrom)),
+    );
+    const windowEnd = this.floorToHourIso(
+      this.maxDate(importantWarnings.map((item) => item.validTo)),
+    );
+    const alertReasonSignature = importantWarningReasons.join('|') || 'GENERIC';
+    const weatherAlertsDedupeKey = `${params.userId}:WEATHER_ALERTS_SUMMARY:${windowStart}:${windowEnd}:${alertReasonSignature}`;
+
     if (params.weatherChanged) {
       await this.publishEvent({
         userId: params.userId,
@@ -135,45 +172,108 @@ export class NotificationEventService {
       });
     }
 
-    if (params.gardenRiskIncreased) {
-      await this.publishEvent({
-        userId: params.userId,
-        type: NotificationType.GARDEN_RISK_CHANGED,
-        source: 'weather-recompute',
-        sourceId: null,
-        dedupeKey: `${params.userId}:GARDEN_RISK_CHANGED:${params.gardenRiskCode}`,
-        priority: params.gardenRiskPriority,
-        payload: {
-          gardenRiskCode: params.gardenRiskCode,
-        },
-      });
-    }
-
-    const importantWarnings = params.warningInstances.filter((warning) => {
-      const code = `${warning.code}`;
-      return (
-        code.includes('FROST') ||
-        code.includes('HARD_FROST') ||
-        code.includes('HEAVY_RAIN') ||
-        code.includes('DROUGHT') ||
-        code.includes('STORM')
-      );
-    });
-
     if (importantWarnings.length > 0) {
       await this.publishEvent({
         userId: params.userId,
         type: NotificationType.WEATHER_ALERTS_SUMMARY,
         source: 'weather-recompute',
-        dedupeKey: `${params.userId}:WEATHER_ALERTS_SUMMARY:${params.recomputeKey}`,
+        dedupeKey: weatherAlertsDedupeKey,
         priority: NotificationPriority.HIGH,
         payload: {
           warningIds: importantWarnings.map((item) => item.id),
           warningCodes: importantWarnings.map((item) => item.code),
+          warningReasons: importantWarningReasons,
+          primaryWarningReason: importantWarningReasons[0] ?? null,
+          validFrom: windowStart,
+          validTo: windowEnd,
           recomputeKey: params.recomputeKey,
         },
       });
     }
+
+    if (params.gardenRiskIncreased) {
+      const riskReason =
+        this.notificationCopyService.normalizeWarningReason(
+          params.gardenRiskCode,
+        ) ?? params.gardenRiskCode;
+
+      const riskLevel = this.notificationCopyService.mapPriorityToRiskLevel(
+        params.gardenRiskPriority,
+      );
+
+      const warningCodes = params.warningInstances
+        .map((item) => `${item.code}`)
+        .filter(
+          (code) =>
+            this.notificationCopyService.normalizeWarningReason(code) ===
+            riskReason,
+        );
+
+      const relevantWarnings = params.warningInstances.filter(
+        (item) =>
+          this.notificationCopyService.normalizeWarningReason(
+            `${item.code}`,
+          ) === riskReason,
+      );
+
+      const riskValidFrom = this.floorToHourIso(
+        this.minDate(relevantWarnings.map((item) => item.validFrom)),
+      );
+      const riskValidTo = this.floorToHourIso(
+        this.maxDate(relevantWarnings.map((item) => item.validTo)),
+      );
+
+      await this.publishEvent({
+        userId: params.userId,
+        type: NotificationType.GARDEN_RISK_CHANGED,
+        source: 'weather-recompute',
+        sourceId: null,
+        dedupeKey: `${params.userId}:GARDEN_RISK_CHANGED:${riskReason}:${riskValidFrom}:${riskValidTo}`,
+        priority: params.gardenRiskPriority,
+        payload: {
+          riskLevel,
+          riskReason,
+          warningCode: riskReason,
+          warningCodes,
+          gardenRiskCode: params.gardenRiskCode,
+          validFrom: riskValidFrom,
+          validTo: riskValidTo,
+          weatherAlertCoverageKey: importantWarningReasons.includes(riskReason)
+            ? weatherAlertsDedupeKey
+            : null,
+        },
+      });
+    }
+  }
+
+  private minDate(values: Date[]): Date {
+    if (values.length === 0) {
+      return new Date();
+    }
+
+    return values.reduce((acc, value) => (value < acc ? value : acc));
+  }
+
+  private maxDate(values: Date[]): Date {
+    if (values.length === 0) {
+      return new Date();
+    }
+
+    return values.reduce((acc, value) => (value > acc ? value : acc));
+  }
+
+  private floorToHourIso(value: Date): string {
+    return new Date(
+      Date.UTC(
+        value.getUTCFullYear(),
+        value.getUTCMonth(),
+        value.getUTCDate(),
+        value.getUTCHours(),
+        0,
+        0,
+        0,
+      ),
+    ).toISOString();
   }
 
   async publishArticleEvent(params: {

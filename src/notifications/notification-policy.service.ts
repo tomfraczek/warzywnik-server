@@ -30,8 +30,19 @@ export class NotificationPolicyService {
     priority: NotificationPriority;
     dedupeKey: string;
     dedupeHours: number;
+    suppressPushWhenDedupedBy?: {
+      type: NotificationType;
+      dedupeKey: string;
+    };
   }): Promise<NotificationPolicyDecision> {
-    const { user, type, priority, dedupeKey, dedupeHours } = params;
+    const {
+      user,
+      type,
+      priority,
+      dedupeKey,
+      dedupeHours,
+      suppressPushWhenDedupedBy,
+    } = params;
 
     if (!user.notificationsEnabled) {
       return { decision: 'SKIP', reason: 'preference_disabled' };
@@ -53,6 +64,32 @@ export class NotificationPolicyService {
 
     if (dedupeExists) {
       return { decision: 'SKIP', reason: 'deduped' };
+    }
+
+    if (suppressPushWhenDedupedBy) {
+      const coveredByOtherNotification = await this.em.findOne(
+        NotificationDedupe,
+        {
+          user: user.id,
+          type: suppressPushWhenDedupedBy.type,
+          dedupeKey: suppressPushWhenDedupedBy.dedupeKey,
+          expiresAt: { $gt: new Date() },
+        },
+      );
+
+      if (coveredByOtherNotification) {
+        const dedupe = new NotificationDedupe();
+        dedupe.user = user;
+        dedupe.type = type;
+        dedupe.dedupeKey = dedupeKey;
+        dedupe.expiresAt = new Date(Date.now() + dedupeHours * 60 * 60 * 1000);
+        this.em.persist(dedupe);
+
+        return {
+          decision: 'CENTER_ONLY',
+          reason: 'covered_by_weather_alert',
+        };
+      }
     }
 
     const intensityDecision = this.evaluateIntensity(

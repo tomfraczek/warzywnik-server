@@ -36,6 +36,37 @@ export class NotificationPreferencesService {
       user.notificationsEnabled = dto.notificationsEnabled;
     }
 
+    const groups = (
+      dto as PatchNotificationPreferencesDto & {
+        groups?: {
+          tasksAndRemindersEnabled?: boolean;
+          weatherAndRiskEnabled?: boolean;
+          articlesAndTipsEnabled?: boolean;
+          summariesEnabled?: boolean;
+        };
+      }
+    ).groups;
+
+    if (groups?.tasksAndRemindersEnabled !== undefined) {
+      preference.tasksEnabled = groups.tasksAndRemindersEnabled;
+      preference.dailySummaryEnabled = groups.tasksAndRemindersEnabled;
+      preference.lifecycleSuggestionsEnabled = groups.tasksAndRemindersEnabled;
+    }
+
+    if (groups?.weatherAndRiskEnabled !== undefined) {
+      preference.weatherStatusEnabled = groups.weatherAndRiskEnabled;
+      preference.gardenRiskEnabled = groups.weatherAndRiskEnabled;
+      preference.weatherAlertsEnabled = groups.weatherAndRiskEnabled;
+    }
+
+    if (groups?.articlesAndTipsEnabled !== undefined) {
+      preference.recommendedArticlesEnabled = groups.articlesAndTipsEnabled;
+    }
+
+    if (groups?.summariesEnabled !== undefined) {
+      preference.weeklyDigestEnabled = groups.summariesEnabled;
+    }
+
     if (dto.tasksEnabled !== undefined)
       preference.tasksEnabled = dto.tasksEnabled;
     if (dto.dailySummaryEnabled !== undefined)
@@ -85,18 +116,60 @@ export class NotificationPreferencesService {
     user: User,
     preference: NotificationPreference,
   ): NotificationPreferenceResponse {
+    const groups = {
+      tasksAndRemindersEnabled:
+        preference.tasksEnabled &&
+        preference.dailySummaryEnabled &&
+        preference.lifecycleSuggestionsEnabled,
+      weatherAndRiskEnabled:
+        preference.weatherStatusEnabled &&
+        preference.gardenRiskEnabled &&
+        preference.weatherAlertsEnabled,
+      articlesAndTipsEnabled: preference.recommendedArticlesEnabled,
+      summariesEnabled: preference.weeklyDigestEnabled,
+    };
+
     return {
       notificationsEnabled: user.notificationsEnabled,
-      tasksEnabled: preference.tasksEnabled,
-      dailySummaryEnabled: preference.dailySummaryEnabled,
-      weatherStatusEnabled: preference.weatherStatusEnabled,
-      gardenRiskEnabled: preference.gardenRiskEnabled,
-      weatherAlertsEnabled: preference.weatherAlertsEnabled,
-      recommendedArticlesEnabled: preference.recommendedArticlesEnabled,
-      lifecycleSuggestionsEnabled: preference.lifecycleSuggestionsEnabled,
-      weeklyDigestEnabled: preference.weeklyDigestEnabled,
       intensity: preference.intensity,
       notificationHour: preference.notificationHour,
+      groups,
+      advanced: {
+        tasksEnabled: preference.tasksEnabled,
+        dailySummaryEnabled: preference.dailySummaryEnabled,
+        weatherStatusEnabled: preference.weatherStatusEnabled,
+        gardenRiskEnabled: preference.gardenRiskEnabled,
+        weatherAlertsEnabled: preference.weatherAlertsEnabled,
+        recommendedArticlesEnabled: preference.recommendedArticlesEnabled,
+        lifecycleSuggestionsEnabled: preference.lifecycleSuggestionsEnabled,
+        weeklyDigestEnabled: preference.weeklyDigestEnabled,
+      },
+      ui: {
+        notificationsEnabled: {
+          label: 'Włącz powiadomienia',
+          description:
+            'Otrzymuj ważne informacje o zadaniach, pogodzie i uprawach.',
+        },
+        groups: {
+          tasksAndReminders: {
+            label: 'Zadania i przypomnienia',
+          },
+          weatherAndRisk: {
+            label: 'Pogoda i ryzyko',
+          },
+          articlesAndTips: {
+            label: 'Porady i artykuły',
+          },
+          summaries: {
+            label: 'Podsumowania',
+          },
+        },
+        notificationHour: {
+          label: 'Godzina codziennych przypomnień',
+          description:
+            'O tej godzinie wyślemy plan dnia i spokojne podsumowania. Ważne alerty pogodowe mogą przyjść od razu.',
+        },
+      },
       createdAt: preference.createdAt,
       updatedAt: preference.updatedAt,
     };

@@ -19,6 +19,7 @@ import { WeeklyDigestService } from './weekly-digest.service';
 import { LifecycleSuggestionService } from './lifecycle-suggestion.service';
 import { DailySummaryService } from './daily-summary.service';
 import { NotificationPreferencesService } from './notification-preferences.service';
+import { NotificationCopyService } from './notification-copy.service';
 import { User } from '../users/user.entity';
 import { ActionTask } from '../action-tasks/action-task.entity';
 import { WarningInstance } from '../weather/warnings/warning-instance.entity';
@@ -56,6 +57,7 @@ import { UserDevice } from '../devices/user-device.entity';
     LifecycleSuggestionService,
     DailySummaryService,
     NotificationPreferencesService,
+    NotificationCopyService,
   ],
   exports: [
     NotificationEventService,

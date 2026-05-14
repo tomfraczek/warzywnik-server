@@ -256,6 +256,8 @@ export class PushDeliveryService {
       plantingIds: this.optionalStringArray(payload.plantingIds),
       warningIds: this.optionalStringArray(payload.warningIds),
       warningCode: this.optionalString(payload.warningCode),
+      riskLevel: this.optionalRiskLevel(payload.riskLevel),
+      riskReason: this.optionalString(payload.riskReason),
       articleId: this.optionalString(payload.articleId),
       articleSlug: this.optionalString(payload.articleSlug),
       dedupeKey: batch.dedupeKey,
@@ -276,6 +278,22 @@ export class PushDeliveryService {
       (item): item is string => typeof item === 'string',
     );
     return items.length > 0 ? items : undefined;
+  }
+
+  private optionalRiskLevel(
+    value: unknown,
+  ): 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | undefined {
+    if (
+      value === 'NONE' ||
+      value === 'LOW' ||
+      value === 'MEDIUM' ||
+      value === 'HIGH' ||
+      value === 'CRITICAL'
+    ) {
+      return value;
+    }
+
+    return undefined;
   }
 
   private async sendToExpo(

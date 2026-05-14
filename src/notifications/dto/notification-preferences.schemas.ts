@@ -3,6 +3,12 @@ import { NotificationIntensity } from '../../common/enums/notification.enums';
 
 export type PatchNotificationPreferencesDto = {
   notificationsEnabled?: boolean;
+  groups?: {
+    tasksAndRemindersEnabled?: boolean;
+    weatherAndRiskEnabled?: boolean;
+    articlesAndTipsEnabled?: boolean;
+    summariesEnabled?: boolean;
+  };
   tasksEnabled?: boolean;
   dailySummaryEnabled?: boolean;
   weatherStatusEnabled?: boolean;
@@ -18,6 +24,15 @@ export type PatchNotificationPreferencesDto = {
 export const patchNotificationPreferencesSchema = z
   .object({
     notificationsEnabled: z.coerce.boolean().optional(),
+    groups: z
+      .object({
+        tasksAndRemindersEnabled: z.coerce.boolean().optional(),
+        weatherAndRiskEnabled: z.coerce.boolean().optional(),
+        articlesAndTipsEnabled: z.coerce.boolean().optional(),
+        summariesEnabled: z.coerce.boolean().optional(),
+      })
+      .strict()
+      .optional(),
     tasksEnabled: z.coerce.boolean().optional(),
     dailySummaryEnabled: z.coerce.boolean().optional(),
     weatherStatusEnabled: z.coerce.boolean().optional(),

@@ -34,6 +34,11 @@ export class NotificationsController {
     return this.notificationCenterService.list(req.userEntity as User, query);
   }
 
+  @Get('summary')
+  summary(@Req() req: RequestWithUser) {
+    return this.notificationCenterService.summary(req.userEntity as User);
+  }
+
   @Patch(':id/read')
   markRead(
     @Req() req: RequestWithUser,

@@ -18,6 +18,8 @@ export type PushNotificationPayload = {
   plantingIds?: string[];
   warningIds?: string[];
   warningCode?: string;
+  riskLevel?: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  riskReason?: string;
   articleId?: string;
   articleSlug?: string;
   dedupeKey: string;
@@ -26,16 +28,56 @@ export type PushNotificationPayload = {
 
 export type NotificationPreferenceResponse = {
   notificationsEnabled: boolean;
-  tasksEnabled: boolean;
-  dailySummaryEnabled: boolean;
-  weatherStatusEnabled: boolean;
-  gardenRiskEnabled: boolean;
-  weatherAlertsEnabled: boolean;
-  recommendedArticlesEnabled: boolean;
-  lifecycleSuggestionsEnabled: boolean;
-  weeklyDigestEnabled: boolean;
-  intensity: string;
   notificationHour: number;
+  intensity: 'IMPORTANT_ONLY' | 'BALANCED' | 'ALL';
+  groups: {
+    tasksAndRemindersEnabled: boolean;
+    weatherAndRiskEnabled: boolean;
+    articlesAndTipsEnabled: boolean;
+    summariesEnabled: boolean;
+  };
+  advanced?: {
+    tasksEnabled: boolean;
+    dailySummaryEnabled: boolean;
+    weatherStatusEnabled: boolean;
+    gardenRiskEnabled: boolean;
+    weatherAlertsEnabled: boolean;
+    recommendedArticlesEnabled: boolean;
+    lifecycleSuggestionsEnabled: boolean;
+    weeklyDigestEnabled: boolean;
+  };
+  ui: {
+    notificationsEnabled: {
+      label: string;
+      description: string;
+    };
+    groups: {
+      tasksAndReminders: {
+        label: string;
+      };
+      weatherAndRisk: {
+        label: string;
+      };
+      articlesAndTips: {
+        label: string;
+      };
+      summaries: {
+        label: string;
+      };
+    };
+    notificationHour: {
+      label: string;
+      description: string;
+    };
+  };
   createdAt: Date;
   updatedAt: Date;
+};
+
+export type NotificationSummaryResponse = {
+  unreadCount: number;
+  hasUnread: boolean;
+  highestUnreadPriority: 'LOW' | 'NORMAL' | 'HIGH' | 'CRITICAL' | null;
+  hasHighPriorityUnread: boolean;
+  hasCriticalUnread: boolean;
 };

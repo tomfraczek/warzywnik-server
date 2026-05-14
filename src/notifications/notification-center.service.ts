@@ -8,6 +8,7 @@ import {
   NotificationType,
 } from '../common/enums/notification.enums';
 import { ListNotificationsQueryDto } from './dto/notifications.schemas';
+import { NotificationSummaryResponse } from './notification.types';
 
 @Injectable()
 export class NotificationCenterService {
@@ -93,6 +94,49 @@ export class NotificationCenterService {
     return this.serialize(item);
   }
 
+  async summary(user: User): Promise<NotificationSummaryResponse> {
+    const result: Array<{
+      unreadCount?: number;
+      maxPriorityRank?: number;
+    }> = await this.em.getConnection().execute(
+      `
+      select
+        count(*)::int as "unreadCount",
+        coalesce(max(
+          case priority
+            when 'CRITICAL' then 4
+            when 'HIGH' then 3
+            when 'NORMAL' then 2
+            when 'LOW' then 1
+            else 0
+          end
+        ), 0)::int as "maxPriorityRank"
+      from notifications
+      where user_id = ?
+        and read_at is null
+        and dismissed_at is null
+      `,
+      [user.id],
+    );
+
+    const row = result[0] ?? {};
+    const unreadCount = Number(row.unreadCount ?? 0);
+    const maxPriorityRank = Number(row.maxPriorityRank ?? 0);
+
+    const highestUnreadPriority = this.rankToPriority(maxPriorityRank);
+
+    return {
+      unreadCount,
+      hasUnread: unreadCount > 0,
+      highestUnreadPriority,
+      hasHighPriorityUnread:
+        highestUnreadPriority === NotificationPriority.HIGH ||
+        highestUnreadPriority === NotificationPriority.CRITICAL,
+      hasCriticalUnread:
+        highestUnreadPriority === NotificationPriority.CRITICAL,
+    };
+  }
+
   private async getOwnedOrThrow(
     userId: string,
     notificationId: string,
@@ -123,5 +167,13 @@ export class NotificationCenterService {
       dismissedAt: item.dismissedAt,
       createdAt: item.createdAt,
     };
+  }
+
+  private rankToPriority(rank: number): NotificationPriority | null {
+    if (rank >= 4) return NotificationPriority.CRITICAL;
+    if (rank >= 3) return NotificationPriority.HIGH;
+    if (rank >= 2) return NotificationPriority.NORMAL;
+    if (rank >= 1) return NotificationPriority.LOW;
+    return null;
   }
 }
