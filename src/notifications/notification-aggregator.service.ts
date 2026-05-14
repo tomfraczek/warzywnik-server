@@ -69,7 +69,18 @@ export class NotificationAggregatorService {
       grouped.set(key, current);
     }
 
-    for (const groupEvents of grouped.values()) {
+    const sortedGroups = [...grouped.values()].sort((a, b) => {
+      const rank = (type: NotificationType): number => {
+        if (type === NotificationType.WEATHER_ALERTS_SUMMARY) return 0;
+        if (type === NotificationType.GARDEN_RISK_CHANGED) return 1;
+        if (type === NotificationType.WEATHER_STATUS_CHANGED) return 2;
+        return 10;
+      };
+
+      return rank(a[0].type) - rank(b[0].type);
+    });
+
+    for (const groupEvents of sortedGroups) {
       await this.aggregateGroup(groupEvents);
     }
 
@@ -227,22 +238,42 @@ export class NotificationAggregatorService {
     }
 
     if (type === NotificationType.WEATHER_STATUS_CHANGED) {
+      const latestPayload = events[events.length - 1].payload;
       const weatherStatusCode = this.readString(
-        events[events.length - 1].payload.weatherStatusCode,
+        latestPayload.weatherStatusCode,
+      );
+      const weatherStatusReason = this.readString(
+        latestPayload.weatherStatusReason,
       );
       const copy =
         this.notificationCopyService.buildWeatherStatusChangedCopy(
           weatherStatusCode,
         );
+      const weatherAlertCoverageKey = this.readString(
+        latestPayload.weatherAlertCoverageKey,
+      );
       return {
         type,
         routeTarget: NotificationRouteTarget.WEATHER,
         title: copy.title,
         body: copy.body,
-        payload: { weatherStatusCode },
-        dedupeKey: `${events[0].user.id}:${type}:${weatherStatusCode ?? 'NA'}`,
+        payload: {
+          weatherStatusCode,
+          weatherStatusReason,
+          validFrom: this.readString(latestPayload.validFrom),
+          validTo: this.readString(latestPayload.validTo),
+        },
+        dedupeKey:
+          events[events.length - 1].dedupeKey ||
+          `${events[0].user.id}:${type}:${weatherStatusCode ?? 'NA'}`,
         priority: events[events.length - 1].priority,
         dedupeHours: 4,
+        suppressPushWhenDedupedBy: weatherAlertCoverageKey
+          ? {
+              type: NotificationType.WEATHER_ALERTS_SUMMARY,
+              dedupeKey: weatherAlertCoverageKey,
+            }
+          : undefined,
       };
     }
 

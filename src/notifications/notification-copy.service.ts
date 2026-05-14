@@ -214,6 +214,44 @@ export class NotificationCopyService {
     return upperCode;
   }
 
+  normalizeWeatherStatusReason(code?: string | null): string | null {
+    if (!code) {
+      return null;
+    }
+
+    const upperCode = code.toUpperCase();
+
+    if (upperCode.includes('THUNDER') || upperCode.includes('STORM')) {
+      return 'STORM';
+    }
+
+    if (upperCode.includes('HARD_FROST')) {
+      return 'HARD_FROST';
+    }
+
+    if (upperCode.includes('FROST')) {
+      return 'FROST';
+    }
+
+    if (upperCode.includes('HEAVY_RAIN') || upperCode.includes('RAIN')) {
+      return 'HEAVY_RAIN';
+    }
+
+    if (upperCode.includes('WIND')) {
+      return 'WIND_DAMAGE';
+    }
+
+    if (
+      upperCode.includes('DROUGHT') ||
+      upperCode.includes('DRY') ||
+      upperCode.includes('WATERING')
+    ) {
+      return 'DROUGHT';
+    }
+
+    return this.normalizeWarningReason(upperCode) ?? upperCode;
+  }
+
   mapPriorityToRiskLevel(
     priority: string,
   ): 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {

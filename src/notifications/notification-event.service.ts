@@ -159,15 +159,51 @@ export class NotificationEventService {
     const weatherAlertsDedupeKey = `${params.userId}:WEATHER_ALERTS_SUMMARY:${windowStart}:${windowEnd}:${alertReasonSignature}`;
 
     if (params.weatherChanged) {
+      const statusCodeUpper = params.weatherStatusCode.toUpperCase();
+      const weatherStatusReason =
+        statusCodeUpper.includes('HEAVY_RAIN') ||
+        statusCodeUpper.includes('RAIN')
+          ? 'HEAVY_RAIN'
+          : statusCodeUpper.includes('WIND')
+            ? 'WIND_DAMAGE'
+            : statusCodeUpper.includes('HARD_FROST')
+              ? 'HARD_FROST'
+              : statusCodeUpper.includes('FROST')
+                ? 'FROST'
+                : statusCodeUpper.includes('THUNDER') ||
+                    statusCodeUpper.includes('STORM')
+                  ? 'STORM'
+                  : statusCodeUpper.includes('DROUGHT') ||
+                      statusCodeUpper.includes('DRY') ||
+                      statusCodeUpper.includes('WATERING')
+                    ? 'DROUGHT'
+                    : (this.notificationCopyService.normalizeWarningReason(
+                        params.weatherStatusCode,
+                      ) ?? params.weatherStatusCode);
+
+      const fallbackWindow = this.floorToHourIso(new Date(params.recomputeKey));
+      const weatherValidFrom =
+        importantWarnings.length > 0 ? windowStart : fallbackWindow;
+      const weatherValidTo =
+        importantWarnings.length > 0 ? windowEnd : fallbackWindow;
+
       await this.publishEvent({
         userId: params.userId,
         type: NotificationType.WEATHER_STATUS_CHANGED,
         source: 'weather-recompute',
         sourceId: null,
-        dedupeKey: `${params.userId}:WEATHER_STATUS_CHANGED:${params.weatherStatusCode}`,
+        dedupeKey: `${params.userId}:WEATHER_STATUS_CHANGED:${weatherStatusReason}:${weatherValidFrom}:${weatherValidTo}`,
         priority: params.weatherStatusPriority,
         payload: {
           weatherStatusCode: params.weatherStatusCode,
+          weatherStatusReason,
+          validFrom: weatherValidFrom,
+          validTo: weatherValidTo,
+          weatherAlertCoverageKey: importantWarningReasons.includes(
+            weatherStatusReason,
+          )
+            ? weatherAlertsDedupeKey
+            : null,
         },
       });
     }

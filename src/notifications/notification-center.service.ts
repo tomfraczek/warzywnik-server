@@ -42,6 +42,7 @@ export class NotificationCenterService {
 
     if (query.status === 'unread') {
       where.readAt = null;
+      where.dismissedAt = null;
     }
 
     if (query.status === 'read') {
