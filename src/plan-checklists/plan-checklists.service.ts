@@ -179,7 +179,7 @@ export class PlanChecklistsService {
       },
     );
 
-    const allExisting = await this.em.find(PlanChecklistItem, {
+    const activeBedItems = await this.em.find(PlanChecklistItem, {
       user: params.user.id,
       bed: bed.id,
       archivedAt: null,
@@ -187,7 +187,7 @@ export class PlanChecklistsService {
 
     if (plannedPlantings.length === 0) {
       this.archivePlanForBedWithoutPlannedPlantings({
-        items: allExisting,
+        items: activeBedItems,
         reason: 'plan_completed_or_empty',
       });
 
@@ -210,10 +210,23 @@ export class PlanChecklistsService {
       fertilizers,
     });
 
+    const candidateKeys = Array.from(
+      new Set(candidates.map((candidate) => candidate.dedupeKey)),
+    );
+
+    const existingMatchingCandidates =
+      candidateKeys.length > 0
+        ? await this.em.find(PlanChecklistItem, {
+            user: params.user.id,
+            source: PlanChecklistSource.AUTO,
+            dedupeKey: { $in: candidateKeys },
+          })
+        : [];
+
     const existingByKey = new Map<string, PlanChecklistItem>();
     const suppressedKeys = new Set<string>();
 
-    for (const item of allExisting) {
+    for (const item of existingMatchingCandidates) {
       const key = item.sourceKey ?? item.dedupeKey;
       if (!key) continue;
 
@@ -300,7 +313,7 @@ export class PlanChecklistsService {
       this.em.persist(created);
     }
 
-    for (const item of allExisting) {
+    for (const item of activeBedItems) {
       if (item.source !== PlanChecklistSource.AUTO) {
         continue;
       }

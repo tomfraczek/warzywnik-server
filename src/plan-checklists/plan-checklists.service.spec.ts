@@ -157,6 +157,53 @@ describe('PlanChecklistsService', () => {
     expect(existing.archivedAt).toBeNull();
   });
 
+  it('reuses archived auto item by dedupe key instead of inserting duplicate', async () => {
+    const em = createEm();
+    const service = new PlanChecklistsService(em);
+    jest.spyOn(service, 'getBedPlan').mockResolvedValue({ ok: true } as never);
+
+    const archivedExisting = {
+      id: 'archived-1',
+      source: PlanChecklistSource.AUTO,
+      sourceKey: 'plan-checklist:bed:bed-1:clean-bed-before-plan',
+      dedupeKey: 'plan-checklist:bed:bed-1:clean-bed-before-plan',
+      status: PlanChecklistStatus.PENDING,
+      archivedAt: new Date('2026-01-01T00:00:00.000Z'),
+      archiveReason: 'plan_completed_or_empty',
+      suppressedAt: null,
+    } as unknown as PlanChecklistItem;
+
+    em.findOne.mockResolvedValue(makeBed());
+    em.find.mockImplementation(
+      (entity: unknown, where?: Record<string, unknown>) => {
+        if (entity === Planting) return Promise.resolve([makePlanting('1')]);
+        if (entity === PlanChecklistTemplate)
+          return Promise.resolve([
+            makeTemplate(
+              'clean-bed-before-plan',
+              PlanChecklistScope.BED,
+              'bed_has_new_plantings',
+            ),
+          ]);
+        if (entity === FertilizerType) return Promise.resolve([]);
+        if (entity === PlanChecklistItem) {
+          if (where?.bed === 'bed-1' && where?.archivedAt === null) {
+            return Promise.resolve([]);
+          }
+
+          return Promise.resolve([archivedExisting]);
+        }
+
+        return Promise.resolve([]);
+      },
+    );
+
+    await service.recomputeForBed({ user, bedId: 'bed-1', reason: 'TEST' });
+
+    expect(em.persist).not.toHaveBeenCalled();
+    expect(archivedExisting.archivedAt).toBeNull();
+  });
+
   it('keeps DONE/SKIPPED state for auto item on recompute', async () => {
     const em = createEm();
     const service = new PlanChecklistsService(em);
