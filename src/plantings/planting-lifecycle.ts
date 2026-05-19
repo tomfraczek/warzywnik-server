@@ -94,7 +94,6 @@ export const isStatusAllowedForStartMethod = (
 };
 
 export const ACTIVE_PLANTING_STATUSES = [
-  PlantingStatus.NEW,
   PlantingStatus.SEEDLING_PREPARED,
   PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT,
   PlantingStatus.IN_GROUND,

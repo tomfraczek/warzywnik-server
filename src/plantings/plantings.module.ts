@@ -10,6 +10,7 @@ import { WarningRulesModule } from '../warning-rules/warning-rules.module';
 import { ActionTasksModule } from '../action-tasks/action-tasks.module';
 import { PlantingInsightsModule } from '../planting-insights/planting-insights.module';
 import { AnalyticsModule } from '../analytics/analytics.module';
+import { PlanChecklistsModule } from '../plan-checklists/plan-checklists.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ActionTasksModule,
     PlantingInsightsModule,
     AnalyticsModule,
+    PlanChecklistsModule,
   ],
   providers: [PlantingsService],
   controllers: [PlantingsController],

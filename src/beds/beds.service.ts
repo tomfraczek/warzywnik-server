@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Bed } from './bed.entity';
@@ -34,6 +35,7 @@ import { PlantingInsightsService } from '../planting-insights/planting-insights.
 import { PlantingEventType } from '../common/enums/planting-event.enums';
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
 import { PlantingEvent } from '../planting-insights/planting-event.entity';
+import { PlanChecklistsService } from '../plan-checklists/plan-checklists.service';
 
 @Injectable()
 export class BedsService {
@@ -42,6 +44,8 @@ export class BedsService {
     private readonly weatherRecomputeService: WeatherRecomputeService,
     private readonly plantingInsightsService: PlantingInsightsService,
     private readonly actionAutomationService: ActionAutomationService,
+    @Optional()
+    private readonly planChecklistsService?: PlanChecklistsService,
   ) {}
 
   async createQuickAction(
@@ -292,6 +296,8 @@ export class BedsService {
     }
 
     const previousIsActive = bed.isActive;
+    const previousDepthCm = bed.depthCm ?? null;
+    const previousSoilId = bed.soil?.id ?? null;
 
     if (dto.name !== undefined) bed.name = dto.name;
     if (dto.description !== undefined) bed.description = dto.description;
@@ -343,6 +349,15 @@ export class BedsService {
       previousIsActive,
       bed.isActive,
     );
+
+    const depthChanged = (bed.depthCm ?? null) !== previousDepthCm;
+    const soilChanged = (bed.soil?.id ?? null) !== previousSoilId;
+
+    if (depthChanged || soilChanged) {
+      await this.recomputePlanChecklistForBed(user, bed.id, {
+        reason: 'BED_PLAN_INPUTS_UPDATED',
+      });
+    }
 
     // NOTE: Bed changes (soil, depth, measurements) affect planting warnings.
     // Clients should refetch plantings for this bed after updates.
@@ -568,5 +583,21 @@ export class BedsService {
       throw new BadRequestException(`${field} must be a valid ISO date`);
     }
     return date;
+  }
+
+  private async recomputePlanChecklistForBed(
+    user: User,
+    bedId: string,
+    options: { reason: string },
+  ) {
+    if (!this.planChecklistsService) {
+      return;
+    }
+
+    await this.planChecklistsService.recomputeForBed({
+      user,
+      bedId,
+      reason: options.reason,
+    });
   }
 }

@@ -8,6 +8,7 @@ import { WeatherModule } from '../weather/weather.module';
 import { GrowingSpace } from '../growing-spaces/growing-space.entity';
 import { PlantingInsightsModule } from '../planting-insights/planting-insights.module';
 import { ActionTasksModule } from '../action-tasks/action-tasks.module';
+import { PlanChecklistsModule } from '../plan-checklists/plan-checklists.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ActionTasksModule } from '../action-tasks/action-tasks.module';
     WeatherModule,
     PlantingInsightsModule,
     ActionTasksModule,
+    PlanChecklistsModule,
   ],
   controllers: [BedsController],
   providers: [BedsService],

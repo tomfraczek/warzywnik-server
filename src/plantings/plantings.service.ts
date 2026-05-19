@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Planting } from './planting.entity';
@@ -43,6 +44,7 @@ import { PlantingInsightsService } from '../planting-insights/planting-insights.
 import { PlantingEventType } from '../common/enums/planting-event.enums';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { PlantingEvent } from '../planting-insights/planting-event.entity';
+import { PlanChecklistsService } from '../plan-checklists/plan-checklists.service';
 import {
   ACTIVE_PLANTING_STATUSES,
   getAllowedStatusTransitions,
@@ -75,6 +77,8 @@ export class PlantingsService {
     private readonly actionAutomationService: ActionAutomationService,
     private readonly plantingInsightsService: PlantingInsightsService,
     private readonly analyticsService: AnalyticsService,
+    @Optional()
+    private readonly planChecklistsService?: PlanChecklistsService,
   ) {}
 
   async list(user: User, query: ListPlantingsQueryDto) {
@@ -287,6 +291,12 @@ export class PlantingsService {
       reason: 'PLANTING_CREATED',
     });
 
+    if (planting.status === PlantingStatus.NEW) {
+      await this.recomputePlanChecklistForBed(user, planting.bed.id, {
+        reason: 'PLANTING_NEW_CREATED',
+      });
+    }
+
     return await this.serializeWithComputed(planting, bed, vegetable, {
       includeWarnings: true,
     });
@@ -385,6 +395,10 @@ export class PlantingsService {
     }
 
     const previousStatus = planting.status;
+    const previousBedId = planting.bed.id;
+    const previousVegetableId = planting.vegetable.id;
+    const previousStartMethod = planting.startMethod;
+    const previousPlannedStartDate = planting.plannedStartDate;
     let timelineInitializedFromStatusChange = false;
     let sowedAtInitializedFromFinalState = false;
     let transplantedAtInitializedFromFinalState = false;
@@ -553,6 +567,41 @@ export class PlantingsService {
       reason: 'PLANTING_TIMELINE_UPDATED',
     });
 
+    const statusChanged = planting.status !== previousStatus;
+    const bedChanged = planting.bed.id !== previousBedId;
+    const vegetableChanged = planting.vegetable.id !== previousVegetableId;
+    const startMethodChanged = planting.startMethod !== previousStartMethod;
+    const plannedStartDateChanged =
+      planting.plannedStartDate.getTime() !==
+      previousPlannedStartDate.getTime();
+
+    if (
+      previousStatus === PlantingStatus.NEW &&
+      planting.status !== PlantingStatus.NEW
+    ) {
+      await this.archivePlanChecklistForStartedPlanting(user, planting.id, {
+        reason: 'planting_started',
+      });
+    }
+
+    const shouldRecomputePlanForCurrentBed =
+      planting.status === PlantingStatus.NEW ||
+      (statusChanged && previousStatus === PlantingStatus.NEW) ||
+      (previousStatus === PlantingStatus.NEW &&
+        (vegetableChanged || startMethodChanged || plannedStartDateChanged));
+
+    if (shouldRecomputePlanForCurrentBed) {
+      await this.recomputePlanChecklistForBed(user, planting.bed.id, {
+        reason: 'PLANTING_NEW_UPDATED',
+      });
+    }
+
+    if (bedChanged && previousStatus === PlantingStatus.NEW) {
+      await this.recomputePlanChecklistForBed(user, previousBedId, {
+        reason: 'PLANTING_NEW_MOVED_BED',
+      });
+    }
+
     return await this.serializeWithComputed(planting, bed, vegetable, {
       includeWarnings: true,
     });
@@ -645,6 +694,15 @@ export class PlantingsService {
         eventType: PlantingEventType.PLANTING_CANCELLED,
         eventTime: new Date(),
         payload: { previousStatus },
+      });
+    }
+
+    if (previousStatus === PlantingStatus.NEW) {
+      await this.archivePlanChecklistForStartedPlanting(user, planting.id, {
+        reason: 'planting_deleted_or_cancelled',
+      });
+      await this.recomputePlanChecklistForBed(user, planting.bed.id, {
+        reason: 'PLANTING_NEW_REMOVED',
       });
     }
   }
@@ -1612,5 +1670,37 @@ export class PlantingsService {
     throw new BadRequestException(
       `Status transition from ${previous} to ${next} is not allowed. Allowed statuses: ${allowed.join(', ')}`,
     );
+  }
+
+  private async recomputePlanChecklistForBed(
+    user: User,
+    bedId: string,
+    options: { reason: string },
+  ) {
+    if (!this.planChecklistsService) {
+      return;
+    }
+
+    await this.planChecklistsService.recomputeForBed({
+      user,
+      bedId,
+      reason: options.reason,
+    });
+  }
+
+  private async archivePlanChecklistForStartedPlanting(
+    user: User,
+    plantingId: string,
+    options: { reason: string },
+  ) {
+    if (!this.planChecklistsService) {
+      return;
+    }
+
+    await this.planChecklistsService.archiveItemsForStartedPlanting({
+      user,
+      plantingId,
+      reason: options.reason,
+    });
   }
 }

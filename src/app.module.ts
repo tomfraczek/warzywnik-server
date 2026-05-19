@@ -39,6 +39,7 @@ import { PlantingInsightsModule } from './planting-insights/planting-insights.mo
 import { AnalyticsModule } from './analytics/analytics.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { PlanChecklistsModule } from './plan-checklists/plan-checklists.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     AnalyticsModule,
     FavoritesModule,
     NotificationsModule,
+    PlanChecklistsModule,
   ],
   controllers: [AppController],
   providers: [

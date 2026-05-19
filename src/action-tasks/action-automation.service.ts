@@ -221,6 +221,7 @@ export class ActionAutomationService {
       );
 
       if (
+        planting.status === PlantingStatus.NEW ||
         planting.status === PlantingStatus.FAILED ||
         planting.status === PlantingStatus.CANCELLED ||
         planting.status === PlantingStatus.HARVESTED ||
