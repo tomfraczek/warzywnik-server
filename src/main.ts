@@ -62,8 +62,14 @@ async function bootstrap() {
   /**
    * CORS – docelowo z env, lokalnie localhost
    */
+  const corsOrigins = [
+    'http://localhost:3000',
+    'https://warzywnik-cms.vercel.app',
+    process.env.FRONTEND_URL,
+  ].filter((value): value is string => Boolean(value));
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
+    origin: Array.from(new Set(corsOrigins)),
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
