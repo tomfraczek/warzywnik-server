@@ -25,6 +25,15 @@ type ExpoPushResponse = {
   data?: ExpoPushTicket[];
 };
 
+type ExpoReceipt = {
+  id?: string;
+  status?: string;
+  message?: string;
+  details?: {
+    error?: string;
+  };
+};
+
 @Injectable()
 export class PushDeliveryService {
   private readonly logger = new Logger(PushDeliveryService.name);
@@ -80,7 +89,10 @@ export class PushDeliveryService {
       return;
     }
 
-    const receipts = await this.fetchReceipts(ticketIds);
+    const receipts = await this.fetchExpoReceipts(ticketIds, {
+      reason: 'scheduled_receipts_check',
+      notificationType: 'BULK',
+    });
 
     for (const delivery of deliveries) {
       const ticketId = delivery.expoTicketId;
@@ -88,6 +100,10 @@ export class PushDeliveryService {
 
       const receipt = receipts[ticketId];
       if (!receipt) continue;
+
+      this.logger.log(
+        `push receipt checked ticket=${ticketId} status=${receipt.status ?? 'unknown'} error=${receipt.details?.error ?? 'none'} message=${receipt.message ?? 'none'}`,
+      );
 
       delivery.expoReceiptId =
         typeof receipt.id === 'string' ? receipt.id : null;
@@ -145,8 +161,18 @@ export class PushDeliveryService {
       data: payload,
     }));
 
+    for (const device of devices) {
+      this.logger.log(
+        `push send attempt userId=${batch.user.id} notificationType=${batch.type} token=${device.expoPushToken} platform=${device.platform} payload=${JSON.stringify(payload)} timestamp=${new Date().toISOString()}`,
+      );
+    }
+
     try {
-      const response = await this.sendToExpo(messages);
+      const response = await this.sendMessagesToExpo(messages, {
+        reason: 'deliver_batch',
+        userId: batch.user.id,
+        notificationType: batch.type,
+      });
       const tickets = response.data ?? [];
 
       for (let index = 0; index < devices.length; index += 1) {
@@ -164,6 +190,10 @@ export class PushDeliveryService {
           delivery.errorCode = ticket?.details?.error ?? 'EXPO_SEND_ERROR';
           delivery.errorMessage = ticket?.message ?? 'Expo send failed';
 
+          this.logger.error(
+            `push send failed userId=${batch.user.id} notificationType=${batch.type} token=${device.expoPushToken} platform=${device.platform} error=${delivery.errorCode} message=${delivery.errorMessage}`,
+          );
+
           device.lastErrorAt = new Date();
           device.lastErrorCode = delivery.errorCode;
           if (delivery.errorCode === 'DeviceNotRegistered') {
@@ -176,6 +206,10 @@ export class PushDeliveryService {
           delivery.expoTicketId = ticket.id ?? null;
           device.lastSuccessAt = new Date();
           device.lastErrorCode = null;
+
+          this.logger.log(
+            `push send success userId=${batch.user.id} notificationType=${batch.type} token=${device.expoPushToken} platform=${device.platform} ticketId=${delivery.expoTicketId ?? 'none'}`,
+          );
         }
 
         this.em.persist(delivery);
@@ -313,19 +347,35 @@ export class PushDeliveryService {
     return (JSON.parse(text) as ExpoPushResponse) ?? {};
   }
 
-  private async fetchReceipts(ticketIds: string[]): Promise<
-    Record<
-      string,
-      {
-        id?: string;
-        status?: string;
-        message?: string;
-        details?: {
-          error?: string;
-        };
-      }
-    >
-  > {
+  async sendMessagesToExpo(
+    messages: Array<Record<string, unknown>>,
+    context?: {
+      reason?: string;
+      userId?: string;
+      notificationType?: string;
+    },
+  ): Promise<ExpoPushResponse> {
+    const response = await this.sendToExpo(messages);
+    const tickets = response.data ?? [];
+
+    tickets.forEach((ticket, index) => {
+      const target = messages[index]?.to;
+      this.logger.log(
+        `push expo response reason=${context?.reason ?? 'unknown'} userId=${context?.userId ?? 'unknown'} notificationType=${context?.notificationType ?? 'unknown'} token=${typeof target === 'string' ? target : 'unknown'} ticketStatus=${ticket?.status ?? 'unknown'} ticketId=${ticket?.id ?? 'none'} error=${ticket?.details?.error ?? 'none'} message=${ticket?.message ?? 'none'}`,
+      );
+    });
+
+    return response;
+  }
+
+  async fetchExpoReceipts(
+    ticketIds: string[],
+    context?: {
+      reason?: string;
+      userId?: string;
+      notificationType?: string;
+    },
+  ): Promise<Record<string, ExpoReceipt>> {
     const response = await fetch(this.expoReceiptsEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -338,17 +388,17 @@ export class PushDeliveryService {
     }
 
     const parsed = JSON.parse(text) as {
-      data?: Record<
-        string,
-        {
-          id?: string;
-          status?: string;
-          message?: string;
-          details?: { error?: string };
-        }
-      >;
+      data?: Record<string, ExpoReceipt>;
     };
 
-    return parsed.data ?? {};
+    const data = parsed.data ?? {};
+
+    Object.entries(data).forEach(([ticketId, receipt]) => {
+      this.logger.log(
+        `push expo receipt reason=${context?.reason ?? 'unknown'} userId=${context?.userId ?? 'unknown'} notificationType=${context?.notificationType ?? 'unknown'} ticketId=${ticketId} status=${receipt?.status ?? 'unknown'} error=${receipt?.details?.error ?? 'none'} message=${receipt?.message ?? 'none'}`,
+      );
+    });
+
+    return data;
   }
 }

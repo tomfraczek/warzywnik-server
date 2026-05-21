@@ -20,12 +20,15 @@ import { LifecycleSuggestionService } from './lifecycle-suggestion.service';
 import { DailySummaryService } from './daily-summary.service';
 import { NotificationPreferencesService } from './notification-preferences.service';
 import { NotificationCopyService } from './notification-copy.service';
+import { PushDebugService } from './push-debug.service';
+import { PushDebugController } from './push-debug.controller';
 import { User } from '../users/user.entity';
 import { ActionTask } from '../action-tasks/action-task.entity';
 import { WarningInstance } from '../weather/warnings/warning-instance.entity';
 import { Planting } from '../plantings/planting.entity';
 import { Article } from '../articles/article.entity';
 import { UserDevice } from '../devices/user-device.entity';
+import { AdminTokenGuard } from '../auth/admin-token.guard';
 
 @Module({
   imports: [
@@ -45,7 +48,11 @@ import { UserDevice } from '../devices/user-device.entity';
       UserDevice,
     ]),
   ],
-  controllers: [NotificationsController, NotificationPreferencesController],
+  controllers: [
+    NotificationsController,
+    NotificationPreferencesController,
+    PushDebugController,
+  ],
   providers: [
     NotificationEventService,
     NotificationAggregatorService,
@@ -58,6 +65,8 @@ import { UserDevice } from '../devices/user-device.entity';
     DailySummaryService,
     NotificationPreferencesService,
     NotificationCopyService,
+    PushDebugService,
+    AdminTokenGuard,
   ],
   exports: [
     NotificationEventService,
