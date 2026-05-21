@@ -8,7 +8,6 @@ import { AnalyticsService } from './analytics.service';
 import { AnalyticsEvent } from './analytics-event.entity';
 import { ArticleMetric } from './article-metric.entity';
 import { VegetablePopularity } from './vegetable-popularity.entity';
-import { AdminTokenGuard } from '../auth/admin-token.guard';
 
 @Module({
   imports: [
@@ -19,7 +18,7 @@ import { AdminTokenGuard } from '../auth/admin-token.guard';
     ]),
   ],
   controllers: [AnalyticsController, CmsAnalyticsController],
-  providers: [AnalyticsService, AdminTokenGuard],
+  providers: [AnalyticsService],
   exports: [AnalyticsService],
 })
 export class AnalyticsModule {}

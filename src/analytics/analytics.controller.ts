@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Query,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { User } from '../users/user.entity';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -21,7 +13,6 @@ import {
   trackEventsSchema,
 } from './dto/analytics.schemas';
 import { Public } from '../auth/public.decorator';
-import { AdminTokenGuard } from '../auth/admin-token.guard';
 
 type RequestWithUser = {
   userEntity?: User;
@@ -60,7 +51,6 @@ export class AnalyticsController {
 }
 
 @Public()
-@UseGuards(AdminTokenGuard)
 @Controller('v1/cms/analytics')
 export class CmsAnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}

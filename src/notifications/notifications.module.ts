@@ -28,7 +28,6 @@ import { WarningInstance } from '../weather/warnings/warning-instance.entity';
 import { Planting } from '../plantings/planting.entity';
 import { Article } from '../articles/article.entity';
 import { UserDevice } from '../devices/user-device.entity';
-import { AdminTokenGuard } from '../auth/admin-token.guard';
 
 @Module({
   imports: [
@@ -66,7 +65,6 @@ import { AdminTokenGuard } from '../auth/admin-token.guard';
     NotificationPreferencesService,
     NotificationCopyService,
     PushDebugService,
-    AdminTokenGuard,
   ],
   exports: [
     NotificationEventService,
