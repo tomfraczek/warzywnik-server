@@ -2,8 +2,10 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ActionTask } from './action-task.entity';
 import {
@@ -34,12 +36,51 @@ import { NotificationEventService } from '../notifications/notification-event.se
 
 @Injectable()
 export class ActionTasksService {
+  private readonly logger = new Logger(ActionTasksService.name);
+
   constructor(
     private readonly em: EntityManager,
     private readonly remindersService: RemindersService,
     private readonly plantingInsightsService: PlantingInsightsService,
     private readonly notificationEventService: NotificationEventService,
   ) {}
+
+  @Cron('15 0 * * *', { name: 'action-tasks-cleanup-overdue-next-day' })
+  async cleanupOverdueTasksNextDay(): Promise<void> {
+    const cutoff = this.startOfUtcDay(new Date());
+
+    const staleTasks = await this.em.find(
+      ActionTask,
+      {
+        status: ActionTaskStatus.PENDING,
+        source: ActionTaskSource.VEGETABLE_RULE,
+        sourceType: ActionTaskSourceType.AUTOMATION,
+        dueAt: { $lt: cutoff },
+      },
+      {
+        orderBy: [{ dueAt: 'asc' }],
+        limit: 2000,
+      },
+    );
+
+    if (staleTasks.length === 0) {
+      return;
+    }
+
+    await this.em.transactional(async (em) => {
+      for (const task of staleTasks) {
+        task.status = ActionTaskStatus.CANCELED;
+        task.suppressedAt = new Date();
+        await this.remindersService.cancelPendingForActionTask(task.id, em);
+      }
+
+      await em.flush();
+    });
+
+    this.logger.log(
+      `overdue automation tasks canceled count=${staleTasks.length} cutoff=${cutoff.toISOString()}`,
+    );
+  }
 
   async createForPlanting(
     user: User,
@@ -656,6 +697,20 @@ export class ActionTasksService {
     const copy = new Date(date);
     copy.setDate(copy.getDate() + days);
     return copy;
+  }
+
+  private startOfUtcDay(value: Date): Date {
+    return new Date(
+      Date.UTC(
+        value.getUTCFullYear(),
+        value.getUTCMonth(),
+        value.getUTCDate(),
+        0,
+        0,
+        0,
+        0,
+      ),
+    );
   }
 
   private normalizeTaskDueAt(date: Date) {
