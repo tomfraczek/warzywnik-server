@@ -82,6 +82,43 @@ export class ActionTasksService {
     );
   }
 
+  @Cron('25 0 * * *', { name: 'action-tasks-cleanup-done-next-day' })
+  async cleanupDoneTasksNextDay(): Promise<void> {
+    const cutoff = this.startOfUtcDay(this.addDays(new Date(), -1));
+
+    const doneTasks = await this.em.find(
+      ActionTask,
+      {
+        status: ActionTaskStatus.DONE,
+        $or: [
+          { doneAt: { $lt: cutoff } },
+          { doneAt: null, updatedAt: { $lt: cutoff } },
+        ],
+      },
+      {
+        orderBy: [{ doneAt: 'asc' }, { updatedAt: 'asc' }],
+        limit: 2000,
+      },
+    );
+
+    if (doneTasks.length === 0) {
+      return;
+    }
+
+    await this.em.transactional(async (em) => {
+      for (const task of doneTasks) {
+        await this.remindersService.cancelPendingForActionTask(task.id, em);
+        em.remove(task);
+      }
+
+      await em.flush();
+    });
+
+    this.logger.log(
+      `done tasks removed count=${doneTasks.length} cutoff=${cutoff.toISOString()}`,
+    );
+  }
+
   async createForPlanting(
     user: User,
     plantingId: string,
