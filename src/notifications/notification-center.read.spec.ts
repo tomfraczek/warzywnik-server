@@ -49,4 +49,21 @@ describe('NotificationCenterService read and unread filters', () => {
     expect(flush).toHaveBeenCalledTimes(1);
     expect(result.readAt).toBeInstanceOf(Date);
   });
+
+  it('removes read notifications older than 24h', async () => {
+    const nativeDelete = jest.fn().mockResolvedValue(7);
+    const service = new NotificationCenterService({ nativeDelete } as never);
+
+    await service.cleanupReadNotificationsAfter24h();
+
+    expect(nativeDelete).toHaveBeenCalledTimes(1);
+    expect(nativeDelete).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        readAt: {
+          $lt: expect.any(Date),
+        },
+      }),
+    );
+  });
 });

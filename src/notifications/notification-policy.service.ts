@@ -78,12 +78,7 @@ export class NotificationPolicyService {
       );
 
       if (coveredByOtherNotification) {
-        const dedupe = new NotificationDedupe();
-        dedupe.user = user;
-        dedupe.type = type;
-        dedupe.dedupeKey = dedupeKey;
-        dedupe.expiresAt = new Date(Date.now() + dedupeHours * 60 * 60 * 1000);
-        this.em.persist(dedupe);
+        await this.insertDedupeRecord(user, type, dedupeKey, dedupeHours);
 
         return {
           decision: 'CENTER_ONLY',
@@ -102,18 +97,28 @@ export class NotificationPolicyService {
       );
     }
 
-    const dedupe = new NotificationDedupe();
-    dedupe.user = user;
-    dedupe.type = type;
-    dedupe.dedupeKey = dedupeKey;
-    dedupe.expiresAt = new Date(Date.now() + dedupeHours * 60 * 60 * 1000);
-    this.em.persist(dedupe);
+    await this.insertDedupeRecord(user, type, dedupeKey, dedupeHours);
 
     return {
       decision: intensityDecision,
       reason:
         intensityDecision === 'CENTER_ONLY' ? 'low_priority_center_only' : 'ok',
     };
+  }
+
+  private async insertDedupeRecord(
+    user: User,
+    type: NotificationType,
+    dedupeKey: string,
+    dedupeHours: number,
+  ): Promise<void> {
+    const expiresAt = new Date(Date.now() + dedupeHours * 60 * 60 * 1000);
+    await this.em.getConnection().execute(
+      `insert into notification_dedupe (user_id, type, dedupe_key, expires_at, created_at)
+       values (?, ?, ?, ?, now())
+       on conflict (user_id, type, dedupe_key) do nothing`,
+      [user.id, type, dedupeKey, expiresAt],
+    );
   }
 
   private isTypeEnabled(

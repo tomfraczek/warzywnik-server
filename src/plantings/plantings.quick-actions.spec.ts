@@ -196,7 +196,7 @@ describe('PlantingsService quick actions', () => {
         id: 'e-3',
         eventTime: new Date('2026-05-06T08:00:00.000Z'),
         payload: {
-          actionKind: 'WATERING',
+          actionKind: 'OTHER_ACTION',
           scope: 'planting',
           metadata: { note: 'to ma zostać pominięte' },
         },

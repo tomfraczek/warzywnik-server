@@ -8,7 +8,7 @@ import { User } from '../users/user.entity';
 import { BedQuickActionKind } from '../common/enums/quick-action.enums';
 
 describe('BedsService quick actions', () => {
-  it('records bed WATERING as timeline events and recomputes plantings', async () => {
+  it('records bed NOTE as timeline events and recomputes plantings', async () => {
     const em = {
       findOne: jest.fn().mockResolvedValue({ id: 'bed-1' }),
       find: jest.fn().mockResolvedValue([
@@ -47,7 +47,11 @@ describe('BedsService quick actions', () => {
         createQuickAction: (
           user: User,
           bedId: string,
-          dto: { actionKind: BedQuickActionKind; occurredAt?: string },
+          dto: {
+            actionKind: BedQuickActionKind;
+            occurredAt?: string;
+            note: string;
+          },
         ) => Promise<{
           bedId: string;
           actionKind: BedQuickActionKind;
@@ -57,8 +61,9 @@ describe('BedsService quick actions', () => {
         }>;
       }
     ).createQuickAction({ id: 'user-1' } as User, 'bed-1', {
-      actionKind: BedQuickActionKind.WATERING,
+      actionKind: BedQuickActionKind.NOTE,
       occurredAt,
+      note: 'Notatka grządki',
     });
 
     expect(recordEvent).toHaveBeenCalledTimes(2);
@@ -75,15 +80,18 @@ describe('BedsService quick actions', () => {
 
     expect(firstEventArg.plantingId).toBe('p-1');
     expect(firstEventArg.bedId).toBe('bed-1');
-    expect(firstEventArg.payload.actionKind).toBe(BedQuickActionKind.WATERING);
+    expect(firstEventArg.payload.actionKind).toBe(BedQuickActionKind.NOTE);
     expect(firstEventArg.payload.scope).toBe('bed');
-    expect(firstEventArg.payload.decisionType).toBe('WATERING');
+    expect(firstEventArg.payload.decisionType).toBeNull();
+    expect(
+      (firstEventArg.payload.metadata as Record<string, unknown>).note,
+    ).toBe('Notatka grządki');
 
     expect(recomputeForPlanting).toHaveBeenCalledTimes(2);
     expect(result).toEqual(
       expect.objectContaining({
         bedId: 'bed-1',
-        actionKind: BedQuickActionKind.WATERING,
+        actionKind: BedQuickActionKind.NOTE,
         eventsRecorded: 2,
         recomputedPlantingIds: ['p-1', 'p-2'],
       }),
@@ -122,7 +130,7 @@ describe('BedsService quick actions', () => {
           eventTime: new Date('2026-05-05T09:00:00.000Z'),
           planting: { id: 'p-1' },
           payload: {
-            actionKind: 'WATERING',
+            actionKind: 'OTHER_ACTION',
             scope: 'bed',
             metadata: { note: 'to ma zostać pominięte' },
           },

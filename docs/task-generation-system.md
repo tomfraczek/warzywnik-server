@@ -140,7 +140,7 @@ Quick actions zapisują zdarzenia użytkownika w timeline (`PLANTING_ACTION_COMP
 Endpointy quick actions:
 
 - `POST /v1/beds/:bedId/quick-actions`
-  - `WATERING`, `WEEDING`, `MOISTURE_CHECK`, `NOTE`
+  - tylko `NOTE`
 - `POST /v1/plantings/:plantingId/quick-actions`
   - tylko `NOTE`
 

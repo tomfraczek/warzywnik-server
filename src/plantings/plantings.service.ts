@@ -50,11 +50,7 @@ import {
   getAllowedStatusTransitions,
   isStatusAllowedForStartMethod,
 } from './planting-lifecycle';
-import {
-  mapQuickActionKindToActionType,
-  mapQuickActionKindToDecisionType,
-  QuickActionScope,
-} from '../common/enums/quick-action.enums';
+import { QuickActionScope } from '../common/enums/quick-action.enums';
 
 type WarningResult = WarningOutput;
 
@@ -776,8 +772,8 @@ export class PlantingsService {
       note: dto.note,
     };
 
-    const decisionType = mapQuickActionKindToDecisionType(dto.actionKind);
-    const actionType = mapQuickActionKindToActionType(dto.actionKind);
+    const decisionType = null;
+    const actionType = null;
 
     await this.plantingInsightsService.recordEvent({
       plantingId: planting.id,

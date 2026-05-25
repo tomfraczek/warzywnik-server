@@ -26,11 +26,7 @@ import { PlantingDisease } from '../planting-diseases/planting-disease.entity';
 import { PestOccurrence } from '../pest-occurrences/pest-occurrence.entity';
 import { Reminder } from '../reminders/reminder.entity';
 import { ReminderStatus } from '../common/enums/reminder.enums';
-import {
-  mapQuickActionKindToActionType,
-  mapQuickActionKindToDecisionType,
-  QuickActionScope,
-} from '../common/enums/quick-action.enums';
+import { QuickActionScope } from '../common/enums/quick-action.enums';
 import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
 import { PlantingEventType } from '../common/enums/planting-event.enums';
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
@@ -72,12 +68,10 @@ export class BedsService {
       { populate: ['vegetable'] },
     );
 
-    const decisionType = mapQuickActionKindToDecisionType(dto.actionKind);
-    const actionType = mapQuickActionKindToActionType(dto.actionKind);
+    const decisionType = null;
+    const actionType = null;
 
     const metadata: Record<string, unknown> = {};
-    if (dto.moistureLevel !== undefined)
-      metadata.moistureLevel = dto.moistureLevel;
     if (dto.note !== undefined) metadata.note = dto.note;
 
     for (const planting of plantings) {
@@ -102,7 +96,7 @@ export class BedsService {
       await this.actionAutomationService.recomputeForPlanting({
         user,
         plantingId: planting.id,
-        reason: `BED_QUICK_ACTION_${dto.actionKind}`,
+        reason: 'BED_QUICK_ACTION_NOTE',
       });
     }
 

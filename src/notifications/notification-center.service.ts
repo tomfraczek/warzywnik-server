@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { Cron } from '@nestjs/schedule';
 import { Notification } from './entities/notification.entity';
 import { User } from '../users/user.entity';
 import {
@@ -12,7 +13,24 @@ import { NotificationSummaryResponse } from './notification.types';
 
 @Injectable()
 export class NotificationCenterService {
+  private readonly logger = new Logger(NotificationCenterService.name);
+
   constructor(private readonly em: EntityManager) {}
+
+  @Cron('35 * * * *', { name: 'notifications-cleanup-read-after-24h' })
+  async cleanupReadNotificationsAfter24h(): Promise<void> {
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const removedCount = await this.em.nativeDelete(Notification, {
+      readAt: { $lt: cutoff },
+    });
+
+    if (removedCount > 0) {
+      this.logger.log(
+        `read notifications removed count=${removedCount} cutoff=${cutoff.toISOString()}`,
+      );
+    }
+  }
 
   async createNotification(params: {
     user: User;
