@@ -5,6 +5,7 @@ import { Planting } from '../plantings/planting.entity';
 import {
   ActionRuleSchedule,
   ActionRuleTrigger,
+  ActionTaskOwnerScopeType,
   ActionTaskSource,
   ActionTaskSourceType,
   ActionTaskStatus,
@@ -1179,6 +1180,8 @@ export class ActionAutomationService {
 
     if (params.rule.actionTemplate.target === ActionTemplateTarget.BED) {
       task.targetType = ActionTaskTargetType.BED;
+      task.ownerScopeType = ActionTaskOwnerScopeType.BED;
+      task.ownerScopeId = params.planting.bed.id;
       task.bed = params.planting.bed;
       task.planting = null;
       task.growingSpace = null;
@@ -1186,11 +1189,15 @@ export class ActionAutomationService {
       params.rule.actionTemplate.target === ActionTemplateTarget.SPACE
     ) {
       task.targetType = ActionTaskTargetType.SPACE;
+      task.ownerScopeType = ActionTaskOwnerScopeType.SPACE;
+      task.ownerScopeId = params.planting.bed.growingSpace.id;
       task.growingSpace = params.planting.bed.growingSpace;
       task.planting = null;
       task.bed = null;
     } else {
       task.targetType = ActionTaskTargetType.PLANTING;
+      task.ownerScopeType = ActionTaskOwnerScopeType.PLANTING;
+      task.ownerScopeId = params.planting.id;
       task.planting = params.planting;
       task.bed = null;
       task.growingSpace = null;
@@ -1503,6 +1510,18 @@ export class ActionAutomationService {
           : params.aggregationScope === ActionTemplateAggregationScope.SPACE
             ? ActionTaskTargetType.SPACE
             : ActionTaskTargetType.USER;
+      existing.ownerScopeType =
+        params.aggregationScope === ActionTemplateAggregationScope.BED
+          ? ActionTaskOwnerScopeType.BED
+          : params.aggregationScope === ActionTemplateAggregationScope.SPACE
+            ? ActionTaskOwnerScopeType.SPACE
+            : ActionTaskOwnerScopeType.USER;
+      existing.ownerScopeId =
+        params.aggregationScope === ActionTemplateAggregationScope.BED
+          ? params.planting.bed.id
+          : params.aggregationScope === ActionTemplateAggregationScope.SPACE
+            ? params.planting.bed.growingSpace.id
+            : params.user.id;
       existing.planting = null;
       existing.bed =
         params.aggregationScope === ActionTemplateAggregationScope.BED
@@ -1552,6 +1571,18 @@ export class ActionAutomationService {
         : params.aggregationScope === ActionTemplateAggregationScope.SPACE
           ? ActionTaskTargetType.SPACE
           : ActionTaskTargetType.USER;
+    task.ownerScopeType =
+      params.aggregationScope === ActionTemplateAggregationScope.BED
+        ? ActionTaskOwnerScopeType.BED
+        : params.aggregationScope === ActionTemplateAggregationScope.SPACE
+          ? ActionTaskOwnerScopeType.SPACE
+          : ActionTaskOwnerScopeType.USER;
+    task.ownerScopeId =
+      params.aggregationScope === ActionTemplateAggregationScope.BED
+        ? params.planting.bed.id
+        : params.aggregationScope === ActionTemplateAggregationScope.SPACE
+          ? params.planting.bed.growingSpace.id
+          : params.user.id;
     task.planting = null;
     task.bed =
       params.aggregationScope === ActionTemplateAggregationScope.BED
@@ -1627,7 +1658,6 @@ export class ActionAutomationService {
     em: EntityManager;
   }) {
     const desiredKeys = new Set(params.desired.map((item) => item.sourceKey));
-    const plantingSourceKeyPrefix = `${params.planting.id}:`;
 
     const generated = await params.em.find(
       ActionTask,
@@ -1636,9 +1666,27 @@ export class ActionAutomationService {
         source: ActionTaskSource.VEGETABLE_RULE,
         status: ActionTaskStatus.PENDING,
         $or: [
+          // Direct planting tasks by ownerScope
+          {
+            ownerScopeType: ActionTaskOwnerScopeType.PLANTING,
+            ownerScopeId: params.planting.id,
+          },
+          // Legacy: direct planting tasks by planting relation
           { planting: params.planting.id },
-          { bed: params.planting.bed.id },
-          { growingSpace: params.planting.bed.growingSpace.id },
+          // Bed-level tasks with this planting in affectedPlantingIds
+          {
+            ownerScopeType: ActionTaskOwnerScopeType.BED,
+            ownerScopeId: params.planting.bed.id,
+          },
+          // Space-level tasks (only if space exists)
+          ...(params.planting.bed.growingSpace?.id
+            ? [
+                {
+                  ownerScopeType: ActionTaskOwnerScopeType.SPACE,
+                  ownerScopeId: params.planting.bed.growingSpace.id,
+                },
+              ]
+            : []),
         ],
       },
       { populate: ['planting', 'bed', 'growingSpace'] },
@@ -1646,15 +1694,6 @@ export class ActionAutomationService {
 
     for (const task of generated) {
       if (task.status === ActionTaskStatus.DONE) {
-        continue;
-      }
-      if (
-        !this.isCleanupCandidateOwnedByPlanting(
-          task,
-          params.planting.id,
-          plantingSourceKeyPrefix,
-        )
-      ) {
         continue;
       }
       if (
@@ -1667,6 +1706,44 @@ export class ActionAutomationService {
       const key = task.sourceKey ?? '';
       if (desiredKeys.has(key)) {
         continue;
+      }
+
+      // For bed/space aggregated tasks: remove this planting from affectedPlantingIds
+      // instead of canceling, unless no affected plantings remain
+      if (
+        task.ownerScopeType === ActionTaskOwnerScopeType.BED ||
+        task.ownerScopeType === ActionTaskOwnerScopeType.SPACE
+      ) {
+        const affectedIds = Array.isArray(task.metadata?.affectedPlantingIds)
+          ? (task.metadata!.affectedPlantingIds as string[]).filter(
+              (id) => id !== params.planting.id,
+            )
+          : [];
+        if (affectedIds.length > 0) {
+          // Other plantings still affected – keep task but shrink list
+          task.metadata = {
+            ...(task.metadata ?? {}),
+            affectedPlantingIds: affectedIds,
+          };
+          continue;
+        }
+        // No affected plantings left → cancel
+      }
+
+      if (
+        !this.isCleanupCandidateOwnedByPlanting(
+          task,
+          params.planting.id,
+          `${params.planting.id}:`,
+        )
+      ) {
+        // For bed/space tasks without ownerScope info, still cancel if stale
+        if (
+          task.ownerScopeType !== ActionTaskOwnerScopeType.BED &&
+          task.ownerScopeType !== ActionTaskOwnerScopeType.SPACE
+        ) {
+          continue;
+        }
       }
 
       task.status = ActionTaskStatus.CANCELED;
@@ -1691,8 +1768,6 @@ export class ActionAutomationService {
     planting: Planting;
     em: EntityManager;
   }) {
-    const plantingSourceKeyPrefix = `${params.planting.id}:`;
-
     const generated = await params.em.find(
       ActionTask,
       {
@@ -1700,23 +1775,63 @@ export class ActionAutomationService {
         source: ActionTaskSource.VEGETABLE_RULE,
         status: ActionTaskStatus.PENDING,
         $or: [
+          {
+            ownerScopeType: ActionTaskOwnerScopeType.PLANTING,
+            ownerScopeId: params.planting.id,
+          },
+          // Legacy fallback
           { planting: params.planting.id },
-          { bed: params.planting.bed.id },
-          { growingSpace: params.planting.bed.growingSpace.id },
+          {
+            ownerScopeType: ActionTaskOwnerScopeType.BED,
+            ownerScopeId: params.planting.bed.id,
+          },
+          ...(params.planting.bed.growingSpace?.id
+            ? [
+                {
+                  ownerScopeType: ActionTaskOwnerScopeType.SPACE,
+                  ownerScopeId: params.planting.bed.growingSpace.id,
+                },
+              ]
+            : []),
         ],
       },
       { populate: ['planting', 'bed', 'growingSpace'] },
     );
 
     for (const task of generated) {
+      // For aggregated bed/space tasks: remove planting from affectedPlantingIds
+      if (
+        task.ownerScopeType === ActionTaskOwnerScopeType.BED ||
+        task.ownerScopeType === ActionTaskOwnerScopeType.SPACE
+      ) {
+        const remaining = Array.isArray(task.metadata?.affectedPlantingIds)
+          ? (task.metadata!.affectedPlantingIds as string[]).filter(
+              (id) => id !== params.planting.id,
+            )
+          : [];
+        if (remaining.length > 0) {
+          task.metadata = {
+            ...(task.metadata ?? {}),
+            affectedPlantingIds: remaining,
+          };
+          continue;
+        }
+        // No plantings left – fall through to cancel
+      }
+
       if (
         !this.isCleanupCandidateOwnedByPlanting(
           task,
           params.planting.id,
-          plantingSourceKeyPrefix,
+          `${params.planting.id}:`,
         )
       ) {
-        continue;
+        if (
+          task.ownerScopeType !== ActionTaskOwnerScopeType.BED &&
+          task.ownerScopeType !== ActionTaskOwnerScopeType.SPACE
+        ) {
+          continue;
+        }
       }
 
       task.status = ActionTaskStatus.CANCELED;
@@ -1960,7 +2075,14 @@ export class ActionAutomationService {
     accepted: GeneratedTaskCandidate[];
     skipped: Array<{ sourceKey: string; reason: string }>;
   }> {
-    const plantingScope = this.getPlantingScopeWhere(params.planting);
+    // Limits are now applied only to direct planting-level tasks to avoid
+    // bed/space related tasks from blocking harvest/pruning/staking for this planting.
+    const directPlantingWhere = {
+      user: params.user.id,
+      source: ActionTaskSource.VEGETABLE_RULE,
+      ownerScopeType: ActionTaskOwnerScopeType.PLANTING,
+      ownerScopeId: params.planting.id,
+    } as const;
 
     const existingTasks = await params.em.find(ActionTask, {
       user: params.user.id,
@@ -1976,18 +2098,14 @@ export class ActionAutomationService {
     );
 
     let activeTasks = await params.em.count(ActionTask, {
-      user: params.user.id,
-      source: ActionTaskSource.VEGETABLE_RULE,
+      ...directPlantingWhere,
       status: ActionTaskStatus.PENDING,
-      ...plantingScope,
     });
 
     const weekStart = this.startOfCurrentWeek();
     let newTasksThisWeek = await params.em.count(ActionTask, {
-      user: params.user.id,
-      source: ActionTaskSource.VEGETABLE_RULE,
+      ...directPlantingWhere,
       createdAt: { $gte: weekStart },
-      ...plantingScope,
     });
 
     const accepted: GeneratedTaskCandidate[] = [];
@@ -2170,6 +2288,8 @@ export class ActionAutomationService {
     task.suppressedAt = null;
     task.generatedAt = new Date();
     task.targetType = ActionTaskTargetType.PLANTING;
+    task.ownerScopeType = ActionTaskOwnerScopeType.PLANTING;
+    task.ownerScopeId = params.planting.id;
     task.planting = params.planting;
     task.bed = null;
     task.growingSpace = null;
@@ -2347,16 +2467,6 @@ export class ActionAutomationService {
     }
 
     return result;
-  }
-
-  private getPlantingScopeWhere(planting: Planting) {
-    return {
-      $or: [
-        { planting: planting.id },
-        { bed: planting.bed.id },
-        { growingSpace: planting.bed.growingSpace.id },
-      ],
-    };
   }
 
   private startOfCurrentWeek() {

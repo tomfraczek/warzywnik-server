@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
+  ActionTaskOwnerScopeType,
   ActionTaskSource,
   ActionTaskSourceType,
   ActionTaskStatus,
@@ -28,8 +29,11 @@ type TaskProposal = {
   description?: string | null;
   dueAt: Date;
   targetType: ActionTaskTargetType;
+  ownerScopeType: ActionTaskOwnerScopeType;
+  ownerScopeId: string;
   bedId?: string | null;
   plantingId?: string | null;
+  affectedPlantingIds?: string[];
   metadata?: Record<string, unknown>;
 };
 
@@ -190,6 +194,8 @@ export class WeatherTaskPlannerService {
           current.description = proposal.description ?? null;
           current.dueAt = proposal.dueAt;
           current.targetType = proposal.targetType;
+          current.ownerScopeType = proposal.ownerScopeType;
+          current.ownerScopeId = proposal.ownerScopeId;
           current.bed = proposal.bedId
             ? txEm.getReference(Bed, proposal.bedId)
             : null;
@@ -202,6 +208,7 @@ export class WeatherTaskPlannerService {
             decisionType: proposal.decisionType,
             actionKind: proposal.decisionType,
             sourceKey: proposal.dedupeKey,
+            affectedPlantingIds: proposal.affectedPlantingIds ?? [],
           };
           continue;
         }
@@ -215,12 +222,15 @@ export class WeatherTaskPlannerService {
         task.description = proposal.description ?? null;
         task.dueAt = proposal.dueAt;
         task.targetType = proposal.targetType;
+        task.ownerScopeType = proposal.ownerScopeType;
+        task.ownerScopeId = proposal.ownerScopeId;
         task.dedupeKey = proposal.dedupeKey;
         task.metadata = {
           ...(proposal.metadata ?? {}),
           decisionType: proposal.decisionType,
           actionKind: proposal.decisionType,
           sourceKey: proposal.dedupeKey,
+          affectedPlantingIds: proposal.affectedPlantingIds ?? [],
         };
         task.isManuallyRescheduled = false;
         task.generatedAt = now;
@@ -297,16 +307,18 @@ export class WeatherTaskPlannerService {
         continue;
       }
 
-      const dedupeKey = this.buildDedupeKey({
+      const dedupeKeyOld = this.buildDedupeKey({
         code: warning.code,
         userId,
         localDate,
         bedId: warning.bed?.id ?? null,
         plantingId: warning.planting?.id ?? null,
       });
+      // dedupeKeyOld is kept here as unused legacy – the actual dedupeKey is computed below after scope resolution
+      void dedupeKeyOld;
 
       this.logger.debug(
-        `warning code=${warning.code} localDate=${localDate} dedupeKey=${dedupeKey} bedId=${warning.bed?.id ?? null} plantingId=${warning.planting?.id ?? null}`,
+        `warning code=${warning.code} localDate=${localDate} bedId=${warning.bed?.id ?? null} plantingId=${warning.planting?.id ?? null}`,
       );
 
       const baseMetadata = {
@@ -314,41 +326,101 @@ export class WeatherTaskPlannerService {
         ...(warning.details ?? {}),
       };
 
+      // Resolve ownership: prefer bed-level for weather tasks that logically affect a bed
+      // For watering specifically, always use BED scope if a bed is known
+      const resolvedBedId = warning.bed?.id ?? null;
+      const resolvedPlantingId = warning.planting?.id ?? null;
+
+      const isWateringCode =
+        warning.code === WarningCode.WATERING_NEEDED_TODAY ||
+        warning.code === WarningCode.WATERING_NEEDED_TOMORROW;
+
+      // Determine scope: watering and overwatering are always bed-level when bed is known
+      const isBedLevelCode =
+        isWateringCode ||
+        warning.code === WarningCode.OVERWATERING_PREPARE_TODAY ||
+        warning.code === WarningCode.OVERWATERING_PREPARE_TOMORROW ||
+        warning.code === WarningCode.OVERWATERING_CHECK_TODAY ||
+        warning.code === WarningCode.OVERWATERING_CHECK_TOMORROW ||
+        warning.code === WarningCode.GREENHOUSE_HEAT_WAVE_TODAY_DAY ||
+        warning.code === WarningCode.GREENHOUSE_HEAT_WAVE_TOMORROW_DAY ||
+        warning.code === WarningCode.GREENHOUSE_SNOW_LOAD_TODAY ||
+        warning.code === WarningCode.GREENHOUSE_SNOW_LOAD_TOMORROW ||
+        warning.code === WarningCode.GREENHOUSE_WET_SNOW_TODAY ||
+        warning.code === WarningCode.GREENHOUSE_WET_SNOW_TOMORROW;
+
+      let ownerScopeType: ActionTaskOwnerScopeType;
+      let ownerScopeId: string;
+      let targetType: ActionTaskTargetType;
+      let effectiveBedId: string | null = resolvedBedId;
+      let effectivePlantingId: string | null = resolvedPlantingId;
+
+      if (isBedLevelCode && resolvedBedId) {
+        ownerScopeType = ActionTaskOwnerScopeType.BED;
+        ownerScopeId = resolvedBedId;
+        targetType = ActionTaskTargetType.BED;
+        effectivePlantingId = null; // BED-level: no direct planting
+      } else if (resolvedPlantingId) {
+        ownerScopeType = ActionTaskOwnerScopeType.PLANTING;
+        ownerScopeId = resolvedPlantingId;
+        targetType = ActionTaskTargetType.PLANTING;
+      } else if (resolvedBedId) {
+        ownerScopeType = ActionTaskOwnerScopeType.BED;
+        ownerScopeId = resolvedBedId;
+        targetType = ActionTaskTargetType.BED;
+      } else {
+        ownerScopeType = ActionTaskOwnerScopeType.USER;
+        ownerScopeId = userId;
+        targetType = ActionTaskTargetType.USER;
+      }
+
+      // Build dedupe key using ownerScope for consolidation
+      const dedupeKey = this.buildDedupeKey({
+        code: warning.code,
+        userId,
+        localDate,
+        bedId: effectiveBedId,
+        plantingId: effectivePlantingId,
+      });
+
+      this.logger.debug(
+        `warning code=${warning.code} localDate=${localDate} dedupeKey=${dedupeKey} ownerScopeType=${ownerScopeType} ownerScopeId=${ownerScopeId}`,
+      );
+
       const base: Omit<TaskProposal, 'title' | 'description'> = {
         dedupeKey,
         decisionType: 'GENERAL_MONITORING',
         dueAt: this.resolveTaskDueAt(warning),
-        targetType: warning.planting?.id
-          ? ActionTaskTargetType.PLANTING
-          : warning.bed?.id
-            ? ActionTaskTargetType.BED
-            : ActionTaskTargetType.USER,
-        bedId: warning.bed?.id ?? null,
-        plantingId: warning.planting?.id ?? null,
+        targetType,
+        ownerScopeType,
+        ownerScopeId,
+        bedId: effectiveBedId,
+        plantingId: effectivePlantingId,
+        affectedPlantingIds: resolvedPlantingId ? [resolvedPlantingId] : [],
         metadata: baseMetadata,
       };
 
       switch (warning.code) {
         case WarningCode.WATERING_NEEDED_TODAY:
         case WarningCode.WATERING_NEEDED_TOMORROW:
-          proposals.set(dedupeKey, {
+          proposals.set(base.dedupeKey, {
             ...base,
             decisionType: 'WATERING',
-            targetType: ActionTaskTargetType.USER,
+            // Keep BED-level scope from `base` (set above by isBedLevelCode logic)
             title: 'Podlej uprawy',
             description: 'Podlewanie operacyjne zaplanowane na dziś/jutro.',
             metadata: {
               ...base.metadata,
               decisionType: 'WATERING',
               actionKind: 'WATERING',
-              sourceKey: dedupeKey,
+              sourceKey: base.dedupeKey,
             },
           });
           break;
 
         case WarningCode.OVERWATERING_PREPARE_TODAY:
         case WarningCode.OVERWATERING_PREPARE_TOMORROW:
-          proposals.set(dedupeKey, {
+          proposals.set(base.dedupeKey, {
             ...base,
             decisionType: 'MOISTURE_CHECK',
             targetType: ActionTaskTargetType.BED,
@@ -358,14 +430,14 @@ export class WeatherTaskPlannerService {
               ...base.metadata,
               decisionType: 'MOISTURE_CHECK',
               actionKind: 'MOISTURE_CHECK',
-              sourceKey: dedupeKey,
+              sourceKey: base.dedupeKey,
             },
           });
           break;
 
         case WarningCode.OVERWATERING_CHECK_TODAY:
         case WarningCode.OVERWATERING_CHECK_TOMORROW:
-          proposals.set(dedupeKey, {
+          proposals.set(base.dedupeKey, {
             ...base,
             decisionType: 'MOISTURE_CHECK',
             targetType: ActionTaskTargetType.BED,
@@ -376,14 +448,14 @@ export class WeatherTaskPlannerService {
               ...base.metadata,
               decisionType: 'MOISTURE_CHECK',
               actionKind: 'MOISTURE_CHECK',
-              sourceKey: dedupeKey,
+              sourceKey: base.dedupeKey,
             },
           });
           break;
 
         case WarningCode.SOWING_PAUSE_TOO_COLD_TODAY:
         case WarningCode.SOWING_PAUSE_TOO_COLD_TOMORROW:
-          proposals.set(dedupeKey, {
+          proposals.set(base.dedupeKey, {
             ...base,
             targetType: ActionTaskTargetType.PLANTING,
             title: 'Wstrzymaj siew',
@@ -393,7 +465,7 @@ export class WeatherTaskPlannerService {
 
         case WarningCode.GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT:
         case WarningCode.GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT:
-          proposals.set(dedupeKey, {
+          proposals.set(base.dedupeKey, {
             ...base,
             decisionType: 'FROST_PROTECTION',
             targetType: ActionTaskTargetType.PLANTING,
@@ -403,14 +475,14 @@ export class WeatherTaskPlannerService {
               ...base.metadata,
               decisionType: 'FROST_PROTECTION',
               actionKind: 'FROST_PROTECTION',
-              sourceKey: dedupeKey,
+              sourceKey: base.dedupeKey,
             },
           });
           break;
 
         case WarningCode.GREENHOUSE_HEAT_WAVE_TODAY_DAY:
         case WarningCode.GREENHOUSE_HEAT_WAVE_TOMORROW_DAY:
-          proposals.set(dedupeKey, {
+          proposals.set(base.dedupeKey, {
             ...base,
             targetType: ActionTaskTargetType.BED,
             title: 'Schłodź szklarnię / tunel',
@@ -422,7 +494,7 @@ export class WeatherTaskPlannerService {
         case WarningCode.GREENHOUSE_SNOW_LOAD_TOMORROW:
         case WarningCode.GREENHOUSE_WET_SNOW_TODAY:
         case WarningCode.GREENHOUSE_WET_SNOW_TOMORROW:
-          proposals.set(dedupeKey, {
+          proposals.set(base.dedupeKey, {
             ...base,
             targetType: ActionTaskTargetType.BED,
             title: 'Odśnież konstrukcję',
@@ -431,7 +503,7 @@ export class WeatherTaskPlannerService {
           break;
 
         default:
-          proposals.set(dedupeKey, {
+          proposals.set(base.dedupeKey, {
             ...base,
             decisionType:
               warning.code === WarningCode.FROST_RISK_TODAY_NIGHT ||
@@ -482,7 +554,7 @@ export class WeatherTaskPlannerService {
                 warning.code === WarningCode.HARD_FROST_RISK_TOMORROW_NIGHT
                   ? 'FROST_PROTECTION'
                   : 'GENERAL_MONITORING',
-              sourceKey: dedupeKey,
+              sourceKey: base.dedupeKey,
             },
           });
       }

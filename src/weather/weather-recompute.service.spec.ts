@@ -42,6 +42,8 @@ describe('WeatherRecomputeService', () => {
       {} as never,
       {} as never,
       {} as never,
+      {} as never,
+      {} as never,
     );
 
     return { service, em };
@@ -213,6 +215,8 @@ describe('WeatherRecomputeService', () => {
       {} as never,
       {} as never,
       weatherTaskPlannerService as never,
+      {} as never,
+      {} as never,
     );
 
     await service.recomputeTasks('user-1');

@@ -51,6 +51,16 @@ import {
   isStatusAllowedForStartMethod,
 } from './planting-lifecycle';
 import { QuickActionScope } from '../common/enums/quick-action.enums';
+import { ActionTask } from '../action-tasks/action-task.entity';
+import {
+  ActionTaskOwnerScopeType,
+  ActionTaskSource,
+  ActionTaskStatus,
+} from '../common/enums/action.enums';
+import { Reminder } from '../reminders/reminder.entity';
+import {
+  ReminderStatus,
+} from '../common/enums/reminder.enums';
 
 type WarningResult = WarningOutput;
 
@@ -681,6 +691,9 @@ export class PlantingsService {
     planting.status = PlantingStatus.CANCELLED;
     await this.em.flush();
 
+    // Handle all tasks associated with this planting
+    await this.cancelOrphanedTasksForPlanting(user.id, planting.id);
+
     if (previousStatus !== PlantingStatus.CANCELLED) {
       await this.plantingInsightsService.recordEvent({
         plantingId: planting.id,
@@ -701,6 +714,92 @@ export class PlantingsService {
         reason: 'PLANTING_NEW_REMOVED',
       });
     }
+  }
+
+  /**
+   * Cancel direct tasks owned by a planting, and remove planting from
+   * affectedPlantingIds of aggregated bed/space tasks.
+   * If an aggregated task has no remaining affected plantings, it is cancelled.
+   */
+  private async cancelOrphanedTasksForPlanting(
+    userId: string,
+    plantingId: string,
+  ) {
+    await this.em.transactional(async (em) => {
+      // 1. Direct tasks (planting owner) – cancel all, including manual
+      const directTasks = await em.find(ActionTask, {
+        user: userId,
+        status: ActionTaskStatus.PENDING,
+        ownerScopeType: ActionTaskOwnerScopeType.PLANTING,
+        ownerScopeId: plantingId,
+      });
+
+      // Legacy: also catch tasks with planting relation but no ownerScope set yet
+      const legacyDirectTasks = await em.find(ActionTask, {
+        user: userId,
+        status: ActionTaskStatus.PENDING,
+        planting: plantingId,
+        ownerScopeType: null,
+      });
+
+      for (const task of [...directTasks, ...legacyDirectTasks]) {
+        task.status = ActionTaskStatus.CANCELED;
+        task.suppressedAt = new Date();
+        await em.nativeUpdate(
+          Reminder,
+          {
+            actionTaskId: task.id,
+            status: { $in: [ReminderStatus.PENDING, ReminderStatus.PROCESSING] },
+          },
+          { status: ReminderStatus.CANCELED, lockedAt: null, lastError: null },
+        );
+      }
+
+      // 2. Aggregated bed/space tasks – remove this planting from affectedPlantingIds
+      const aggregatedTasks = await em.find(ActionTask, {
+        user: userId,
+        status: ActionTaskStatus.PENDING,
+        ownerScopeType: {
+          $in: [ActionTaskOwnerScopeType.BED, ActionTaskOwnerScopeType.SPACE],
+        },
+        metadata: { affectedPlantingIds: { $contains: [plantingId] } as any },
+      });
+
+      for (const task of aggregatedTasks) {
+        const affectedIds = Array.isArray(task.metadata?.affectedPlantingIds)
+          ? (task.metadata!.affectedPlantingIds as string[]).filter(
+              (pid) => pid !== plantingId,
+            )
+          : [];
+
+        if (affectedIds.length === 0) {
+          // No plantings left – cancel the task
+          task.status = ActionTaskStatus.CANCELED;
+          task.suppressedAt = new Date();
+          await em.nativeUpdate(
+            Reminder,
+            {
+              actionTaskId: task.id,
+              status: {
+                $in: [ReminderStatus.PENDING, ReminderStatus.PROCESSING],
+              },
+            },
+            {
+              status: ReminderStatus.CANCELED,
+              lockedAt: null,
+              lastError: null,
+            },
+          );
+        } else {
+          task.metadata = {
+            ...(task.metadata ?? {}),
+            affectedPlantingIds: affectedIds,
+          };
+        }
+      }
+
+      await em.flush();
+    });
   }
 
   async getAvailableStatuses(user: User, id: string) {

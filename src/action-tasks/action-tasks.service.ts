@@ -14,9 +14,11 @@ import {
   CreatePlantingActionTasksBulkDto,
   ListBedActionTasksQueryDto,
   ListActionTasksQueryDto,
+  ListPlantingActionTasksQueryDto,
   PatchActionTaskDto,
 } from './dto/action-task.schemas';
 import {
+  ActionTaskOwnerScopeType,
   ActionTaskSource,
   ActionTaskSourceType,
   ActionTaskStatus,
@@ -136,6 +138,8 @@ export class ActionTasksService {
       const task = new ActionTask();
       task.user = user;
       task.targetType = ActionTaskTargetType.PLANTING;
+      task.ownerScopeType = ActionTaskOwnerScopeType.PLANTING;
+      task.ownerScopeId = planting.id;
       task.planting = planting;
       task.bed = planting.bed;
       task.source = ActionTaskSource.MANUAL;
@@ -205,6 +209,8 @@ export class ActionTasksService {
       const task = new ActionTask();
       task.user = user;
       task.targetType = ActionTaskTargetType.BED;
+      task.ownerScopeType = ActionTaskOwnerScopeType.BED;
+      task.ownerScopeId = bed.id;
       task.bed = bed;
       task.planting = null;
       task.source = ActionTaskSource.MANUAL;
@@ -257,19 +263,99 @@ export class ActionTasksService {
   async listForPlanting(
     user: User,
     plantingId: string,
-    query: ListActionTasksQueryDto,
+    query: ListPlantingActionTasksQueryDto,
   ) {
     await this.getPlantingOrThrow(user, plantingId);
 
-    const where = this.buildListWhere(user, query);
-    where.planting = plantingId;
+    const baseWhere = this.buildListWhere(user, query);
+    const mode = query.mode ?? 'direct';
 
-    const items = await this.em.find(ActionTask, where, {
-      orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }],
-      populate: ['actionTemplate', 'planting', 'planting.vegetable', 'bed'],
+    if (mode === 'direct') {
+      // Only tasks directly owned by this planting
+      const where = {
+        ...baseWhere,
+        ownerScopeType: ActionTaskOwnerScopeType.PLANTING,
+        ownerScopeId: plantingId,
+      };
+      const items = await this.em.find(ActionTask, where, {
+        orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }],
+        populate: ['actionTemplate', 'planting', 'planting.vegetable', 'bed'],
+      });
+      return items.map((item) =>
+        this.serialize(item, { relationToCurrentPlanting: 'direct' }),
+      );
+    }
+
+    if (mode === 'related') {
+      // Bed/space tasks that have this planting in affectedPlantingIds
+      const items = await this.em.find(
+        ActionTask,
+        {
+          ...baseWhere,
+          ownerScopeType: { $in: [ActionTaskOwnerScopeType.BED, ActionTaskOwnerScopeType.SPACE] },
+          metadata: { affectedPlantingIds: { $contains: [plantingId] } as any },
+        },
+        {
+          orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }],
+          populate: ['actionTemplate', 'planting', 'planting.vegetable', 'bed'],
+        },
+      );
+      return items.map((item) =>
+        this.serialize(item, {
+          relationToCurrentPlanting:
+            item.ownerScopeType === ActionTaskOwnerScopeType.BED
+              ? 'related_from_bed'
+              : 'related_from_space',
+        }),
+      );
+    }
+
+    // mode === 'all'
+    const directItems = await this.em.find(
+      ActionTask,
+      {
+        ...baseWhere,
+        ownerScopeType: ActionTaskOwnerScopeType.PLANTING,
+        ownerScopeId: plantingId,
+      },
+      {
+        orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }],
+        populate: ['actionTemplate', 'planting', 'planting.vegetable', 'bed'],
+      },
+    );
+
+    const relatedItems = await this.em.find(
+      ActionTask,
+      {
+        ...baseWhere,
+        ownerScopeType: { $in: [ActionTaskOwnerScopeType.BED, ActionTaskOwnerScopeType.SPACE] },
+        metadata: { affectedPlantingIds: { $contains: [plantingId] } as any },
+      },
+      {
+        orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }],
+        populate: ['actionTemplate', 'planting', 'planting.vegetable', 'bed'],
+      },
+    );
+
+    const all = [
+      ...directItems.map((item) =>
+        this.serialize(item, { relationToCurrentPlanting: 'direct' }),
+      ),
+      ...relatedItems.map((item) =>
+        this.serialize(item, {
+          relationToCurrentPlanting:
+            item.ownerScopeType === ActionTaskOwnerScopeType.BED
+              ? 'related_from_bed'
+              : 'related_from_space',
+        }),
+      ),
+    ];
+    all.sort((a, b) => {
+      const aTime = a.dueAt ? new Date(a.dueAt).getTime() : 0;
+      const bTime = b.dueAt ? new Date(b.dueAt).getTime() : 0;
+      return aTime - bTime;
     });
-
-    return items.map((item) => this.serialize(item));
+    return all;
   }
 
   async listForBed(
@@ -283,8 +369,8 @@ export class ActionTasksService {
     const scope = query.scope ?? BedActionTasksScope.INCLUDING_CHILDREN;
 
     if (scope === BedActionTasksScope.OWN) {
-      where.bed = bedId;
-      where.targetType = ActionTaskTargetType.BED;
+      where.ownerScopeType = ActionTaskOwnerScopeType.BED;
+      where.ownerScopeId = bedId;
     } else {
       where.$or = [{ bed: bedId }, { planting: { bed: bedId } }];
     }
@@ -311,6 +397,8 @@ export class ActionTasksService {
         expectedTarget: ActionTemplateTarget.BED,
         setupTask: (task) => {
           task.targetType = ActionTaskTargetType.BED;
+          task.ownerScopeType = ActionTaskOwnerScopeType.BED;
+          task.ownerScopeId = bed.id;
           task.bed = bed;
           task.planting = null;
         },
@@ -341,6 +429,8 @@ export class ActionTasksService {
         expectedTarget: ActionTemplateTarget.PLANTING,
         setupTask: (task) => {
           task.targetType = ActionTaskTargetType.PLANTING;
+          task.ownerScopeType = ActionTaskOwnerScopeType.PLANTING;
+          task.ownerScopeId = planting.id;
           task.bed = null;
           task.planting = planting;
         },
@@ -503,7 +593,8 @@ export class ActionTasksService {
       // Capture event params for PLANTING_ACTION_COMPLETED before transaction ends
       if (
         task.status === ActionTaskStatus.DONE &&
-        task.targetType === ActionTaskTargetType.PLANTING &&
+        (task.targetType === ActionTaskTargetType.PLANTING ||
+          task.ownerScopeType === ActionTaskOwnerScopeType.PLANTING) &&
         task.planting != null &&
         task.actionTemplate != null &&
         task.doneAt != null
@@ -536,11 +627,28 @@ export class ActionTasksService {
 
       if (
         task.status === ActionTaskStatus.DONE &&
-        task.targetType === ActionTaskTargetType.BED &&
+        (task.targetType === ActionTaskTargetType.BED ||
+          task.ownerScopeType === ActionTaskOwnerScopeType.BED) &&
         task.bed != null &&
         task.actionTemplate != null &&
         task.doneAt != null
       ) {
+        const TERMINAL_STATUSES = new Set([
+          'FAILED',
+          'CANCELLED',
+          'HARVESTED',
+          'CLEARED',
+          'failed',
+          'cancelled',
+          'harvested',
+          'cleared',
+        ]);
+
+        // Prefer explicit affectedPlantingIds; fall back to all active plantings in bed
+        const affectedIds = Array.isArray(task.metadata?.affectedPlantingIds)
+          ? (task.metadata!.affectedPlantingIds as string[])
+          : null;
+
         const bedPlantings = await em.find(
           Planting,
           {
@@ -550,7 +658,15 @@ export class ActionTasksService {
           { populate: ['bed', 'vegetable'] },
         );
 
-        for (const planting of bedPlantings) {
+        const plantingsToRecord = affectedIds
+          ? bedPlantings.filter(
+              (p) =>
+                affectedIds.includes(p.id) &&
+                !TERMINAL_STATUSES.has(p.status),
+            )
+          : bedPlantings.filter((p) => !TERMINAL_STATUSES.has(p.status));
+
+        for (const planting of plantingsToRecord) {
           await this.plantingInsightsService.recordEvent({
             plantingId: planting.id,
             userId: user.id,
@@ -573,6 +689,7 @@ export class ActionTasksService {
               actionTitle: task.title,
               source: task.source,
               targetType: task.targetType,
+              ownerScopeType: task.ownerScopeType ?? null,
               dueAt: task.dueAt?.toISOString() ?? null,
               doneAt: task.doneAt.toISOString(),
               description: task.description ?? null,
@@ -581,6 +698,60 @@ export class ActionTasksService {
             },
           });
         }
+      }
+
+      if (
+        task.status === ActionTaskStatus.DONE &&
+        task.ownerScopeType === ActionTaskOwnerScopeType.SPACE &&
+        task.growingSpace != null &&
+        task.actionTemplate != null &&
+        task.doneAt != null
+      ) {
+        const TERMINAL_STATUSES = new Set([
+          'FAILED',
+          'CANCELLED',
+          'HARVESTED',
+          'CLEARED',
+          'failed',
+          'cancelled',
+          'harvested',
+          'cleared',
+        ]);
+        const affectedIds = Array.isArray(task.metadata?.affectedPlantingIds)
+          ? (task.metadata!.affectedPlantingIds as string[])
+          : null;
+        if (affectedIds && affectedIds.length > 0) {
+          const spacePlantings = await em.find(
+            Planting,
+            { user: user.id, id: { $in: affectedIds } },
+            { populate: ['bed', 'vegetable'] },
+          );
+          for (const planting of spacePlantings) {
+            if (TERMINAL_STATUSES.has(planting.status)) continue;
+            await this.plantingInsightsService.recordEvent({
+              plantingId: planting.id,
+              userId: user.id,
+              bedId: planting.bed.id,
+              vegetableId: planting.vegetable.id,
+              eventType: PlantingEventType.PLANTING_ACTION_COMPLETED,
+              eventTime: task.doneAt,
+              payload: {
+                taskId: task.id,
+                actionTemplateId: task.actionTemplate.id,
+                actionType: task.actionTemplate.type,
+                decisionType:
+                  typeof task.metadata?.decisionType === 'string'
+                    ? task.metadata.decisionType
+                    : null,
+                actionTitle: task.title,
+                source: task.source,
+                ownerScopeType: task.ownerScopeType,
+                scope: 'space',
+              },
+            });
+          }
+        }
+        // If no affectedPlantingIds, do not record events for space tasks
       }
 
       await em.flush();
@@ -872,15 +1043,23 @@ export class ActionTasksService {
     return created;
   }
 
-  private serialize(entity: ActionTask) {
+  private serialize(
+    entity: ActionTask,
+    meta?: {
+      relationToCurrentPlanting?: 'direct' | 'related_from_bed' | 'related_from_space' | null;
+    },
+  ) {
     return {
       id: entity.id,
       userId: entity.user.id,
       targetType: entity.targetType,
+      ownerScopeType: entity.ownerScopeType ?? null,
+      ownerScopeId: entity.ownerScopeId ?? null,
       plantingId: entity.planting?.id ?? null,
       vegetableName: entity.planting?.vegetable?.name ?? null,
       bedId: entity.bed?.id ?? null,
       bedName: entity.bed?.name ?? null,
+      growingSpaceId: entity.growingSpace?.id ?? null,
       status: entity.status,
       source: entity.source,
       sourceType: entity.sourceType,
@@ -900,15 +1079,20 @@ export class ActionTasksService {
         ? {
             id: entity.actionTemplate.id,
             name: entity.actionTemplate.name,
+            /**
+             * @deprecated use `target` instead – `scope` is kept for backwards compatibility
+             */
             scope: entity.actionTemplate.target,
             target: entity.actionTemplate.target,
             type: entity.actionTemplate.type,
+            aggregationScope: entity.actionTemplate.aggregationScope ?? null,
             defaultDueOffsetDays: entity.actionTemplate.defaultDueOffsetDays,
           }
         : null,
       doneAt: entity.doneAt ?? null,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      relationToCurrentPlanting: meta?.relationToCurrentPlanting ?? null,
     };
   }
 

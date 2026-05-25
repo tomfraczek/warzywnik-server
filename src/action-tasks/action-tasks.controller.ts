@@ -20,10 +20,10 @@ import {
   createPlantingActionTasksBulkSchema,
   CreatePlantingActionTasksBulkDto,
   listBedActionTasksQuerySchema,
-  listActionTasksQuerySchema,
+  listPlantingActionTasksQuerySchema,
   patchActionTaskSchema,
   ListBedActionTasksQueryDto,
-  ListActionTasksQueryDto,
+  ListPlantingActionTasksQueryDto,
   PatchActionTaskDto,
 } from './dto/action-task.schemas';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -69,8 +69,8 @@ export class ActionTasksController {
   listForPlanting(
     @Req() req: RequestWithUser,
     @Param('plantingId', new ParseUUIDPipe()) plantingId: string,
-    @Query(new ZodValidationPipe(listActionTasksQuerySchema))
-    query: ListActionTasksQueryDto,
+    @Query(new ZodValidationPipe(listPlantingActionTasksQuerySchema))
+    query: ListPlantingActionTasksQueryDto,
   ) {
     return this.actionTasksService.listForPlanting(
       req.userEntity as User,

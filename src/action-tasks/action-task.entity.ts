@@ -9,6 +9,7 @@ import {
   Unique,
 } from '@mikro-orm/core';
 import {
+  ActionTaskOwnerScopeType,
   ActionTaskSource,
   ActionTaskSourceType,
   ActionTaskStatus,
@@ -30,6 +31,7 @@ import { GrowingSpace } from '../growing-spaces/growing-space.entity';
 @Index({ properties: ['sourceRefId'] })
 @Index({ properties: ['dedupeKey'] })
 @Index({ properties: ['sourceKey'] })
+@Index({ properties: ['ownerScopeType', 'ownerScopeId'] })
 @Unique({
   properties: ['user', 'source', 'sourceRefId', 'dueAt', 'cycleIndex'],
 })
@@ -42,6 +44,20 @@ export class ActionTask {
 
   @Enum({ items: () => ActionTaskTargetType })
   targetType!: ActionTaskTargetType;
+
+  /**
+   * ownerScopeType is the canonical ownership indicator.
+   * Always set on new tasks. Nullable only for legacy rows pre-migration.
+   */
+  @Enum({ items: () => ActionTaskOwnerScopeType, nullable: true })
+  ownerScopeType?: ActionTaskOwnerScopeType | null;
+
+  /**
+   * ownerScopeId holds the ID of the owning entity (planting.id, bed.id, growingSpace.id).
+   * Always set when ownerScopeType is set.
+   */
+  @Property({ type: 'uuid', nullable: true })
+  ownerScopeId?: string | null;
 
   @ManyToOne(() => Planting, { nullable: true })
   planting?: Planting | null;

@@ -23,6 +23,10 @@ export type ListActionTasksQueryDto = {
   to?: string;
 };
 
+export type ListPlantingActionTasksQueryDto = ListActionTasksQueryDto & {
+  mode?: 'direct' | 'related' | 'all';
+};
+
 export type ListBedActionTasksQueryDto = ListActionTasksQueryDto & {
   scope: BedActionTasksScope;
 };
@@ -84,6 +88,11 @@ export const listActionTasksQuerySchema = z.object({
   from: isoDateSchema.optional(),
   to: isoDateSchema.optional(),
 });
+
+export const listPlantingActionTasksQuerySchema =
+  listActionTasksQuerySchema.extend({
+    mode: z.enum(['direct', 'related', 'all']).default('direct'),
+  });
 
 export const listBedActionTasksQuerySchema = listActionTasksQuerySchema.extend({
   scope: z

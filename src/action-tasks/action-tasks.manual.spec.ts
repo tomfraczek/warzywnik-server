@@ -38,6 +38,7 @@ describe('ActionTasksService manual tasks', () => {
       em,
       { upsertPendingForActionTask: jest.fn() } as never,
       { recordEvent: jest.fn() } as never,
+      { publishTaskEvents: jest.fn() } as never,
     );
 
     await expect(
@@ -84,6 +85,7 @@ describe('ActionTasksService manual tasks', () => {
       em,
       remindersService as never,
       { recordEvent: jest.fn() } as never,
+      { publishTaskEvents: jest.fn() } as never,
     );
 
     const result = await service.createForBed(user, 'bed-1', {
@@ -140,6 +142,7 @@ describe('ActionTasksService manual tasks', () => {
       em,
       { upsertPendingForActionTask: jest.fn() } as never,
       { recordEvent: jest.fn() } as never,
+      { publishTaskEvents: jest.fn() } as never,
     );
 
     const result = await service.createForBed(
@@ -175,6 +178,7 @@ describe('ActionTasksService manual tasks', () => {
       em,
       { upsertPendingForActionTask: jest.fn() } as never,
       { recordEvent: jest.fn() } as never,
+      { publishTaskEvents: jest.fn() } as never,
     );
 
     await expect(
@@ -228,6 +232,7 @@ describe('ActionTasksService manual tasks', () => {
         upsertPendingForActionTask: jest.fn(),
       } as never,
       plantingInsightsService as never,
+      { publishTaskEvents: jest.fn() } as never,
     );
 
     await service.patch(user, 'task-1', {
@@ -271,6 +276,7 @@ describe('ActionTasksService manual tasks', () => {
         cancelPendingForActionTask: jest.fn(),
       } as never,
       { recordEvent: jest.fn() } as never,
+      { publishTaskEvents: jest.fn() } as never,
     );
 
     await service.remove(user, 'task-1');

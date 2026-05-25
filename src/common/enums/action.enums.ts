@@ -78,6 +78,17 @@ export enum ActionTaskTargetType {
   SPACE = 'space',
 }
 
+/**
+ * OwnerScopeType is the authoritative ownership field for a task.
+ * Unlike targetType (legacy), ownerScopeType is always set and never guessed.
+ */
+export enum ActionTaskOwnerScopeType {
+  USER = 'user',
+  BED = 'bed',
+  PLANTING = 'planting',
+  SPACE = 'space',
+}
+
 export enum BedActionTasksScope {
   OWN = 'own',
   INCLUDING_CHILDREN = 'includingChildren',

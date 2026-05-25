@@ -33,7 +33,7 @@ export class CalendarService {
         status: { $in: taskStatuses },
       },
       {
-        populate: ['actionTemplate', 'bed', 'planting'],
+        populate: ['actionTemplate', 'bed', 'planting', 'growingSpace'],
         orderBy: [{ dueAt: 'asc' }, { createdAt: 'asc' }],
       },
     );
@@ -77,8 +77,12 @@ export class CalendarService {
         id: task.id,
         status: task.status,
         dueAt: task.dueAt,
+        targetType: task.targetType,
+        ownerScopeType: task.ownerScopeType ?? null,
+        ownerScopeId: task.ownerScopeId ?? null,
         bedId: task.bed?.id ?? null,
         plantingId: task.planting?.id ?? null,
+        growingSpaceId: task.growingSpace?.id ?? null,
         source: task.source,
         sourceType: task.sourceType,
         title: task.title,
@@ -86,7 +90,12 @@ export class CalendarService {
           ? {
               id: task.actionTemplate.id,
               name: task.actionTemplate.name,
+              /**
+               * @deprecated use `target` instead
+               */
               scope: task.actionTemplate.target,
+              target: task.actionTemplate.target,
+              aggregationScope: task.actionTemplate.aggregationScope ?? null,
               type: task.actionTemplate.type,
             }
           : null,
