@@ -52,32 +52,19 @@ const OPERATIONAL_TASK_CODES = new Set<WarningCode>([
   WarningCode.WIND_DAMAGE_TOMORROW_NIGHT,
   WarningCode.WATERING_NEEDED_TODAY,
   WarningCode.WATERING_NEEDED_TOMORROW,
-  WarningCode.SOWING_PAUSE_TOO_COLD_TODAY,
-  WarningCode.SOWING_PAUSE_TOO_COLD_TOMORROW,
+  // SOWING_PAUSE_TOO_COLD_TODAY/TOMORROW intentionally excluded — these are blocking: true warnings;
+  // they should surface as alerts/blockers, not generate action tasks.
   WarningCode.GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT,
   WarningCode.GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT,
   WarningCode.OVERWATERING_PREPARE_TODAY,
   WarningCode.OVERWATERING_PREPARE_TOMORROW,
   WarningCode.OVERWATERING_CHECK_TODAY,
   WarningCode.OVERWATERING_CHECK_TOMORROW,
-  WarningCode.GREENHOUSE_FROST_RISK_TODAY_NIGHT,
-  WarningCode.GREENHOUSE_FROST_RISK_TOMORROW_NIGHT,
-  WarningCode.GREENHOUSE_HARD_FROST_RISK_TODAY_NIGHT,
-  WarningCode.GREENHOUSE_HARD_FROST_RISK_TOMORROW_NIGHT,
-  WarningCode.GREENHOUSE_HEAT_WAVE_TODAY_DAY,
-  WarningCode.GREENHOUSE_HEAT_WAVE_TOMORROW_DAY,
-  WarningCode.GREENHOUSE_STRONG_WIND_TODAY_DAY,
-  WarningCode.GREENHOUSE_STRONG_WIND_TOMORROW_DAY,
-  WarningCode.GREENHOUSE_STORM_TODAY_DAY,
-  WarningCode.GREENHOUSE_STORM_TOMORROW_DAY,
-  WarningCode.GREENHOUSE_HEAVY_RAIN_TODAY_DAY,
-  WarningCode.GREENHOUSE_HEAVY_RAIN_TOMORROW_DAY,
-  WarningCode.GREENHOUSE_SNOW_LOAD_TODAY,
-  WarningCode.GREENHOUSE_SNOW_LOAD_TOMORROW,
-  WarningCode.GREENHOUSE_WET_SNOW_TODAY,
-  WarningCode.GREENHOUSE_WET_SNOW_TOMORROW,
-  WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TODAY,
-  WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TOMORROW,
+  // GREENHOUSE_* codes intentionally excluded — these are SPACE-level warnings that require
+  // WarningInstance.growingSpace association to produce a correct ownerScopeType=SPACE task.
+  // Until that FK exists, creating a BED task for a SPACE warning would produce wrong ownership.
+  // Greenhouse warnings surface as alerts/informational entries only.
+  // TODO: re-enable with ownerScopeType=SPACE once WarningInstance.growingSpace FK is wired.
 ]);
 
 @Injectable()
@@ -341,21 +328,45 @@ export class WeatherTaskPlannerService {
         warning.code === WarningCode.OVERWATERING_PREPARE_TODAY ||
         warning.code === WarningCode.OVERWATERING_PREPARE_TOMORROW ||
         warning.code === WarningCode.OVERWATERING_CHECK_TODAY ||
-        warning.code === WarningCode.OVERWATERING_CHECK_TOMORROW ||
+        warning.code === WarningCode.OVERWATERING_CHECK_TOMORROW;
+
+      // GREENHOUSE codes are SPACE-level operations (ventilation, snow load, heat management)
+      // Note: full SPACE scope requires WarningInstance.growingSpace association;
+      // until that is added, we fall back to BED scope if a bed is available.
+      const isGreenHouseCode =
         warning.code === WarningCode.GREENHOUSE_HEAT_WAVE_TODAY_DAY ||
         warning.code === WarningCode.GREENHOUSE_HEAT_WAVE_TOMORROW_DAY ||
         warning.code === WarningCode.GREENHOUSE_SNOW_LOAD_TODAY ||
         warning.code === WarningCode.GREENHOUSE_SNOW_LOAD_TOMORROW ||
         warning.code === WarningCode.GREENHOUSE_WET_SNOW_TODAY ||
-        warning.code === WarningCode.GREENHOUSE_WET_SNOW_TOMORROW;
+        warning.code === WarningCode.GREENHOUSE_WET_SNOW_TOMORROW ||
+        warning.code === WarningCode.GREENHOUSE_FROST_RISK_TODAY_NIGHT ||
+        warning.code === WarningCode.GREENHOUSE_FROST_RISK_TOMORROW_NIGHT ||
+        warning.code === WarningCode.GREENHOUSE_HARD_FROST_RISK_TODAY_NIGHT ||
+        warning.code ===
+          WarningCode.GREENHOUSE_HARD_FROST_RISK_TOMORROW_NIGHT ||
+        warning.code === WarningCode.GREENHOUSE_STRONG_WIND_TODAY_DAY ||
+        warning.code === WarningCode.GREENHOUSE_STRONG_WIND_TOMORROW_DAY ||
+        warning.code === WarningCode.GREENHOUSE_STORM_TODAY_DAY ||
+        warning.code === WarningCode.GREENHOUSE_STORM_TOMORROW_DAY ||
+        warning.code === WarningCode.GREENHOUSE_HEAVY_RAIN_TODAY_DAY ||
+        warning.code === WarningCode.GREENHOUSE_HEAVY_RAIN_TOMORROW_DAY ||
+        warning.code === WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TODAY ||
+        warning.code === WarningCode.GREENHOUSE_SUDDEN_TEMP_DROP_TOMORROW;
 
       let ownerScopeType: ActionTaskOwnerScopeType;
       let ownerScopeId: string;
       let targetType: ActionTaskTargetType;
-      let effectiveBedId: string | null = resolvedBedId;
+      const effectiveBedId: string | null = resolvedBedId;
       let effectivePlantingId: string | null = resolvedPlantingId;
 
-      if (isBedLevelCode && resolvedBedId) {
+      if (isGreenHouseCode && resolvedBedId) {
+        // TODO: upgrade to ownerScopeType=SPACE once WarningInstance.growingSpace is populated
+        ownerScopeType = ActionTaskOwnerScopeType.BED;
+        ownerScopeId = resolvedBedId;
+        targetType = ActionTaskTargetType.BED;
+        effectivePlantingId = null;
+      } else if (isBedLevelCode && resolvedBedId) {
         ownerScopeType = ActionTaskOwnerScopeType.BED;
         ownerScopeId = resolvedBedId;
         targetType = ActionTaskTargetType.BED;
@@ -453,15 +464,8 @@ export class WeatherTaskPlannerService {
           });
           break;
 
-        case WarningCode.SOWING_PAUSE_TOO_COLD_TODAY:
-        case WarningCode.SOWING_PAUSE_TOO_COLD_TOMORROW:
-          proposals.set(base.dedupeKey, {
-            ...base,
-            targetType: ActionTaskTargetType.PLANTING,
-            title: 'Wstrzymaj siew',
-            description: 'Warunki termiczne są zbyt niskie.',
-          });
-          break;
+        // SOWING_PAUSE_TOO_COLD_TODAY/TOMORROW removed from switch — excluded from OPERATIONAL_TASK_CODES.
+        // These are blocking: true alerts, not actionable tasks.
 
         case WarningCode.GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT:
         case WarningCode.GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT:

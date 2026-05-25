@@ -22,7 +22,10 @@ describe('WeatherTaskPlannerService', () => {
       }),
     };
 
-    const service = new WeatherTaskPlannerService(em as never, { publishTaskEvents: jest.fn() } as never);
+    const service = new WeatherTaskPlannerService(
+      em as never,
+      { publishTaskEvents: jest.fn() } as never,
+    );
     await service.recomputeWeatherTasksForUser('user-1');
 
     expect(em.find).not.toHaveBeenCalled();
@@ -134,7 +137,10 @@ describe('WeatherTaskPlannerService', () => {
       }),
     };
 
-    const service = new WeatherTaskPlannerService(em as never, { publishTaskEvents: jest.fn() } as never);
+    const service = new WeatherTaskPlannerService(
+      em as never,
+      { publishTaskEvents: jest.fn() } as never,
+    );
     await service.recomputeWeatherTasksForUser('user-1');
 
     const updated = tasks.find(
@@ -216,7 +222,10 @@ describe('WeatherTaskPlannerService', () => {
       }),
     };
 
-    const service = new WeatherTaskPlannerService(em as never, { publishTaskEvents: jest.fn() } as never);
+    const service = new WeatherTaskPlannerService(
+      em as never,
+      { publishTaskEvents: jest.fn() } as never,
+    );
     await service.recomputeWeatherTasksForUser('user-1');
 
     expect(tasks).toHaveLength(0);

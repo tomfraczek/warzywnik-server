@@ -1,6 +1,7 @@
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ActionTasksService } from './action-tasks.service';
 import {
+  ActionTaskOwnerScopeType,
   ActionTaskStatus,
   ActionTaskTargetType,
 } from '../common/enums/action.enums';
@@ -9,6 +10,8 @@ type AnyTask = {
   id: string;
   user: { id: string };
   targetType: ActionTaskTargetType;
+  ownerScopeType?: ActionTaskOwnerScopeType | null;
+  ownerScopeId?: string | null;
   planting?: {
     id: string;
     bed?: { id: string };
@@ -48,6 +51,8 @@ describe('ActionTasksService list scoping', () => {
     id: input.id,
     user: { id: 'user-1' },
     targetType: input.targetType ?? ActionTaskTargetType.BED,
+    ownerScopeType: input.ownerScopeType ?? null,
+    ownerScopeId: input.ownerScopeId ?? null,
     planting: input.planting ?? null,
     bed: input.bed ?? null,
     status: input.status ?? ActionTaskStatus.PENDING,
@@ -74,6 +79,8 @@ describe('ActionTasksService list scoping', () => {
   const aggregatedBedTask = createTask({
     id: 'task-bed-aggregated',
     targetType: ActionTaskTargetType.BED,
+    ownerScopeType: ActionTaskOwnerScopeType.BED,
+    ownerScopeId: bedId,
     bed: { id: bedId, name: 'Grządka A' },
     planting: null,
     title: 'Zadanie zbiorcze dla grządki',
@@ -88,6 +95,8 @@ describe('ActionTasksService list scoping', () => {
   const plantingTaskOnBed = createTask({
     id: 'task-planting',
     targetType: ActionTaskTargetType.PLANTING,
+    ownerScopeType: ActionTaskOwnerScopeType.PLANTING,
+    ownerScopeId: plantingId,
     planting: {
       id: plantingId,
       bed: { id: bedId },
@@ -101,6 +110,8 @@ describe('ActionTasksService list scoping', () => {
   const plantingTaskWithBedRef = createTask({
     id: 'task-planting-with-bed',
     targetType: ActionTaskTargetType.PLANTING,
+    ownerScopeType: ActionTaskOwnerScopeType.PLANTING,
+    ownerScopeId: 'planting-2',
     planting: {
       id: 'planting-2',
       bed: { id: bedId },
@@ -142,6 +153,14 @@ describe('ActionTasksService list scoping', () => {
     }
 
     if (where.targetType && task.targetType !== where.targetType) {
+      return false;
+    }
+
+    if (where.ownerScopeType && task.ownerScopeType !== where.ownerScopeType) {
+      return false;
+    }
+
+    if (where.ownerScopeId && task.ownerScopeId !== where.ownerScopeId) {
       return false;
     }
 

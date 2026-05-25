@@ -61,7 +61,7 @@ describe('NotificationCenterService read and unread filters', () => {
       expect.anything(),
       expect.objectContaining({
         readAt: {
-          $lt: expect.any(Date),
+          $lt: expect.any(Date) as unknown,
         },
       }),
     );

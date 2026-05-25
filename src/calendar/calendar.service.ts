@@ -6,7 +6,10 @@ import {
   GetCalendarQueryDto,
   calendarReminderStatuses,
 } from './dto/calendar.schemas';
-import { ActionTaskStatus } from '../common/enums/action.enums';
+import {
+  ActionTaskOwnerScopeType,
+  ActionTaskStatus,
+} from '../common/enums/action.enums';
 import { Planting } from '../plantings/planting.entity';
 import { Reminder } from '../reminders/reminder.entity';
 
@@ -80,9 +83,21 @@ export class CalendarService {
         targetType: task.targetType,
         ownerScopeType: task.ownerScopeType ?? null,
         ownerScopeId: task.ownerScopeId ?? null,
+        relationType: (() => {
+          if (task.ownerScopeType === ActionTaskOwnerScopeType.PLANTING)
+            return 'direct';
+          if (task.ownerScopeType === ActionTaskOwnerScopeType.BED)
+            return 'bed';
+          if (task.ownerScopeType === ActionTaskOwnerScopeType.SPACE)
+            return 'space';
+          return null;
+        })(),
         bedId: task.bed?.id ?? null,
         plantingId: task.planting?.id ?? null,
         growingSpaceId: task.growingSpace?.id ?? null,
+        affectedPlantingIds: Array.isArray(task.metadata?.affectedPlantingIds)
+          ? (task.metadata.affectedPlantingIds as string[])
+          : null,
         source: task.source,
         sourceType: task.sourceType,
         title: task.title,

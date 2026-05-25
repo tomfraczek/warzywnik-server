@@ -54,13 +54,10 @@ import { QuickActionScope } from '../common/enums/quick-action.enums';
 import { ActionTask } from '../action-tasks/action-task.entity';
 import {
   ActionTaskOwnerScopeType,
-  ActionTaskSource,
   ActionTaskStatus,
 } from '../common/enums/action.enums';
 import { Reminder } from '../reminders/reminder.entity';
-import {
-  ReminderStatus,
-} from '../common/enums/reminder.enums';
+import { ReminderStatus } from '../common/enums/reminder.enums';
 
 type WarningResult = WarningOutput;
 
@@ -749,7 +746,9 @@ export class PlantingsService {
           Reminder,
           {
             actionTaskId: task.id,
-            status: { $in: [ReminderStatus.PENDING, ReminderStatus.PROCESSING] },
+            status: {
+              $in: [ReminderStatus.PENDING, ReminderStatus.PROCESSING],
+            },
           },
           { status: ReminderStatus.CANCELED, lockedAt: null, lastError: null },
         );
@@ -767,7 +766,7 @@ export class PlantingsService {
 
       for (const task of aggregatedTasks) {
         const affectedIds = Array.isArray(task.metadata?.affectedPlantingIds)
-          ? (task.metadata!.affectedPlantingIds as string[]).filter(
+          ? (task.metadata.affectedPlantingIds as string[]).filter(
               (pid) => pid !== plantingId,
             )
           : [];

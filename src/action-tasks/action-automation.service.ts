@@ -1715,7 +1715,7 @@ export class ActionAutomationService {
         task.ownerScopeType === ActionTaskOwnerScopeType.SPACE
       ) {
         const affectedIds = Array.isArray(task.metadata?.affectedPlantingIds)
-          ? (task.metadata!.affectedPlantingIds as string[]).filter(
+          ? (task.metadata.affectedPlantingIds as string[]).filter(
               (id) => id !== params.planting.id,
             )
           : [];
@@ -1805,7 +1805,7 @@ export class ActionAutomationService {
         task.ownerScopeType === ActionTaskOwnerScopeType.SPACE
       ) {
         const remaining = Array.isArray(task.metadata?.affectedPlantingIds)
-          ? (task.metadata!.affectedPlantingIds as string[]).filter(
+          ? (task.metadata.affectedPlantingIds as string[]).filter(
               (id) => id !== params.planting.id,
             )
           : [];

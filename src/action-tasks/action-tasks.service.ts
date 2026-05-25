@@ -292,7 +292,9 @@ export class ActionTasksService {
         ActionTask,
         {
           ...baseWhere,
-          ownerScopeType: { $in: [ActionTaskOwnerScopeType.BED, ActionTaskOwnerScopeType.SPACE] },
+          ownerScopeType: {
+            $in: [ActionTaskOwnerScopeType.BED, ActionTaskOwnerScopeType.SPACE],
+          },
           metadata: { affectedPlantingIds: { $contains: [plantingId] } as any },
         },
         {
@@ -328,7 +330,9 @@ export class ActionTasksService {
       ActionTask,
       {
         ...baseWhere,
-        ownerScopeType: { $in: [ActionTaskOwnerScopeType.BED, ActionTaskOwnerScopeType.SPACE] },
+        ownerScopeType: {
+          $in: [ActionTaskOwnerScopeType.BED, ActionTaskOwnerScopeType.SPACE],
+        },
         metadata: { affectedPlantingIds: { $contains: [plantingId] } as any },
       },
       {
@@ -646,7 +650,7 @@ export class ActionTasksService {
 
         // Prefer explicit affectedPlantingIds; fall back to all active plantings in bed
         const affectedIds = Array.isArray(task.metadata?.affectedPlantingIds)
-          ? (task.metadata!.affectedPlantingIds as string[])
+          ? (task.metadata.affectedPlantingIds as string[])
           : null;
 
         const bedPlantings = await em.find(
@@ -661,8 +665,7 @@ export class ActionTasksService {
         const plantingsToRecord = affectedIds
           ? bedPlantings.filter(
               (p) =>
-                affectedIds.includes(p.id) &&
-                !TERMINAL_STATUSES.has(p.status),
+                affectedIds.includes(p.id) && !TERMINAL_STATUSES.has(p.status),
             )
           : bedPlantings.filter((p) => !TERMINAL_STATUSES.has(p.status));
 
@@ -718,7 +721,7 @@ export class ActionTasksService {
           'cleared',
         ]);
         const affectedIds = Array.isArray(task.metadata?.affectedPlantingIds)
-          ? (task.metadata!.affectedPlantingIds as string[])
+          ? (task.metadata.affectedPlantingIds as string[])
           : null;
         if (affectedIds && affectedIds.length > 0) {
           const spacePlantings = await em.find(
@@ -1046,7 +1049,11 @@ export class ActionTasksService {
   private serialize(
     entity: ActionTask,
     meta?: {
-      relationToCurrentPlanting?: 'direct' | 'related_from_bed' | 'related_from_space' | null;
+      relationToCurrentPlanting?:
+        | 'direct'
+        | 'related_from_bed'
+        | 'related_from_space'
+        | null;
     },
   ) {
     return {

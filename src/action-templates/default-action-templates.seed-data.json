@@ -324,7 +324,7 @@
   {
     "name": "Kontrola szkodników",
     "description": "Kontrola obejmuje oglądanie spodniej strony liści, młodych pędów, wierzchołków wzrostu, kwiatów oraz gleby wokół roślin. Wczesne wykrycie pojedynczych kolonii mszyc, przędziorków, wciornastków lub gąsienic pozwala zastosować metody mechaniczne i biologiczne przed eskalacją problemu. Warto dokumentować obserwacje, aby odróżnić incydent od narastającej presji. Zabieg ochronny ukierunkowany na wykrywanie i ograniczanie szkodników. Jego wartość wynika z regularności: pojedyncza obserwacja często nie pokazuje skali problemu, ale cykliczny monitoring pozwala rozpoznać moment, w którym populacja zaczyna zagrażać roślinom. Zabieg powinien preferować metody mechaniczne, biologiczne i profilaktyczne przed działaniami chemicznymi. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Przed wykonaniem zabiegu należy potwierdzić przyczynę problemu przez obserwację objawów i ocenę warunków uprawowych. W aplikacji taki szablon powinien być traktowany jako działanie świadome, uruchamiane po diagnozie, a nie rutynowe zadanie wykonywane bez powodu.",
-    "target": "planting",
+    "target": "bed",
     "environment": "any",
     "type": "pest_control",
     "defaultDueOffsetDays": 0,
@@ -333,12 +333,12 @@
     "maxAutoOccurrencesPerPlanting": 4,
     "minDaysBetweenOccurrences": 7,
     "requiresUserConfirmation": false,
-    "aggregationScope": "bed"
+    "aggregationScope": "none"
   },
   {
     "name": "Kontrola wilgotności gleby",
     "description": "Pomiar lub obserwacja wilgotności przy roślinie pozwala ocenić, czy woda jest dostępna w strefie korzeniowej, a nie tylko na powierzchni. Zabieg ogranicza dwa częste błędy: podlewanie zbyt płytkie oraz podlewanie roślin, które faktycznie mają już nadmiar wilgoci. Jest szczególnie ważny w uprawach pojemnikowych, w tunelu i na glebach skrajnie lekkich lub ciężkich. Zabieg obserwacyjny, który służy zebraniu informacji o stanie roślin, gleby lub przestrzeni uprawowej. Monitoring nie jest biernym oglądaniem uprawy, lecz świadomą diagnostyką: użytkownik powinien sprawdzić konkretne wskaźniki, zanotować odchylenia i dopiero na tej podstawie podjąć decyzję o podlewaniu, nawożeniu, ochronie lub zmianie warunków. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Rezultatem zabiegu powinna być informacja diagnostyczna możliwa do zapisania w historii uprawy. Sam pomiar lub obserwacja ma wartość tylko wtedy, gdy prowadzi do trafniejszej decyzji o kolejnym działaniu.",
-    "target": "planting",
+    "target": "bed",
     "environment": "any",
     "type": "monitoring",
     "defaultDueOffsetDays": 0,
@@ -347,7 +347,8 @@
     "maxAutoOccurrencesPerPlanting": 6,
     "minDaysBetweenOccurrences": 3,
     "requiresUserConfirmation": false,
-    "aggregationScope": "bed"
+    "aggregationScope": "none",
+    "isUserSelectable": false
   },
   {
     "name": "Kontrola wilgotności gleby (grządka)",
@@ -618,7 +619,7 @@
   {
     "name": "Podlewanie roślin",
     "description": "Podlewanie roślin powinno dostarczać wodę do aktywnej strefy korzeniowej, a nie jedynie zwilżać powierzchnię gleby. Częstotliwość i ilość wody zależą od gatunku, fazy wzrostu, typu gleby, ściółki i pogody. Prawidłowe podlewanie ogranicza stres, poprawia pobieranie składników i zmniejsza ryzyko zaburzeń fizjologicznych. Zabieg wodny wykonywany na poziomie rośliny lub nasadzenia. Jego celem jest dostarczenie wody do strefy korzeniowej w ilości odpowiadającej fazie rozwoju, typowi gleby i aktualnym warunkom pogodowym. Prawidłowe podlewanie powinno unikać zarówno przesuszenia, jak i długotrwałego zalania, ponieważ oba stany prowadzą do stresu fizjologicznego. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
-    "target": "planting",
+    "target": "bed",
     "environment": "any",
     "type": "watering",
     "defaultDueOffsetDays": 0,
@@ -627,7 +628,7 @@
     "maxAutoOccurrencesPerPlanting": 3,
     "minDaysBetweenOccurrences": 1,
     "requiresUserConfirmation": false,
-    "aggregationScope": "bed"
+    "aggregationScope": "none"
   },
   {
     "name": "Podwiązywanie roślin",
@@ -856,7 +857,7 @@
   {
     "name": "Ściółkowanie wokół roślin",
     "description": "Ściółkowanie bezpośrednio wokół roślin stabilizuje mikroklimat strefy korzeniowej, ogranicza zachwaszczenie i zmniejsza zabrudzenie liści oraz owoców cząstkami gleby. Może także ograniczać rozprzestrzenianie patogenów przenoszonych przez rozbryzgi wody. Materiał ściółkujący powinien być dobrany do gatunku i warunków wilgotnościowych. Zabieg ochronny oparty na barierach fizycznych lub zmianie mikrośrodowiska wokół rośliny. Jego przewaga polega na tym, że często ogranicza problem zanim dojdzie do dużej presji chorób lub szkodników. Takie działania są szczególnie wartościowe w ogrodnictwie amatorskim, ponieważ zmniejszają potrzebę stosowania środków interwencyjnych. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonywany wtedy, gdy wynika z aktualnego stanu uprawy, sezonu albo planu prac. Jego celem jest poprawa przewidywalności prowadzenia warzywnika i ograniczenie działań przypadkowych.",
-    "target": "planting",
+    "target": "bed",
     "environment": "any",
     "type": "physical_protection",
     "defaultDueOffsetDays": -1,
@@ -865,7 +866,8 @@
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 30,
     "requiresUserConfirmation": false,
-    "aggregationScope": "bed"
+    "aggregationScope": "none",
+    "isUserSelectable": false
   },
   {
     "name": "Siew nasion",
@@ -954,7 +956,7 @@
   {
     "name": "Usuwanie chwastów przy roślinach",
     "description": "Usuwanie chwastów przy roślinach wymaga ostrożności, aby nie uszkodzić płytkich korzeni warzyw. Zabieg zmniejsza konkurencję o wodę, światło i składniki pokarmowe, szczególnie w początkowych fazach wzrostu. Regularność jest ważniejsza niż intensywne, rzadkie odchwaszczanie. Zabieg ograniczający konkurencję chwastów o wodę, światło, przestrzeń i składniki pokarmowe. Chwasty mogą również tworzyć mikroklimat sprzyjający chorobom i stanowić schronienie dla szkodników. Regularne usuwanie chwastów jest szczególnie ważne na wczesnym etapie wzrostu warzyw, gdy ich system korzeniowy jest jeszcze słabo rozwinięty. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
-    "target": "planting",
+    "target": "bed",
     "environment": "any",
     "type": "weeding",
     "defaultDueOffsetDays": 0,
@@ -963,7 +965,8 @@
     "maxAutoOccurrencesPerPlanting": 6,
     "minDaysBetweenOccurrences": 7,
     "requiresUserConfirmation": false,
-    "aggregationScope": "bed"
+    "aggregationScope": "none",
+    "isUserSelectable": false
   },
   {
     "name": "Usuwanie chwastów z grządki",
