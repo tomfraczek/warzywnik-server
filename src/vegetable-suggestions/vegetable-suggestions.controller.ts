@@ -9,7 +9,6 @@ import {
   Post,
   Query,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { VegetableSuggestionsService } from './vegetable-suggestions.service';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -19,7 +18,6 @@ import {
   CreateVegetableSuggestionDto,
   ListAdminVegetableSuggestionsQueryDto,
 } from './dto/vegetable-suggestion.schemas';
-import { AdminTokenGuard } from '../auth/admin-token.guard';
 
 type RequestWithUser = {
   userEntity?: { id: string };
@@ -43,7 +41,6 @@ export class VegetableSuggestionsController {
 }
 
 @Controller('v1/admin/vegetable-suggestions')
-@UseGuards(AdminTokenGuard)
 export class VegetableSuggestionsAdminController {
   constructor(
     private readonly vegetableSuggestionsService: VegetableSuggestionsService,

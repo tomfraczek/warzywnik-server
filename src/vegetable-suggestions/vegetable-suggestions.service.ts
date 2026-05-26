@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { VegetableSuggestion } from './vegetable-suggestion.entity';
+import { MailService } from '../mail/mail.service';
 import {
   CreateVegetableSuggestionDto,
   ListAdminVegetableSuggestionsQueryDto,
@@ -8,7 +9,10 @@ import {
 
 @Injectable()
 export class VegetableSuggestionsService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly mailService: MailService,
+  ) {}
 
   async create(dto: CreateVegetableSuggestionDto, userId: string | null) {
     const suggestion = new VegetableSuggestion();
@@ -17,6 +21,8 @@ export class VegetableSuggestionsService {
     suggestion.userId = userId;
 
     await this.em.persistAndFlush(suggestion);
+
+    void this.mailService.sendVegetableSuggestionNotification(suggestion.name);
 
     return {
       id: suggestion.id,
