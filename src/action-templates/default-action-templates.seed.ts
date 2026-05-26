@@ -25,6 +25,7 @@ type ActionTemplateSeedRecord = {
   minDaysBetweenOccurrences?: number | null;
   requiresUserConfirmation?: boolean;
   defaultDueOffsetDays: number | null;
+  allowedPlantingStatuses?: string[] | null;
 };
 
 export const DEFAULT_ACTION_TEMPLATES: readonly ActionTemplateSeedRecord[] =
@@ -63,6 +64,8 @@ export const upsertDefaultActionTemplates = async (
         item.requiresUserConfirmation ?? false;
       existingBySlug.defaultDueOffsetDays = item.defaultDueOffsetDays;
       existingBySlug.isUserSelectable = resolveIsUserSelectable(item);
+      existingBySlug.allowedPlantingStatuses =
+        item.allowedPlantingStatuses ?? null;
       continue;
     }
 
@@ -90,6 +93,8 @@ export const upsertDefaultActionTemplates = async (
         item.requiresUserConfirmation ?? false;
       existingExact.defaultDueOffsetDays = item.defaultDueOffsetDays;
       existingExact.isUserSelectable = resolveIsUserSelectable(item);
+      existingExact.allowedPlantingStatuses =
+        item.allowedPlantingStatuses ?? null;
       continue;
     }
 
@@ -117,6 +122,8 @@ export const upsertDefaultActionTemplates = async (
       existingByName.description = item.description;
       existingByName.defaultDueOffsetDays = item.defaultDueOffsetDays;
       existingByName.isUserSelectable = resolveIsUserSelectable(item);
+      existingByName.allowedPlantingStatuses =
+        item.allowedPlantingStatuses ?? null;
       continue;
     }
 
@@ -138,6 +145,7 @@ export const upsertDefaultActionTemplates = async (
     template.requiresUserConfirmation = item.requiresUserConfirmation ?? false;
     template.defaultDueOffsetDays = item.defaultDueOffsetDays;
     template.isUserSelectable = resolveIsUserSelectable(item);
+    template.allowedPlantingStatuses = item.allowedPlantingStatuses ?? null;
 
     em.persist(template);
   }

@@ -67,6 +67,14 @@ export class ActionTemplate {
   @Property({ type: 'boolean', default: false })
   isUserSelectable: boolean = false;
 
+  /**
+   * Optional list of PlantingStatus values for which this template may generate tasks.
+   * null = no explicit restriction (other than global blocked statuses).
+   * Used by ActionAutomationService to guard per-status task generation.
+   */
+  @Property({ type: 'array', nullable: true, default: null })
+  allowedPlantingStatuses: string[] | null = null;
+
   @ManyToMany(() => Pest, 'recommendedActions')
   recommendedForPests = new Collection<Pest>(this);
 

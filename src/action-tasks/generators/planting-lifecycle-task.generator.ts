@@ -26,11 +26,10 @@ export class PlantingLifecycleTaskGenerator {
         (rule.actionTemplate as { generationMode?: string }).generationMode ??
           'AUTO',
       );
-      if (
-        mode !== 'AUTO' &&
-        mode !== 'WEATHER_TRIGGERED' &&
-        mode !== 'SEASONAL'
-      ) {
+      // Only AUTO mode generates lifecycle tasks in the active planner.
+      // WEATHER_TRIGGERED and SEASONAL belong to weather alerts / seasonal
+      // checklists respectively, not to the active task queue.
+      if (mode !== 'AUTO') {
         continue;
       }
 

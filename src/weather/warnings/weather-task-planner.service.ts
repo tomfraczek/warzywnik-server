@@ -37,35 +37,11 @@ type TaskProposal = {
   metadata?: Record<string, unknown>;
 };
 
-const OPERATIONAL_TASK_CODES = new Set<WarningCode>([
-  WarningCode.FROST_RISK_TODAY_NIGHT,
-  WarningCode.FROST_RISK_TOMORROW_NIGHT,
-  WarningCode.HARD_FROST_RISK_TODAY_NIGHT,
-  WarningCode.HARD_FROST_RISK_TOMORROW_NIGHT,
-  WarningCode.HEAVY_RAIN_TODAY_DAY,
-  WarningCode.HEAVY_RAIN_TODAY_NIGHT,
-  WarningCode.HEAVY_RAIN_TOMORROW_DAY,
-  WarningCode.HEAVY_RAIN_TOMORROW_NIGHT,
-  WarningCode.WIND_DAMAGE_TODAY_DAY,
-  WarningCode.WIND_DAMAGE_TODAY_NIGHT,
-  WarningCode.WIND_DAMAGE_TOMORROW_DAY,
-  WarningCode.WIND_DAMAGE_TOMORROW_NIGHT,
-  WarningCode.WATERING_NEEDED_TODAY,
-  WarningCode.WATERING_NEEDED_TOMORROW,
-  // SOWING_PAUSE_TOO_COLD_TODAY/TOMORROW intentionally excluded — these are blocking: true warnings;
-  // they should surface as alerts/blockers, not generate action tasks.
-  WarningCode.GERMINATION_PROTECT_TOO_COLD_TODAY_NIGHT,
-  WarningCode.GERMINATION_PROTECT_TOO_COLD_TOMORROW_NIGHT,
-  WarningCode.OVERWATERING_PREPARE_TODAY,
-  WarningCode.OVERWATERING_PREPARE_TOMORROW,
-  WarningCode.OVERWATERING_CHECK_TODAY,
-  WarningCode.OVERWATERING_CHECK_TOMORROW,
-  // GREENHOUSE_* codes intentionally excluded — these are SPACE-level warnings that require
-  // WarningInstance.growingSpace association to produce a correct ownerScopeType=SPACE task.
-  // Until that FK exists, creating a BED task for a SPACE warning would produce wrong ownership.
-  // Greenhouse warnings surface as alerts/informational entries only.
-  // TODO: re-enable with ownerScopeType=SPACE once WarningInstance.growingSpace FK is wired.
-]);
+// All operational warning codes have been removed from OPERATIONAL_TASK_CODES.
+// Weather warnings are now surfaced exclusively as alerts/informational entries
+// in the weather risk section and do NOT create ActionTasks in the planner.
+// See: lightweight-planner migration, requirements §1 & §2.
+const OPERATIONAL_TASK_CODES = new Set<WarningCode>();
 
 @Injectable()
 export class WeatherTaskPlannerService {

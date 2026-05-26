@@ -11,6 +11,7 @@ import {
   ActionTaskStatus,
   ActionTaskTargetType,
   ActionTemplateAggregationScope,
+  ActionTemplateGenerationMode,
   ActionTemplateTarget,
 } from '../common/enums/action.enums';
 import { VegetableActionRule } from '../vegetables/vegetable-action-rule.entity';
@@ -2039,14 +2040,37 @@ export class ActionAutomationService {
       planting.timelineTimezone,
     );
 
+    const ROUTINE_PLANTING_DEFAULT_STATUSES = [
+      'IN_GROUND',
+      'READY_FOR_FINAL_HARVEST',
+    ];
+
     return [...lifecycleCandidates, ...routineCandidates]
-      .filter(
-        (candidate) =>
+      .filter((candidate) => {
+        const template = candidate.rule?.actionTemplate;
+
+        if (template) {
+          const allowed = template.allowedPlantingStatuses;
+          if (allowed && allowed.length > 0) {
+            // Explicit restriction: planting status must be in the allowed list
+            if (!allowed.includes(planting.status)) return false;
+          } else if (
+            template.generationMode === ActionTemplateGenerationMode.ROUTINE &&
+            template.target === ActionTemplateTarget.PLANTING
+          ) {
+            // Default guard: ROUTINE planting tasks only run for active growing stages
+            if (!ROUTINE_PLANTING_DEFAULT_STATUSES.includes(planting.status))
+              return false;
+          }
+        }
+
+        return (
           toDateOnlyInTimezone(
             candidate.dueAt,
             planting.timelineTimezone,
-          ).getTime() === todayInTz.getTime(),
-      )
+          ).getTime() === todayInTz.getTime()
+        );
+      })
       .sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime());
   }
 

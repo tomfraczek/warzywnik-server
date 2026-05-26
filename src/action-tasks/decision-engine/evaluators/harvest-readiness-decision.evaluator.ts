@@ -71,7 +71,8 @@ export class HarvestReadinessDecisionEvaluator implements DecisionEvaluator {
         reason: 'Uprawa jest gotowa do końcowego zbioru.',
         confidence: 'high',
         sourceKey: `decision:harvest-check:${context.planting.id}`,
-        actionTemplateSlug: 'kontrola-gotowosci-do-zbioru',
+        // Use zbior-plonow template explicitly — only valid for READY_FOR_FINAL_HARVEST
+        actionTemplateSlug: 'zbior-plonow',
         shouldCreateTask: true,
       };
 

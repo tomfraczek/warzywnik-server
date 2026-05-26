@@ -586,7 +586,10 @@
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": null,
     "requiresUserConfirmation": false,
-    "aggregationScope": "none"
+    "aggregationScope": "none",
+    "allowedPlantingStatuses": [
+      "SEEDLING_PREPARED"
+    ]
   },
   {
     "name": "Planowanie płodozmianu",
@@ -642,7 +645,11 @@
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": 14,
     "requiresUserConfirmation": false,
-    "aggregationScope": "none"
+    "aggregationScope": "none",
+    "allowedPlantingStatuses": [
+      "IN_GROUND",
+      "READY_FOR_FINAL_HARVEST"
+    ]
   },
   {
     "name": "Pomiar pH gleby",
@@ -852,7 +859,10 @@
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": null,
     "requiresUserConfirmation": false,
-    "aggregationScope": "none"
+    "aggregationScope": "none",
+    "allowedPlantingStatuses": [
+      "SEEDLING_READY_FOR_TRANSPLANT"
+    ]
   },
   {
     "name": "Ściółkowanie wokół roślin",
@@ -881,7 +891,10 @@
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": null,
     "requiresUserConfirmation": false,
-    "aggregationScope": "none"
+    "aggregationScope": "none",
+    "allowedPlantingStatuses": [
+      "SEEDLING_PREPARED"
+    ]
   },
   {
     "name": "Solarizacja gleby",
@@ -1095,6 +1108,24 @@
     "aggregationScope": "none"
   },
   {
+    "name": "Kontrola gotowości do zbioru",
+    "description": "Ocena gotowości do zbioru polega na sprawdzeniu wizualnych i dotykowych cech dojrzałości: barwy skórki, twardości, zapachu, łatwości oddzielania od łodygi i wielkości. Pozwala uniknąć zbioru zbyt wczesnego lub zbyt późnego, które pogarszają jakość i trwałość plonu. Wynik obserwacji powinien skłonić użytkownika do decyzji: zbierać czy czekać. Zabieg obserwacyjny poprzedzający zbiór. Ten szablon jest przeznaczony dla nasadzenia. Jego celem jest pomoc w podjęciu świadomej decyzji o terminie zbioru bez przedwczesnego lub spóźnionego działania.",
+    "target": "planting",
+    "environment": "any",
+    "type": "monitoring",
+    "defaultDueOffsetDays": 0,
+    "generationMode": "AUTO",
+    "priority": "medium",
+    "maxAutoOccurrencesPerPlanting": 2,
+    "minDaysBetweenOccurrences": 3,
+    "requiresUserConfirmation": false,
+    "aggregationScope": "none",
+    "allowedPlantingStatuses": [
+      "IN_GROUND",
+      "READY_FOR_FINAL_HARVEST"
+    ]
+  },
+  {
     "name": "Zbiór plonów",
     "description": "Zbiór plonów powinien być wykonany w fazie optymalnej dla smaku, wartości użytkowej i trwałości przechowalniczej. Termin zależy od gatunku: inne kryteria stosuje się dla liści, korzeni, owoców i nasion. Regularny zbiór u wielu roślin pobudza dalsze plonowanie i ogranicza przeciążenie roślin. Zabieg kończący określony etap produkcyjny rośliny lub całej uprawy. Odpowiedni termin zbioru wpływa na smak, trwałość przechowalniczą, zawartość suchej masy i ogólną jakość plonu. Zbyt wczesny lub zbyt późny zbiór może obniżyć wartość użytkową warzyw oraz utrudnić planowanie kolejnych prac. Ten szablon jest przeznaczony dla nasadzenia, czyli konkretnej uprawy prowadzonej w danej grządce lub przestrzeni. Może być stosowany niezależnie od środowiska uprawy, o ile kontekst rośliny, gleby lub sezonu wskazuje na taką potrzebę. Zabieg powinien być wykonany w momencie zgodnym z fazą rozwojową rośliny. W aplikacji warto pokazywać go jako praktyczną czynność, ale z wyraźnym uzasadnieniem, ponieważ termin i jakość wykonania bezpośrednio wpływają na dalszy rozwój uprawy.",
     "target": "planting",
@@ -1106,7 +1137,10 @@
     "maxAutoOccurrencesPerPlanting": 1,
     "minDaysBetweenOccurrences": null,
     "requiresUserConfirmation": false,
-    "aggregationScope": "none"
+    "aggregationScope": "none",
+    "allowedPlantingStatuses": [
+      "READY_FOR_FINAL_HARVEST"
+    ]
   },
   {
     "name": "Zmiana uprawy w grządce",
