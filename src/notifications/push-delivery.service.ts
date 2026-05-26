@@ -135,14 +135,28 @@ export class PushDeliveryService {
   }
 
   private async deliverBatch(batch: NotificationBatch): Promise<void> {
+    // Atomically claim the batch: only the first concurrent run proceeds.
+    // This prevents two simultaneous deliverPendingBatches() executions from
+    // sending the same push twice to the user's device.
+    const claimed = await this.em.getConnection().execute(
+      `UPDATE notification_batches SET status = 'PROCESSING'
+       WHERE id = ? AND status = 'PENDING'
+       RETURNING id`,
+      [batch.id],
+    );
+    if (claimed.length === 0) {
+      // Another run already claimed this batch — skip silently.
+      return;
+    }
+    // Refresh local entity state to reflect the DB update
+    batch.status = NotificationBatchStatus.PROCESSING;
+
     // PLAN_ONLY batches are created SKIPPED by the aggregator;
     // guard here as a safety net so we never push plan-only tasks.
     if (batch.deliveryPolicy === NotificationDeliveryPolicy.PLAN_ONLY) {
-      if (batch.status !== NotificationBatchStatus.SKIPPED) {
-        batch.status = NotificationBatchStatus.SKIPPED;
-        batch.skippedReason = 'plan_only';
-        await this.em.flush();
-      }
+      batch.status = NotificationBatchStatus.SKIPPED;
+      batch.skippedReason = 'plan_only';
+      await this.em.flush();
       return;
     }
 

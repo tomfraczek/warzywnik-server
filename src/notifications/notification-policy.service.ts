@@ -30,6 +30,7 @@ export class NotificationPolicyService {
     priority: NotificationPriority;
     dedupeKey: string;
     dedupeHours: number;
+    userIntentKey?: string | null;
     suppressPushWhenDedupedBy?: {
       type: NotificationType;
       dedupeKey: string;
@@ -41,6 +42,7 @@ export class NotificationPolicyService {
       priority,
       dedupeKey,
       dedupeHours,
+      userIntentKey,
       suppressPushWhenDedupedBy,
     } = params;
 
@@ -64,6 +66,26 @@ export class NotificationPolicyService {
 
     if (dedupeExists) {
       return { decision: 'SKIP', reason: 'deduped' };
+    }
+
+    // Secondary dedup: if a batch for this userIntentKey was already sent today
+    // (regardless of dedupeKey format), skip. This prevents duplicate pushes
+    // when the dedupeKey format changed between deployments (e.g. timestamp-based
+    // old format vs date-only new format for the same logical intent).
+    if (userIntentKey) {
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+      const intentBatchExists = await this.em.getConnection().execute(
+        `SELECT 1 FROM notification_batches
+         WHERE user_id = ? AND user_intent_key = ?
+           AND status IN ('PENDING','SENT','SKIPPED')
+           AND created_at >= ?
+         LIMIT 1`,
+        [user.id, userIntentKey, todayStart],
+      );
+      if (intentBatchExists.length > 0) {
+        return { decision: 'SKIP', reason: 'intent_deduped_today' };
+      }
     }
 
     if (suppressPushWhenDedupedBy) {

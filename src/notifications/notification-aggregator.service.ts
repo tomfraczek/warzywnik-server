@@ -47,16 +47,34 @@ export class NotificationAggregatorService {
 
   @Cron('*/1 * * * *', { name: 'notification-aggregate-outbox' })
   async processPendingEvents(): Promise<void> {
+    // Atomically claim a batch of PENDING events by updating their status to
+    // PROCESSING in a single UPDATE. This prevents concurrent cron runs from
+    // processing the same events and creating duplicate batches.
+    const claimResult = await this.em.getConnection().execute(
+      `UPDATE notification_event_outbox
+       SET status = 'PROCESSING'
+       WHERE id IN (
+         SELECT id FROM notification_event_outbox
+         WHERE status = 'PENDING' AND available_at <= NOW()
+         ORDER BY created_at ASC
+         LIMIT 500
+         FOR UPDATE SKIP LOCKED
+       )
+       RETURNING id`,
+    );
+
+    if (claimResult.length === 0) {
+      return;
+    }
+
+    const claimedIds = claimResult.map((row: { id: string }) => row.id);
+
     const events = await this.em.find(
       NotificationEventOutbox,
-      {
-        status: NotificationEventStatus.PENDING,
-        availableAt: { $lte: new Date() },
-      },
+      { id: { $in: claimedIds } },
       {
         populate: ['user'],
         orderBy: [{ createdAt: 'asc' }],
-        limit: 500,
       },
     );
 
@@ -115,6 +133,7 @@ export class NotificationAggregatorService {
       priority: candidate.priority,
       dedupeKey: candidate.dedupeKey,
       dedupeHours: candidate.dedupeHours,
+      userIntentKey: candidate.userIntentKey,
       suppressPushWhenDedupedBy: candidate.suppressPushWhenDedupedBy,
     });
 

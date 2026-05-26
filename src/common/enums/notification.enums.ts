@@ -47,6 +47,7 @@ export enum NotificationPriority {
 
 export enum NotificationEventStatus {
   PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
   PROCESSED = 'PROCESSED',
   SKIPPED = 'SKIPPED',
   FAILED = 'FAILED',
@@ -54,6 +55,7 @@ export enum NotificationEventStatus {
 
 export enum NotificationBatchStatus {
   PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
   SENT = 'SENT',
   SKIPPED = 'SKIPPED',
   FAILED = 'FAILED',
