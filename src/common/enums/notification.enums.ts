@@ -4,6 +4,13 @@ export enum NotificationIntensity {
   ALL = 'ALL',
 }
 
+export enum NotificationDeliveryPolicy {
+  PUSH_IMMEDIATE = 'PUSH_IMMEDIATE',
+  PUSH_DIGEST = 'PUSH_DIGEST',
+  CENTER_ONLY = 'CENTER_ONLY',
+  PLAN_ONLY = 'PLAN_ONLY',
+}
+
 export enum NotificationType {
   TASKS_GENERATED = 'TASKS_GENERATED',
   DAILY_TASKS_SUMMARY = 'DAILY_TASKS_SUMMARY',

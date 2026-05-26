@@ -261,4 +261,94 @@ export class NotificationCopyService {
     if (priority === 'LOW') return 'LOW';
     return 'NONE';
   }
+
+  // ─── Intent-specific plural copy builders ──────────────────────────────────
+
+  /**
+   * "Podlewanie roślin — 3 grządki wymagają uwagi"
+   */
+  buildWateringTasksCopy(bedCount: number): NotificationCopy {
+    const n = bedCount || 1;
+    const suffix =
+      n === 1
+        ? 'grządka wymaga uwagi'
+        : n < 5
+          ? 'grządki wymagają uwagi'
+          : 'grządek wymaga uwagi';
+    return {
+      title: 'Podlewanie roślin',
+      body: `${n} ${suffix}`,
+    };
+  }
+
+  /**
+   * "Zbiory — 4 uprawy gotowe do zbioru"
+   */
+  buildHarvestReadyCopy(plantingCount: number): NotificationCopy {
+    const n = plantingCount || 1;
+    const suffix =
+      n === 1
+        ? 'uprawa jest gotowa do zbioru'
+        : n < 5
+          ? 'uprawy są gotowe do zbioru'
+          : 'upraw jest gotowych do zbioru';
+    return {
+      title: 'Zbiory',
+      body: `${n} ${suffix}`,
+    };
+  }
+
+  /**
+   * "Ochrona przed przymrozkami — zabezpiecz N upraw"
+   */
+  buildFrostProtectionCopy(taskCount: number): NotificationCopy {
+    const n = taskCount || 1;
+    const suffix = n === 1 ? 'uprawę' : n < 5 ? 'uprawy' : 'upraw';
+    return {
+      title: 'Ochrona przed przymrozkami',
+      body: `Zabezpiecz ${n} ${suffix} przed chłodem`,
+    };
+  }
+
+  /**
+   * "Ochrona przed wiatrem — zabezpiecz N upraw"
+   */
+  buildWindProtectionCopy(taskCount: number): NotificationCopy {
+    const n = taskCount || 1;
+    const suffix = n === 1 ? 'uprawę' : n < 5 ? 'uprawy' : 'upraw';
+    return {
+      title: 'Silny wiatr',
+      body: `Zabezpiecz ${n} ${suffix} przed wiatrem`,
+    };
+  }
+
+  /**
+   * Plural lifecycle copy: "5 upraw gotowych do zbioru" / "3 uprawy gotowe do przesadzenia"
+   */
+  buildLifecyclePluralCopy(
+    count: number,
+    suggestedAction: string,
+  ): NotificationCopy {
+    const actionLower = suggestedAction.toLowerCase();
+    if (actionLower.includes('zbior') || actionLower.includes('harvest')) {
+      return {
+        title: 'Czas na zbiory 🌿',
+        body: `${count} upraw ${count < 5 ? 'jest gotowych' : 'jest gotowych'} do zbioru`,
+      };
+    }
+    if (
+      actionLower.includes('transplant') ||
+      actionLower.includes('przesadz') ||
+      actionLower.includes('rozsada')
+    ) {
+      return {
+        title: 'Rozsada do przesadzenia 🌱',
+        body: `${count} rozsad czeka na przesadzenie do grządki`,
+      };
+    }
+    return {
+      title: 'Aktualizacja upraw',
+      body: `${count} upraw wymaga Twojej uwagi`,
+    };
+  }
 }

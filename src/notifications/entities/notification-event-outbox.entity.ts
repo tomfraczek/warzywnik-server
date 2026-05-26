@@ -39,6 +39,9 @@ export class NotificationEventOutbox {
   @Property({ type: TextType })
   dedupeKey!: string;
 
+  @Property({ type: TextType, nullable: true })
+  userIntentKey?: string | null;
+
   @Enum({
     items: () => NotificationPriority,
     default: NotificationPriority.NORMAL,

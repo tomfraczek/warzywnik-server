@@ -10,6 +10,7 @@ import {
 import { User } from '../../users/user.entity';
 import {
   NotificationBatchStatus,
+  NotificationDeliveryPolicy,
   NotificationPriority,
   NotificationRouteTarget,
   NotificationType,
@@ -42,6 +43,17 @@ export class NotificationBatch {
 
   @Property({ type: TextType })
   dedupeKey!: string;
+
+  @Property({ type: TextType, nullable: true })
+  userIntentKey?: string | null;
+
+  @Enum({
+    items: () => NotificationDeliveryPolicy,
+    default: NotificationDeliveryPolicy.PUSH_DIGEST,
+    nullable: true,
+  })
+  deliveryPolicy: NotificationDeliveryPolicy =
+    NotificationDeliveryPolicy.PUSH_DIGEST;
 
   @Enum({
     items: () => NotificationPriority,

@@ -4,6 +4,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { NotificationBatch } from './entities/notification-batch.entity';
 import {
   NotificationBatchStatus,
+  NotificationDeliveryPolicy,
   NotificationDeliveryStatus,
 } from '../common/enums/notification.enums';
 import { UserDevice } from '../devices/user-device.entity';
@@ -134,6 +135,17 @@ export class PushDeliveryService {
   }
 
   private async deliverBatch(batch: NotificationBatch): Promise<void> {
+    // PLAN_ONLY batches are created SKIPPED by the aggregator;
+    // guard here as a safety net so we never push plan-only tasks.
+    if (batch.deliveryPolicy === NotificationDeliveryPolicy.PLAN_ONLY) {
+      if (batch.status !== NotificationBatchStatus.SKIPPED) {
+        batch.status = NotificationBatchStatus.SKIPPED;
+        batch.skippedReason = 'plan_only';
+        await this.em.flush();
+      }
+      return;
+    }
+
     const notification = await this.ensureNotification(batch);
 
     const devices = await this.em.find(UserDevice, {

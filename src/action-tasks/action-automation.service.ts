@@ -1612,8 +1612,14 @@ export class ActionAutomationService {
   private async upsertReminderForTask(
     em: EntityManager,
     task: ActionTask,
-    template: ActionTemplate,
+    _template: ActionTemplate,
   ) {
+    // Auto-generated tasks (VEGETABLE_RULE / DECISION_ENGINE) are delivered
+    // to users exclusively via Pipeline A (NotificationEventOutbox →
+    // NotificationAggregatorService → Policy → PushDeliveryService).
+    // Creating a Reminder here would also trigger Pipeline B
+    // (PushWorkerService → Expo directly), causing duplicate pushes.
+    // We only cancel any stale reminders that may exist from before this change.
     await em.nativeUpdate(
       Reminder,
       {
@@ -1626,28 +1632,6 @@ export class ActionAutomationService {
         lastError: null,
       },
     );
-
-    const reminder = new Reminder();
-    reminder.user = task.user;
-    reminder.type = ReminderType.ACTION_TASK_DUE;
-    reminder.status = ReminderStatus.PENDING;
-    reminder.scheduledAt = task.dueAt as Date;
-    reminder.actionTaskId = task.id;
-    reminder.payload = {
-      kind: 'action',
-      actionTaskId: task.id,
-      actionTemplateId: template.id,
-      actionTemplateName: template.name,
-      bedId: task.bed?.id,
-      plantingId: task.planting?.id,
-      growingSpaceId: task.growingSpace?.id,
-      action: ReminderAction.CHECK,
-    };
-    reminder.attempts = 0;
-    reminder.lockedAt = null;
-    reminder.lastError = null;
-
-    em.persist(reminder);
   }
 
   private async cleanupStaleGeneratedTasksForPlanting(params: {

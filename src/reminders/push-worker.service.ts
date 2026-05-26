@@ -336,6 +336,18 @@ export class PushWorkerService {
       `process reminder=${reminder.id} | user=${reminder.user.id} | scheduledAt=${reminder.scheduledAt.toISOString()} | attempts=${reminder.attempts}`,
     );
 
+    // ACTION_TASK_DUE reminders are delivered exclusively via Pipeline A
+    // (NotificationEventOutbox → Aggregator → Policy → PushDeliveryService).
+    // Sending them here would bypass deduplication, user preferences and
+    // intensity gating, causing duplicate / spam pushes.
+    if (reminder.type === ReminderType.ACTION_TASK_DUE) {
+      await this.markSuccess(reminder.id);
+      this.logger.log(
+        `skipped ACTION_TASK_DUE reminder via Pipeline B | reminder=${reminder.id}`,
+      );
+      return;
+    }
+
     const devices = await this.em.find(UserDevice, {
       user: reminder.user.id,
       isEnabled: true,

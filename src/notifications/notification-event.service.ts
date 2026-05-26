@@ -23,6 +23,7 @@ type PublishEventParams = {
   sourceId?: string | null;
   payload: Record<string, unknown>;
   dedupeKey: string;
+  userIntentKey?: string | null;
   priority: NotificationPriority;
   availableAt?: Date;
 };
@@ -65,6 +66,7 @@ export class NotificationEventService {
     event.sourceId = params.sourceId ?? null;
     event.payload = params.payload;
     event.dedupeKey = params.dedupeKey;
+    event.userIntentKey = params.userIntentKey ?? null;
     event.priority = params.priority;
     event.availableAt = params.availableAt ?? new Date();
 
@@ -72,11 +74,68 @@ export class NotificationEventService {
     await this.em.flush();
   }
 
+  /**
+   * Resolves a userIntentKey for a task-based notification.
+   *
+   * The intent key groups notifications by what the user needs to do,
+   * not by which specific task/bed/planting triggered the event.
+   *
+   * Examples:
+   *   WATERING_TODAY:{userId}:{date}     — all watering tasks due today
+   *   FROST_PROTECTION:{userId}:{date}   — all frost-related weather tasks
+   *   TASKS_DUE_TODAY:{userId}:{date}    — generic automation tasks
+   */
+  resolveTaskUserIntentKey(userId: string, task: ActionTask): string {
+    const today = new Date().toISOString().slice(0, 10);
+
+    if (task.source === ActionTaskSource.WEATHER_WARNING) {
+      // Derive intent from the action template slug or title
+      const slug =
+        (task.actionTemplate as { slug?: string } | undefined)?.slug ??
+        task.title ??
+        '';
+      const code = slug.toUpperCase();
+
+      if (
+        code.includes('WODA') ||
+        code.includes('WATER') ||
+        code.includes('PODLEW') ||
+        code.includes('PODLEJ')
+      ) {
+        return `WATERING_TODAY:${userId}:${today}`;
+      }
+      if (code.includes('ZBIOR') || code.includes('HARVEST')) {
+        return `HARVEST_READY:${userId}:${today}`;
+      }
+      if (
+        code.includes('FROST') ||
+        code.includes('PRZYMROZ') ||
+        code.includes('OSLON')
+      ) {
+        return `FROST_PROTECTION:${userId}:${today}`;
+      }
+      if (code.includes('WIND') || code.includes('WIATR')) {
+        return `WIND_PROTECTION:${userId}:${today}`;
+      }
+      // All other weather tasks share one daily weather-tasks intent
+      return `WEATHER_TASKS:${userId}:${today}`;
+    }
+
+    if (task.source === ActionTaskSource.VEGETABLE_RULE) {
+      // Automation tasks go into a single daily plan intent
+      return `TASKS_DUE_TODAY:${userId}:${today}`;
+    }
+
+    return `TASKS_DUE_TODAY:${userId}:${today}`;
+  }
+
   async publishTaskEvents(params: {
     userId: string;
     tasks: ActionTask[];
     source: string;
   }): Promise<void> {
+    const today = new Date().toISOString().slice(0, 10);
+
     const dueTasks = params.tasks.filter(
       (task) =>
         task.status === ActionTaskStatus.PENDING &&
@@ -85,12 +144,14 @@ export class NotificationEventService {
     );
 
     for (const task of dueTasks) {
-      const dueWindow = `${task.dueAt?.toISOString().slice(0, 13) ?? 'na'}:00`;
+      const userIntentKey = this.resolveTaskUserIntentKey(params.userId, task);
+
+      // dedupeKey uses intent+date so all tasks with the same intent share one outbox event
       const dedupeKey = [
         params.userId,
         NotificationType.TASKS_GENERATED,
+        userIntentKey,
         task.id,
-        dueWindow,
       ].join(':');
 
       await this.publishEvent({
@@ -104,8 +165,10 @@ export class NotificationEventService {
           plantingId: task.planting?.id ?? null,
           dueAt: task.dueAt?.toISOString() ?? null,
           source: task.source,
+          userIntentKey,
         },
         dedupeKey,
+        userIntentKey,
         priority:
           task.source === ActionTaskSource.WEATHER_WARNING
             ? NotificationPriority.HIGH
@@ -156,7 +219,8 @@ export class NotificationEventService {
       this.maxDate(importantWarnings.map((item) => item.validTo)),
     );
     const alertReasonSignature = importantWarningReasons.join('|') || 'GENERIC';
-    const weatherAlertsDedupeKey = `${params.userId}:WEATHER_ALERTS_SUMMARY:${windowStart}:${windowEnd}:${alertReasonSignature}`;
+    const today = new Date().toISOString().slice(0, 10);
+    const weatherAlertsDedupeKey = `${params.userId}:WEATHER_ALERTS_SUMMARY:${alertReasonSignature}:${today}`;
 
     if (params.weatherChanged) {
       const statusCodeUpper = params.weatherStatusCode.toUpperCase();
@@ -192,7 +256,8 @@ export class NotificationEventService {
         type: NotificationType.WEATHER_STATUS_CHANGED,
         source: 'weather-recompute',
         sourceId: null,
-        dedupeKey: `${params.userId}:WEATHER_STATUS_CHANGED:${weatherStatusReason}:${weatherValidFrom}:${weatherValidTo}`,
+        dedupeKey: `${params.userId}:WEATHER_STATUS_CHANGED:${weatherStatusReason}:${today}`,
+        userIntentKey: `WEATHER_ALERTS:${params.userId}:${today}:${weatherStatusReason}`,
         priority: params.weatherStatusPriority,
         payload: {
           weatherStatusCode: params.weatherStatusCode,
@@ -209,11 +274,13 @@ export class NotificationEventService {
     }
 
     if (importantWarnings.length > 0) {
+      const primaryReason = importantWarningReasons[0] ?? 'GENERIC';
       await this.publishEvent({
         userId: params.userId,
         type: NotificationType.WEATHER_ALERTS_SUMMARY,
         source: 'weather-recompute',
         dedupeKey: weatherAlertsDedupeKey,
+        userIntentKey: `WEATHER_ALERTS:${params.userId}:${today}:${primaryReason}`,
         priority: NotificationPriority.HIGH,
         payload: {
           warningIds: importantWarnings.map((item) => item.id),
@@ -264,7 +331,8 @@ export class NotificationEventService {
         type: NotificationType.GARDEN_RISK_CHANGED,
         source: 'weather-recompute',
         sourceId: null,
-        dedupeKey: `${params.userId}:GARDEN_RISK_CHANGED:${riskReason}:${riskValidFrom}:${riskValidTo}`,
+        dedupeKey: `${params.userId}:GARDEN_RISK_CHANGED:${riskReason}:${today}`,
+        userIntentKey: `GARDEN_RISK_${riskReason}:${params.userId}:${today}`,
         priority: params.gardenRiskPriority,
         payload: {
           riskLevel,
@@ -333,6 +401,14 @@ export class NotificationEventService {
     }
   }
 
+  /**
+   * Publishes a lifecycle suggestion event. Called once per planting.
+   * The dedupeKey is per (userId, suggestedAction, today) so multiple
+   * plantings with the same action type on the same day produce only one event.
+   *
+   * The Aggregator accumulates all plantingIds from concurrent events that
+   * share the same userIntentKey and builds a single merged batch.
+   */
   async publishLifecycleSuggestionEvent(params: {
     userId: string;
     plantingId: string;
@@ -340,12 +416,17 @@ export class NotificationEventService {
     suggestedAction: string;
     priority?: NotificationPriority;
   }): Promise<void> {
+    const today = new Date().toISOString().slice(0, 10);
+    const intentSlug = params.suggestedAction.slice(0, 40).replace(/\s+/g, '_');
+    const userIntentKey = `LIFECYCLE_${intentSlug}:${params.userId}:${today}`;
+
     await this.publishEvent({
       userId: params.userId,
       type: NotificationType.LIFECYCLE_SUGGESTION,
       source: 'lifecycle',
       sourceId: params.plantingId,
-      dedupeKey: `${params.userId}:LIFECYCLE_SUGGESTION:${params.plantingId}:${params.suggestedAction}`,
+      dedupeKey: `${params.userId}:LIFECYCLE_SUGGESTION:${params.suggestedAction}:${today}`,
+      userIntentKey,
       priority: params.priority ?? NotificationPriority.NORMAL,
       payload: {
         plantingId: params.plantingId,
@@ -369,6 +450,7 @@ export class NotificationEventService {
       type: NotificationType.DAILY_TASKS_SUMMARY,
       source: 'daily-summary-cron',
       dedupeKey: `${userId}:DAILY_TASKS_SUMMARY:${today}`,
+      userIntentKey: `TASKS_DUE_TODAY:${userId}:${today}`,
       priority: NotificationPriority.NORMAL,
       payload: {
         actionTaskIds: taskIds,
@@ -404,7 +486,7 @@ export class NotificationEventService {
         dueAt: { $gte: new Date() },
       },
       {
-        populate: ['user', 'bed', 'planting'],
+        populate: ['user', 'bed', 'planting', 'actionTemplate'],
       },
     );
 
