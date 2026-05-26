@@ -40,6 +40,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PlanChecklistsModule } from './plan-checklists/plan-checklists.module';
+import { VegetableSuggestionsModule } from './vegetable-suggestions/vegetable-suggestions.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { PlanChecklistsModule } from './plan-checklists/plan-checklists.module';
     FavoritesModule,
     NotificationsModule,
     PlanChecklistsModule,
+    VegetableSuggestionsModule,
   ],
   controllers: [AppController],
   providers: [
