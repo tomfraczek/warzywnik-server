@@ -27,7 +27,7 @@ export class MailService {
 
     try {
       await this.resend.emails.send({
-        from: 'Warzywnik <noreply@warzywnik.app>',
+        from: 'Warzywnik <onboarding@resend.dev>',
         to: this.adminEmail,
         subject: 'Nowe zgłoszenie brakującego warzywa',
         text: `Nowe zgłoszenie brakującego warzywa: ${name} dla Twojej aplikacji warzywnik`,
