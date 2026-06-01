@@ -684,6 +684,8 @@ export class VegetablesService {
         return 'DIRECT_SOW';
       case PlantingStartMethod.TRANSPLANT:
         return 'TRANSPLANT';
+      case PlantingStartMethod.PURCHASED_SEEDLING:
+        return 'PURCHASED_SEEDLING';
     }
   }
 
@@ -695,6 +697,8 @@ export class VegetablesService {
         return PlantingStartMethod.DIRECT_SOW;
       case 'TRANSPLANT':
         return PlantingStartMethod.TRANSPLANT;
+      case 'PURCHASED_SEEDLING':
+        return PlantingStartMethod.PURCHASED_SEEDLING;
     }
   }
 }
