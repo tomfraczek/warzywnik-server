@@ -13,4 +13,5 @@ export enum PlantingStatus {
 export enum PlantingStartMethod {
   DIRECT_SOW = 'DIRECT_SOW',
   TRANSPLANT = 'TRANSPLANT',
+  PURCHASED_SEEDLING = 'PURCHASED_SEEDLING',
 }

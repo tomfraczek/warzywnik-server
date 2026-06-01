@@ -972,6 +972,7 @@ export class ActionAutomationService {
     const startMethods = [
       PlantingStartMethod.DIRECT_SOW,
       PlantingStartMethod.TRANSPLANT,
+      PlantingStartMethod.PURCHASED_SEEDLING,
     ] as const;
 
     const coverageByVegetable = vegetables.map((vegetable) => {

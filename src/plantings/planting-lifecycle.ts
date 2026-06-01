@@ -11,6 +11,14 @@ const DIRECT_SOW_PATH = [
   PlantingStatus.CLEARED,
 ] as const;
 
+const PURCHASED_SEEDLING_PATH = [
+  PlantingStatus.NEW,
+  PlantingStatus.IN_GROUND,
+  PlantingStatus.READY_FOR_FINAL_HARVEST,
+  PlantingStatus.HARVESTED,
+  PlantingStatus.CLEARED,
+] as const;
+
 const TRANSPLANT_PATH = [
   PlantingStatus.NEW,
   PlantingStatus.SEEDLING_PREPARED,
@@ -24,9 +32,10 @@ const TRANSPLANT_PATH = [
 export const getLifecyclePath = (
   startMethod: PlantingStartMethod,
 ): readonly PlantingStatus[] => {
-  return startMethod === PlantingStartMethod.DIRECT_SOW
-    ? DIRECT_SOW_PATH
-    : TRANSPLANT_PATH;
+  if (startMethod === PlantingStartMethod.DIRECT_SOW) return DIRECT_SOW_PATH;
+  if (startMethod === PlantingStartMethod.PURCHASED_SEEDLING)
+    return PURCHASED_SEEDLING_PATH;
+  return TRANSPLANT_PATH;
 };
 
 export const getAllowedStatusTransitions = (
@@ -65,7 +74,10 @@ export const getAllowedStatusTransitions = (
       PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT,
     ].includes(current)
       ? [PlantingStatus.IN_GROUND]
-      : [];
+      : startMethod === PlantingStartMethod.PURCHASED_SEEDLING &&
+          current === PlantingStatus.NEW
+        ? [PlantingStatus.IN_GROUND]
+        : [];
 
   return [
     ...new Set<PlantingStatus>([

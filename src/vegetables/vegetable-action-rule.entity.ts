@@ -23,7 +23,10 @@ type ActionRuleTriggerValue =
 
 type ActionRuleScheduleValue = 'ONCE' | 'EVERY_N_DAYS';
 
-type PlantingStartMethodValue = 'DIRECT_SOW' | 'TRANSPLANT';
+type PlantingStartMethodValue =
+  | 'DIRECT_SOW'
+  | 'TRANSPLANT'
+  | 'PURCHASED_SEEDLING';
 
 const ACTION_RULE_TRIGGER_ITEMS: ActionRuleTriggerValue[] = [
   'ON_SOWED',
@@ -45,6 +48,7 @@ const ACTION_RULE_SCHEDULE_ITEMS: ActionRuleScheduleValue[] = [
 const PLANTING_START_METHOD_ITEMS: PlantingStartMethodValue[] = [
   'DIRECT_SOW',
   'TRANSPLANT',
+  'PURCHASED_SEEDLING',
 ];
 
 @Entity({ tableName: 'vegetable_action_rules' })

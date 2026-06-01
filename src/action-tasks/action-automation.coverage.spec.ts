@@ -81,7 +81,7 @@ describe('ActionAutomationService coverage', () => {
     expect(result.coverage.hardMinimumRulesPerStartMethod).toBe(1);
     expect(result.coverage.softTargetRulesPerStartMethod).toBe(2);
     expect(result.coverage.totalVegetables).toBe(2);
-    expect(result.coverage.totalMethodPairs).toBe(4);
+    expect(result.coverage.totalMethodPairs).toBe(6);
     expect(result.coverage.pairsMeetingHardMinimum).toBe(3);
     expect(result.coverage.pairsMeetingSoftTarget).toBe(0);
     expect(result.coverage.status).toBe('below_hard');
@@ -93,7 +93,7 @@ describe('ActionAutomationService coverage', () => {
       (entry: { vegetableId: string }) => entry.vegetableId === 'veg-b',
     );
 
-    expect(vegAEntry?.status).toBe('meets_hard_only');
+    expect(vegAEntry?.status).toBe('below_hard');
     expect(vegBEntry?.status).toBe('below_hard');
   });
 });

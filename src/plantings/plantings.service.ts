@@ -230,7 +230,8 @@ export class PlantingsService {
       planting.status === PlantingStatus.IN_GROUND;
     const shouldAutoSetTransplantedAtOnCreate =
       dto.transplantedAt === undefined &&
-      planting.startMethod === PlantingStartMethod.TRANSPLANT &&
+      (planting.startMethod === PlantingStartMethod.TRANSPLANT ||
+        planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING) &&
       planting.status === PlantingStatus.IN_GROUND;
 
     if (shouldAutoSetSowedAtOnCreate) {
@@ -435,7 +436,8 @@ export class PlantingsService {
     if (
       dto.transplantedAt === undefined &&
       planting.status === PlantingStatus.IN_GROUND &&
-      planting.startMethod === PlantingStartMethod.TRANSPLANT &&
+      (planting.startMethod === PlantingStartMethod.TRANSPLANT ||
+        planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING) &&
       planting.transplantedAt == null
     ) {
       planting.transplantedAt = new Date();
@@ -1607,7 +1609,9 @@ export class PlantingsService {
       ((planting.startMethod === PlantingStartMethod.DIRECT_SOW &&
         nextStatus === PlantingStatus.IN_GROUND) ||
         (planting.startMethod === PlantingStartMethod.TRANSPLANT &&
-          nextStatus === PlantingStatus.SEEDLING_PREPARED));
+          nextStatus === PlantingStatus.SEEDLING_PREPARED) ||
+        (planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING &&
+          nextStatus === PlantingStatus.IN_GROUND));
 
     if (!shouldInitialize) {
       return false;
@@ -1616,7 +1620,12 @@ export class PlantingsService {
     const now = new Date();
     planting.actualStartDate = now;
     planting.plannedStartDate = now;
-    planting.sowedAt = planting.sowedAt ?? now;
+
+    if (planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING) {
+      planting.transplantedAt = planting.transplantedAt ?? now;
+    } else {
+      planting.sowedAt = planting.sowedAt ?? now;
+    }
 
     const harvestWindow = this.computeHarvestWindow(vegetable, now);
     planting.harvestWindowStart = harvestWindow?.start ?? null;
@@ -1641,6 +1650,13 @@ export class PlantingsService {
       PlantingStatus.HARVESTED,
       PlantingStatus.CLEARED,
     ]);
+
+    if (planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING) {
+      if (!startedStatusesForDirectSow.has(planting.status)) {
+        return null;
+      }
+      return planting.transplantedAt ?? planting.plannedStartDate;
+    }
 
     const started =
       planting.startMethod === PlantingStartMethod.DIRECT_SOW
