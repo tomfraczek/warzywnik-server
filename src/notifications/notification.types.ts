@@ -29,7 +29,6 @@ export type PushNotificationPayload = {
 export type NotificationPreferenceResponse = {
   notificationsEnabled: boolean;
   notificationHour: number;
-  intensity: 'IMPORTANT_ONLY' | 'BALANCED' | 'ALL';
   groups: {
     tasksAndRemindersEnabled: boolean;
     weatherAndRiskEnabled: boolean;

@@ -3,7 +3,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from '../users/user.entity';
 import { NotificationPreference } from './entities/notification-preference.entity';
 import { PatchNotificationPreferencesDto } from './dto/notification-preferences.schemas';
-import { NotificationIntensity } from '../common/enums/notification.enums';
 import { NotificationPreferenceResponse } from './notification.types';
 
 @Injectable()
@@ -83,7 +82,7 @@ export class NotificationPreferencesService {
       preference.lifecycleSuggestionsEnabled = dto.lifecycleSuggestionsEnabled;
     if (dto.weeklyDigestEnabled !== undefined)
       preference.weeklyDigestEnabled = dto.weeklyDigestEnabled;
-    if (dto.intensity !== undefined) preference.intensity = dto.intensity;
+    // dto.intensity is accepted for backward compatibility but intentionally not applied.
     if (dto.notificationHour !== undefined) {
       preference.notificationHour = dto.notificationHour;
       user.notificationHour = dto.notificationHour;
@@ -106,7 +105,6 @@ export class NotificationPreferencesService {
     const preference = new NotificationPreference();
     preference.user = user;
     preference.notificationHour = user.notificationHour;
-    preference.intensity = NotificationIntensity.BALANCED;
 
     await this.em.persistAndFlush(preference);
     return preference;
@@ -131,7 +129,6 @@ export class NotificationPreferencesService {
 
     return {
       notificationsEnabled: user.notificationsEnabled,
-      intensity: preference.intensity,
       notificationHour: preference.notificationHour,
       groups,
       advanced: {

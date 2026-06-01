@@ -17,6 +17,7 @@ export type PatchNotificationPreferencesDto = {
   recommendedArticlesEnabled?: boolean;
   lifecycleSuggestionsEnabled?: boolean;
   weeklyDigestEnabled?: boolean;
+  /** @deprecated Accepted for backward compatibility only. Has no effect on notification delivery. */
   intensity?: NotificationIntensity;
   notificationHour?: number;
 };

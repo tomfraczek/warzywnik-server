@@ -19,6 +19,7 @@ import {
   ActionTaskSource,
   ActionTaskStatus,
 } from '../common/enums/action.enums';
+import { NotificationPolicyService } from './notification-policy.service';
 
 describe('Scenario A — 3 watering tasks collapse into 1 PUSH_DIGEST batch', () => {
   const copy = new NotificationCopyService();
@@ -527,5 +528,177 @@ describe('Scenario J — TASKS_GENERATED / VEGETABLE_RULE nadal PLAN_ONLY', () =
       instance as Record<string, (...args: unknown[]) => unknown>
     )['resolveTasksDeliveryPolicy'](null);
     expect(result).toBe(NotificationDeliveryPolicy.PLAN_ONLY);
+  });
+});
+
+// ─── Scenariusze K–N: polityka powiadomień bez intensity ───────────────────
+
+describe('Scenario K — NotificationPolicyService: intensity nie wpływa na decyzję', () => {
+  function makePolicyService(opts: {
+    notificationsEnabled: boolean;
+    typeEnabled: boolean;
+    dedupeExists?: boolean;
+    suppressCovered?: boolean;
+  }): NotificationPolicyService {
+    const fakePreference = {
+      tasksEnabled: opts.typeEnabled,
+      dailySummaryEnabled: opts.typeEnabled,
+      weatherStatusEnabled: opts.typeEnabled,
+      gardenRiskEnabled: opts.typeEnabled,
+      weatherAlertsEnabled: opts.typeEnabled,
+      recommendedArticlesEnabled: opts.typeEnabled,
+      lifecycleSuggestionsEnabled: opts.typeEnabled,
+      weeklyDigestEnabled: opts.typeEnabled,
+      // intensity still exists in entity but is not read by policy
+      intensity: 'IMPORTANT_ONLY',
+    };
+
+    const fakePreferencesService = {
+      getOrCreatePreference: jest.fn().mockResolvedValue(fakePreference),
+    };
+
+    const fakeEm = {
+      findOne: jest
+        .fn()
+        .mockImplementation((_entity: unknown, query: { type?: string }) => {
+          if (query.type === undefined) {
+            // NotificationDedupe lookup
+            return Promise.resolve(opts.dedupeExists ? {} : null);
+          }
+          return Promise.resolve(opts.suppressCovered ? {} : null);
+        }),
+      getConnection: jest.fn().mockReturnValue({
+        execute: jest.fn().mockResolvedValue([]),
+      }),
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return new (NotificationPolicyService as any)(
+      fakeEm,
+      fakePreferencesService,
+    );
+  }
+
+  it('K-A: PUSH_DIGEST + preference enabled → PUSH (intensity IMPORTANT_ONLY ignorowane)', async () => {
+    const service = makePolicyService({
+      notificationsEnabled: true,
+      typeEnabled: true,
+    });
+    const result = await service.evaluate({
+      user: { id: 'u1', notificationsEnabled: true } as never,
+      type: NotificationType.DAILY_TASKS_SUMMARY,
+      priority: NotificationPriority.LOW, // wcześniej powodowałoby CENTER_ONLY
+      dedupeKey: 'dk1',
+      dedupeHours: 24,
+    });
+    expect(result.decision).toBe('PUSH');
+    expect(result.reason).toBe('ok');
+  });
+
+  it('K-B: PUSH_IMMEDIATE + preference enabled → PUSH', async () => {
+    const service = makePolicyService({
+      notificationsEnabled: true,
+      typeEnabled: true,
+    });
+    const result = await service.evaluate({
+      user: { id: 'u1', notificationsEnabled: true } as never,
+      type: NotificationType.WEATHER_ALERTS_SUMMARY,
+      priority: NotificationPriority.HIGH,
+      dedupeKey: 'dk2',
+      dedupeHours: 8,
+    });
+    expect(result.decision).toBe('PUSH');
+  });
+
+  it('K-C: CENTER_ONLY z suppressPushWhenDedupedBy (weather alert coverage) nadal działa', async () => {
+    const fakePreference = {
+      tasksEnabled: true,
+      dailySummaryEnabled: true,
+      weatherStatusEnabled: true,
+      gardenRiskEnabled: true,
+      weatherAlertsEnabled: true,
+      recommendedArticlesEnabled: true,
+      lifecycleSuggestionsEnabled: true,
+      weeklyDigestEnabled: true,
+      intensity: 'ALL',
+    };
+    const fakePreferencesService = {
+      getOrCreatePreference: jest.fn().mockResolvedValue(fakePreference),
+    };
+    let callCount = 0;
+    const fakeEm = {
+      findOne: jest.fn().mockImplementation(() => {
+        callCount++;
+        // First call = dedupe check → not deduped; second call = suppressPushWhenDedupedBy → covered
+        return callCount === 1 ? Promise.resolve(null) : Promise.resolve({});
+      }),
+      getConnection: jest
+        .fn()
+        .mockReturnValue({ execute: jest.fn().mockResolvedValue([]) }),
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const service = new (NotificationPolicyService as any)(
+      fakeEm,
+      fakePreferencesService,
+    );
+    const result = await service.evaluate({
+      user: { id: 'u1', notificationsEnabled: true } as never,
+      type: NotificationType.WEATHER_STATUS_CHANGED,
+      priority: NotificationPriority.NORMAL,
+      dedupeKey: 'dk3',
+      dedupeHours: 4,
+      suppressPushWhenDedupedBy: {
+        type: NotificationType.WEATHER_ALERTS_SUMMARY,
+        dedupeKey: 'alert-dk',
+      },
+    });
+    expect(result.decision).toBe('CENTER_ONLY');
+  });
+
+  it('K-D: preference disabled → SKIP (type_disabled)', async () => {
+    const service = makePolicyService({
+      notificationsEnabled: true,
+      typeEnabled: false,
+    });
+    const result = await service.evaluate({
+      user: { id: 'u1', notificationsEnabled: true } as never,
+      type: NotificationType.ARTICLE_RECOMMENDED,
+      priority: NotificationPriority.NORMAL,
+      dedupeKey: 'dk4',
+      dedupeHours: 18,
+    });
+    expect(result.decision).toBe('SKIP');
+    expect(result.reason).toBe('type_disabled');
+  });
+
+  it('K-E: globalny notificationsEnabled=false → SKIP (preference_disabled)', async () => {
+    const service = makePolicyService({
+      notificationsEnabled: false,
+      typeEnabled: true,
+    });
+    const result = await service.evaluate({
+      user: { id: 'u1', notificationsEnabled: false } as never,
+      type: NotificationType.DAILY_TASKS_SUMMARY,
+      priority: NotificationPriority.NORMAL,
+      dedupeKey: 'dk5',
+      dedupeHours: 24,
+    });
+    expect(result.decision).toBe('SKIP');
+    expect(result.reason).toBe('preference_disabled');
+  });
+
+  it('K-F: stary klient wysyła intensity w body — Zod akceptuje, decyzja niezależna od intensity', async () => {
+    // Weryfikujemy że Zod schema nie odrzuca intensity
+    const { patchNotificationPreferencesSchema } =
+      require('./dto/notification-preferences.schemas') as {
+        patchNotificationPreferencesSchema: {
+          safeParse: (v: unknown) => { success: boolean };
+        };
+      };
+    const result = patchNotificationPreferencesSchema.safeParse({
+      intensity: 'IMPORTANT_ONLY',
+      dailySummaryEnabled: true,
+    });
+    expect(result.success).toBe(true);
   });
 });

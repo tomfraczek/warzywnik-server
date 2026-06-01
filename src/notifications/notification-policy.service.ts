@@ -1,7 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
-  NotificationIntensity,
   NotificationPriority,
   NotificationType,
 } from '../common/enums/notification.enums';
@@ -17,8 +16,6 @@ type NotificationPolicyDecision = {
 
 @Injectable()
 export class NotificationPolicyService {
-  private readonly logger = new Logger(NotificationPolicyService.name);
-
   constructor(
     private readonly em: EntityManager,
     private readonly notificationPreferencesService: NotificationPreferencesService,
@@ -39,7 +36,6 @@ export class NotificationPolicyService {
     const {
       user,
       type,
-      priority,
       dedupeKey,
       dedupeHours,
       userIntentKey,
@@ -109,23 +105,9 @@ export class NotificationPolicyService {
       }
     }
 
-    const intensityDecision = this.evaluateIntensity(
-      preference.intensity,
-      priority,
-    );
-    if (intensityDecision !== 'PUSH') {
-      this.logger.log(
-        `notification intensity gate user=${user.id} type=${type} priority=${priority} decision=${intensityDecision}`,
-      );
-    }
-
     await this.insertDedupeRecord(user, type, dedupeKey, dedupeHours);
 
-    return {
-      decision: intensityDecision,
-      reason:
-        intensityDecision === 'CENTER_ONLY' ? 'low_priority_center_only' : 'ok',
-    };
+    return { decision: 'PUSH', reason: 'ok' };
   }
 
   private async insertDedupeRecord(
@@ -167,26 +149,5 @@ export class NotificationPolicyService {
       default:
         return true;
     }
-  }
-
-  private evaluateIntensity(
-    intensity: NotificationIntensity,
-    priority: NotificationPriority,
-  ): 'PUSH' | 'CENTER_ONLY' {
-    if (intensity === NotificationIntensity.IMPORTANT_ONLY) {
-      return priority === NotificationPriority.HIGH ||
-        priority === NotificationPriority.CRITICAL
-        ? 'PUSH'
-        : 'CENTER_ONLY';
-    }
-
-    if (intensity === NotificationIntensity.BALANCED) {
-      if (priority === NotificationPriority.LOW) {
-        return 'CENTER_ONLY';
-      }
-      return 'PUSH';
-    }
-
-    return 'PUSH';
   }
 }

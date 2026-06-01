@@ -44,6 +44,11 @@ export class NotificationPreference {
   @Property({ type: 'boolean', default: true })
   weeklyDigestEnabled: boolean = true;
 
+  /**
+   * @deprecated Intensity is no longer used in notification policy decisions.
+   * The field is retained in the database for backward compatibility only.
+   * Do not read or write this field in application logic.
+   */
   @Enum({
     items: () => NotificationIntensity,
     default: NotificationIntensity.BALANCED,
