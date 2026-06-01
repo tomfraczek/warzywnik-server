@@ -15,7 +15,7 @@ export class PlantingSeasonSummary {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
 
-  @ManyToOne(() => Planting)
+  @ManyToOne(() => Planting, { deleteRule: 'cascade' })
   planting!: Planting;
 
   @Property({ type: 'uuid' })

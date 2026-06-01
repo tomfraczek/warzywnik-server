@@ -14,7 +14,7 @@ export class HarvestResult {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
 
-  @ManyToOne(() => Planting)
+  @ManyToOne(() => Planting, { deleteRule: 'cascade' })
   planting!: Planting;
 
   @Property({ type: Date, nullable: true })

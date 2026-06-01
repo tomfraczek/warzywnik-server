@@ -21,7 +21,7 @@ export class PlantingDisease {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
 
-  @ManyToOne(() => Planting)
+  @ManyToOne(() => Planting, { deleteRule: 'cascade' })
   planting!: Planting;
 
   @ManyToOne(() => Disease)

@@ -16,7 +16,7 @@ export class UserDevice {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
   user!: User;
 
   @Enum({ items: () => DevicePlatform })

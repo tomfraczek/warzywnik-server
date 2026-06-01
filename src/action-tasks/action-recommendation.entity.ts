@@ -22,10 +22,10 @@ export class ActionRecommendation {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
   user!: User;
 
-  @ManyToOne(() => Planting)
+  @ManyToOne(() => Planting, { deleteRule: 'cascade' })
   planting!: Planting;
 
   @ManyToOne(() => ActionTemplate)

@@ -8,8 +8,6 @@ import { User } from './user.entity';
 import { PatchMeDto } from './dto/me.schemas';
 import { LocationMode } from '../common/enums/user.enums';
 import { MeResponse } from './dto/me.types';
-import { Bed } from '../beds/bed.entity';
-import { Planting } from '../plantings/planting.entity';
 import { UpdateMyLocationDto } from './dto/location.schemas';
 import { UserLocationResponseDto } from './dto/location.types';
 import { Location } from '../locations/location.entity';
@@ -210,12 +208,30 @@ export class UsersService {
 
   async deleteMe(userId: string): Promise<void> {
     await this.em.transactional(async (em) => {
-      await em.nativeDelete(Planting, { user: userId });
-      await em.nativeDelete(Bed, { user: userId });
+      const user = await em.findOne(
+        User,
+        { id: userId },
+        { populate: ['location'] },
+      );
+      if (!user) {
+        return;
+      }
 
-      const user = await em.findOne(User, { id: userId });
-      if (user) {
-        await em.removeAndFlush(user);
+      const locationId = user.location?.id ?? null;
+
+      // Removing the user triggers ON DELETE CASCADE for all owned entities:
+      // plantings, beds, growing_spaces, action_tasks, action_recommendations,
+      // plan_checklist_items, harvest_prompt_states, reminders, user_devices,
+      // notification_preferences, notifications, notification_batches,
+      // notification_event_outbox, notification_dedupe, weather_notification_state,
+      // favorites, weather_snapshots, warning_instances.
+      // Planting children (planting_diseases, harvest_results, planting_events,
+      // planting_season_summaries, pest_occurrences) cascade from plantings.
+      await em.removeAndFlush(user);
+
+      // Location has no user_id FK — must be deleted explicitly.
+      if (locationId) {
+        await em.nativeDelete(Location, { id: locationId });
       }
     });
   }

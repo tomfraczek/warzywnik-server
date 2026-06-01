@@ -39,7 +39,7 @@ export class ActionTask {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
   user!: User;
 
   @Enum({ items: () => ActionTaskTargetType })
@@ -59,10 +59,10 @@ export class ActionTask {
   @Property({ type: 'uuid', nullable: true })
   ownerScopeId?: string | null;
 
-  @ManyToOne(() => Planting, { nullable: true })
+  @ManyToOne(() => Planting, { nullable: true, deleteRule: 'set null' })
   planting?: Planting | null;
 
-  @ManyToOne(() => Bed, { nullable: true })
+  @ManyToOne(() => Bed, { nullable: true, deleteRule: 'set null' })
   bed?: Bed | null;
 
   @ManyToOne(() => GrowingSpace, { nullable: true })

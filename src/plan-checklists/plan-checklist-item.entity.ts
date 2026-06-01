@@ -36,10 +36,10 @@ export class PlanChecklistItem {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
   user!: User;
 
-  @ManyToOne(() => Bed)
+  @ManyToOne(() => Bed, { deleteRule: 'cascade' })
   bed!: Bed;
 
   @ManyToOne(() => Planting, { nullable: true })

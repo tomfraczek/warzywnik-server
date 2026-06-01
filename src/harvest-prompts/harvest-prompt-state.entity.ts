@@ -19,13 +19,13 @@ export class HarvestPromptState {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
   user!: User;
 
-  @ManyToOne(() => Planting)
+  @ManyToOne(() => Planting, { deleteRule: 'cascade' })
   planting!: Planting;
 
-  @ManyToOne(() => Bed)
+  @ManyToOne(() => Bed, { deleteRule: 'cascade' })
   bed!: Bed;
 
   @Property({ type: Date, nullable: true, columnType: 'date' })
