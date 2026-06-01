@@ -15,9 +15,11 @@ export class NotificationCopyService {
   }
 
   buildDailySummaryCopy(taskCount: number): NotificationCopy {
+    const n = taskCount;
+    const zadania = n === 1 ? 'zadanie' : n > 1 && n < 5 ? 'zadania' : 'zadań';
     return {
       title: 'Plan na dziś',
-      body: `Na dziś masz ${taskCount} zadań do wykonania.`,
+      body: `Masz ${n} ${zadania} do wykonania w ogrodzie.`,
     };
   }
 
@@ -151,13 +153,22 @@ export class NotificationCopyService {
     };
   }
 
-  buildArticleRecommendedCopy(articleCount: number): NotificationCopy {
+  buildArticleRecommendedCopy(
+    articleCount: number,
+    articleTitle?: string | null,
+  ): NotificationCopy {
+    if (articleCount === 1 && articleTitle) {
+      return {
+        title: 'Nowy artykuł w bibliotece',
+        body: `Opublikowaliśmy nowy artykuł: „${articleTitle}”. Zapraszamy do lektury.`,
+      };
+    }
     return {
-      title: 'Nowy poradnik dla Twoich upraw',
+      title: 'Nowy artykuł w bibliotece',
       body:
         articleCount === 1
-          ? 'Dodaliśmy artykuł, który może pasować do Twojego ogrodu.'
-          : `Dodaliśmy ${articleCount} artykuły, które mogą pasować do Twojego ogrodu.`,
+          ? 'Opublikowaliśmy nowy artykuł dla Twoich upraw. Zapraszamy do lektury.'
+          : `Opublikowaliśmy ${articleCount} nowe artykuły dla Twoich upraw. Zapraszamy do lektury.`,
     };
   }
 

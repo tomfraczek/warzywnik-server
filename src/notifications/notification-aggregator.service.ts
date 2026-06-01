@@ -286,7 +286,7 @@ export class NotificationAggregatorService {
         dedupeKey: `${events[0].user.id}:${type}:${day}`,
         userIntentKey,
         priority: NotificationPriority.NORMAL,
-        deliveryPolicy: NotificationDeliveryPolicy.PLAN_ONLY,
+        deliveryPolicy: NotificationDeliveryPolicy.PUSH_DIGEST,
         dedupeHours: 24,
       };
     }
@@ -441,8 +441,13 @@ export class NotificationAggregatorService {
         this.notificationRoutingService.pickArticleRouteTarget(
           articleIds.length,
         );
+      const articleTitle =
+        events
+          .map((event) => this.readString(event.payload.articleTitle))
+          .find((v): v is string => Boolean(v)) ?? null;
       const copy = this.notificationCopyService.buildArticleRecommendedCopy(
         articleIds.length,
+        articleTitle,
       );
 
       return {
@@ -454,11 +459,12 @@ export class NotificationAggregatorService {
           articleId: articleIds[0] ?? null,
           articleSlug: articleSlugs[0] ?? null,
           articleIds,
+          articleTitle,
         },
         dedupeKey: `${events[0].user.id}:${type}:${articleIds.sort().join(',')}`,
         userIntentKey: null,
         priority: NotificationPriority.NORMAL,
-        deliveryPolicy: NotificationDeliveryPolicy.CENTER_ONLY,
+        deliveryPolicy: NotificationDeliveryPolicy.PUSH_DIGEST,
         dedupeHours: 18,
       };
     }

@@ -136,11 +136,14 @@ export class NotificationEventService {
   }): Promise<void> {
     const today = new Date().toISOString().slice(0, 10);
 
+    const startOfToday = new Date();
+    startOfToday.setUTCHours(0, 0, 0, 0);
+
     const dueTasks = params.tasks.filter(
       (task) =>
         task.status === ActionTaskStatus.PENDING &&
         task.dueAt != null &&
-        task.dueAt.getTime() >= Date.now(),
+        task.dueAt.getTime() >= startOfToday.getTime(),
     );
 
     for (const task of dueTasks) {
@@ -384,6 +387,7 @@ export class NotificationEventService {
     userIds: string[];
     articleId: string;
     articleSlug: string;
+    articleTitle?: string;
   }): Promise<void> {
     for (const userId of params.userIds) {
       await this.publishEvent({
@@ -396,6 +400,7 @@ export class NotificationEventService {
         payload: {
           articleId: params.articleId,
           articleSlug: params.articleSlug,
+          articleTitle: params.articleTitle ?? null,
         },
       });
     }
@@ -476,6 +481,8 @@ export class NotificationEventService {
   @Cron('*/5 * * * *', { name: 'notification-automation-task-events' })
   async collectAutomationTaskEvents(): Promise<void> {
     const from = new Date(Date.now() - 15 * 60 * 1000);
+    const startOfToday = new Date();
+    startOfToday.setUTCHours(0, 0, 0, 0);
 
     const tasks = await this.em.find(
       ActionTask,
@@ -483,7 +490,7 @@ export class NotificationEventService {
         source: { $in: [ActionTaskSource.VEGETABLE_RULE] },
         status: ActionTaskStatus.PENDING,
         createdAt: { $gte: from },
-        dueAt: { $gte: new Date() },
+        dueAt: { $gte: startOfToday },
       },
       {
         populate: ['user', 'bed', 'planting', 'actionTemplate'],

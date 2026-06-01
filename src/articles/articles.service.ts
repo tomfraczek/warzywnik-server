@@ -398,6 +398,7 @@ export class ArticlesService {
       userIds: Array.from(matchedUserIds),
       articleId: article.id,
       articleSlug: article.slug,
+      articleTitle: article.title,
     });
   }
 
