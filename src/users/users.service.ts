@@ -1,8 +1,10 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { createClerkClient } from '@clerk/backend';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from './user.entity';
 import { PatchMeDto } from './dto/me.schemas';
@@ -16,6 +18,8 @@ import { LocationEventsService } from '../locations/location-events.service';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     private readonly em: EntityManager,
     private readonly locationEventsService: LocationEventsService,
@@ -207,6 +211,8 @@ export class UsersService {
   }
 
   async deleteMe(userId: string): Promise<void> {
+    let clerkUserId: string | null = null;
+
     await this.em.transactional(async (em) => {
       const user = await em.findOne(
         User,
@@ -217,6 +223,7 @@ export class UsersService {
         return;
       }
 
+      clerkUserId = user.clerkUserId;
       const locationId = user.location?.id ?? null;
 
       // Removing the user triggers ON DELETE CASCADE for all owned entities:
@@ -234,6 +241,41 @@ export class UsersService {
         await em.nativeDelete(Location, { id: locationId });
       }
     });
+
+    // Delete the Clerk account after the local transaction succeeds.
+    // This is intentionally outside the transaction: local data is the source
+    // of truth — if Clerk deletion fails we log a warning but don't roll back.
+    if (clerkUserId) {
+      await this.deleteClerkUser(clerkUserId, userId);
+    }
+  }
+
+  private async deleteClerkUser(
+    clerkUserId: string,
+    localUserId: string,
+  ): Promise<void> {
+    const secretKey = process.env.CLERK_SECRET_KEY;
+    if (!secretKey) {
+      this.logger.warn(
+        `deleteMe user=${localUserId}: CLERK_SECRET_KEY not set, skipping Clerk deletion`,
+      );
+      return;
+    }
+
+    try {
+      const clerk = createClerkClient({ secretKey });
+      await clerk.users.deleteUser(clerkUserId);
+      this.logger.log(
+        `deleteMe user=${localUserId}: Clerk account deleted clerkUserId=${clerkUserId}`,
+      );
+    } catch (err: unknown) {
+      this.logger.error(
+        `deleteMe user=${localUserId}: failed to delete Clerk account clerkUserId=${clerkUserId}: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+        err instanceof Error ? err.stack : undefined,
+      );
+    }
   }
 
   async exportMe(userId: string): Promise<MeResponse> {
