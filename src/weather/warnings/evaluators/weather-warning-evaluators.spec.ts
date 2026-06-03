@@ -197,4 +197,307 @@ describe('Weather warning evaluators', () => {
       out.some((item) => item.code === WarningCode.FROST_RISK_TOMORROW_NIGHT),
     ).toBe(false);
   });
+
+  // Regression: hourly.precipitation may contain nulls (mapped to 0 by toFiniteNumber),
+  // while daily.precipSum is always fully populated by Open-Meteo.
+  // When hourlyPrecip=0 but dailyPrecipSum=10.5, WATERING_NEEDED must NOT be emitted.
+  it('Operational evaluator does NOT emit WATERING_NEEDED_TOMORROW when daily precipSum=10.5 but hourly precip=0 (null scenario)', async () => {
+    const evaluator = new OperationalWeatherWarningsEvaluator(configService);
+    const ctx = buildContext();
+    // now = 2026-05-28 10:00 UTC → local Warsaw date = 2026-05-28 (CEST = UTC+2)
+    ctx.now = new Date('2026-05-28T08:00:00.000Z');
+    ctx.snapshotData.timezone = 'Europe/Warsaw';
+
+    // daily[0] = today, daily[1] = tomorrow with 10.5 mm rain
+    ctx.snapshotData.daily = [
+      {
+        date: '2026-05-28',
+        tempMin: 14,
+        tempMax: 28,
+        precipSum: 0,
+        windMax: 20,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-05-29',
+        tempMin: 16,
+        tempMax: 29,
+        precipSum: 10.5,
+        windMax: 22,
+        weatherCode: 61,
+      },
+      {
+        date: '2026-05-30',
+        tempMin: 12,
+        tempMax: 22,
+        precipSum: 1,
+        windMax: 18,
+        weatherCode: 2,
+      },
+    ];
+
+    // Hourly for today (2026-05-28): normal temp, 0 precip
+    const todayHourly = Array.from({ length: 24 }, (_v, i) => ({
+      time: `2026-05-28T${String(i).padStart(2, '0')}:00:00.000Z`,
+      temp: 26,
+      precip: 0,
+      rain: 0,
+      snow: 0,
+      wind: 20,
+      weatherCode: 2,
+      isDay: i >= 4 && i < 20,
+    }));
+
+    // Hourly for tomorrow (2026-05-29): hot (28°C, above wateringHighTempC=24) but
+    // precip=0 — simulating null→0 conversion that caused the bug.
+    // With the fix, dailyPrecipSum=10.5 > wateringDailyPrecipMaxMm=2, so no warning.
+    const tomorrowHourly = Array.from({ length: 24 }, (_v, i) => ({
+      time: `2026-05-29T${String(i).padStart(2, '0')}:00:00.000Z`,
+      temp: 28,
+      precip: 0, // nulls from Open-Meteo would be mapped to 0 — this is the bug scenario
+      rain: 0,
+      snow: 0,
+      wind: 20,
+      weatherCode: 61,
+      isDay: i >= 4 && i < 20,
+    }));
+
+    ctx.snapshotData.hourly = [...todayHourly, ...tomorrowHourly];
+
+    const out = await evaluator.evaluate(ctx);
+    expect(
+      out.some((item) => item.code === WarningCode.WATERING_NEEDED_TOMORROW),
+    ).toBe(false);
+  });
+
+  // Regression: same daily/hourly mismatch must also prevent false WATERING_NEEDED_TODAY.
+  it('Operational evaluator does NOT emit WATERING_NEEDED_TODAY when daily precipSum=8 but hourly precip=0', async () => {
+    const evaluator = new OperationalWeatherWarningsEvaluator(configService);
+    const ctx = buildContext();
+    ctx.now = new Date('2026-05-28T08:00:00.000Z');
+    ctx.snapshotData.timezone = 'Europe/Warsaw';
+
+    ctx.snapshotData.daily = [
+      {
+        date: '2026-05-28',
+        tempMin: 14,
+        tempMax: 28,
+        precipSum: 8,
+        windMax: 20,
+        weatherCode: 61,
+      },
+      {
+        date: '2026-05-29',
+        tempMin: 12,
+        tempMax: 20,
+        precipSum: 0,
+        windMax: 18,
+        weatherCode: 2,
+      },
+    ];
+
+    ctx.snapshotData.hourly = Array.from({ length: 48 }, (_v, i) => ({
+      time: `2026-05-${i < 24 ? '28' : '29'}T${String(i % 24).padStart(2, '0')}:00:00.000Z`,
+      temp: 28,
+      precip: 0,
+      rain: 0,
+      snow: 0,
+      wind: 20,
+      weatherCode: i < 24 ? 61 : 2,
+      isDay: i % 24 >= 4 && i % 24 < 20,
+    }));
+
+    const out = await evaluator.evaluate(ctx);
+    expect(
+      out.some((item) => item.code === WarningCode.WATERING_NEEDED_TODAY),
+    ).toBe(false);
+  });
+
+  // Regression: HEAVY_RAIN must be emitted from daily.precipSum when hourly data is
+  // null/0. daily.precipSum cannot be split into DAY/NIGHT, so the _DAY variant is used
+  // as a conservative all-day signal with dailyFallback=true in details.
+  it('Operational evaluator DOES emit HEAVY_RAIN_TOMORROW_DAY when daily precipSum=15 but hourly precip=0 (null scenario)', async () => {
+    const evaluator = new OperationalWeatherWarningsEvaluator(configService);
+    const ctx = buildContext();
+    ctx.now = new Date('2026-05-28T08:00:00.000Z');
+    ctx.snapshotData.timezone = 'Europe/Warsaw';
+
+    // heavyRainWindowThresholdMm = 12 (from configService mock)
+    ctx.snapshotData.daily = [
+      {
+        date: '2026-05-28',
+        tempMin: 14,
+        tempMax: 22,
+        precipSum: 0,
+        windMax: 20,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-05-29',
+        tempMin: 15,
+        tempMax: 20,
+        precipSum: 15,
+        windMax: 25,
+        weatherCode: 63,
+      },
+    ];
+
+    // All hourly precip = 0 — simulating null→0 conversion from Open-Meteo
+    ctx.snapshotData.hourly = Array.from({ length: 48 }, (_v, i) => ({
+      time: `2026-05-${i < 24 ? '28' : '29'}T${String(i % 24).padStart(2, '0')}:00:00.000Z`,
+      temp: 18,
+      precip: 0,
+      rain: 0,
+      snow: 0,
+      wind: 20,
+      weatherCode: i < 24 ? 2 : 63,
+      isDay: i % 24 >= 4 && i % 24 < 20,
+    }));
+
+    const out = await evaluator.evaluate(ctx);
+    const heavyRainWarning = out.find(
+      (item) => item.code === WarningCode.HEAVY_RAIN_TOMORROW_DAY,
+    );
+    expect(heavyRainWarning).toBeDefined();
+    expect(heavyRainWarning?.details?.dailyFallback).toBe(true);
+    expect(heavyRainWarning?.values?.precipSumMm).toBe(15);
+  });
+
+  it('Operational evaluator DOES emit HEAVY_RAIN_TODAY_DAY when daily precipSum=20 but hourly precip=0', async () => {
+    const evaluator = new OperationalWeatherWarningsEvaluator(configService);
+    const ctx = buildContext();
+    ctx.now = new Date('2026-05-28T08:00:00.000Z');
+    ctx.snapshotData.timezone = 'Europe/Warsaw';
+
+    ctx.snapshotData.daily = [
+      {
+        date: '2026-05-28',
+        tempMin: 14,
+        tempMax: 20,
+        precipSum: 20,
+        windMax: 20,
+        weatherCode: 63,
+      },
+      {
+        date: '2026-05-29',
+        tempMin: 12,
+        tempMax: 18,
+        precipSum: 0,
+        windMax: 18,
+        weatherCode: 2,
+      },
+    ];
+
+    ctx.snapshotData.hourly = Array.from({ length: 48 }, (_v, i) => ({
+      time: `2026-05-${i < 24 ? '28' : '29'}T${String(i % 24).padStart(2, '0')}:00:00.000Z`,
+      temp: 18,
+      precip: 0,
+      rain: 0,
+      snow: 0,
+      wind: 20,
+      weatherCode: i < 24 ? 63 : 2,
+      isDay: i % 24 >= 4 && i % 24 < 20,
+    }));
+
+    const out = await evaluator.evaluate(ctx);
+    const heavyRainWarning = out.find(
+      (item) => item.code === WarningCode.HEAVY_RAIN_TODAY_DAY,
+    );
+    expect(heavyRainWarning).toBeDefined();
+    expect(heavyRainWarning?.details?.dailyFallback).toBe(true);
+  });
+
+  it('Operational evaluator does NOT use daily fallback for HEAVY_RAIN when hourly data already produced a warning', async () => {
+    const evaluator = new OperationalWeatherWarningsEvaluator(configService);
+    const ctx = buildContext();
+    ctx.now = new Date('2026-05-28T08:00:00.000Z');
+    ctx.snapshotData.timezone = 'Europe/Warsaw';
+
+    ctx.snapshotData.daily = [
+      {
+        date: '2026-05-28',
+        tempMin: 14,
+        tempMax: 20,
+        precipSum: 18,
+        windMax: 20,
+        weatherCode: 63,
+      },
+      {
+        date: '2026-05-29',
+        tempMin: 12,
+        tempMax: 18,
+        precipSum: 0,
+        windMax: 18,
+        weatherCode: 2,
+      },
+    ];
+
+    // hourly DAY window has 14mm (above heavyRainWindowThresholdMm=12) → real warning fires
+    ctx.snapshotData.hourly = Array.from({ length: 48 }, (_v, i) => ({
+      time: `2026-05-${i < 24 ? '28' : '29'}T${String(i % 24).padStart(2, '0')}:00:00.000Z`,
+      temp: 18,
+      precip: i < 24 && i % 24 >= 6 && i % 24 < 18 ? 1.2 : 0, // 12h × 1.2mm = 14.4mm in DAY window
+      rain: 0,
+      snow: 0,
+      wind: 20,
+      weatherCode: i < 24 ? 63 : 2,
+      isDay: i % 24 >= 4 && i % 24 < 20,
+    }));
+
+    const out = await evaluator.evaluate(ctx);
+    const heavyRainWarnings = out.filter(
+      (item) => item.code === WarningCode.HEAVY_RAIN_TODAY_DAY,
+    );
+    // Exactly one warning — the hourly-based one, not a duplicate fallback
+    expect(heavyRainWarnings).toHaveLength(1);
+    expect(heavyRainWarnings[0]?.details?.dailyFallback).toBeFalsy();
+  });
+
+  // Regression: OVERWATERING_PREPARE/CHECK should fire when daily precipSum>=20
+  // even if hourly precip=0 (null scenario). The fix uses Math.max(hourly, daily).
+  it('Operational evaluator DOES emit OVERWATERING warnings when daily precipSum=25 but hourly precip=0', async () => {
+    const evaluator = new OperationalWeatherWarningsEvaluator(configService);
+    const ctx = buildContext();
+    // bed with poor drainage (required for OVERWATERING)
+    ctx.beds[0].soil = { drainage: 'poor' } as never;
+    ctx.now = new Date('2026-05-28T08:00:00.000Z');
+    ctx.snapshotData.timezone = 'Europe/Warsaw';
+
+    ctx.snapshotData.daily = [
+      {
+        date: '2026-05-28',
+        tempMin: 14,
+        tempMax: 20,
+        precipSum: 0,
+        windMax: 18,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-05-29',
+        tempMin: 12,
+        tempMax: 18,
+        precipSum: 25,
+        windMax: 18,
+        weatherCode: 63,
+      },
+    ];
+
+    ctx.snapshotData.hourly = Array.from({ length: 48 }, (_v, i) => ({
+      time: `2026-05-${i < 24 ? '28' : '29'}T${String(i % 24).padStart(2, '0')}:00:00.000Z`,
+      temp: 16,
+      precip: 0, // hourly nulls → 0
+      rain: 0,
+      snow: 0,
+      wind: 18,
+      weatherCode: i < 24 ? 2 : 63,
+      isDay: i % 24 >= 4 && i % 24 < 20,
+    }));
+
+    const out = await evaluator.evaluate(ctx);
+    expect(
+      out.some(
+        (item) => item.code === WarningCode.OVERWATERING_PREPARE_TOMORROW,
+      ),
+    ).toBe(true);
+  });
 });

@@ -83,9 +83,13 @@ export class OperationalWeatherWarningsEvaluator
     );
 
     const dailyTempMinByDate = new Map<string, number>();
+    const dailyPrecipByDate = new Map<string, number>();
     for (const day of ctx.snapshotData?.daily ?? []) {
       if (typeof day.date === 'string' && typeof day.tempMin === 'number') {
         dailyTempMinByDate.set(day.date, day.tempMin);
+      }
+      if (typeof day.date === 'string' && typeof day.precipSum === 'number') {
+        dailyPrecipByDate.set(day.date, day.precipSum);
       }
     }
 
@@ -264,6 +268,10 @@ export class OperationalWeatherWarningsEvaluator
         });
       }
 
+      // Track whether hourly data already produced any HEAVY_RAIN warning for
+      // this date. Used below to decide whether to apply the daily fallback.
+      let heavyRainEmittedFromHourly = false;
+
       (['DAY', 'NIGHT'] as const).forEach((dayPart) => {
         const metrics = dayMetrics[dayPart];
         const rainCode =
@@ -289,6 +297,7 @@ export class OperationalWeatherWarningsEvaluator
           (metrics.precipSumMm >= heavyRainWindowThresholdMm ||
             metrics.peakPrecipMm >= heavyRainPeakThresholdMm)
         ) {
+          heavyRainEmittedFromHourly = true;
           result.push({
             scope: WarningScope.USER,
             code: rainCode,
@@ -354,8 +363,76 @@ export class OperationalWeatherWarningsEvaluator
         }
       });
 
-      const totalPrecipMm =
+      const hourlyPrecipMm =
         dayMetrics.DAY.precipSumMm + dayMetrics.NIGHT.precipSumMm;
+      // Prefer daily precipSum as the authoritative source: Open-Meteo's daily
+      // precipitation_sum is always fully populated, while hourly precipitation
+      // can contain null values silently converted to 0, causing undercount.
+      // Use the higher of the two values to avoid false watering recommendations
+      // when hourly data is incomplete.
+      const dailyPrecipMm = dailyPrecipByDate.get(localDate) ?? 0;
+      const totalPrecipMm = Math.max(hourlyPrecipMm, dailyPrecipMm);
+
+      // Diagnostic: log when daily and hourly precipitation diverge significantly.
+      // A large gap indicates incomplete hourly data (null→0 conversion) from Open-Meteo.
+      const precipDivergenceMm = dailyPrecipMm - hourlyPrecipMm;
+      if (precipDivergenceMm > 5) {
+        this.logger.warn(
+          `[DIAG] precip divergence user=${ctx.user.id} localDate=${localDate} ` +
+            `hourlySum=${hourlyPrecipMm.toFixed(2)} dailySum=${dailyPrecipMm.toFixed(2)} ` +
+            `diff=${precipDivergenceMm.toFixed(2)} — hourly data may be incomplete (null→0)`,
+        );
+      }
+
+      // Daily fallback for HEAVY_RAIN: when hourly data is incomplete (null→0) but
+      // daily.precipSum exceeds the heavy-rain threshold, emit a single all-day warning.
+      // We cannot reliably split the daily total into DAY/NIGHT without hourly data, so
+      // we use the _DAY variant with dayPartLabel='w ciągu dnia' as a conservative signal.
+      // The dedupeKey matches the regular _DAY key so that if hourly data later becomes
+      // available and produces its own _DAY warning, the record is simply updated.
+      if (
+        outdoorBeds.length > 0 &&
+        !heavyRainEmittedFromHourly &&
+        dailyPrecipMm >= heavyRainWindowThresholdMm
+      ) {
+        const fallbackRainCode =
+          dayIndex === 0
+            ? WarningCode.HEAVY_RAIN_TODAY_DAY
+            : WarningCode.HEAVY_RAIN_TOMORROW_DAY;
+
+        result.push({
+          scope: WarningScope.USER,
+          code: fallbackRainCode,
+          values: {
+            dayLabel,
+            dayPartLabel: 'w ciągu dnia',
+            precipSumMm: Number(dailyPrecipMm.toFixed(2)),
+            thresholdMm: heavyRainWindowThresholdMm,
+          },
+          details: {
+            localDate,
+            dayPart: 'DAY',
+            dayLabel,
+            precipSumMm: Number(dailyPrecipMm.toFixed(2)),
+            peakPrecipMm: 0,
+            thresholdMm: heavyRainWindowThresholdMm,
+            affectedBeds,
+            affectedBedsCount: affectedBeds.length,
+            dailyFallback: true,
+          },
+          validFrom: bounds.start,
+          validTo: bounds.end,
+          snapshotFetchedAt: ctx.snapshotFetchedAt,
+          weatherBasis: ctx.weatherBasis,
+          dedupeKey: dedupeKeyFor({
+            userId: ctx.user.id,
+            code: fallbackRainCode,
+            localDate,
+            dayPart: 'DAY',
+          }),
+        });
+      }
+
       const maxTempC = Math.max(
         dayMetrics.DAY.maxTempC,
         dayMetrics.NIGHT.maxTempC,
@@ -366,7 +443,7 @@ export class OperationalWeatherWarningsEvaluator
       );
 
       this.logger.debug(
-        `metrics user=${ctx.user.id} localDate=${localDate} day=${dayIndex === 0 ? 'today' : 'tomorrow'} nightMin=${nightValid ? nightMin.toFixed(1) : 'NA'} dayPrecip=${dayMetrics.DAY.precipSumMm.toFixed(2)} nightPrecip=${dayMetrics.NIGHT.precipSumMm.toFixed(2)} dayWindMax=${dayMetrics.DAY.maxWindKmh.toFixed(1)} nightWindMax=${dayMetrics.NIGHT.maxWindKmh.toFixed(1)} totalPrecip=${totalPrecipMm.toFixed(2)} maxTemp=${Number.isFinite(maxTempC) ? maxTempC.toFixed(1) : 'NA'} maxWind=${maxWindKmh.toFixed(1)}`,
+        `metrics user=${ctx.user.id} localDate=${localDate} day=${dayIndex === 0 ? 'today' : 'tomorrow'} nightMin=${nightValid ? nightMin.toFixed(1) : 'NA'} dayPrecip=${dayMetrics.DAY.precipSumMm.toFixed(2)} nightPrecip=${dayMetrics.NIGHT.precipSumMm.toFixed(2)} dayWindMax=${dayMetrics.DAY.maxWindKmh.toFixed(1)} nightWindMax=${dayMetrics.NIGHT.maxWindKmh.toFixed(1)} hourlyPrecip=${hourlyPrecipMm.toFixed(2)} dailyPrecip=${dailyPrecipMm.toFixed(2)} totalPrecip=${totalPrecipMm.toFixed(2)} maxTemp=${Number.isFinite(maxTempC) ? maxTempC.toFixed(1) : 'NA'} maxWind=${maxWindKmh.toFixed(1)}`,
       );
 
       if (
