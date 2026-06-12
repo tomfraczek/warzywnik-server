@@ -24,8 +24,6 @@ export class LifecycleSuggestionService {
         status: {
           $in: [
             PlantingStatus.NEW,
-            PlantingStatus.SEEDLING_PREPARED,
-            PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT,
             PlantingStatus.IN_GROUND,
             PlantingStatus.READY_FOR_FINAL_HARVEST,
           ],
@@ -37,19 +35,6 @@ export class LifecycleSuggestionService {
     );
 
     for (const planting of candidates) {
-      if (
-        planting.status === PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT &&
-        planting.transplantedAt == null
-      ) {
-        await this.notificationEventService.publishLifecycleSuggestionEvent({
-          userId: planting.user.id,
-          plantingId: planting.id,
-          bedId: planting.bed.id,
-          suggestedAction: `Rozsada ${planting.vegetable.name} może być gotowa do przesadzenia.`,
-          priority: NotificationPriority.NORMAL,
-        });
-      }
-
       if (
         planting.harvestWindowStart &&
         planting.harvestWindowStart >= now &&

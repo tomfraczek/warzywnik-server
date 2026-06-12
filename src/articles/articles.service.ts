@@ -421,10 +421,7 @@ export class ArticlesService {
   private deriveContextsForPlanting(planting: Planting): Set<ArticleContext> {
     const contexts = new Set<ArticleContext>([ArticleContext.LEARNING]);
 
-    if (
-      planting.status === PlantingStatus.NEW ||
-      planting.status === PlantingStatus.SEEDLING_PREPARED
-    ) {
+    if (planting.status === PlantingStatus.NEW) {
       contexts.add(ArticleContext.PLANNING);
       contexts.add(ArticleContext.SOWING);
     }

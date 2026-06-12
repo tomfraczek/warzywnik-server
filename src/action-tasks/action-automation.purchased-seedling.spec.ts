@@ -3,12 +3,11 @@
  *
  * Covers:
  *  1. Lifecycle path: NEW → IN_GROUND → READY_FOR_FINAL_HARVEST → HARVESTED → CLEARED
- *  2. SEEDLING_PREPARED / SEEDLING_READY_FOR_TRANSPLANT are not allowed
- *  3. transplantedAt (not sowedAt) is the anchor date for IN_GROUND transition
- *  4. harvest window calculated from transplantedAt
- *  5. ON_SOWED / AFTER_SOWING_DAYS rules do NOT generate tasks (no sowedAt)
- *  6. ON_TRANSPLANTED / AFTER_TRANSPLANT_DAYS rules work via transplantedAt
- *  7. getCoverage() accounts for PURCHASED_SEEDLING
+ *  2. transplantedAt (not sowedAt) is the anchor date for IN_GROUND transition
+ *  3. harvest window calculated from transplantedAt
+ *  4. ON_SOWED / AFTER_SOWING_DAYS rules do NOT generate tasks (no sowedAt)
+ *  5. ON_TRANSPLANTED / AFTER_TRANSPLANT_DAYS rules work via transplantedAt
+ *  6. getCoverage() accounts for PURCHASED_SEEDLING
  */
 
 import {
@@ -86,11 +85,6 @@ describe('PURCHASED_SEEDLING lifecycle path', () => {
     ]);
   });
 
-  it('does NOT include SEEDLING_PREPARED or SEEDLING_READY_FOR_TRANSPLANT', () => {
-    const path = getLifecyclePath(PlantingStartMethod.PURCHASED_SEEDLING);
-    expect(path).not.toContain(PlantingStatus.SEEDLING_PREPARED);
-    expect(path).not.toContain(PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT);
-  });
 });
 
 // ─── 2. isStatusAllowedForStartMethod ────────────────────────────────────────
@@ -114,23 +108,6 @@ describe('PURCHASED_SEEDLING — isStatusAllowedForStartMethod', () => {
     ).toBe(true);
   });
 
-  it('does NOT allow SEEDLING_PREPARED', () => {
-    expect(
-      isStatusAllowedForStartMethod(
-        PlantingStatus.SEEDLING_PREPARED,
-        PlantingStartMethod.PURCHASED_SEEDLING,
-      ),
-    ).toBe(false);
-  });
-
-  it('does NOT allow SEEDLING_READY_FOR_TRANSPLANT', () => {
-    expect(
-      isStatusAllowedForStartMethod(
-        PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT,
-        PlantingStartMethod.PURCHASED_SEEDLING,
-      ),
-    ).toBe(false);
-  });
 });
 
 // ─── 3. Allowed status transitions ───────────────────────────────────────────
@@ -144,14 +121,6 @@ describe('PURCHASED_SEEDLING — getAllowedStatusTransitions', () => {
     expect(allowed).toContain(PlantingStatus.IN_GROUND);
     expect(allowed).toContain(PlantingStatus.FAILED);
     expect(allowed).toContain(PlantingStatus.CANCELLED);
-  });
-
-  it('from NEW does NOT allow SEEDLING_PREPARED', () => {
-    const allowed = getAllowedStatusTransitions(
-      PlantingStatus.NEW,
-      PlantingStartMethod.PURCHASED_SEEDLING,
-    );
-    expect(allowed).not.toContain(PlantingStatus.SEEDLING_PREPARED);
   });
 
   it('from IN_GROUND allows READY_FOR_FINAL_HARVEST', () => {

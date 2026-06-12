@@ -38,13 +38,6 @@ export class GerminationTooColdEvaluator implements WeatherWarningEvaluator {
 
     return ctx.plantings
       .filter((planting) => {
-        if (
-          planting.status === PlantingStatus.SEEDLING_PREPARED ||
-          planting.status === PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT
-        ) {
-          return true;
-        }
-
         if (planting.status !== PlantingStatus.IN_GROUND) {
           return false;
         }

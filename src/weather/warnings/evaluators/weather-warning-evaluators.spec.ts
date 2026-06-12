@@ -3,7 +3,10 @@ import { WarningCode } from '../../../common/enums/warning.enums';
 import { CultivationEnvironment } from '../../../common/enums/bed.enums';
 import { Bed } from '../../../beds/bed.entity';
 import { Planting } from '../../../plantings/planting.entity';
-import { PlantingStatus } from '../../../common/enums/planting.enums';
+import {
+  PlantingStartMethod,
+  PlantingStatus,
+} from '../../../common/enums/planting.enums';
 import { User } from '../../../users/user.entity';
 import { WeatherWarningConfigService } from '../weather-warning-config.service';
 import { DroughtRiskNext7DaysEvaluator } from './drought-risk-next-7-days.evaluator';
@@ -158,6 +161,17 @@ describe('Weather warning evaluators', () => {
     const evaluator = new GerminationTooColdEvaluator(configService);
     const ctx = buildContext();
     ctx.snapshotData.hourly[0].temp = 4;
+    ctx.plantings = [
+      {
+        ...ctx.plantings[0],
+        status: PlantingStatus.IN_GROUND,
+        startMethod: PlantingStartMethod.DIRECT_SOW,
+        sowedAt: new Date('2026-02-25T10:00:00.000Z'),
+        actualStartDate: new Date('2026-02-25T10:00:00.000Z'),
+        transplantedAt: null,
+        plannedStartDate: new Date('2026-02-25T10:00:00.000Z'),
+      } as unknown as Planting,
+    ];
     const out = await evaluator.evaluate(ctx);
     expect(out[0]?.code).toBe(WarningCode.GERMINATION_TOO_COLD);
   });

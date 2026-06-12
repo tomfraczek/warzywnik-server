@@ -593,56 +593,6 @@ export class OperationalWeatherWarningsEvaluator
         riskyNightTempC < germinationMinTempC
       ) {
         supportedPlantings.forEach((planting) => {
-          if (
-            planting.status === PlantingStatus.SEEDLING_PREPARED ||
-            planting.status === PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT
-          ) {
-            const code =
-              dayIndex === 0
-                ? WarningCode.SOWING_PAUSE_TOO_COLD_TODAY
-                : WarningCode.SOWING_PAUSE_TOO_COLD_TOMORROW;
-
-            result.push({
-              scope: WarningScope.PLANTING,
-              code,
-              bedId: planting.bed.id,
-              plantingId: planting.id,
-              values: {
-                dayLabel,
-                dayPartLabel: 'w nocy',
-                bedName: normalizeBedName(planting.bed.name),
-                vegetableName: planting.vegetable.name,
-                minTempC: Number(riskyNightTempC.toFixed(1)),
-                thresholdC: germinationMinTempC,
-              },
-              details: {
-                localDate,
-                dayPart: 'NIGHT',
-                dayLabel,
-                plantingState: planting.status,
-                usedFallback: true,
-                bedId: planting.bed.id,
-                bedName: normalizeBedName(planting.bed.name),
-                plantingId: planting.id,
-                vegetableName: planting.vegetable.name,
-                minTempC: Number(riskyNightTempC.toFixed(1)),
-                thresholdC: germinationMinTempC,
-              },
-              validFrom: bounds.start,
-              validTo: bounds.end,
-              snapshotFetchedAt: ctx.snapshotFetchedAt,
-              weatherBasis: ctx.weatherBasis,
-              dedupeKey: dedupeKeyFor({
-                userId: ctx.user.id,
-                code,
-                plantingId: planting.id,
-                localDate,
-                dayPart: 'NIGHT',
-              }),
-            });
-            return;
-          }
-
           if (planting.status !== PlantingStatus.IN_GROUND) {
             return;
           }

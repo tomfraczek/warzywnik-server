@@ -199,7 +199,7 @@ describe('allowedPlantingStatuses filter logic', () => {
     ).toHaveLength(1);
   });
 
-  it('podwiazywanie-roslin excluded for SEEDLING_PREPARED', () => {
+  it('podwiazywanie-roslin excluded for NEW', () => {
     const rule = makeRule(
       'r1',
       ActionRuleTrigger.ON_SOWED,
@@ -211,12 +211,12 @@ describe('allowedPlantingStatuses filter logic', () => {
     expect(
       applyStatusFilter(
         [{ rule, dueAt: now }],
-        PlantingStatus.SEEDLING_PREPARED,
+        PlantingStatus.NEW,
       ),
     ).toHaveLength(0);
   });
 
-  it('ROUTINE planting task excluded for SEEDLING_PREPARED (default guard)', () => {
+  it('ROUTINE planting task excluded for NEW (default guard)', () => {
     const rule = makeRule(
       'r1',
       ActionRuleTrigger.ON_SOWED,
@@ -229,7 +229,7 @@ describe('allowedPlantingStatuses filter logic', () => {
     expect(
       applyStatusFilter(
         [{ rule, dueAt: now }],
-        PlantingStatus.SEEDLING_PREPARED,
+        PlantingStatus.NEW,
       ),
     ).toHaveLength(0);
   });

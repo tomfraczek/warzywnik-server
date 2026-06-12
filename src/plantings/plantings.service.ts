@@ -1606,12 +1606,7 @@ export class PlantingsService {
   ): boolean {
     const shouldInitialize =
       previousStatus === PlantingStatus.NEW &&
-      ((planting.startMethod === PlantingStartMethod.DIRECT_SOW &&
-        nextStatus === PlantingStatus.IN_GROUND) ||
-        (planting.startMethod === PlantingStartMethod.TRANSPLANT &&
-          nextStatus === PlantingStatus.SEEDLING_PREPARED) ||
-        (planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING &&
-          nextStatus === PlantingStatus.IN_GROUND));
+      nextStatus === PlantingStatus.IN_GROUND;
 
     if (!shouldInitialize) {
       return false;
@@ -1621,10 +1616,10 @@ export class PlantingsService {
     planting.actualStartDate = now;
     planting.plannedStartDate = now;
 
-    if (planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING) {
-      planting.transplantedAt = planting.transplantedAt ?? now;
-    } else {
+    if (planting.startMethod === PlantingStartMethod.DIRECT_SOW) {
       planting.sowedAt = planting.sowedAt ?? now;
+    } else if (planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING) {
+      planting.transplantedAt = planting.transplantedAt ?? now;
     }
 
     const harvestWindow = this.computeHarvestWindow(vegetable, now);
@@ -1635,36 +1630,19 @@ export class PlantingsService {
   }
 
   private resolveCultivationStartDate(planting: Planting): Date | null {
-    const startedStatusesForDirectSow = new Set<PlantingStatus>([
+    const startedStatuses = new Set<PlantingStatus>([
       PlantingStatus.IN_GROUND,
       PlantingStatus.READY_FOR_FINAL_HARVEST,
       PlantingStatus.HARVESTED,
       PlantingStatus.CLEARED,
     ]);
 
-    const startedStatusesForTransplant = new Set<PlantingStatus>([
-      PlantingStatus.SEEDLING_PREPARED,
-      PlantingStatus.SEEDLING_READY_FOR_TRANSPLANT,
-      PlantingStatus.IN_GROUND,
-      PlantingStatus.READY_FOR_FINAL_HARVEST,
-      PlantingStatus.HARVESTED,
-      PlantingStatus.CLEARED,
-    ]);
-
-    if (planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING) {
-      if (!startedStatusesForDirectSow.has(planting.status)) {
-        return null;
-      }
-      return planting.transplantedAt ?? planting.plannedStartDate;
+    if (!startedStatuses.has(planting.status)) {
+      return null;
     }
 
-    const started =
-      planting.startMethod === PlantingStartMethod.DIRECT_SOW
-        ? startedStatusesForDirectSow.has(planting.status)
-        : startedStatusesForTransplant.has(planting.status);
-
-    if (!started) {
-      return null;
+    if (planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING) {
+      return planting.transplantedAt ?? planting.plannedStartDate;
     }
 
     return (
