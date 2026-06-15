@@ -21,6 +21,7 @@ import { GerminationTooColdEvaluator } from './evaluators/germination-too-cold.e
 import { OperationalWeatherWarningsEvaluator } from './evaluators/operational-weather-warnings.evaluator';
 import { GreenhouseWeatherWarningsEvaluator } from './evaluators/greenhouse-weather-warnings.evaluator';
 import { ACTIVE_PLANTING_STATUSES } from '../../plantings/planting-lifecycle';
+import { resolveWarningContradictions } from './weather-warning-guards';
 
 @Injectable()
 export class WeatherWarningOrchestratorService {
@@ -103,8 +104,9 @@ export class WeatherWarningOrchestratorService {
     };
 
     const allInputs = await this.evaluateAll(context);
+    const resolved = resolveWarningContradictions(allInputs);
     const deduped = new Map<string, WarningInstanceUpsertInput>();
-    for (const input of allInputs) {
+    for (const input of resolved) {
       deduped.set(input.dedupeKey, input);
     }
 
