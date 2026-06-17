@@ -35,13 +35,24 @@ export class UsersService {
     let user = await this.em.findOne(User, { clerkUserId });
 
     if (!user) {
-      user = new User();
-      user.clerkUserId = clerkUserId;
-      user.email = email ?? null;
-      user.displayName = displayName ?? null;
-      user.lastLoginAt = new Date();
-      await this.em.persistAndFlush(user);
-      return user;
+      try {
+        user = new User();
+        user.clerkUserId = clerkUserId;
+        user.email = email ?? null;
+        user.displayName = displayName ?? null;
+        user.lastLoginAt = new Date();
+        await this.em.persistAndFlush(user);
+        return user;
+      } catch (err: unknown) {
+        const isUniqueViolation =
+          err instanceof Error && err.message.includes('duplicate key value violates unique constraint');
+        if (!isUniqueViolation) throw err;
+        // concurrent insert race — detach the failed entity so UoW doesn't retry,
+        // then re-fetch the row that the winning request committed
+        this.em.detach(user);
+        user = await this.em.findOne(User, { clerkUserId });
+        if (!user) throw err;
+      }
     }
 
     let changed = false;
