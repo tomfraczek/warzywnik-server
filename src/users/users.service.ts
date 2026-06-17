@@ -32,47 +32,19 @@ export class UsersService {
   }): Promise<User> {
     const { clerkUserId, email, displayName } = params;
 
-    let user = await this.em.findOne(User, { clerkUserId });
-
-    if (!user) {
-      try {
-        user = new User();
-        user.clerkUserId = clerkUserId;
-        user.email = email ?? null;
-        user.displayName = displayName ?? null;
-        user.lastLoginAt = new Date();
-        await this.em.persistAndFlush(user);
-        return user;
-      } catch (err: unknown) {
-        const isUniqueViolation =
-          err instanceof Error && err.message.includes('duplicate key value violates unique constraint');
-        if (!isUniqueViolation) throw err;
-        // concurrent insert race — detach the failed entity so UoW doesn't retry,
-        // then re-fetch the row that the winning request committed
-        this.em.detach(user);
-        user = await this.em.findOne(User, { clerkUserId });
-        if (!user) throw err;
-      }
-    }
-
-    let changed = false;
-
-    if (email !== undefined && email !== user.email) {
-      user.email = email;
-      changed = true;
-    }
-
-    if (displayName !== undefined && displayName !== user.displayName) {
-      user.displayName = displayName;
-      changed = true;
-    }
-
-    user.lastLoginAt = new Date();
-    changed = true;
-
-    if (changed) {
-      await this.em.flush();
-    }
+    const user = await this.em.upsert(
+      User,
+      {
+        clerkUserId,
+        ...(email !== undefined && { email }),
+        ...(displayName !== undefined && { displayName }),
+        lastLoginAt: new Date(),
+      },
+      {
+        onConflictFields: ['clerkUserId'],
+        onConflictMergeFields: ['email', 'displayName', 'lastLoginAt'],
+      },
+    );
 
     return user;
   }
