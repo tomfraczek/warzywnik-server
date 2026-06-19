@@ -111,6 +111,8 @@ export class UsersController {
       'locationLat',
       'locationLon',
       'locationUpdatedAt',
+      'automaticTasksEnabled',
+      'displayTutorials',
     ];
 
     const row = [
@@ -128,6 +130,8 @@ export class UsersController {
       data.locationLat != null ? String(data.locationLat) : '',
       data.locationLon != null ? String(data.locationLon) : '',
       data.locationUpdatedAt ? data.locationUpdatedAt.toISOString() : '',
+      String(data.automaticTasksEnabled),
+      String(data.displayTutorials),
     ].map((value) => this.escapeCsvValue(value));
 
     return `${header.join(',')}\n${row.join(',')}\n`;

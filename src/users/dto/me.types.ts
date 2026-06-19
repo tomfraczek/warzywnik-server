@@ -23,4 +23,5 @@ export type MeResponse = {
   locationLon: number | null;
   locationUpdatedAt: Date | null;
   automaticTasksEnabled: boolean;
+  displayTutorials: boolean;
 };
