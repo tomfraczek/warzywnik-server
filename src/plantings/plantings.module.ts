@@ -11,6 +11,7 @@ import { ActionTasksModule } from '../action-tasks/action-tasks.module';
 import { PlantingInsightsModule } from '../planting-insights/planting-insights.module';
 import { AnalyticsModule } from '../analytics/analytics.module';
 import { PlanChecklistsModule } from '../plan-checklists/plan-checklists.module';
+import { EntitlementsModule } from '../entitlements/entitlements.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PlanChecklistsModule } from '../plan-checklists/plan-checklists.module'
     PlantingInsightsModule,
     AnalyticsModule,
     PlanChecklistsModule,
+    EntitlementsModule,
   ],
   providers: [PlantingsService],
   controllers: [PlantingsController],

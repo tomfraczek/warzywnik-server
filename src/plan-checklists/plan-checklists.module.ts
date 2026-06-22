@@ -11,6 +11,7 @@ import { Soil } from '../soils/soil.entity';
 import { FertilizerType } from '../fertilizers/fertilizer-type.entity';
 import { User } from '../users/user.entity';
 import { PlanChecklistTemplatesSeedService } from './plan-checklist-templates.seed.service';
+import { EntitlementsModule } from '../entitlements/entitlements.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PlanChecklistTemplatesSeedService } from './plan-checklist-templates.se
       FertilizerType,
       User,
     ]),
+    EntitlementsModule,
   ],
   providers: [PlanChecklistsService, PlanChecklistTemplatesSeedService],
   controllers: [PlanChecklistsController],

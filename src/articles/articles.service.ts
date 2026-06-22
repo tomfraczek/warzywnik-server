@@ -6,6 +6,7 @@ import {
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Article } from './article.entity';
 import { toSlug } from '../common/utils/slug.util';
+import { EntitlementsService } from '../entitlements/entitlements.service';
 import {
   CreateArticleDto,
   ListArticlesQueryDto,
@@ -52,6 +53,7 @@ export class ArticlesService {
     private readonly em: EntityManager,
     private readonly analyticsService: AnalyticsService,
     private readonly notificationEventService: NotificationEventService,
+    private readonly entitlementsService: EntitlementsService,
   ) {}
 
   async listPublic(query: ListArticlesQueryDto) {
@@ -158,7 +160,8 @@ export class ArticlesService {
       userId: user?.id ?? null,
     });
 
-    return this.serializeDetail(entity);
+    const isPremium = user ? this.entitlementsService.isPremium(user) : false;
+    return this.serializeDetail(entity, isPremium);
   }
 
   async getPublicBySlug(slug: string, user?: User | null) {
@@ -472,13 +475,14 @@ export class ArticlesService {
     };
   }
 
-  private serializeDetail(article: Article) {
+  private serializeDetail(article: Article, isPremium = true) {
     return {
       id: article.id,
       slug: article.slug,
       title: article.title,
       excerpt: article.excerpt,
-      content: article.content,
+      content: isPremium ? article.content : null,
+      fullArticlesLocked: !isPremium,
       coverImageUrl: article.coverImageUrl ?? null,
       coverUpdatedAt: article.coverUpdatedAt?.toISOString() ?? null,
       months: article.months ?? [],

@@ -7,12 +7,14 @@ import { Planting } from '../plantings/planting.entity';
 import { Pest } from '../pests/pest.entity';
 import { RemindersModule } from '../reminders/reminders.module';
 import { PlantingInsightsModule } from '../planting-insights/planting-insights.module';
+import { EntitlementsModule } from '../entitlements/entitlements.module';
 
 @Module({
   imports: [
     MikroOrmModule.forFeature([PestOccurrence, Planting, Pest]),
     RemindersModule,
     PlantingInsightsModule,
+    EntitlementsModule,
   ],
   providers: [PestOccurrencesService],
   controllers: [PestOccurrencesController],

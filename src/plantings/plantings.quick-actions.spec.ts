@@ -1,6 +1,14 @@
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PlantingsService } from './plantings.service';
 import { WarningsService } from '../warning-rules/warnings.service';
+import { EntitlementsService } from '../entitlements/entitlements.service';
+
+const premiumEntitlementsService = {
+  isPremium: () => true,
+  resolveSource: () => 'subscription',
+  getEntitlements: jest.fn(),
+  getLimits: jest.fn(),
+} as unknown as EntitlementsService;
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
 import { PlantingInsightsService } from '../planting-insights/planting-insights.service';
 import { AnalyticsService } from '../analytics/analytics.service';
@@ -53,6 +61,7 @@ describe('PlantingsService quick actions', () => {
       actionAutomationService,
       plantingInsightsService,
       analyticsService,
+      premiumEntitlementsService,
     );
 
     return { em, service, recordEvent, recomputeForPlanting };

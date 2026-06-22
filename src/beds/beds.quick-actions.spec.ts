@@ -6,6 +6,14 @@ import { ActionAutomationService } from '../action-tasks/action-automation.servi
 import { ActionTask } from '../action-tasks/action-task.entity';
 import { User } from '../users/user.entity';
 import { BedQuickActionKind } from '../common/enums/quick-action.enums';
+import { EntitlementsService } from '../entitlements/entitlements.service';
+
+const premiumEntitlementsService = {
+  isPremium: () => true,
+  resolveSource: () => 'subscription',
+  getEntitlements: jest.fn(),
+  getLimits: jest.fn(),
+} as unknown as EntitlementsService;
 
 describe('BedsService quick actions', () => {
   it('records bed NOTE as timeline events and recomputes plantings', async () => {
@@ -39,6 +47,7 @@ describe('BedsService quick actions', () => {
       weatherRecomputeService,
       plantingInsightsService,
       actionAutomationService,
+      premiumEntitlementsService,
     );
 
     const occurredAt = '2026-05-06T09:00:00.000Z';
@@ -156,6 +165,7 @@ describe('BedsService quick actions', () => {
       weatherRecomputeService,
       plantingInsightsService,
       actionAutomationService,
+      premiumEntitlementsService,
     );
 
     const result = await (
@@ -230,6 +240,7 @@ describe('BedsService quick actions', () => {
       weatherRecomputeService,
       plantingInsightsService,
       actionAutomationService,
+      premiumEntitlementsService,
     );
 
     await (

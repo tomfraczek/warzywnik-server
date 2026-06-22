@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { User } from '../users/user.entity';
@@ -21,8 +22,12 @@ import {
   PatchPlanChecklistItemDto,
 } from './dto/plan-checklist.schemas';
 import { PlanChecklistsService } from './plan-checklists.service';
+import { PremiumGuard } from '../entitlements/premium.guard';
+import { RequirePremium } from '../entitlements/require-premium.decorator';
 
 @Controller()
+@UseGuards(PremiumGuard)
+@RequirePremium('gardenPlanner')
 export class PlanChecklistsController {
   constructor(private readonly planChecklistsService: PlanChecklistsService) {}
 

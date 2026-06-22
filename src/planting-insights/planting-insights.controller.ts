@@ -1,6 +1,15 @@
-import { Controller, Get, Param, ParseUUIDPipe, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { PlantingInsightsService } from './planting-insights.service';
 import { User } from '../users/user.entity';
+import { PremiumGuard } from '../entitlements/premium.guard';
+import { RequirePremium } from '../entitlements/require-premium.decorator';
 
 @Controller()
 export class PlantingInsightsController {
@@ -17,6 +26,8 @@ export class PlantingInsightsController {
   }
 
   @Get('v1/plantings/:id/season-comparison')
+  @UseGuards(PremiumGuard)
+  @RequirePremium('seasonStatistics')
   getSeasonComparison(
     @Req() req: { userEntity?: User },
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -28,6 +39,8 @@ export class PlantingInsightsController {
   }
 
   @Get('v1/beds/:bedId/seasons')
+  @UseGuards(PremiumGuard)
+  @RequirePremium('seasonStatistics')
   getBedSeasons(
     @Req() req: { userEntity?: User },
     @Param('bedId', new ParseUUIDPipe()) bedId: string,

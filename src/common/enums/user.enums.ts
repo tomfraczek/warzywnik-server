@@ -3,6 +3,11 @@ export enum UserSubscription {
   PREMIUM = 'PREMIUM',
 }
 
+export enum SubscriptionPlan {
+  FREE = 'free',
+  PREMIUM = 'premium',
+}
+
 export enum Units {
   METRIC = 'METRIC',
   IMPERIAL = 'IMPERIAL',

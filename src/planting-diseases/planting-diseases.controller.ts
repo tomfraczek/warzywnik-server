@@ -10,6 +10,7 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { PlantingDiseasesService } from './planting-diseases.service';
 import {
@@ -22,12 +23,16 @@ import {
 } from './dto/planting-disease.schemas';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { User } from '../users/user.entity';
+import { PremiumGuard } from '../entitlements/premium.guard';
+import { RequirePremium } from '../entitlements/require-premium.decorator';
 
 type RequestWithUser = {
   userEntity?: User;
 };
 
 @Controller()
+@UseGuards(PremiumGuard)
+@RequirePremium('cropDiseaseHistory')
 export class PlantingDiseasesController {
   constructor(
     private readonly plantingDiseasesService: PlantingDiseasesService,

@@ -27,6 +27,7 @@ import {
   updateMyLocationSchema,
 } from './dto/location.schemas';
 import { UserLocationResponseDto } from './dto/location.types';
+import { EntitlementsService } from '../entitlements/entitlements.service';
 
 type RequestWithUser = {
   userEntity?: User;
@@ -34,12 +35,21 @@ type RequestWithUser = {
 
 @Controller('v1')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly entitlementsService: EntitlementsService,
+  ) {}
 
   @Get('me')
   me(@Req() req: RequestWithUser): Promise<MeResponse> {
     const user = this.getUserFromRequest(req);
     return this.usersService.getMe(user.id);
+  }
+
+  @Get('users/me/entitlements')
+  getEntitlements(@Req() req: RequestWithUser) {
+    const user = this.getUserFromRequest(req);
+    return this.entitlementsService.getEntitlements(user);
   }
 
   @Patch('me')

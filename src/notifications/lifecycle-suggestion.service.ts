@@ -5,12 +5,14 @@ import { Planting } from '../plantings/planting.entity';
 import { PlantingStatus } from '../common/enums/planting.enums';
 import { NotificationEventService } from './notification-event.service';
 import { NotificationPriority } from '../common/enums/notification.enums';
+import { EntitlementsService } from '../entitlements/entitlements.service';
 
 @Injectable()
 export class LifecycleSuggestionService {
   constructor(
     private readonly em: EntityManager,
     private readonly notificationEventService: NotificationEventService,
+    private readonly entitlementsService: EntitlementsService,
   ) {}
 
   @Cron('15 */3 * * *', { name: 'notification-lifecycle-suggestions' })
@@ -35,6 +37,10 @@ export class LifecycleSuggestionService {
     );
 
     for (const planting of candidates) {
+      if (!this.entitlementsService.isPremium(planting.user)) {
+        continue;
+      }
+
       if (
         planting.harvestWindowStart &&
         planting.harvestWindowStart >= now &&

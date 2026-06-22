@@ -9,6 +9,7 @@ import { GrowingSpace } from '../growing-spaces/growing-space.entity';
 import { PlantingInsightsModule } from '../planting-insights/planting-insights.module';
 import { ActionTasksModule } from '../action-tasks/action-tasks.module';
 import { PlanChecklistsModule } from '../plan-checklists/plan-checklists.module';
+import { EntitlementsModule } from '../entitlements/entitlements.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PlanChecklistsModule } from '../plan-checklists/plan-checklists.module'
     PlantingInsightsModule,
     ActionTasksModule,
     PlanChecklistsModule,
+    EntitlementsModule,
   ],
   controllers: [BedsController],
   providers: [BedsService],

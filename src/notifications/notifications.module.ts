@@ -28,6 +28,7 @@ import { WarningInstance } from '../weather/warnings/warning-instance.entity';
 import { Planting } from '../plantings/planting.entity';
 import { Article } from '../articles/article.entity';
 import { UserDevice } from '../devices/user-device.entity';
+import { EntitlementsModule } from '../entitlements/entitlements.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { UserDevice } from '../devices/user-device.entity';
       Article,
       UserDevice,
     ]),
+    EntitlementsModule,
   ],
   controllers: [
     NotificationsController,

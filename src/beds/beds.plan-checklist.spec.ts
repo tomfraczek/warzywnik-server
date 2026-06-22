@@ -2,6 +2,14 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { BedsService } from './beds.service';
 import { Bed } from './bed.entity';
 import { PlanChecklistsService } from '../plan-checklists/plan-checklists.service';
+import { EntitlementsService } from '../entitlements/entitlements.service';
+
+const premiumEntitlementsService = {
+  isPremium: () => true,
+  resolveSource: () => 'subscription',
+  getEntitlements: jest.fn(),
+  getLimits: jest.fn(),
+} as unknown as EntitlementsService;
 
 describe('BedsService plan checklist triggers', () => {
   it('recomputes bed plan when depth changes', async () => {
@@ -45,6 +53,7 @@ describe('BedsService plan checklist triggers', () => {
       weatherRecomputeService,
       plantingInsightsService,
       actionAutomationService,
+      premiumEntitlementsService,
       planChecklistsService,
     );
 

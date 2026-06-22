@@ -21,7 +21,8 @@
     "migration:create": "mikro-orm migration:create",
     "migration:up": "mikro-orm migration:up",
     "migration:down": "mikro-orm migration:down",
-    "seed": "ts-node -r tsconfig-paths/register src/seeds/seed-vegetables.ts"
+    "seed": "ts-node -r tsconfig-paths/register src/seeds/seed-vegetables.ts",
+    "seed:dev-premium": "ts-node -r tsconfig-paths/register src/seeds/seed-dev-premium.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.975.0",

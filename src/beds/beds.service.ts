@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   Optional,
@@ -32,6 +34,7 @@ import { PlantingEventType } from '../common/enums/planting-event.enums';
 import { ActionAutomationService } from '../action-tasks/action-automation.service';
 import { PlantingEvent } from '../planting-insights/planting-event.entity';
 import { PlanChecklistsService } from '../plan-checklists/plan-checklists.service';
+import { EntitlementsService } from '../entitlements/entitlements.service';
 
 @Injectable()
 export class BedsService {
@@ -40,6 +43,7 @@ export class BedsService {
     private readonly weatherRecomputeService: WeatherRecomputeService,
     private readonly plantingInsightsService: PlantingInsightsService,
     private readonly actionAutomationService: ActionAutomationService,
+    private readonly entitlementsService: EntitlementsService,
     @Optional()
     private readonly planChecklistsService?: PlanChecklistsService,
   ) {}
@@ -53,6 +57,22 @@ export class BedsService {
 
     if (!bed) {
       throw new NotFoundException('Bed not found');
+    }
+
+    const accessStatus = await this.resolveBedAccessStatus(user, bed);
+    if (accessStatus === 'locked') {
+      throw new HttpException(
+        {
+          code: 'PREMIUM_REQUIRED',
+          message: 'This resource is locked in the Free plan.',
+          details: {
+            reason: 'RESOURCE_LOCKED',
+            resourceType: 'bed',
+            resourceId: bedId,
+          },
+        },
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     const occurredAt = dto.occurredAt
@@ -215,8 +235,19 @@ export class BedsService {
       populate: ['soil', 'growingSpace'],
     });
 
+    const isPremium = this.entitlementsService.isPremium(user);
+    const availableIds = isPremium
+      ? null
+      : await this.resolveAvailableBedIds(user);
+
     return {
-      items: items.map((item) => this.serializeBed(item)),
+      items: items.map((item) => ({
+        ...this.serializeBed(item),
+        accessStatus:
+          isPremium || availableIds === null || availableIds.has(item.id)
+            ? 'available'
+            : 'locked',
+      })),
       page,
       limit,
       total,
@@ -236,10 +267,28 @@ export class BedsService {
       throw new NotFoundException('Bed not found');
     }
 
-    return this.serializeBed(bed);
+    const accessStatus = await this.resolveBedAccessStatus(user, bed);
+
+    return { ...this.serializeBed(bed), accessStatus };
   }
 
   async create(user: User, dto: CreateBedDto) {
+    const isPremium = this.entitlementsService.isPremium(user);
+
+    if (!isPremium) {
+      const count = await this.em.count(Bed, { user: user.id });
+      if (count >= 1) {
+        throw new HttpException(
+          {
+            code: 'PREMIUM_REQUIRED',
+            message: 'This action requires Premium.',
+            details: { reason: 'LIMIT_REACHED', limit: 'beds' },
+          },
+          HttpStatus.FORBIDDEN,
+        );
+      }
+    }
+
     const bed = new Bed();
     bed.user = user;
     bed.name = dto.name;
@@ -273,7 +322,7 @@ export class BedsService {
     await this.em.persistAndFlush(bed);
 
     await this.em.populate(bed, ['soil', 'growingSpace']);
-    return this.serializeBed(bed);
+    return { ...this.serializeBed(bed), accessStatus: 'available' };
   }
 
   async update(user: User, id: string, dto: UpdateBedDto) {
@@ -287,6 +336,22 @@ export class BedsService {
 
     if (!bed) {
       throw new NotFoundException('Bed not found');
+    }
+
+    const accessStatus = await this.resolveBedAccessStatus(user, bed);
+    if (accessStatus === 'locked') {
+      throw new HttpException(
+        {
+          code: 'PREMIUM_REQUIRED',
+          message: 'This resource is locked in the Free plan.',
+          details: {
+            reason: 'RESOURCE_LOCKED',
+            resourceType: 'bed',
+            resourceId: id,
+          },
+        },
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     const previousIsActive = bed.isActive;
@@ -355,7 +420,7 @@ export class BedsService {
 
     // NOTE: Bed changes (soil, depth, measurements) affect planting warnings.
     // Clients should refetch plantings for this bed after updates.
-    return this.serializeBed(bed);
+    return { ...this.serializeBed(bed), accessStatus };
   }
 
   async remove(user: User, id: string) {
@@ -363,6 +428,22 @@ export class BedsService {
       const bed = await em.findOne(Bed, { id, user: user.id });
       if (!bed) {
         throw new NotFoundException('Bed not found');
+      }
+
+      const accessStatus = await this.resolveBedAccessStatus(user, bed);
+      if (accessStatus === 'locked') {
+        throw new HttpException(
+          {
+            code: 'PREMIUM_REQUIRED',
+            message: 'This resource is locked in the Free plan.',
+            details: {
+              reason: 'RESOURCE_LOCKED',
+              resourceType: 'bed',
+              resourceId: id,
+            },
+          },
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       const plantings = await em.find(
@@ -536,6 +617,33 @@ export class BedsService {
       createdAt: bed.createdAt,
       updatedAt: bed.updatedAt,
     };
+  }
+
+  async resolveBedAccessStatus(
+    user: User,
+    bed: Bed,
+  ): Promise<'available' | 'locked'> {
+    if (this.entitlementsService.isPremium(user)) {
+      return 'available';
+    }
+
+    const availableIds = await this.resolveAvailableBedIds(user);
+    return availableIds.has(bed.id) ? 'available' : 'locked';
+  }
+
+  private async resolveAvailableBedIds(user: User): Promise<Set<string>> {
+    const beds = await this.em.find(
+      Bed,
+      { user: user.id },
+      { fields: ['id'], orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] },
+    );
+
+    const availableIds = new Set<string>();
+    if (beds.length > 0) {
+      availableIds.add(beds[0].id);
+    }
+
+    return availableIds;
   }
 
   private async resolveGrowingSpaceForCreate(user: User, dto: CreateBedDto) {

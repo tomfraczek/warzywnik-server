@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   Optional,
@@ -45,6 +47,7 @@ import { PlantingEventType } from '../common/enums/planting-event.enums';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { PlantingEvent } from '../planting-insights/planting-event.entity';
 import { PlanChecklistsService } from '../plan-checklists/plan-checklists.service';
+import { EntitlementsService } from '../entitlements/entitlements.service';
 import {
   ACTIVE_PLANTING_STATUSES,
   getAllowedStatusTransitions,
@@ -80,9 +83,16 @@ export class PlantingsService {
     private readonly actionAutomationService: ActionAutomationService,
     private readonly plantingInsightsService: PlantingInsightsService,
     private readonly analyticsService: AnalyticsService,
+    private readonly entitlementsService: EntitlementsService,
     @Optional()
     private readonly planChecklistsService?: PlanChecklistsService,
   ) {}
+
+  private readonly freePlanActiveStatuses = [
+    PlantingStatus.NEW,
+    PlantingStatus.IN_GROUND,
+    PlantingStatus.READY_FOR_FINAL_HARVEST,
+  ];
 
   async list(user: User, query: ListPlantingsQueryDto) {
     const { page, limit, bedId, status, fromDate, toDate, includeWarnings } =
@@ -132,15 +142,30 @@ export class PlantingsService {
       ? await this.warningsService.getRulesMap(Object.values(WarningCode))
       : undefined;
 
-    return {
-      items: await Promise.all(
-        items.map((item) =>
-          this.serializeWithComputed(item, item.bed, item.vegetable, {
-            includeWarnings: Boolean(includeWarnings),
-            rulesMap,
-          }),
-        ),
+    const isPremium = this.entitlementsService.isPremium(user);
+    const availableIds = isPremium
+      ? null
+      : await this.resolveAvailablePlantingIds(user);
+
+    const serialized = await Promise.all(
+      items.map((item) =>
+        this.serializeWithComputed(item, item.bed, item.vegetable, {
+          includeWarnings: Boolean(includeWarnings),
+          rulesMap,
+        }),
       ),
+    );
+
+    return {
+      items: serialized.map((item) => ({
+        ...item,
+        accessStatus:
+          isPremium ||
+          availableIds === null ||
+          availableIds.has(item.id as string)
+            ? 'available'
+            : 'locked',
+      })),
       page,
       limit,
       total,
@@ -168,7 +193,7 @@ export class PlantingsService {
       throw new NotFoundException('Planting not found');
     }
 
-    return this.serializeWithComputed(
+    const serialized = await this.serializeWithComputed(
       planting,
       planting.bed,
       planting.vegetable,
@@ -179,6 +204,9 @@ export class PlantingsService {
           : undefined,
       },
     );
+
+    const accessStatus = await this.resolvePlantingAccessStatus(user, planting);
+    return { ...serialized, accessStatus };
   }
 
   async create(user: User, dto: CreatePlantingDto) {
@@ -190,6 +218,42 @@ export class PlantingsService {
 
     if (!bed) {
       throw new NotFoundException('Bed not found');
+    }
+
+    const isPremium = this.entitlementsService.isPremium(user);
+
+    if (!isPremium) {
+      const isBedLocked = await this.isBedLockedForFree(user, bed.id);
+      if (isBedLocked) {
+        throw new HttpException(
+          {
+            code: 'PREMIUM_REQUIRED',
+            message: 'This resource is locked in the Free plan.',
+            details: {
+              reason: 'RESOURCE_LOCKED',
+              resourceType: 'bed',
+              resourceId: bed.id,
+            },
+          },
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      const activePlantingsCount = await this.em.count(Planting, {
+        user: user.id,
+        status: { $in: this.freePlanActiveStatuses },
+      });
+
+      if (activePlantingsCount >= 5) {
+        throw new HttpException(
+          {
+            code: 'PREMIUM_REQUIRED',
+            message: 'This action requires Premium.',
+            details: { reason: 'LIMIT_REACHED', limit: 'activePlantings' },
+          },
+          HttpStatus.FORBIDDEN,
+        );
+      }
     }
 
     const vegetable = await this.em.findOne(
@@ -317,6 +381,22 @@ export class PlantingsService {
 
     if (!planting) {
       throw new NotFoundException('Planting not found');
+    }
+
+    const accessStatus = await this.resolvePlantingAccessStatus(user, planting);
+    if (accessStatus === 'locked') {
+      throw new HttpException(
+        {
+          code: 'PREMIUM_REQUIRED',
+          message: 'This resource is locked in the Free plan.',
+          details: {
+            reason: 'RESOURCE_LOCKED',
+            resourceType: 'planting',
+            resourceId: id,
+          },
+        },
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     let bed = planting.bed;
@@ -1698,6 +1778,52 @@ export class PlantingsService {
 
   private addDays(date: Date, days: number) {
     return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+  }
+
+  async resolvePlantingAccessStatus(
+    user: User,
+    planting: Planting,
+  ): Promise<'available' | 'locked'> {
+    if (this.entitlementsService.isPremium(user)) {
+      return 'available';
+    }
+
+    const isActive = this.freePlanActiveStatuses.includes(planting.status);
+    if (!isActive) {
+      return 'available';
+    }
+
+    const availableIds = await this.resolveAvailablePlantingIds(user);
+    return availableIds.has(planting.id) ? 'available' : 'locked';
+  }
+
+  private async isBedLockedForFree(
+    user: User,
+    bedId: string,
+  ): Promise<boolean> {
+    const beds = await this.em.find(
+      Bed,
+      { user: user.id },
+      { fields: ['id'], orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] },
+    );
+
+    if (beds.length === 0) return false;
+    return beds[0].id !== bedId;
+  }
+
+  private async resolveAvailablePlantingIds(user: User): Promise<Set<string>> {
+    const activePlantings = await this.em.find(
+      Planting,
+      { user: user.id, status: { $in: this.freePlanActiveStatuses } },
+      { fields: ['id'], orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] },
+    );
+
+    const availableIds = new Set<string>();
+    for (let i = 0; i < Math.min(activePlantings.length, 5); i++) {
+      availableIds.add(activePlantings[i].id);
+    }
+
+    return availableIds;
   }
 
   private parseDate(value: string, field: string) {

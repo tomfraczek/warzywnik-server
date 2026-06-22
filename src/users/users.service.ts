@@ -32,19 +32,28 @@ export class UsersService {
   }): Promise<User> {
     const { clerkUserId, email, displayName } = params;
 
-    const user = await this.em.upsert(
-      User,
-      {
-        clerkUserId,
-        ...(email !== undefined && { email }),
-        ...(displayName !== undefined && { displayName }),
-        lastLoginAt: new Date(),
-      },
-      {
-        onConflictFields: ['clerkUserId'],
-        onConflictMergeFields: ['email', 'displayName', 'lastLoginAt'],
-      },
-    );
+    const existing = await this.em.findOne(User, { clerkUserId });
+
+    if (existing) {
+      if (email !== undefined) existing.email = email;
+      if (displayName !== undefined) existing.displayName = displayName;
+      existing.lastLoginAt = new Date();
+      await this.em.flush();
+      return existing;
+    }
+
+    const now = new Date();
+    const trialEndsAt = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    const user = new User();
+    user.clerkUserId = clerkUserId;
+    if (email !== undefined) user.email = email;
+    if (displayName !== undefined) user.displayName = displayName;
+    user.lastLoginAt = now;
+    user.trialStartedAt = now;
+    user.trialEndsAt = trialEndsAt;
+
+    await this.em.persistAndFlush(user);
 
     return user;
   }

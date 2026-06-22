@@ -5,9 +5,14 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { Location } from '../locations/location.entity';
 import { LocationsModule } from '../locations/locations.module';
+import { EntitlementsModule } from '../entitlements/entitlements.module';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([User, Location]), LocationsModule],
+  imports: [
+    MikroOrmModule.forFeature([User, Location]),
+    LocationsModule,
+    EntitlementsModule,
+  ],
   providers: [UsersService],
   controllers: [UsersController],
   exports: [UsersService],

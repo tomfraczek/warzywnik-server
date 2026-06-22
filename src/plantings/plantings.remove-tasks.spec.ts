@@ -11,6 +11,14 @@
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PlantingsService } from './plantings.service';
 import { PlantingStatus } from '../common/enums/planting.enums';
+import { EntitlementsService } from '../entitlements/entitlements.service';
+
+const premiumEntitlementsService = {
+  isPremium: () => true,
+  resolveSource: () => 'subscription',
+  getEntitlements: jest.fn(),
+  getLimits: jest.fn(),
+} as unknown as EntitlementsService;
 import {
   ActionTaskOwnerScopeType,
   ActionTaskStatus,
@@ -117,6 +125,7 @@ function makeService(em: EntityManager) {
     actionAutomationService,
     plantingInsightsService,
     analyticsService,
+    premiumEntitlementsService,
   );
 }
 

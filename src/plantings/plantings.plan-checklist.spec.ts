@@ -1,6 +1,14 @@
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PlantingsService } from './plantings.service';
 import { PlanChecklistsService } from '../plan-checklists/plan-checklists.service';
+import { EntitlementsService } from '../entitlements/entitlements.service';
+
+const premiumEntitlementsService = {
+  isPremium: () => true,
+  resolveSource: () => 'subscription',
+  getEntitlements: jest.fn(),
+  getLimits: jest.fn(),
+} as unknown as EntitlementsService;
 import {
   PlantingStartMethod,
   PlantingStatus,
@@ -71,6 +79,7 @@ describe('PlantingsService plan checklist triggers', () => {
       actionAutomationService,
       plantingInsightsService,
       analyticsService,
+      premiumEntitlementsService,
       planChecklistsService,
     );
 

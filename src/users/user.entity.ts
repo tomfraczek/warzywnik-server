@@ -12,6 +12,7 @@ import {
   Language,
   LocationMode,
   PrecipitationUnit,
+  SubscriptionPlan,
   TemperatureUnit,
   ThemeMode,
   Units,
@@ -102,6 +103,18 @@ export class User {
 
   @ManyToOne(() => Location, { nullable: true, deleteRule: 'set null' })
   location?: Location | null;
+
+  @Enum({ items: () => SubscriptionPlan, default: SubscriptionPlan.FREE })
+  subscriptionPlan: SubscriptionPlan = SubscriptionPlan.FREE;
+
+  @Property({ type: Date, nullable: true })
+  subscriptionExpiresAt?: Date | null;
+
+  @Property({ type: Date, nullable: true })
+  trialStartedAt?: Date | null;
+
+  @Property({ type: Date, nullable: true })
+  trialEndsAt?: Date | null;
 
   @Property({ type: 'boolean', default: true })
   isActive: boolean = true;
