@@ -10,6 +10,7 @@ export class ActionTemplatesSeedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await upsertDefaultActionTemplates(this.em);
+    this.em.clear();
     this.logger.log('Default action templates upserted');
   }
 }

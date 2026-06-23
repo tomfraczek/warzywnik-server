@@ -153,6 +153,7 @@ export class PushWorkerService {
       }
     } finally {
       this.isRunning = false;
+      this.em.clear();
     }
   }
 

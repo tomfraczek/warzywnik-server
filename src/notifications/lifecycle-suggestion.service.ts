@@ -69,5 +69,7 @@ export class LifecycleSuggestionService {
         });
       }
     }
+
+    this.em.clear();
   }
 }

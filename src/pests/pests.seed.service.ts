@@ -10,6 +10,7 @@ export class PestsSeedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await upsertDefaultPests(this.em, this.logger);
+    this.em.clear();
     this.logger.log('Default pests upserted');
   }
 }

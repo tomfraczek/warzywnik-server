@@ -10,6 +10,7 @@ export class WarningRulesSeedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await upsertDefaultWarningRules(this.em);
+    this.em.clear();
     this.logger.log('Default warning rules upserted');
   }
 }

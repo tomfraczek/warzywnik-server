@@ -53,6 +53,8 @@ export class DailySummaryService {
         tasks.map((task) => task.id),
       );
     }
+
+    this.em.clear();
   }
 
   private isMatchingHour(timezone: string, notificationHour: number): boolean {

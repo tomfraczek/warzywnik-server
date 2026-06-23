@@ -87,6 +87,8 @@ export class WeeklyDigestService {
         newArticles,
       });
     }
+
+    this.em.clear();
   }
 
   private isMatchingHour(timezone: string, notificationHour: number): boolean {

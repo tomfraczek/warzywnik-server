@@ -27,6 +27,8 @@ export class VegetablesSeedService implements OnModuleInit {
         : undefined,
     );
 
+    this.em.clear();
+
     if (!shouldLogMissingReferences) {
       this.logger.log(
         'Vegetables missing-reference warnings suppressed for non-local environment',

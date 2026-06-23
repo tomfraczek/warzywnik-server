@@ -18,41 +18,45 @@ export class WeatherRefreshScheduler {
 
   @Cron('0,30 * * * *', { name: 'weather-refresh' })
   async refreshWeatherSnapshots(): Promise<void> {
-    const candidateUserIds = await this.selectUsersToRefresh();
+    try {
+      const candidateUserIds = await this.selectUsersToRefresh();
 
-    if (candidateUserIds.length === 0) {
-      return;
-    }
+      if (candidateUserIds.length === 0) {
+        return;
+      }
 
-    let refreshed = 0;
+      let refreshed = 0;
 
-    await this.runWithConcurrency(
-      candidateUserIds,
-      this.parallelLimit,
-      async (userId) => {
-        try {
-          const didRefresh = await this.weatherService.refreshIfExpiringSoon({
-            userId,
-            reason: 'CRON_REFRESH',
-            preemptiveMinutes: 15,
-          });
+      await this.runWithConcurrency(
+        candidateUserIds,
+        this.parallelLimit,
+        async (userId) => {
+          try {
+            const didRefresh = await this.weatherService.refreshIfExpiringSoon({
+              userId,
+              reason: 'CRON_REFRESH',
+              preemptiveMinutes: 15,
+            });
 
-          if (didRefresh) {
-            refreshed += 1;
+            if (didRefresh) {
+              refreshed += 1;
+            }
+          } catch (error) {
+            this.logger.warn(
+              `cron weather refresh failed for user=${userId}: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
+            );
           }
-        } catch (error) {
-          this.logger.warn(
-            `cron weather refresh failed for user=${userId}: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
-        }
-      },
-    );
+        },
+      );
 
-    this.logger.log(
-      `cron weather refresh done users=${candidateUserIds.length} refreshed=${refreshed}`,
-    );
+      this.logger.log(
+        `cron weather refresh done users=${candidateUserIds.length} refreshed=${refreshed}`,
+      );
+    } finally {
+      this.em.clear();
+    }
   }
 
   private async selectUsersToRefresh(): Promise<string[]> {

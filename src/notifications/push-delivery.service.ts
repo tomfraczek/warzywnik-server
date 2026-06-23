@@ -49,26 +49,31 @@ export class PushDeliveryService {
 
   @Cron('*/1 * * * *', { name: 'notification-push-delivery' })
   async deliverPendingBatches(): Promise<void> {
-    const batches = await this.em.find(
-      NotificationBatch,
-      {
-        status: NotificationBatchStatus.PENDING,
-        sendAfter: { $lte: new Date() },
-      },
-      {
-        populate: ['user'],
-        orderBy: [{ createdAt: 'asc' }],
-        limit: 100,
-      },
-    );
+    try {
+      const batches = await this.em.find(
+        NotificationBatch,
+        {
+          status: NotificationBatchStatus.PENDING,
+          sendAfter: { $lte: new Date() },
+        },
+        {
+          populate: ['user'],
+          orderBy: [{ createdAt: 'asc' }],
+          limit: 100,
+        },
+      );
 
-    for (const batch of batches) {
-      await this.deliverBatch(batch);
+      for (const batch of batches) {
+        await this.deliverBatch(batch);
+      }
+    } finally {
+      this.em.clear();
     }
   }
 
   @Cron('*/10 * * * *', { name: 'notification-push-receipts' })
   async checkReceipts(): Promise<void> {
+    try {
     const deliveries = await this.em.find(
       NotificationDelivery,
       {
@@ -132,6 +137,9 @@ export class PushDeliveryService {
     }
 
     await this.em.flush();
+    } finally {
+      this.em.clear();
+    }
   }
 
   private async deliverBatch(batch: NotificationBatch): Promise<void> {

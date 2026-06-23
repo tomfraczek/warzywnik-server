@@ -164,6 +164,7 @@ export class WeatherWarningsSeedService implements OnModuleInit {
   async onModuleInit(): Promise<void> {
     await this.upsertWarningRuleSeeds();
     await this.upsertConfigSeeds();
+    this.em.clear();
     this.logger.log('Weather warning rules/config seeds upserted');
   }
 

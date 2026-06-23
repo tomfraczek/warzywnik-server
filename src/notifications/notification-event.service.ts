@@ -516,5 +516,7 @@ export class NotificationEventService {
     if (tasks.length > 0) {
       this.logger.log(`collected automation task events count=${tasks.length}`);
     }
+
+    this.em.clear();
   }
 }

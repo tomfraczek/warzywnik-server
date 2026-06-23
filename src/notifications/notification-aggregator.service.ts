@@ -47,6 +47,7 @@ export class NotificationAggregatorService {
 
   @Cron('*/1 * * * *', { name: 'notification-aggregate-outbox' })
   async processPendingEvents(): Promise<void> {
+    try {
     // Atomically claim a batch of PENDING events by updating their status to
     // PROCESSING in a single UPDATE. This prevents concurrent cron runs from
     // processing the same events and creating duplicate batches.
@@ -111,6 +112,9 @@ export class NotificationAggregatorService {
     }
 
     await this.em.flush();
+    } finally {
+      this.em.clear();
+    }
   }
 
   private async aggregateGroup(

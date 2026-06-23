@@ -10,6 +10,7 @@ export class DiseasesSeedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await upsertDefaultDiseases(this.em, this.logger);
+    this.em.clear();
     this.logger.log('Default diseases upserted');
   }
 }

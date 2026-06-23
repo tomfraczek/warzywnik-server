@@ -49,76 +49,84 @@ export class ActionTasksService {
 
   @Cron('15 0 * * *', { name: 'action-tasks-cleanup-overdue-next-day' })
   async cleanupOverdueTasksNextDay(): Promise<void> {
-    const cutoff = this.startOfUtcDay(new Date());
+    try {
+      const cutoff = this.startOfUtcDay(new Date());
 
-    const staleTasks = await this.em.find(
-      ActionTask,
-      {
-        status: ActionTaskStatus.PENDING,
-        source: ActionTaskSource.VEGETABLE_RULE,
-        sourceType: ActionTaskSourceType.AUTOMATION,
-        dueAt: { $lt: cutoff },
-      },
-      {
-        orderBy: [{ dueAt: 'asc' }],
-        limit: 2000,
-      },
-    );
+      const staleTasks = await this.em.find(
+        ActionTask,
+        {
+          status: ActionTaskStatus.PENDING,
+          source: ActionTaskSource.VEGETABLE_RULE,
+          sourceType: ActionTaskSourceType.AUTOMATION,
+          dueAt: { $lt: cutoff },
+        },
+        {
+          orderBy: [{ dueAt: 'asc' }],
+          limit: 2000,
+        },
+      );
 
-    if (staleTasks.length === 0) {
-      return;
-    }
-
-    await this.em.transactional(async (em) => {
-      for (const task of staleTasks) {
-        task.status = ActionTaskStatus.CANCELED;
-        task.suppressedAt = new Date();
-        await this.remindersService.cancelPendingForActionTask(task.id, em);
+      if (staleTasks.length === 0) {
+        return;
       }
 
-      await em.flush();
-    });
+      await this.em.transactional(async (em) => {
+        for (const task of staleTasks) {
+          task.status = ActionTaskStatus.CANCELED;
+          task.suppressedAt = new Date();
+          await this.remindersService.cancelPendingForActionTask(task.id, em);
+        }
 
-    this.logger.log(
-      `overdue automation tasks canceled count=${staleTasks.length} cutoff=${cutoff.toISOString()}`,
-    );
+        await em.flush();
+      });
+
+      this.logger.log(
+        `overdue automation tasks canceled count=${staleTasks.length} cutoff=${cutoff.toISOString()}`,
+      );
+    } finally {
+      this.em.clear();
+    }
   }
 
   @Cron('25 0 * * *', { name: 'action-tasks-cleanup-done-next-day' })
   async cleanupDoneTasksNextDay(): Promise<void> {
-    const cutoff = this.startOfUtcDay(this.addDays(new Date(), -1));
+    try {
+      const cutoff = this.startOfUtcDay(this.addDays(new Date(), -1));
 
-    const doneTasks = await this.em.find(
-      ActionTask,
-      {
-        status: ActionTaskStatus.DONE,
-        $or: [
-          { doneAt: { $lt: cutoff } },
-          { doneAt: null, updatedAt: { $lt: cutoff } },
-        ],
-      },
-      {
-        orderBy: [{ doneAt: 'asc' }, { updatedAt: 'asc' }],
-        limit: 2000,
-      },
-    );
+      const doneTasks = await this.em.find(
+        ActionTask,
+        {
+          status: ActionTaskStatus.DONE,
+          $or: [
+            { doneAt: { $lt: cutoff } },
+            { doneAt: null, updatedAt: { $lt: cutoff } },
+          ],
+        },
+        {
+          orderBy: [{ doneAt: 'asc' }, { updatedAt: 'asc' }],
+          limit: 2000,
+        },
+      );
 
-    if (doneTasks.length === 0) {
-      return;
-    }
-
-    await this.em.transactional(async (em) => {
-      for (const task of doneTasks) {
-        await this.remindersService.cancelPendingForActionTask(task.id, em);
-        em.remove(task);
+      if (doneTasks.length === 0) {
+        return;
       }
 
-      await em.flush();
-    });
+      await this.em.transactional(async (em) => {
+        for (const task of doneTasks) {
+          await this.remindersService.cancelPendingForActionTask(task.id, em);
+          em.remove(task);
+        }
 
-    this.logger.log(
-      `done tasks removed count=${doneTasks.length} cutoff=${cutoff.toISOString()}`,
-    );
+        await em.flush();
+      });
+
+      this.logger.log(
+        `done tasks removed count=${doneTasks.length} cutoff=${cutoff.toISOString()}`,
+      );
+    } finally {
+      this.em.clear();
+    }
   }
 
   async createForPlanting(

@@ -10,6 +10,7 @@ export class FertilizersSeedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await upsertDefaultFertilizers(this.em);
+    this.em.clear();
     this.logger.log('Default fertilizers upserted');
   }
 }

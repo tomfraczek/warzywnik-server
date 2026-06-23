@@ -10,6 +10,7 @@ export class SoilsSeedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await upsertDefaultSoils(this.em);
+    this.em.clear();
     this.logger.log('Default soils upserted');
   }
 }

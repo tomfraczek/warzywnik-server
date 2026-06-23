@@ -10,6 +10,7 @@ export class PlanChecklistTemplatesSeedService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await upsertDefaultPlanChecklistTemplates(this.em);
+    this.em.clear();
     this.logger.log('Default plan checklist templates upserted');
   }
 }
