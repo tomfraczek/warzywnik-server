@@ -42,6 +42,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { PlanChecklistsModule } from './plan-checklists/plan-checklists.module';
 import { VegetableSuggestionsModule } from './vegetable-suggestions/vegetable-suggestions.module';
 import { NotesModule } from './notes/notes.module';
+import { RevenueCatModule } from './revenuecat/revenuecat.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { NotesModule } from './notes/notes.module';
     PlanChecklistsModule,
     VegetableSuggestionsModule,
     NotesModule,
+    RevenueCatModule,
   ],
   controllers: [AppController],
   providers: [
