@@ -8,9 +8,11 @@ import {
 } from '../entitlements/entitlements.service';
 import { SubscriptionPlan } from '../common/enums/user.enums';
 
-const REVENUECAT_API_URL = 'https://api.revenuecat.com/v1';
-const PREMIUM_ENTITLEMENT_ID = 'premium';
+const REVENUECAT_V2_URL = 'https://api.revenuecat.com/v2';
+const PREMIUM_LOOKUP_KEY = 'premium';
 const PREMIUM_PRODUCT_PREFIX = 'warzywnik_premium';
+
+// ─── Webhook types (unchanged — webhook payload is V1/V2 agnostic) ──────────
 
 export type RevenueCatWebhookEvent = {
   id?: string;
@@ -33,27 +35,53 @@ export type RevenueCatWebhookPayload = {
   event: RevenueCatWebhookEvent;
 };
 
-type RevenueCatSubscriberResponse = {
-  subscriber: {
-    entitlements: Record<
-      string,
-      {
-        expires_date: string | null;
-        product_identifier: string;
-        purchase_date: string;
-      }
-    >;
-  };
+// ─── RevenueCat REST API V2 types ────────────────────────────────────────────
+
+type RcV2EntitlementItem = {
+  object: 'entitlement';
+  id: string;
+  lookup_key: string;
+  display_name: string;
+  project_id: string;
+  created_at: number;
 };
+
+type RcV2EntitlementsListResponse = {
+  object: 'list';
+  items: RcV2EntitlementItem[];
+  next_page: string | null;
+};
+
+type RcV2ActiveEntitlementItem = {
+  object: 'customer.active_entitlement';
+  entitlement_id: string;
+  expires_at: number | null;
+};
+
+type RcV2ActiveEntitlementsResponse = {
+  object: 'list';
+  items: RcV2ActiveEntitlementItem[];
+  next_page: string | null;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 @Injectable()
 export class RevenueCatService {
   private readonly logger = new Logger(RevenueCatService.name);
 
+  /**
+   * Cached internal RevenueCat entitlement ID for the "premium" lookup_key.
+   * Populated lazily on the first sync call. Cleared on service restart.
+   */
+  private premiumEntitlementIdCache: string | null = null;
+
   constructor(
     private readonly em: EntityManager,
     private readonly entitlementsService: EntitlementsService,
   ) {}
+
+  // ─── Webhook ──────────────────────────────────────────────────────────────
 
   async processWebhook(payload: RevenueCatWebhookPayload): Promise<void> {
     const event = payload.event;
@@ -94,13 +122,14 @@ export class RevenueCatService {
         this.logger.warn(
           `RevenueCat webhook: user not found appUserId=${event.app_user_id} type=${eventType}`,
         );
-        // rcEvent is still committed for audit — webhook won't be retried for this event
         return;
       }
 
       this.applyEventToUser(user, event, eventType);
     });
   }
+
+  // ─── Manual sync (uses RevenueCat REST API V2) ────────────────────────────
 
   async syncSubscription(userId: string): Promise<EntitlementsResult> {
     const user = await this.em.findOne(User, { id: userId });
@@ -109,51 +138,63 @@ export class RevenueCatService {
     }
 
     const apiKey = process.env.REVENUECAT_SECRET_API_KEY;
-    if (!apiKey) {
+    const projectId = process.env.REVENUECAT_PROJECT_ID;
+
+    if (!apiKey || !projectId) {
       this.logger.error(
-        'RevenueCat sync failed: REVENUECAT_SECRET_API_KEY is not set',
+        'RevenueCat sync failed: REVENUECAT_SECRET_API_KEY or REVENUECAT_PROJECT_ID is not set',
       );
-      throw new BadGatewayException('RevenueCat API key not configured');
+      throw new BadGatewayException('RevenueCat is not configured');
     }
 
+    const headers = {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    };
+
     try {
-      const response = await fetch(
-        `${REVENUECAT_API_URL}/subscribers/${encodeURIComponent(userId)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        },
+      const premiumEntitlementId = await this.resolvePremiumEntitlementId(
+        projectId,
+        headers,
       );
 
-      if (!response.ok) {
+      const activeResponse = await fetch(
+        `${REVENUECAT_V2_URL}/projects/${projectId}/customers/${encodeURIComponent(userId)}/active_entitlements?limit=100`,
+        { headers },
+      );
+
+      if (!activeResponse.ok) {
         this.logger.error(
-          `RevenueCat API error: status=${response.status} userId=${userId}`,
+          `RevenueCat V2 active_entitlements error: status=${activeResponse.status} userId=${userId}`,
         );
         throw new BadGatewayException(
-          `RevenueCat API returned ${response.status}`,
+          `RevenueCat API returned ${activeResponse.status}`,
         );
       }
 
-      const data = (await response.json()) as RevenueCatSubscriberResponse;
-      const premiumEntitlement =
-        data.subscriber.entitlements[PREMIUM_ENTITLEMENT_ID];
-      const now = new Date();
+      const activeData =
+        (await activeResponse.json()) as RcV2ActiveEntitlementsResponse;
 
-      const isActive =
-        premiumEntitlement != null &&
-        (premiumEntitlement.expires_date == null ||
-          new Date(premiumEntitlement.expires_date) > now);
+      const premiumEntry = activeData.items.find(
+        (e) => e.entitlement_id === premiumEntitlementId,
+      );
 
-      if (isActive) {
+      if (premiumEntry) {
         user.subscriptionPlan = SubscriptionPlan.PREMIUM;
-        user.subscriptionExpiresAt = premiumEntitlement.expires_date
-          ? new Date(premiumEntitlement.expires_date)
-          : null;
-        this.logger.log(
-          `RevenueCat sync: set Premium userId=${userId} expiresAt=${user.subscriptionExpiresAt?.toISOString()}`,
-        );
+
+        if (premiumEntry.expires_at != null) {
+          user.subscriptionExpiresAt = new Date(premiumEntry.expires_at);
+          this.logger.log(
+            `RevenueCat sync: set Premium userId=${userId} expiresAt=${user.subscriptionExpiresAt.toISOString()}`,
+          );
+        } else {
+          // Lifetime or promotional entitlement — no expiry date available.
+          // Keep subscriptionPlan=PREMIUM but leave subscriptionExpiresAt unchanged
+          // to avoid creating a bogus date. A webhook should eventually provide the date.
+          this.logger.warn(
+            `RevenueCat sync: premium entitlement is active but expires_at is null for userId=${userId}. subscriptionExpiresAt not changed.`,
+          );
+        }
       } else {
         user.subscriptionPlan = SubscriptionPlan.FREE;
         user.subscriptionExpiresAt = null;
@@ -175,6 +216,8 @@ export class RevenueCatService {
 
     return this.entitlementsService.getEntitlements(user);
   }
+
+  // ─── Dev mock ─────────────────────────────────────────────────────────────
 
   buildMockPayload(
     type: string,
@@ -203,12 +246,60 @@ export class RevenueCatService {
     };
   }
 
+  // ─── Private helpers ──────────────────────────────────────────────────────
+
+  /**
+   * Resolves the internal RevenueCat entitlement ID for the "premium" lookup_key.
+   * The result is cached in-memory for the lifetime of the service instance.
+   * Requires a restart to pick up changes in RevenueCat entitlement configuration.
+   */
+  private async resolvePremiumEntitlementId(
+    projectId: string,
+    headers: Record<string, string>,
+  ): Promise<string> {
+    if (this.premiumEntitlementIdCache) {
+      return this.premiumEntitlementIdCache;
+    }
+
+    const response = await fetch(
+      `${REVENUECAT_V2_URL}/projects/${projectId}/entitlements?limit=100`,
+      { headers },
+    );
+
+    if (!response.ok) {
+      this.logger.error(
+        `RevenueCat V2 entitlements fetch failed: status=${response.status}`,
+      );
+      throw new BadGatewayException(
+        `RevenueCat entitlements API returned ${response.status}`,
+      );
+    }
+
+    const data = (await response.json()) as RcV2EntitlementsListResponse;
+    const premium = data.items.find((e) => e.lookup_key === PREMIUM_LOOKUP_KEY);
+
+    if (!premium) {
+      this.logger.error(
+        `RevenueCat: entitlement with lookup_key="${PREMIUM_LOOKUP_KEY}" not found in project ${projectId}`,
+      );
+      throw new BadGatewayException(
+        `RevenueCat entitlement "${PREMIUM_LOOKUP_KEY}" not found in project`,
+      );
+    }
+
+    this.logger.log(
+      `RevenueCat: resolved premium entitlement id=${premium.id} (cached)`,
+    );
+    this.premiumEntitlementIdCache = premium.id;
+    return premium.id;
+  }
+
   private isPremiumEvent(event: RevenueCatWebhookEvent): boolean {
     if (Array.isArray(event.entitlement_ids)) {
-      return event.entitlement_ids.includes(PREMIUM_ENTITLEMENT_ID);
+      return event.entitlement_ids.includes(PREMIUM_LOOKUP_KEY);
     }
     if (event.entitlement_id) {
-      return event.entitlement_id === PREMIUM_ENTITLEMENT_ID;
+      return event.entitlement_id === PREMIUM_LOOKUP_KEY;
     }
     if (event.product_id) {
       return event.product_id.startsWith(PREMIUM_PRODUCT_PREFIX);
@@ -236,9 +327,7 @@ export class RevenueCatService {
     eventType: string,
   ): void {
     const expiresAt =
-      event.expiration_at_ms != null
-        ? new Date(event.expiration_at_ms)
-        : null;
+      event.expiration_at_ms != null ? new Date(event.expiration_at_ms) : null;
 
     switch (eventType) {
       case 'INITIAL_PURCHASE':
@@ -262,7 +351,6 @@ export class RevenueCatService {
         break;
 
       case 'CANCELLATION':
-        // User cancelled auto-renewal but retains access until expiration
         user.subscriptionPlan = SubscriptionPlan.PREMIUM;
         if (expiresAt) {
           user.subscriptionExpiresAt = expiresAt;
@@ -273,7 +361,6 @@ export class RevenueCatService {
         break;
 
       case 'BILLING_ISSUE':
-        // Do not revoke immediately — keep premium until expiration
         if (expiresAt) {
           user.subscriptionPlan = SubscriptionPlan.PREMIUM;
           user.subscriptionExpiresAt = expiresAt;
