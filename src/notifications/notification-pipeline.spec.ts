@@ -20,6 +20,19 @@ import {
   ActionTaskStatus,
 } from '../common/enums/action.enums';
 import { NotificationPolicyService } from './notification-policy.service';
+import { NotificationAggregatorService } from './notification-aggregator.service';
+import { patchNotificationPreferencesSchema } from './dto/notification-preferences.schemas';
+
+// Cast helpers for accessing private methods in tests
+type AggregatorPrivate = Record<string, (...args: unknown[]) => unknown>;
+type AggregatorCtor = new (...args: unknown[]) => AggregatorPrivate;
+type EventServicePrivate = {
+  resolveTaskUserIntentKey(userId: string, task: unknown): string;
+};
+type PolicyCtor = new (
+  em: unknown,
+  prefsSvc: unknown,
+) => NotificationPolicyService;
 
 describe('Scenario A — 3 watering tasks collapse into 1 PUSH_DIGEST batch', () => {
   const copy = new NotificationCopyService();
@@ -44,8 +57,10 @@ describe('Scenario A — 3 watering tasks collapse into 1 PUSH_DIGEST batch', ()
   });
 
   it('resolveTaskUserIntentKey returns WATERING_TODAY for WEATHER_WARNING + watering slug', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const service: any = new NotificationEventService(null as never, copy);
+    const service = new NotificationEventService(
+      null as never,
+      copy,
+    ) as unknown as EventServicePrivate;
     const today = new Date().toISOString().slice(0, 10);
     const key = service.resolveTaskUserIntentKey('user1', {
       source: ActionTaskSource.WEATHER_WARNING,
@@ -81,11 +96,10 @@ describe('Scenario B — 4 harvest tasks collapse into 1 PUSH_DIGEST batch', () 
   });
 
   it('resolveTaskUserIntentKey returns HARVEST_READY for WEATHER_WARNING + harvest slug', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const service: any = new NotificationEventService(
+    const service = new NotificationEventService(
       null as never,
       new NotificationCopyService(),
-    );
+    ) as unknown as EventServicePrivate;
     const today = new Date().toISOString().slice(0, 10);
     const key = service.resolveTaskUserIntentKey('userA', {
       source: ActionTaskSource.WEATHER_WARNING,
@@ -100,11 +114,10 @@ describe('Scenario B — 4 harvest tasks collapse into 1 PUSH_DIGEST batch', () 
 
 describe('Scenario C — VEGETABLE_RULE tasks → PLAN_ONLY, no push', () => {
   it('resolveTaskUserIntentKey returns TASKS_DUE_TODAY for VEGETABLE_RULE source', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const service: any = new NotificationEventService(
+    const service = new NotificationEventService(
       null as never,
       new NotificationCopyService(),
-    );
+    ) as unknown as EventServicePrivate;
     const today = new Date().toISOString().slice(0, 10);
     const key = service.resolveTaskUserIntentKey('userB', {
       source: ActionTaskSource.VEGETABLE_RULE,
@@ -140,11 +153,10 @@ describe('Scenario D — LIFECYCLE_SUGGESTION plural copy', () => {
 
 describe('Scenario E — FROST_PROTECTION weather task → PUSH_IMMEDIATE', () => {
   it('resolveTaskUserIntentKey returns FROST_PROTECTION for frost-related WEATHER_WARNING task', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const service: any = new NotificationEventService(
+    const service = new NotificationEventService(
       null as never,
       new NotificationCopyService(),
-    );
+    ) as unknown as EventServicePrivate;
     const today = new Date().toISOString().slice(0, 10);
     const key = service.resolveTaskUserIntentKey('userC', {
       source: ActionTaskSource.WEATHER_WARNING,
@@ -166,146 +178,103 @@ describe('Scenario E — FROST_PROTECTION weather task → PUSH_IMMEDIATE', () =
 
 describe('Scenario F — delivery policy resolution for known intent keys', () => {
   it('WATERING_TODAY → PUSH_DIGEST', () => {
-    // We access the private method directly via casting
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { NotificationAggregatorService } =
-      require('./notification-aggregator.service') as {
-        NotificationAggregatorService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
-    const instance = new NotificationAggregatorService(
-      null,
-      null,
-      null,
-      null,
-      null,
+    const instance =
+      new (NotificationAggregatorService as unknown as AggregatorCtor)(
+        null,
+        null,
+        null,
+        null,
+        null,
+      );
+    const result = instance['resolveTasksDeliveryPolicy'](
+      'WATERING_TODAY:user:2025-06-01',
     );
-    const result = (
-      instance as Record<string, (...args: unknown[]) => unknown>
-    )['resolveTasksDeliveryPolicy']('WATERING_TODAY:user:2025-06-01');
     expect(result).toBe(NotificationDeliveryPolicy.PUSH_DIGEST);
   });
 
   it('TASKS_DUE_TODAY → PLAN_ONLY', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { NotificationAggregatorService } =
-      require('./notification-aggregator.service') as {
-        NotificationAggregatorService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
-    const instance = new NotificationAggregatorService(
-      null,
-      null,
-      null,
-      null,
-      null,
+    const instance =
+      new (NotificationAggregatorService as unknown as AggregatorCtor)(
+        null,
+        null,
+        null,
+        null,
+        null,
+      );
+    const result = instance['resolveTasksDeliveryPolicy'](
+      'TASKS_DUE_TODAY:user:2025-06-01',
     );
-    const result = (
-      instance as Record<string, (...args: unknown[]) => unknown>
-    )['resolveTasksDeliveryPolicy']('TASKS_DUE_TODAY:user:2025-06-01');
     expect(result).toBe(NotificationDeliveryPolicy.PLAN_ONLY);
   });
 
   it('FROST_PROTECTION → PUSH_IMMEDIATE', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { NotificationAggregatorService } =
-      require('./notification-aggregator.service') as {
-        NotificationAggregatorService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
-    const instance = new NotificationAggregatorService(
-      null,
-      null,
-      null,
-      null,
-      null,
+    const instance =
+      new (NotificationAggregatorService as unknown as AggregatorCtor)(
+        null,
+        null,
+        null,
+        null,
+        null,
+      );
+    const result = instance['resolveTasksDeliveryPolicy'](
+      'FROST_PROTECTION:user:2025-06-01',
     );
-    const result = (
-      instance as Record<string, (...args: unknown[]) => unknown>
-    )['resolveTasksDeliveryPolicy']('FROST_PROTECTION:user:2025-06-01');
     expect(result).toBe(NotificationDeliveryPolicy.PUSH_IMMEDIATE);
   });
 
   it('FROST reason → PUSH_IMMEDIATE via resolveWeatherDeliveryPolicy', () => {
-    const { NotificationAggregatorService } =
-      require('./notification-aggregator.service') as {
-        NotificationAggregatorService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
-    const instance = new NotificationAggregatorService(
-      null,
-      null,
-      null,
-      null,
-      null,
-    );
-    const result = (
-      instance as Record<string, (...args: unknown[]) => unknown>
-    )['resolveWeatherDeliveryPolicy']('FROST');
+    const instance =
+      new (NotificationAggregatorService as unknown as AggregatorCtor)(
+        null,
+        null,
+        null,
+        null,
+        null,
+      );
+    const result = instance['resolveWeatherDeliveryPolicy']('FROST');
     expect(result).toBe(NotificationDeliveryPolicy.PUSH_IMMEDIATE);
   });
 
   it('DROUGHT reason → PUSH_DIGEST via resolveWeatherDeliveryPolicy', () => {
-    const { NotificationAggregatorService } =
-      require('./notification-aggregator.service') as {
-        NotificationAggregatorService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
-    const instance = new NotificationAggregatorService(
-      null,
-      null,
-      null,
-      null,
-      null,
-    );
-    const result = (
-      instance as Record<string, (...args: unknown[]) => unknown>
-    )['resolveWeatherDeliveryPolicy']('DROUGHT');
+    const instance =
+      new (NotificationAggregatorService as unknown as AggregatorCtor)(
+        null,
+        null,
+        null,
+        null,
+        null,
+      );
+    const result = instance['resolveWeatherDeliveryPolicy']('DROUGHT');
     expect(result).toBe(NotificationDeliveryPolicy.PUSH_DIGEST);
   });
 
   it('HIGH priority garden risk → PUSH_IMMEDIATE', () => {
-    const { NotificationAggregatorService } =
-      require('./notification-aggregator.service') as {
-        NotificationAggregatorService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
-    const instance = new NotificationAggregatorService(
-      null,
-      null,
-      null,
-      null,
-      null,
+    const instance =
+      new (NotificationAggregatorService as unknown as AggregatorCtor)(
+        null,
+        null,
+        null,
+        null,
+        null,
+      );
+    const result = instance['resolveGardenRiskDeliveryPolicy'](
+      NotificationPriority.HIGH,
     );
-    const result = (
-      instance as Record<string, (...args: unknown[]) => unknown>
-    )['resolveGardenRiskDeliveryPolicy'](NotificationPriority.HIGH);
     expect(result).toBe(NotificationDeliveryPolicy.PUSH_IMMEDIATE);
   });
 
   it('NORMAL priority garden risk → PUSH_DIGEST', () => {
-    const { NotificationAggregatorService } =
-      require('./notification-aggregator.service') as {
-        NotificationAggregatorService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
-    const instance = new NotificationAggregatorService(
-      null,
-      null,
-      null,
-      null,
-      null,
+    const instance =
+      new (NotificationAggregatorService as unknown as AggregatorCtor)(
+        null,
+        null,
+        null,
+        null,
+        null,
+      );
+    const result = instance['resolveGardenRiskDeliveryPolicy'](
+      NotificationPriority.NORMAL,
     );
-    const result = (
-      instance as Record<string, (...args: unknown[]) => unknown>
-    )['resolveGardenRiskDeliveryPolicy'](NotificationPriority.NORMAL);
     expect(result).toBe(NotificationDeliveryPolicy.PUSH_DIGEST);
   });
 });
@@ -337,19 +306,14 @@ describe('Copy service — no technical codes leak to user', () => {
 
 describe('Scenario G — DAILY_TASKS_SUMMARY → PUSH_DIGEST', () => {
   it('buildCandidate returns PUSH_DIGEST for DAILY_TASKS_SUMMARY', () => {
-    const { NotificationAggregatorService } =
-      require('./notification-aggregator.service') as {
-        NotificationAggregatorService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
-    const instance = new NotificationAggregatorService(
-      null,
-      null,
-      null,
-      null,
-      new NotificationCopyService(),
-    );
+    const instance =
+      new (NotificationAggregatorService as unknown as AggregatorCtor)(
+        null,
+        null,
+        null,
+        null,
+        new NotificationCopyService(),
+      );
     const fakeEvent = {
       type: NotificationType.DAILY_TASKS_SUMMARY,
       payload: { actionTaskIds: ['t1', 't2', 't3'] },
@@ -358,15 +322,16 @@ describe('Scenario G — DAILY_TASKS_SUMMARY → PUSH_DIGEST', () => {
       dedupeKey: null,
       priority: NotificationPriority.NORMAL,
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const candidate = (
-      instance as Record<string, (...args: unknown[]) => unknown>
-    )['buildCandidate']([fakeEvent]) as any;
+
+    const candidate = instance['buildCandidate']([fakeEvent]) as Record<
+      string,
+      unknown
+    >;
     expect(candidate).not.toBeNull();
-    expect(candidate.deliveryPolicy).toBe(
+    expect(candidate['deliveryPolicy']).toBe(
       NotificationDeliveryPolicy.PUSH_DIGEST,
     );
-    expect(candidate.routeTarget).toBe('PLANNER');
+    expect(candidate['routeTarget']).toBe('PLANNER');
   });
 
   it('buildDailySummaryCopy uses correct Polish singular form', () => {
@@ -395,17 +360,6 @@ describe('Scenario G — DAILY_TASKS_SUMMARY → PUSH_DIGEST', () => {
 
 describe('Scenario H — dueAt filter: task due 07:00, cron runs 07:22', () => {
   it('task due earlier today still qualifies (startOfToday filter)', () => {
-    const { NotificationEventService } =
-      require('./notification-event.service') as {
-        NotificationEventService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
-    const service = new NotificationEventService(
-      null as never,
-      new NotificationCopyService(),
-    );
-
     // Simulate: dueAt = 07:00 today, current time = 07:22
     const dueAt = new Date();
     dueAt.setUTCHours(7, 0, 0, 0);
@@ -427,22 +381,17 @@ describe('Scenario H — dueAt filter: task due 07:00, cron runs 07:22', () => {
 
 describe('Scenario I — ARTICLE_RECOMMENDED → PUSH_DIGEST', () => {
   it('buildCandidate returns PUSH_DIGEST for ARTICLE_RECOMMENDED', () => {
-    const { NotificationAggregatorService } =
-      require('./notification-aggregator.service') as {
-        NotificationAggregatorService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
     const mockRoutingService = {
       pickArticleRouteTarget: (_count: number) => 'ARTICLE_DETAIL',
     };
-    const instance = new NotificationAggregatorService(
-      null,
-      mockRoutingService,
-      null,
-      null,
-      new NotificationCopyService(),
-    );
+    const instance =
+      new (NotificationAggregatorService as unknown as AggregatorCtor)(
+        null,
+        mockRoutingService,
+        null,
+        null,
+        new NotificationCopyService(),
+      );
     const fakeEvent = {
       type: NotificationType.ARTICLE_RECOMMENDED,
       payload: {
@@ -455,16 +404,17 @@ describe('Scenario I — ARTICLE_RECOMMENDED → PUSH_DIGEST', () => {
       dedupeKey: null,
       priority: NotificationPriority.NORMAL,
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const candidate = (
-      instance as Record<string, (...args: unknown[]) => unknown>
-    )['buildCandidate']([fakeEvent]) as any;
+
+    const candidate = instance['buildCandidate']([fakeEvent]) as Record<
+      string,
+      unknown
+    >;
     expect(candidate).not.toBeNull();
-    expect(candidate.deliveryPolicy).toBe(
+    expect(candidate['deliveryPolicy']).toBe(
       NotificationDeliveryPolicy.PUSH_DIGEST,
     );
-    expect(candidate.title).toBe('Nowy artykuł w bibliotece');
-    expect(candidate.body).toContain('Jak prawidłowo podlewać');
+    expect(candidate['title']).toBe('Nowy artykuł w bibliotece');
+    expect(candidate['body']).toContain('Jak prawidłowo podlewać');
   });
 
   it('buildArticleRecommendedCopy includes article title when provided', () => {
@@ -489,44 +439,30 @@ describe('Scenario I — ARTICLE_RECOMMENDED → PUSH_DIGEST', () => {
 
 describe('Scenario J — TASKS_GENERATED / VEGETABLE_RULE nadal PLAN_ONLY', () => {
   it('resolveTasksDeliveryPolicy returns PLAN_ONLY for TASKS_DUE_TODAY intent', () => {
-    const { NotificationAggregatorService } =
-      require('./notification-aggregator.service') as {
-        NotificationAggregatorService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
-    const instance = new NotificationAggregatorService(
-      null,
-      null,
-      null,
-      null,
-      null,
-    );
-    const result = (
-      instance as Record<string, (...args: unknown[]) => unknown>
-    )['resolveTasksDeliveryPolicy'](
+    const instance =
+      new (NotificationAggregatorService as unknown as AggregatorCtor)(
+        null,
+        null,
+        null,
+        null,
+        null,
+      );
+    const result = instance['resolveTasksDeliveryPolicy'](
       `TASKS_DUE_TODAY:userX:${new Date().toISOString().slice(0, 10)}`,
     );
     expect(result).toBe(NotificationDeliveryPolicy.PLAN_ONLY);
   });
 
   it('resolveTasksDeliveryPolicy returns PLAN_ONLY when intent is null', () => {
-    const { NotificationAggregatorService } =
-      require('./notification-aggregator.service') as {
-        NotificationAggregatorService: new (
-          ...args: unknown[]
-        ) => Record<string, (...args: unknown[]) => unknown>;
-      };
-    const instance = new NotificationAggregatorService(
-      null,
-      null,
-      null,
-      null,
-      null,
-    );
-    const result = (
-      instance as Record<string, (...args: unknown[]) => unknown>
-    )['resolveTasksDeliveryPolicy'](null);
+    const instance =
+      new (NotificationAggregatorService as unknown as AggregatorCtor)(
+        null,
+        null,
+        null,
+        null,
+        null,
+      );
+    const result = instance['resolveTasksDeliveryPolicy'](null);
     expect(result).toBe(NotificationDeliveryPolicy.PLAN_ONLY);
   });
 });
@@ -572,8 +508,7 @@ describe('Scenario K — NotificationPolicyService: intensity nie wpływa na dec
       }),
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return new (NotificationPolicyService as any)(
+    return new (NotificationPolicyService as unknown as PolicyCtor)(
       fakeEm,
       fakePreferencesService,
     );
@@ -636,8 +571,8 @@ describe('Scenario K — NotificationPolicyService: intensity nie wpływa na dec
         .fn()
         .mockReturnValue({ execute: jest.fn().mockResolvedValue([]) }),
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const service = new (NotificationPolicyService as any)(
+
+    const service = new (NotificationPolicyService as unknown as PolicyCtor)(
       fakeEm,
       fakePreferencesService,
     );
@@ -687,14 +622,7 @@ describe('Scenario K — NotificationPolicyService: intensity nie wpływa na dec
     expect(result.reason).toBe('preference_disabled');
   });
 
-  it('K-F: stary klient wysyła intensity w body — Zod akceptuje, decyzja niezależna od intensity', async () => {
-    // Weryfikujemy że Zod schema nie odrzuca intensity
-    const { patchNotificationPreferencesSchema } =
-      require('./dto/notification-preferences.schemas') as {
-        patchNotificationPreferencesSchema: {
-          safeParse: (v: unknown) => { success: boolean };
-        };
-      };
+  it('K-F: stary klient wysyła intensity w body — Zod akceptuje, decyzja niezależna od intensity', () => {
     const result = patchNotificationPreferencesSchema.safeParse({
       intensity: 'IMPORTANT_ONLY',
       dailySummaryEnabled: true,

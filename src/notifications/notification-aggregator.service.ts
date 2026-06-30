@@ -48,11 +48,11 @@ export class NotificationAggregatorService {
   @Cron('*/1 * * * *', { name: 'notification-aggregate-outbox' })
   async processPendingEvents(): Promise<void> {
     try {
-    // Atomically claim a batch of PENDING events by updating their status to
-    // PROCESSING in a single UPDATE. This prevents concurrent cron runs from
-    // processing the same events and creating duplicate batches.
-    const claimResult = await this.em.getConnection().execute(
-      `UPDATE notification_event_outbox
+      // Atomically claim a batch of PENDING events by updating their status to
+      // PROCESSING in a single UPDATE. This prevents concurrent cron runs from
+      // processing the same events and creating duplicate batches.
+      const claimResult = await this.em.getConnection().execute(
+        `UPDATE notification_event_outbox
        SET status = 'PROCESSING'
        WHERE id IN (
          SELECT id FROM notification_event_outbox
@@ -62,56 +62,56 @@ export class NotificationAggregatorService {
          FOR UPDATE SKIP LOCKED
        )
        RETURNING id`,
-    );
+      );
 
-    if (claimResult.length === 0) {
-      return;
-    }
+      if (claimResult.length === 0) {
+        return;
+      }
 
-    const claimedIds = claimResult.map((row: { id: string }) => row.id);
+      const claimedIds = claimResult.map((row: { id: string }) => row.id);
 
-    const events = await this.em.find(
-      NotificationEventOutbox,
-      { id: { $in: claimedIds } },
-      {
-        populate: ['user'],
-        orderBy: [{ createdAt: 'asc' }],
-      },
-    );
+      const events = await this.em.find(
+        NotificationEventOutbox,
+        { id: { $in: claimedIds } },
+        {
+          populate: ['user'],
+          orderBy: [{ createdAt: 'asc' }],
+        },
+      );
 
-    if (events.length === 0) {
-      return;
-    }
+      if (events.length === 0) {
+        return;
+      }
 
-    const grouped = new Map<string, NotificationEventOutbox[]>();
-    for (const event of events) {
-      // Group by userIntentKey when available — this is the key aggregation mechanism.
-      // Multiple per-task events (e.g. 3 watering tasks) collapse into one batch.
-      // Fall back to userId:type for legacy events without an intent key.
-      const key = event.userIntentKey
-        ? `${event.user.id}:intent:${event.userIntentKey}`
-        : `${event.user.id}:${event.type}`;
-      const current = grouped.get(key) ?? [];
-      current.push(event);
-      grouped.set(key, current);
-    }
+      const grouped = new Map<string, NotificationEventOutbox[]>();
+      for (const event of events) {
+        // Group by userIntentKey when available — this is the key aggregation mechanism.
+        // Multiple per-task events (e.g. 3 watering tasks) collapse into one batch.
+        // Fall back to userId:type for legacy events without an intent key.
+        const key = event.userIntentKey
+          ? `${event.user.id}:intent:${event.userIntentKey}`
+          : `${event.user.id}:${event.type}`;
+        const current = grouped.get(key) ?? [];
+        current.push(event);
+        grouped.set(key, current);
+      }
 
-    const sortedGroups = [...grouped.values()].sort((a, b) => {
-      const rank = (type: NotificationType): number => {
-        if (type === NotificationType.WEATHER_ALERTS_SUMMARY) return 0;
-        if (type === NotificationType.GARDEN_RISK_CHANGED) return 1;
-        if (type === NotificationType.WEATHER_STATUS_CHANGED) return 2;
-        return 10;
-      };
+      const sortedGroups = [...grouped.values()].sort((a, b) => {
+        const rank = (type: NotificationType): number => {
+          if (type === NotificationType.WEATHER_ALERTS_SUMMARY) return 0;
+          if (type === NotificationType.GARDEN_RISK_CHANGED) return 1;
+          if (type === NotificationType.WEATHER_STATUS_CHANGED) return 2;
+          return 10;
+        };
 
-      return rank(a[0].type) - rank(b[0].type);
-    });
+        return rank(a[0].type) - rank(b[0].type);
+      });
 
-    for (const groupEvents of sortedGroups) {
-      await this.aggregateGroup(groupEvents);
-    }
+      for (const groupEvents of sortedGroups) {
+        await this.aggregateGroup(groupEvents);
+      }
 
-    await this.em.flush();
+      await this.em.flush();
     } finally {
       this.em.clear();
     }

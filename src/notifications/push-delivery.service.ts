@@ -74,69 +74,69 @@ export class PushDeliveryService {
   @Cron('*/10 * * * *', { name: 'notification-push-receipts' })
   async checkReceipts(): Promise<void> {
     try {
-    const deliveries = await this.em.find(
-      NotificationDelivery,
-      {
-        status: NotificationDeliveryStatus.SENT,
-        expoTicketId: { $ne: null },
-        createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-      },
-      {
-        populate: ['userDevice'],
-        limit: 300,
-      },
-    );
-
-    const ticketIds = deliveries
-      .map((delivery) => delivery.expoTicketId)
-      .filter((value): value is string => typeof value === 'string');
-
-    if (ticketIds.length === 0) {
-      return;
-    }
-
-    const receipts = await this.fetchExpoReceipts(ticketIds, {
-      reason: 'scheduled_receipts_check',
-      notificationType: 'BULK',
-    });
-
-    for (const delivery of deliveries) {
-      const ticketId = delivery.expoTicketId;
-      if (!ticketId) continue;
-
-      const receipt = receipts[ticketId];
-      if (!receipt) continue;
-
-      this.logger.log(
-        `push receipt checked ticket=${ticketId} status=${receipt.status ?? 'unknown'} error=${receipt.details?.error ?? 'none'} message=${receipt.message ?? 'none'}`,
+      const deliveries = await this.em.find(
+        NotificationDelivery,
+        {
+          status: NotificationDeliveryStatus.SENT,
+          expoTicketId: { $ne: null },
+          createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+        },
+        {
+          populate: ['userDevice'],
+          limit: 300,
+        },
       );
 
-      delivery.expoReceiptId =
-        typeof receipt.id === 'string' ? receipt.id : null;
+      const ticketIds = deliveries
+        .map((delivery) => delivery.expoTicketId)
+        .filter((value): value is string => typeof value === 'string');
 
-      if (receipt.status === 'error') {
-        delivery.status = NotificationDeliveryStatus.FAILED;
-        delivery.failedAt = new Date();
-        delivery.errorCode = receipt.details?.error ?? 'EXPO_RECEIPT_ERROR';
-        delivery.errorMessage = receipt.message ?? 'Expo receipt error';
+      if (ticketIds.length === 0) {
+        return;
+      }
 
-        if (
-          delivery.userDevice &&
-          delivery.errorCode === 'DeviceNotRegistered'
-        ) {
-          delivery.userDevice.isEnabled = false;
-          delivery.userDevice.disabledReason = 'DeviceNotRegistered';
-          delivery.userDevice.lastErrorAt = new Date();
-          delivery.userDevice.lastErrorCode = 'DeviceNotRegistered';
+      const receipts = await this.fetchExpoReceipts(ticketIds, {
+        reason: 'scheduled_receipts_check',
+        notificationType: 'BULK',
+      });
+
+      for (const delivery of deliveries) {
+        const ticketId = delivery.expoTicketId;
+        if (!ticketId) continue;
+
+        const receipt = receipts[ticketId];
+        if (!receipt) continue;
+
+        this.logger.log(
+          `push receipt checked ticket=${ticketId} status=${receipt.status ?? 'unknown'} error=${receipt.details?.error ?? 'none'} message=${receipt.message ?? 'none'}`,
+        );
+
+        delivery.expoReceiptId =
+          typeof receipt.id === 'string' ? receipt.id : null;
+
+        if (receipt.status === 'error') {
+          delivery.status = NotificationDeliveryStatus.FAILED;
+          delivery.failedAt = new Date();
+          delivery.errorCode = receipt.details?.error ?? 'EXPO_RECEIPT_ERROR';
+          delivery.errorMessage = receipt.message ?? 'Expo receipt error';
+
+          if (
+            delivery.userDevice &&
+            delivery.errorCode === 'DeviceNotRegistered'
+          ) {
+            delivery.userDevice.isEnabled = false;
+            delivery.userDevice.disabledReason = 'DeviceNotRegistered';
+            delivery.userDevice.lastErrorAt = new Date();
+            delivery.userDevice.lastErrorCode = 'DeviceNotRegistered';
+          }
+        }
+
+        if (delivery.userDevice) {
+          delivery.userDevice.lastReceiptCheckedAt = new Date();
         }
       }
 
-      if (delivery.userDevice) {
-        delivery.userDevice.lastReceiptCheckedAt = new Date();
-      }
-    }
-
-    await this.em.flush();
+      await this.em.flush();
     } finally {
       this.em.clear();
     }

@@ -1698,7 +1698,9 @@ export class PlantingsService {
 
     if (planting.startMethod === PlantingStartMethod.DIRECT_SOW) {
       planting.sowedAt = planting.sowedAt ?? now;
-    } else if (planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING) {
+    } else if (
+      planting.startMethod === PlantingStartMethod.PURCHASED_SEEDLING
+    ) {
       planting.transplantedAt = planting.transplantedAt ?? now;
     }
 

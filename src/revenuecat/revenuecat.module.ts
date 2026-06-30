@@ -7,7 +7,10 @@ import { EntitlementsModule } from '../entitlements/entitlements.module';
 import { User } from '../users/user.entity';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([RevenueCatEvent, User]), EntitlementsModule],
+  imports: [
+    MikroOrmModule.forFeature([RevenueCatEvent, User]),
+    EntitlementsModule,
+  ],
   controllers: [RevenueCatController],
   providers: [RevenueCatService],
   exports: [RevenueCatService],

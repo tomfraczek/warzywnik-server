@@ -485,13 +485,62 @@ describe('Weather warning evaluators', () => {
     // Today: heavy rain (30mm), next 6 days dry — 7-day sum = 30 + 0.5*6 = 33mm > 7mm.
     // But also test with purely dry forecast to verify guard is the safety net.
     ctx.snapshotData.daily = [
-      { date: '2026-05-28', tempMin: 14, tempMax: 26, precipSum: 30, windMax: 20, weatherCode: 63 },
-      { date: '2026-05-29', tempMin: 12, tempMax: 22, precipSum: 0.2, windMax: 18, weatherCode: 2 },
-      { date: '2026-05-30', tempMin: 11, tempMax: 20, precipSum: 0.2, windMax: 15, weatherCode: 2 },
-      { date: '2026-05-31', tempMin: 10, tempMax: 19, precipSum: 0.2, windMax: 14, weatherCode: 2 },
-      { date: '2026-06-01', tempMin: 13, tempMax: 22, precipSum: 0.2, windMax: 16, weatherCode: 2 },
-      { date: '2026-06-02', tempMin: 14, tempMax: 24, precipSum: 0.2, windMax: 20, weatherCode: 2 },
-      { date: '2026-06-03', tempMin: 15, tempMax: 25, precipSum: 0.2, windMax: 18, weatherCode: 2 },
+      {
+        date: '2026-05-28',
+        tempMin: 14,
+        tempMax: 26,
+        precipSum: 30,
+        windMax: 20,
+        weatherCode: 63,
+      },
+      {
+        date: '2026-05-29',
+        tempMin: 12,
+        tempMax: 22,
+        precipSum: 0.2,
+        windMax: 18,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-05-30',
+        tempMin: 11,
+        tempMax: 20,
+        precipSum: 0.2,
+        windMax: 15,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-05-31',
+        tempMin: 10,
+        tempMax: 19,
+        precipSum: 0.2,
+        windMax: 14,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-06-01',
+        tempMin: 13,
+        tempMax: 22,
+        precipSum: 0.2,
+        windMax: 16,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-06-02',
+        tempMin: 14,
+        tempMax: 24,
+        precipSum: 0.2,
+        windMax: 20,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-06-03',
+        tempMin: 15,
+        tempMax: 25,
+        precipSum: 0.2,
+        windMax: 18,
+        weatherCode: 2,
+      },
     ];
 
     // Hourly: 2.5mm/h for all 12 DAY-window hours → DAY sum = 30mm > heavyRainWindowThresholdMm=12
@@ -512,10 +561,16 @@ describe('Weather warning evaluators', () => {
     ];
     const resolved = resolveWarningContradictions(combined);
 
-    expect(resolved.some((w) => w.code === WarningCode.WATERING_NEEDED_TODAY)).toBe(false);
-    expect(resolved.some((w) => w.code === WarningCode.DROUGHT_RISK_NEXT_7_DAYS)).toBe(false);
+    expect(
+      resolved.some((w) => w.code === WarningCode.WATERING_NEEDED_TODAY),
+    ).toBe(false);
+    expect(
+      resolved.some((w) => w.code === WarningCode.DROUGHT_RISK_NEXT_7_DAYS),
+    ).toBe(false);
     // Heavy rain warning must still be present
-    expect(resolved.some((w) => w.code === WarningCode.HEAVY_RAIN_TODAY_DAY)).toBe(true);
+    expect(
+      resolved.some((w) => w.code === WarningCode.HEAVY_RAIN_TODAY_DAY),
+    ).toBe(true);
   });
 
   // Regression 2: daily precip > 0, hourly precip = 0 → drought evaluator must
@@ -528,13 +583,62 @@ describe('Weather warning evaluators', () => {
 
     // today: 8mm (already above the 7mm threshold on its own)
     ctx.snapshotData.daily = [
-      { date: '2026-05-28', tempMin: 14, tempMax: 24, precipSum: 8, windMax: 20, weatherCode: 61 },
-      { date: '2026-05-29', tempMin: 12, tempMax: 20, precipSum: 0, windMax: 18, weatherCode: 2 },
-      { date: '2026-05-30', tempMin: 11, tempMax: 19, precipSum: 0, windMax: 15, weatherCode: 2 },
-      { date: '2026-05-31', tempMin: 10, tempMax: 18, precipSum: 0, windMax: 14, weatherCode: 2 },
-      { date: '2026-06-01', tempMin: 13, tempMax: 21, precipSum: 0, windMax: 16, weatherCode: 2 },
-      { date: '2026-06-02', tempMin: 14, tempMax: 23, precipSum: 0, windMax: 20, weatherCode: 2 },
-      { date: '2026-06-03', tempMin: 15, tempMax: 24, precipSum: 0, windMax: 18, weatherCode: 2 },
+      {
+        date: '2026-05-28',
+        tempMin: 14,
+        tempMax: 24,
+        precipSum: 8,
+        windMax: 20,
+        weatherCode: 61,
+      },
+      {
+        date: '2026-05-29',
+        tempMin: 12,
+        tempMax: 20,
+        precipSum: 0,
+        windMax: 18,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-05-30',
+        tempMin: 11,
+        tempMax: 19,
+        precipSum: 0,
+        windMax: 15,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-05-31',
+        tempMin: 10,
+        tempMax: 18,
+        precipSum: 0,
+        windMax: 14,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-06-01',
+        tempMin: 13,
+        tempMax: 21,
+        precipSum: 0,
+        windMax: 16,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-06-02',
+        tempMin: 14,
+        tempMax: 23,
+        precipSum: 0,
+        windMax: 20,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-06-03',
+        tempMin: 15,
+        tempMax: 24,
+        precipSum: 0,
+        windMax: 18,
+        weatherCode: 2,
+      },
     ];
     // Hourly all zeros (null→0 from Open-Meteo)
     ctx.snapshotData.hourly = Array.from({ length: 48 }, (_v, i) => ({
@@ -549,7 +653,9 @@ describe('Weather warning evaluators', () => {
     }));
 
     const out = await evaluator.evaluate(ctx);
-    expect(out.some((w) => w.code === WarningCode.DROUGHT_RISK_NEXT_7_DAYS)).toBe(false);
+    expect(
+      out.some((w) => w.code === WarningCode.DROUGHT_RISK_NEXT_7_DAYS),
+    ).toBe(false);
   });
 
   // Regression 3: forecast shows heavy rain tomorrow → guard blocks WATERING_NEEDED_TOMORROW
@@ -565,13 +671,62 @@ describe('Weather warning evaluators', () => {
     // 7-day sum = 0 + 20 + 0*5 = 20mm > 7mm → drought should already not fire from math alone.
     // But keep this test to also confirm WATERING_NEEDED_TOMORROW is blocked by the guard.
     ctx.snapshotData.daily = [
-      { date: '2026-05-28', tempMin: 14, tempMax: 30, precipSum: 0, windMax: 20, weatherCode: 2 },
-      { date: '2026-05-29', tempMin: 15, tempMax: 22, precipSum: 20, windMax: 25, weatherCode: 63 },
-      { date: '2026-05-30', tempMin: 12, tempMax: 20, precipSum: 0, windMax: 18, weatherCode: 2 },
-      { date: '2026-05-31', tempMin: 11, tempMax: 19, precipSum: 0, windMax: 14, weatherCode: 2 },
-      { date: '2026-06-01', tempMin: 13, tempMax: 22, precipSum: 0, windMax: 16, weatherCode: 2 },
-      { date: '2026-06-02', tempMin: 14, tempMax: 24, precipSum: 0, windMax: 20, weatherCode: 2 },
-      { date: '2026-06-03', tempMin: 15, tempMax: 26, precipSum: 0, windMax: 18, weatherCode: 2 },
+      {
+        date: '2026-05-28',
+        tempMin: 14,
+        tempMax: 30,
+        precipSum: 0,
+        windMax: 20,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-05-29',
+        tempMin: 15,
+        tempMax: 22,
+        precipSum: 20,
+        windMax: 25,
+        weatherCode: 63,
+      },
+      {
+        date: '2026-05-30',
+        tempMin: 12,
+        tempMax: 20,
+        precipSum: 0,
+        windMax: 18,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-05-31',
+        tempMin: 11,
+        tempMax: 19,
+        precipSum: 0,
+        windMax: 14,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-06-01',
+        tempMin: 13,
+        tempMax: 22,
+        precipSum: 0,
+        windMax: 16,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-06-02',
+        tempMin: 14,
+        tempMax: 24,
+        precipSum: 0,
+        windMax: 20,
+        weatherCode: 2,
+      },
+      {
+        date: '2026-06-03',
+        tempMin: 15,
+        tempMax: 26,
+        precipSum: 0,
+        windMax: 18,
+        weatherCode: 2,
+      },
     ];
     // Today hourly: hot, no rain → triggers WATERING_NEEDED_TODAY from operational evaluator.
     // Tomorrow hourly: zero (null→0), but daily=20mm → triggers HEAVY_RAIN fallback + blocks WATERING_NEEDED_TOMORROW.
@@ -592,8 +747,12 @@ describe('Weather warning evaluators', () => {
     ];
     const resolved = resolveWarningContradictions(combined);
 
-    expect(resolved.some((w) => w.code === WarningCode.WATERING_NEEDED_TOMORROW)).toBe(false);
-    expect(resolved.some((w) => w.code === WarningCode.DROUGHT_RISK_NEXT_7_DAYS)).toBe(false);
+    expect(
+      resolved.some((w) => w.code === WarningCode.WATERING_NEEDED_TOMORROW),
+    ).toBe(false);
+    expect(
+      resolved.some((w) => w.code === WarningCode.DROUGHT_RISK_NEXT_7_DAYS),
+    ).toBe(false);
   });
 
   // Regression 4: multiple consecutive rainy days → 7-day sum exceeds threshold,
@@ -625,7 +784,9 @@ describe('Weather warning evaluators', () => {
     }));
 
     const out = await evaluator.evaluate(ctx);
-    expect(out.some((w) => w.code === WarningCode.DROUGHT_RISK_NEXT_7_DAYS)).toBe(false);
+    expect(
+      out.some((w) => w.code === WarningCode.DROUGHT_RISK_NEXT_7_DAYS),
+    ).toBe(false);
   });
 
   // Regression 5: no historical rain, no forecast rain → DROUGHT_RISK must be emitted.
@@ -656,7 +817,9 @@ describe('Weather warning evaluators', () => {
     }));
 
     const out = await evaluator.evaluate(ctx);
-    expect(out.some((w) => w.code === WarningCode.DROUGHT_RISK_NEXT_7_DAYS)).toBe(true);
+    expect(
+      out.some((w) => w.code === WarningCode.DROUGHT_RISK_NEXT_7_DAYS),
+    ).toBe(true);
   });
 
   // ---------------------------------------------------------------------------

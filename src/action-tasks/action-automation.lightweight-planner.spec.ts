@@ -209,10 +209,7 @@ describe('allowedPlantingStatuses filter logic', () => {
       }),
     );
     expect(
-      applyStatusFilter(
-        [{ rule, dueAt: now }],
-        PlantingStatus.NEW,
-      ),
+      applyStatusFilter([{ rule, dueAt: now }], PlantingStatus.NEW),
     ).toHaveLength(0);
   });
 
@@ -227,10 +224,7 @@ describe('allowedPlantingStatuses filter logic', () => {
       }),
     );
     expect(
-      applyStatusFilter(
-        [{ rule, dueAt: now }],
-        PlantingStatus.NEW,
-      ),
+      applyStatusFilter([{ rule, dueAt: now }], PlantingStatus.NEW),
     ).toHaveLength(0);
   });
 

@@ -1,7 +1,7 @@
 import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20260622000001_create_notes_table extends Migration {
-  override async up(): Promise<void> {
+  override up(): void {
     this.addSql(`
       create table if not exists "notes" (
         "id" uuid not null default gen_random_uuid(),
@@ -27,7 +27,7 @@ export class Migration20260622000001_create_notes_table extends Migration {
     `);
   }
 
-  override async down(): Promise<void> {
+  override down(): void {
     this.addSql('drop table if exists "notes";');
   }
 }

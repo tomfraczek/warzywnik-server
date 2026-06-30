@@ -17,11 +17,7 @@ import {
 import { VegetableActionRule } from '../vegetables/vegetable-action-rule.entity';
 import { ActionTask } from './action-task.entity';
 import { Reminder } from '../reminders/reminder.entity';
-import {
-  ReminderAction,
-  ReminderStatus,
-  ReminderType,
-} from '../common/enums/reminder.enums';
+import { ReminderStatus } from '../common/enums/reminder.enums';
 import { ActionTemplate } from '../action-templates/action-template.entity';
 import {
   addDays,

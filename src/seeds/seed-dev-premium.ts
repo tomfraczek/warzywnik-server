@@ -15,7 +15,9 @@ async function run(): Promise<void> {
   const daysFromNow = parseInt(process.argv[3] ?? '30', 10);
 
   if (!clerkUserId) {
-    console.error('Usage: npm run seed:dev-premium -- <clerkUserId> [daysFromNow]');
+    console.error(
+      'Usage: npm run seed:dev-premium -- <clerkUserId> [daysFromNow]',
+    );
     process.exit(1);
   }
 
@@ -40,7 +42,9 @@ async function run(): Promise<void> {
 
     console.log(`Premium granted to ${user.email ?? clerkUserId}`);
     console.log(`  subscriptionPlan: ${user.subscriptionPlan}`);
-    console.log(`  subscriptionExpiresAt: ${user.subscriptionExpiresAt.toISOString()}`);
+    console.log(
+      `  subscriptionExpiresAt: ${user.subscriptionExpiresAt.toISOString()}`,
+    );
   } finally {
     await orm.close(true);
   }

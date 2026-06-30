@@ -16,6 +16,8 @@ import { Location } from '../locations/location.entity';
 import { LocationRecordMode } from '../common/enums/location.enums';
 import { LocationEventsService } from '../locations/location-events.service';
 
+export const PREMIUM_TRIAL_DAYS = 7;
+
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -43,7 +45,9 @@ export class UsersService {
     }
 
     const now = new Date();
-    const trialEndsAt = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+    const trialEndsAt = new Date(
+      now.getTime() + PREMIUM_TRIAL_DAYS * 24 * 60 * 60 * 1000,
+    );
 
     const user = new User();
     user.clerkUserId = clerkUserId;

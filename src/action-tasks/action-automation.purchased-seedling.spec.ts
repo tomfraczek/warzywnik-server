@@ -84,7 +84,6 @@ describe('PURCHASED_SEEDLING lifecycle path', () => {
       PlantingStatus.CLEARED,
     ]);
   });
-
 });
 
 // ─── 2. isStatusAllowedForStartMethod ────────────────────────────────────────
@@ -107,7 +106,6 @@ describe('PURCHASED_SEEDLING — isStatusAllowedForStartMethod', () => {
       ),
     ).toBe(true);
   });
-
 });
 
 // ─── 3. Allowed status transitions ───────────────────────────────────────────

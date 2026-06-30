@@ -30,7 +30,8 @@ export class NotesController {
   @Get()
   list(
     @Req() req: { userEntity?: User },
-    @Query(new ZodValidationPipe(listNotesQuerySchema)) query: ListNotesQueryDto,
+    @Query(new ZodValidationPipe(listNotesQuerySchema))
+    query: ListNotesQueryDto,
   ) {
     return this.notesService.list(req.userEntity as User, query);
   }

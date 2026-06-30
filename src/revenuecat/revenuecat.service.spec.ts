@@ -26,7 +26,7 @@ const makeMockUser = (overrides: Partial<User> = {}): User => {
   user.subscriptionPlan = SubscriptionPlan.FREE;
   user.subscriptionExpiresAt = null;
   user.trialStartedAt = new Date('2025-01-01');
-  user.trialEndsAt = new Date('2025-01-04');
+  user.trialEndsAt = new Date('2025-01-08');
   return Object.assign(user, overrides);
 };
 
@@ -120,13 +120,13 @@ describe('RevenueCatService', () => {
   const mockTransactional = (
     findOneSideEffect: (entityClass: unknown) => unknown,
   ) => {
-    mockEm.transactional.mockImplementation(async (cb) => {
+    mockEm.transactional.mockImplementation((cb) => {
       const txEm = {
         ...mockEm,
         findOne: jest.fn().mockImplementation(findOneSideEffect),
         persist: jest.fn(),
       };
-      return cb(txEm as unknown as EntityManager);
+      return Promise.resolve(cb(txEm as unknown as EntityManager));
     });
   };
 
@@ -156,7 +156,9 @@ describe('RevenueCatService', () => {
     service = module.get<RevenueCatService>(RevenueCatService);
 
     // Reset lazy cache so every test starts with a fresh entitlement ID resolution
-    (service as unknown as { premiumEntitlementIdCache: null }).premiumEntitlementIdCache = null;
+    (
+      service as unknown as { premiumEntitlementIdCache: null }
+    ).premiumEntitlementIdCache = null;
 
     process.env.REVENUECAT_SECRET_API_KEY = 'test-secret-key';
     process.env.REVENUECAT_PROJECT_ID = MOCK_PROJECT_ID;
@@ -435,7 +437,7 @@ describe('RevenueCatService', () => {
 
     it('does not reset trial fields when setting Free', async () => {
       const trialStart = new Date('2025-06-01');
-      const trialEnd = new Date('2025-06-04');
+      const trialEnd = new Date('2025-06-08');
       const user = makeMockUser({
         subscriptionPlan: SubscriptionPlan.PREMIUM,
         trialStartedAt: trialStart,
@@ -543,7 +545,10 @@ describe('RevenueCatService', () => {
       // First call: 2 fetches (entitlements + active_entitlements)
       setupV2Fetch({
         activeItems: [
-          { entitlement_id: MOCK_PREMIUM_ENTITLEMENT_ID, expires_at: FUTURE_MS },
+          {
+            entitlement_id: MOCK_PREMIUM_ENTITLEMENT_ID,
+            expires_at: FUTURE_MS,
+          },
         ],
       });
       await service.syncSubscription('user-uuid-123');
@@ -556,7 +561,10 @@ describe('RevenueCatService', () => {
         json: jest.fn().mockResolvedValue({
           object: 'list',
           items: [
-            { entitlement_id: MOCK_PREMIUM_ENTITLEMENT_ID, expires_at: FUTURE_MS },
+            {
+              entitlement_id: MOCK_PREMIUM_ENTITLEMENT_ID,
+              expires_at: FUTURE_MS,
+            },
           ],
           next_page: null,
         }),

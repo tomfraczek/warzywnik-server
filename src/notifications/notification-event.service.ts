@@ -134,8 +134,6 @@ export class NotificationEventService {
     tasks: ActionTask[];
     source: string;
   }): Promise<void> {
-    const today = new Date().toISOString().slice(0, 10);
-
     const startOfToday = new Date();
     startOfToday.setUTCHours(0, 0, 0, 0);
 

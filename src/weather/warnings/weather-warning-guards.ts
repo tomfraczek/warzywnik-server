@@ -34,10 +34,11 @@ export const resolveWarningContradictions = (
   const todayHasPrecipitation = [...TODAY_PRECIPITATION_CODES].some((c) =>
     codes.has(c),
   );
-  const tomorrowHasPrecipitation = [...TOMORROW_PRECIPITATION_CODES].some(
-    (c) => codes.has(c),
+  const tomorrowHasPrecipitation = [...TOMORROW_PRECIPITATION_CODES].some((c) =>
+    codes.has(c),
   );
-  const anyPrecipitationAlert = todayHasPrecipitation || tomorrowHasPrecipitation;
+  const anyPrecipitationAlert =
+    todayHasPrecipitation || tomorrowHasPrecipitation;
 
   if (!anyPrecipitationAlert) return warnings;
 

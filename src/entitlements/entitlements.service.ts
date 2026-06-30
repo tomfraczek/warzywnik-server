@@ -81,8 +81,7 @@ export class EntitlementsService {
       return 'subscription';
     }
 
-    const hasActiveTrial =
-      user.trialEndsAt != null && user.trialEndsAt > now;
+    const hasActiveTrial = user.trialEndsAt != null && user.trialEndsAt > now;
 
     if (hasActiveTrial) {
       return 'trial';

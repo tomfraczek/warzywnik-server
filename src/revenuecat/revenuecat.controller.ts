@@ -102,7 +102,11 @@ export class RevenueCatController {
       throw new BadRequestException('userId is required');
     }
 
-    if (!SUPPORTED_MOCK_TYPES.includes(type as (typeof SUPPORTED_MOCK_TYPES)[number])) {
+    if (
+      !SUPPORTED_MOCK_TYPES.includes(
+        type as (typeof SUPPORTED_MOCK_TYPES)[number],
+      )
+    ) {
       throw new BadRequestException(
         `Unsupported event type. Supported: ${SUPPORTED_MOCK_TYPES.join(', ')}`,
       );
