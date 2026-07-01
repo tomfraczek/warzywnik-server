@@ -136,18 +136,15 @@ describe('TutorialsService', () => {
       expect(user.tutorialsEnabled).toBe(false);
     });
 
-    it('sets enabled=true and resets all tutorial records', async () => {
+    it('sets enabled=true without touching tutorial records', async () => {
       const user = makeUser({ tutorialsEnabled: false });
       em.findOneOrFail.mockResolvedValue(user);
-      em.nativeDelete.mockResolvedValue(3);
       em.flush.mockResolvedValue(undefined);
 
       const result = await service.patchTutorialsGlobal(USER_ID, true);
 
       expect(result).toEqual({ enabled: true });
-      expect(em.nativeDelete).toHaveBeenCalledWith(UserTutorial, {
-        user: { id: USER_ID },
-      });
+      expect(em.nativeDelete).not.toHaveBeenCalled();
       expect(user.tutorialsEnabled).toBe(true);
     });
   });

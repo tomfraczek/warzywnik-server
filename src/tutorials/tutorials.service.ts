@@ -35,10 +35,6 @@ export class TutorialsService {
 
     user.tutorialsEnabled = enabled;
 
-    if (enabled) {
-      await this.em.nativeDelete(UserTutorial, { user: { id: userId } });
-    }
-
     await this.em.flush();
 
     return { enabled: user.tutorialsEnabled };
