@@ -95,10 +95,6 @@ export class UsersService {
       user.automaticTasksEnabled = dto.automaticTasksEnabled;
     }
 
-    if (dto.displayTutorials !== undefined) {
-      user.displayTutorials = dto.displayTutorials;
-    }
-
     if (dto.themeMode !== undefined) {
       user.themeMode = dto.themeMode;
     }
@@ -381,7 +377,6 @@ export class UsersService {
       locationUpdatedAt:
         sourceLocation?.updatedAt ?? user.locationUpdatedAt ?? null,
       automaticTasksEnabled: user.automaticTasksEnabled,
-      displayTutorials: user.displayTutorials,
     };
   }
 }
