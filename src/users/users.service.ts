@@ -6,7 +6,9 @@ import {
 } from '@nestjs/common';
 import { createClerkClient } from '@clerk/backend';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { createHash, randomUUID } from 'crypto';
 import { User } from './user.entity';
+import { PremiumTrialClaim } from './premium-trial-claim.entity';
 import { PatchMeDto } from './dto/me.schemas';
 import { LocationMode } from '../common/enums/user.enums';
 import { MeResponse } from './dto/me.types';
@@ -44,22 +46,38 @@ export class UsersService {
       return existing;
     }
 
-    const now = new Date();
-    const trialEndsAt = new Date(
-      now.getTime() + PREMIUM_TRIAL_DAYS * 24 * 60 * 60 * 1000,
-    );
+    const emailHash = this.hashTrialEmail(email);
 
-    const user = new User();
-    user.clerkUserId = clerkUserId;
-    if (email !== undefined) user.email = email;
-    if (displayName !== undefined) user.displayName = displayName;
-    user.lastLoginAt = now;
-    user.trialStartedAt = now;
-    user.trialEndsAt = trialEndsAt;
+    return this.em.transactional(async (em) => {
+      const now = new Date();
+      let claim = await em.findOne(PremiumTrialClaim, { emailHash });
 
-    await this.em.persistAndFlush(user);
+      if (!claim) {
+        claim = new PremiumTrialClaim();
+        claim.emailHash = emailHash;
+        claim.trialStartedAt = now;
+        claim.trialEndsAt = new Date(
+          now.getTime() + PREMIUM_TRIAL_DAYS * 24 * 60 * 60 * 1000,
+        );
+        em.persist(claim);
+      }
 
-    return user;
+      const user = new User();
+      user.id = randomUUID();
+      user.clerkUserId = clerkUserId;
+      if (email !== undefined) user.email = email;
+      if (displayName !== undefined) user.displayName = displayName;
+      user.lastLoginAt = now;
+      user.trialStartedAt = claim.trialStartedAt;
+      user.trialEndsAt = claim.trialEndsAt;
+
+      claim.lastUserId = user.id;
+      claim.lastClerkUserId = clerkUserId;
+
+      await em.persistAndFlush(user);
+
+      return user;
+    });
   }
 
   async getMe(userId: string): Promise<MeResponse> {
@@ -272,6 +290,24 @@ export class UsersService {
         err instanceof Error ? err.stack : undefined,
       );
     }
+  }
+
+  private hashTrialEmail(email?: string | null): string {
+    const normalizedEmail = email?.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      throw new BadRequestException('Email is required to claim premium trial');
+    }
+
+    const pepper = process.env.TRIAL_EMAIL_HASH_PEPPER?.trim();
+
+    if (!pepper) {
+      throw new Error('TRIAL_EMAIL_HASH_PEPPER is required');
+    }
+
+    return createHash('sha256')
+      .update(`${pepper}:${normalizedEmail}`, 'utf8')
+      .digest('hex');
   }
 
   async exportMe(userId: string): Promise<MeResponse> {
