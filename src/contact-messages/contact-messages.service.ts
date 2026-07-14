@@ -26,7 +26,6 @@ export class ContactMessagesService {
   ) {
     const message = new ContactMessage();
     message.category = dto.category;
-    message.title = dto.title;
     message.content = dto.content;
     message.userId = sender?.id ?? null;
     message.userEmail = sender?.email ?? null;
@@ -36,7 +35,6 @@ export class ContactMessagesService {
 
     void this.mailService.sendContactMessageNotification({
       category: message.category,
-      title: message.title,
       content: message.content,
       userEmail: message.userEmail,
       userDisplayName: message.userDisplayName,
@@ -54,10 +52,7 @@ export class ContactMessagesService {
       where.category = category;
     }
     if (search) {
-      where.$or = [
-        { title: { $ilike: `%${search}%` } },
-        { content: { $ilike: `%${search}%` } },
-      ];
+      where.content = { $ilike: `%${search}%` };
     }
 
     const [items, total] = await this.em.findAndCount(ContactMessage, where, {
@@ -94,7 +89,6 @@ export class ContactMessagesService {
     return {
       id: message.id,
       category: message.category,
-      title: message.title,
       content: message.content,
       userId: message.userId ?? null,
       userEmail: message.userEmail ?? null,

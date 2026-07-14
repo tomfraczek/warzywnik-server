@@ -3,7 +3,6 @@ import { ContactMessageCategory } from '../contact-message-category.enum';
 
 export const createContactMessageSchema = z.object({
   category: z.nativeEnum(ContactMessageCategory),
-  title: z.string().trim().min(2).max(200),
   content: z.string().trim().min(1).max(5000),
 });
 

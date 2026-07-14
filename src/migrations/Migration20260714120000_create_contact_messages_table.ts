@@ -6,7 +6,6 @@ export class Migration20260714120000_create_contact_messages_table extends Migra
       create table if not exists "contact_messages" (
         "id" uuid not null default gen_random_uuid(),
         "category" varchar(32) not null,
-        "title" varchar(200) not null,
         "content" text not null,
         "user_id" uuid null,
         "user_email" varchar(255) null,

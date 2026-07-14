@@ -41,14 +41,13 @@ export class MailService {
 
   async sendContactMessageNotification(message: {
     category: ContactMessageCategory;
-    title: string;
     content: string;
     userEmail?: string | null;
     userDisplayName?: string | null;
   }): Promise<void> {
     if (!this.resend) {
       this.logger.warn(
-        `Email skipped (no API key). Would notify about contact message: "${message.title}"`,
+        `Email skipped (no API key). Would notify about contact message in category: "${message.category}"`,
       );
       return;
     }
@@ -60,7 +59,7 @@ export class MailService {
       await this.resend.emails.send({
         from: 'Warzywnik <onboarding@resend.dev>',
         to: this.adminEmail,
-        subject: `Nowa wiadomość z aplikacji: ${message.title}`,
+        subject: `Nowa wiadomość z aplikacji: ${message.category}`,
         text: [
           `Kategoria: ${message.category}`,
           `Od: ${sender}${message.userEmail ? ` (${message.userEmail})` : ''}`,
@@ -68,7 +67,9 @@ export class MailService {
           message.content,
         ].join('\n'),
       });
-      this.logger.log(`Contact message notification sent: "${message.title}"`);
+      this.logger.log(
+        `Contact message notification sent (category: "${message.category}")`,
+      );
     } catch (err) {
       this.logger.error(
         'Failed to send contact message notification email',

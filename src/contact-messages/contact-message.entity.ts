@@ -12,9 +12,6 @@ export class ContactMessage {
   @Enum({ items: () => ContactMessageCategory })
   category!: ContactMessageCategory;
 
-  @Property({ length: 200 })
-  title!: string;
-
   @Property({ type: 'text' })
   content!: string;
 
