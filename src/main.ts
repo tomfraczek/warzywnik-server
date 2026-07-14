@@ -64,6 +64,7 @@ async function bootstrap() {
    */
   const corsOrigins = [
     'http://localhost:3000',
+    'http://localhost:3001',
     'https://warzywnik-cms.vercel.app',
     process.env.FRONTEND_URL,
   ].filter((value): value is string => Boolean(value));

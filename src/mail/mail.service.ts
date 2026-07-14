@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
+import { ContactMessageCategory } from '../contact-messages/contact-message-category.enum';
 
 @Injectable()
 export class MailService {
@@ -35,6 +36,44 @@ export class MailService {
       this.logger.log(`Suggestion notification sent for: "${name}"`);
     } catch (err) {
       this.logger.error('Failed to send suggestion notification email', err);
+    }
+  }
+
+  async sendContactMessageNotification(message: {
+    category: ContactMessageCategory;
+    title: string;
+    content: string;
+    userEmail?: string | null;
+    userDisplayName?: string | null;
+  }): Promise<void> {
+    if (!this.resend) {
+      this.logger.warn(
+        `Email skipped (no API key). Would notify about contact message: "${message.title}"`,
+      );
+      return;
+    }
+
+    try {
+      const sender =
+        message.userDisplayName ?? message.userEmail ?? 'Nieznany użytkownik';
+
+      await this.resend.emails.send({
+        from: 'Warzywnik <onboarding@resend.dev>',
+        to: this.adminEmail,
+        subject: `Nowa wiadomość z aplikacji: ${message.title}`,
+        text: [
+          `Kategoria: ${message.category}`,
+          `Od: ${sender}${message.userEmail ? ` (${message.userEmail})` : ''}`,
+          '',
+          message.content,
+        ].join('\n'),
+      });
+      this.logger.log(`Contact message notification sent: "${message.title}"`);
+    } catch (err) {
+      this.logger.error(
+        'Failed to send contact message notification email',
+        err,
+      );
     }
   }
 }

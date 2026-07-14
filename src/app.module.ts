@@ -41,6 +41,7 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PlanChecklistsModule } from './plan-checklists/plan-checklists.module';
 import { VegetableSuggestionsModule } from './vegetable-suggestions/vegetable-suggestions.module';
+import { ContactMessagesModule } from './contact-messages/contact-messages.module';
 import { NotesModule } from './notes/notes.module';
 import { RevenueCatModule } from './revenuecat/revenuecat.module';
 import { TutorialsModule } from './tutorials/tutorials.module';
@@ -80,6 +81,7 @@ import { TutorialsModule } from './tutorials/tutorials.module';
     NotificationsModule,
     PlanChecklistsModule,
     VegetableSuggestionsModule,
+    ContactMessagesModule,
     NotesModule,
     RevenueCatModule,
     TutorialsModule,
