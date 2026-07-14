@@ -66,6 +66,7 @@ async function bootstrap() {
     'http://localhost:3000',
     'http://localhost:3001',
     'https://warzywnik-cms.vercel.app',
+    'https://cms.warzywnik.info',
     process.env.FRONTEND_URL,
   ].filter((value): value is string => Boolean(value));
 
