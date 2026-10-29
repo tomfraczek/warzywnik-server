@@ -6,6 +6,7 @@
  *  2. Prevents an admin from blocking / demoting / deleting themselves
  *  3. Syncs the Clerk ban only when isActive actually changes
  *  4. Delegates deletion to UsersService.deleteMe()
+ *  5. Applies bulk changes / deletions with the same rules
  */
 
 import { BadRequestException, NotFoundException } from '@nestjs/common';
@@ -44,9 +45,10 @@ function makeUser(overrides: Partial<FakeUser> = {}): FakeUser {
   };
 }
 
-function makeService(user: FakeUser | null) {
+function makeService(user: FakeUser | null, users: FakeUser[] = []) {
   const fakeEm = {
     findOne: jest.fn().mockResolvedValue(user),
+    find: jest.fn().mockResolvedValue(users),
     flush: jest.fn().mockResolvedValue(undefined),
     count: jest.fn().mockResolvedValue(0),
   };
@@ -183,6 +185,92 @@ describe('UsersAdminService', () => {
       await expect(service.delete('user-1', 'admin-1')).rejects.toBeInstanceOf(
         NotFoundException,
       );
+    });
+  });
+
+  describe('bulkUpdate()', () => {
+    it('applies changes to every user with a single flush', async () => {
+      const users = [
+        makeUser(),
+        makeUser({ id: 'user-2', clerkUserId: 'clerk-2' }),
+      ];
+      const { service, fakeEm } = makeService(null, users);
+
+      const result = await service.bulkUpdate(
+        ['user-1', 'user-2'],
+        { isActive: false },
+        'admin-1',
+      );
+
+      expect(result).toEqual({ updated: 2 });
+      expect(users.every((user) => !user.isActive)).toBe(true);
+      expect(fakeEm.flush).toHaveBeenCalledTimes(1);
+      expect(banUser).toHaveBeenCalledWith('clerk-1');
+      expect(banUser).toHaveBeenCalledWith('clerk-2');
+    });
+
+    it('only syncs Clerk for users whose status changed', async () => {
+      const users = [
+        makeUser(),
+        makeUser({ id: 'user-2', clerkUserId: 'clerk-2', isActive: false }),
+      ];
+      const { service } = makeService(null, users);
+
+      await service.bulkUpdate(
+        ['user-1', 'user-2'],
+        { isActive: false },
+        'admin-1',
+      );
+
+      expect(banUser).toHaveBeenCalledTimes(1);
+      expect(banUser).toHaveBeenCalledWith('clerk-1');
+    });
+
+    it('rejects blocking a selection that includes yourself', async () => {
+      const { service, fakeEm } = makeService(null, [makeUser()]);
+
+      await expect(
+        service.bulkUpdate(
+          ['user-1', 'admin-1'],
+          { isActive: false },
+          'admin-1',
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(fakeEm.flush).not.toHaveBeenCalled();
+    });
+
+    it('throws NotFound when some users are missing', async () => {
+      const { service, fakeEm } = makeService(null, [makeUser()]);
+
+      await expect(
+        service.bulkUpdate(['user-1', 'user-2'], { isAdmin: true }, 'admin-1'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(fakeEm.flush).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bulkDelete()', () => {
+    it('deletes every existing user via UsersService.deleteMe()', async () => {
+      const users = [makeUser(), makeUser({ id: 'user-2' })];
+      const { service, fakeUsersService } = makeService(null, users);
+
+      const result = await service.bulkDelete(
+        ['user-1', 'user-2', 'user-3'],
+        'admin-1',
+      );
+
+      expect(result).toEqual({ deleted: 2 });
+      expect(fakeUsersService.deleteMe).toHaveBeenCalledWith('user-1');
+      expect(fakeUsersService.deleteMe).toHaveBeenCalledWith('user-2');
+    });
+
+    it('rejects a selection that includes yourself', async () => {
+      const { service, fakeUsersService } = makeService(null, [makeUser()]);
+
+      await expect(
+        service.bulkDelete(['user-1', 'admin-1'], 'admin-1'),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(fakeUsersService.deleteMe).not.toHaveBeenCalled();
     });
   });
 });

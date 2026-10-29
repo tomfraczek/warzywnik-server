@@ -110,19 +110,105 @@ export class UsersAdminService {
       throw new NotFoundException(`User ${id} not found`);
     }
 
-    if (user.id === actingUserId) {
-      if (dto.isActive === false) {
-        throw new BadRequestException('You cannot block your own account');
-      }
-      if (dto.isAdmin === false) {
-        throw new BadRequestException(
-          'You cannot revoke admin rights from your own account',
-        );
+    this.assertNoSelfLockout([user.id], dto, actingUserId);
+
+    const wasActive = user.isActive;
+    this.applyChanges(user, dto);
+
+    await this.em.flush();
+
+    if (wasActive !== user.isActive) {
+      await this.syncClerkBan(user.clerkUserId, user.id, !user.isActive);
+    }
+
+    return this.serializeDetails(user);
+  }
+
+  async bulkUpdate(
+    ids: string[],
+    dto: PatchAdminUserDto,
+    actingUserId: string,
+  ): Promise<{ updated: number }> {
+    const uniqueIds = [...new Set(ids)];
+    this.assertNoSelfLockout(uniqueIds, dto, actingUserId);
+
+    const users = await this.em.find(User, { id: { $in: uniqueIds } });
+    if (users.length !== uniqueIds.length) {
+      const found = new Set(users.map((user) => user.id));
+      const missing = uniqueIds.filter((id) => !found.has(id));
+      throw new NotFoundException(`Users not found: ${missing.join(', ')}`);
+    }
+
+    const banChanges: User[] = [];
+    for (const user of users) {
+      const wasActive = user.isActive;
+      this.applyChanges(user, dto);
+      if (wasActive !== user.isActive) {
+        banChanges.push(user);
       }
     }
 
-    const wasActive = user.isActive;
+    await this.em.flush();
 
+    for (const user of banChanges) {
+      await this.syncClerkBan(user.clerkUserId, user.id, !user.isActive);
+    }
+
+    return { updated: users.length };
+  }
+
+  async delete(id: string, actingUserId: string): Promise<void> {
+    if (id === actingUserId) {
+      throw new BadRequestException('You cannot delete your own account here');
+    }
+
+    const user = await this.em.findOne(User, { id });
+    if (!user) {
+      throw new NotFoundException(`User ${id} not found`);
+    }
+
+    await this.usersService.deleteMe(id);
+  }
+
+  // Deletes one by one so each account goes through the same cascade and
+  // Clerk cleanup as a single delete. Already-missing users are skipped.
+  async bulkDelete(
+    ids: string[],
+    actingUserId: string,
+  ): Promise<{ deleted: number }> {
+    const uniqueIds = [...new Set(ids)];
+    if (uniqueIds.includes(actingUserId)) {
+      throw new BadRequestException('You cannot delete your own account here');
+    }
+
+    const users = await this.em.find(User, { id: { $in: uniqueIds } });
+
+    for (const user of users) {
+      await this.usersService.deleteMe(user.id);
+    }
+
+    return { deleted: users.length };
+  }
+
+  private assertNoSelfLockout(
+    ids: string[],
+    dto: PatchAdminUserDto,
+    actingUserId: string,
+  ): void {
+    if (!ids.includes(actingUserId)) {
+      return;
+    }
+    if (dto.isActive === false) {
+      throw new BadRequestException('You cannot block your own account');
+    }
+    if (dto.isAdmin === false) {
+      throw new BadRequestException(
+        'You cannot revoke admin rights from your own account',
+      );
+    }
+  }
+
+  private applyChanges(user: User, dto: PatchAdminUserDto): void {
     if (dto.displayName !== undefined) user.displayName = dto.displayName;
     if (dto.isAdmin !== undefined) user.isAdmin = dto.isAdmin;
     if (dto.isActive !== undefined) user.isActive = dto.isActive;
@@ -152,27 +238,6 @@ export class UsersAdminService {
     if (dto.language !== undefined) user.language = dto.language;
     if (dto.locale !== undefined) user.locale = dto.locale;
     if (dto.timezone !== undefined) user.timezone = dto.timezone;
-
-    await this.em.flush();
-
-    if (wasActive !== user.isActive) {
-      await this.syncClerkBan(user.clerkUserId, user.id, !user.isActive);
-    }
-
-    return this.serializeDetails(user);
-  }
-
-  async delete(id: string, actingUserId: string): Promise<void> {
-    if (id === actingUserId) {
-      throw new BadRequestException('You cannot delete your own account here');
-    }
-
-    const user = await this.em.findOne(User, { id });
-    if (!user) {
-      throw new NotFoundException(`User ${id} not found`);
-    }
-
-    await this.usersService.deleteMe(id);
   }
 
   private planFilter(

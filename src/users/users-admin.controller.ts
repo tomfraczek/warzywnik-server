@@ -15,8 +15,12 @@ import { User } from './user.entity';
 import { UsersAdminService } from './users-admin.service';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
+  bulkDeleteAdminUsersSchema,
+  bulkUpdateAdminUsersSchema,
   listAdminUsersQuerySchema,
   patchAdminUserSchema,
+  BulkDeleteAdminUsersDto,
+  BulkUpdateAdminUsersDto,
   ListAdminUsersQueryDto,
   PatchAdminUserDto,
 } from './dto/admin-users.schemas';
@@ -35,6 +39,31 @@ export class UsersAdminController {
     query: ListAdminUsersQueryDto,
   ) {
     return this.usersAdminService.list(query);
+  }
+
+  @Patch()
+  bulkUpdate(
+    @Req() req: RequestWithUser,
+    @Body(new ZodValidationPipe(bulkUpdateAdminUsersSchema))
+    body: BulkUpdateAdminUsersDto,
+  ) {
+    return this.usersAdminService.bulkUpdate(
+      body.ids,
+      body.changes,
+      this.getUserFromRequest(req).id,
+    );
+  }
+
+  @Delete()
+  bulkDelete(
+    @Req() req: RequestWithUser,
+    @Body(new ZodValidationPipe(bulkDeleteAdminUsersSchema))
+    body: BulkDeleteAdminUsersDto,
+  ) {
+    return this.usersAdminService.bulkDelete(
+      body.ids,
+      this.getUserFromRequest(req).id,
+    );
   }
 
   @Get(':id')

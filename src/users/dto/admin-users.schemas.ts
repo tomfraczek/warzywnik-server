@@ -50,5 +50,26 @@ export const patchAdminUserSchema = z
   })
   .strict();
 
+const bulkIdsSchema = z.array(z.string().uuid()).min(1).max(100);
+
+export const bulkUpdateAdminUsersSchema = z
+  .object({
+    ids: bulkIdsSchema,
+    changes: patchAdminUserSchema,
+  })
+  .strict();
+
+export const bulkDeleteAdminUsersSchema = z
+  .object({
+    ids: bulkIdsSchema,
+  })
+  .strict();
+
 export type ListAdminUsersQueryDto = z.infer<typeof listAdminUsersQuerySchema>;
 export type PatchAdminUserDto = z.infer<typeof patchAdminUserSchema>;
+export type BulkUpdateAdminUsersDto = z.infer<
+  typeof bulkUpdateAdminUsersSchema
+>;
+export type BulkDeleteAdminUsersDto = z.infer<
+  typeof bulkDeleteAdminUsersSchema
+>;
