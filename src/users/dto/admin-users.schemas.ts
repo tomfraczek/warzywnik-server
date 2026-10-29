@@ -16,7 +16,14 @@ export const listAdminUsersQuerySchema = z.object({
   isActive: booleanQuery.optional(),
   isAdmin: booleanQuery.optional(),
   sort: z
-    .enum(['createdAt', 'lastLoginAt', 'email', 'displayName', 'isActive'])
+    .enum([
+      'createdAt',
+      'lastLoginAt',
+      'email',
+      'displayName',
+      'isActive',
+      'plan',
+    ])
     .optional(),
   order: z.enum(['asc', 'desc']).optional(),
   page: z.coerce.number().int().min(1).default(1),

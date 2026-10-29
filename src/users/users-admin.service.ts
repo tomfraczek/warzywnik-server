@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { createClerkClient } from '@clerk/backend';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { raw } from '@mikro-orm/core';
 import type { FilterQuery, QueryOrderKeysFlat } from '@mikro-orm/core';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
@@ -71,10 +72,17 @@ export class UsersAdminService {
       User,
       conditions.length ? { $and: conditions } : {},
       {
-        orderBy: {
-          [sort]: `${order} nulls last` as QueryOrderKeysFlat,
-          id: 'asc',
-        },
+        orderBy:
+          sort === 'plan'
+            ? {
+                [this.planRankSql(now)]: order,
+                createdAt: 'desc',
+                id: 'asc',
+              }
+            : {
+                [sort]: `${order} nulls last` as QueryOrderKeysFlat,
+                id: 'asc',
+              },
         limit,
         offset,
       },
@@ -197,6 +205,17 @@ export class UsersAdminService {
         { $or: [{ trialEndsAt: null }, { trialEndsAt: { $lte: now } }] },
       ],
     };
+  }
+
+  // Mirrors EntitlementsService.resolveSource() in SQL so the computed plan can
+  // be sorted on: free = 0, trial = 1, subscription = 2.
+  private planRankSql(now: Date): string {
+    return raw<User, string>(
+      (alias) =>
+        `case when ${alias}.subscription_plan = ? and ${alias}.subscription_expires_at > ? then 2 ` +
+        `when ${alias}.trial_ends_at > ? then 1 else 0 end`,
+      [SubscriptionPlan.PREMIUM, now, now],
+    );
   }
 
   // Local isActive is the source of truth (enforced in ClerkAuthGuard);
