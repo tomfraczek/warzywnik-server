@@ -15,7 +15,9 @@ export const listAdminUsersQuerySchema = z.object({
   plan: z.enum(['subscription', 'trial', 'free']).optional(),
   isActive: booleanQuery.optional(),
   isAdmin: booleanQuery.optional(),
-  sort: z.enum(['createdAt', 'lastLoginAt', 'email', 'displayName']).optional(),
+  sort: z
+    .enum(['createdAt', 'lastLoginAt', 'email', 'displayName', 'isActive'])
+    .optional(),
   order: z.enum(['asc', 'desc']).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(50),
