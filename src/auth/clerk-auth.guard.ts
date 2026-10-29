@@ -1,12 +1,14 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { verifyToken } from '@clerk/backend';
 import { UsersService } from '../users/users.service';
+import { User } from '../users/user.entity';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
 const toErrorMessage = (err: unknown): string => {
@@ -84,6 +86,8 @@ export class ClerkAuthGuard implements CanActivate {
       ? process.env.CLERK_JWT_KEY.replace(/\\n/g, '\n')
       : undefined;
 
+    let user: User;
+
     try {
       const payload = await verifyToken(token, {
         secretKey,
@@ -101,18 +105,22 @@ export class ClerkAuthGuard implements CanActivate {
       const email = (payload as { email?: string }).email;
       const displayName = (payload as { name?: string }).name;
 
-      const user = await this.usersService.getOrCreateFromClerkSub({
+      user = await this.usersService.getOrCreateFromClerkSub({
         clerkUserId: payload.sub,
         email: email ?? null,
         displayName: displayName ?? null,
       });
-
-      req.userEntity = user;
-
-      return true;
     } catch (err: unknown) {
       console.error('Clerk verifyToken error:', toErrorMessage(err));
       throw new UnauthorizedException(toErrorMessage(err));
     }
+
+    if (!user.isActive) {
+      throw new ForbiddenException('Account is blocked');
+    }
+
+    req.userEntity = user;
+
+    return true;
   }
 }
